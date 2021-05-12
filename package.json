@@ -1,0 +1,25 @@
+{
+    "name": "tyranosyntax",
+    "displayName": "TyranoScript syntax",
+    "description": "Provides TyranoScript Adventure Game syntax for Visual Studio Code",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.56.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "tyrano",
+            "aliases": ["tyranoscript", "tyrano"],
+            "extensions": [".ks"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "tyrano",
+            "scopeName": "source.ks",
+            "path": "./syntaxes/tyrano.tmLanguage.json"
+        }]
+    }
+}
