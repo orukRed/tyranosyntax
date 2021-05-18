@@ -15,6 +15,11 @@ snippet.
 
 0.0.2
 bug fixed.
+- When Adding [bg] tag by snippets, two [bg] tags create.
+- A little tag's parameter can't highlighting properly.
+
+Adding syntax highlighting.(character's name parameter.)
+
 
 
 # issues
