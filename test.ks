@@ -46,6 +46,8 @@
 
 [jump storage="" target=""]
 
+[jump storage="" target=""]
+
 
 誰もいねぇじゃねぇか。[p]
 ……[p]
@@ -111,7 +113,7 @@
 
 まず、ティラノスクリプトの特徴として[font color="red"]「HTML5」[resetfont]で動作するよ[p]
 
-
+[chara_config pos_mode="" ptext="" time="" memory="" anim="" pos_change_time="" talk_focus="" brightness_value="" blur_value="" talk_anim="" talk_anim_time="" talk_anim_value="" effect=""]
 #
 つ、つまり？[p]
 #あかね
