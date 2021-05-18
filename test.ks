@@ -69,13 +69,13 @@
 #あかね
 もしかして、ノベルゲームの開発に興味があるの？[p]
 
-[glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="150"  text="はい。興味あります"  target="*selectinterest"  ]
+[glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="150"  text="はい。興味あります"  target="*selectinterest" ]
 [glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="250"  text="興味あります！"  target="*selectinterest"  ]
 [glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="350"  text="どちらかと言うと興味あり"  target="*selectinterest"  ]
 [s  ]
 *selectinterest
 
-[chara_mod  name="akane" face="happy"  ]
+/*[chara_mod  name="akane" face="happy"  ]*/
 #あかね
 わー。興味あるなんて、嬉しいなー。[p]
 #
@@ -92,12 +92,12 @@
 いや、べつに
 #あかね
 [cm]
-[font size=40]
+[font size="" color="" bold="" italic="" face="" edge="" shadow="" effect="" effect_speed=""]
 [delay speed=160]
 ティラノスクリプトー[p]
 [delay speed=30]
 [resetfont]
-
+[3d_anim name="" pos="" rot="" scale="" time="" wait="" lookat="" effect=""]
 #
 ・・・・[p]
 #あかね
