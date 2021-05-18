@@ -6,6 +6,9 @@
 			"include": "#keywords"
 		},
 		{
+			"include": "#strings"
+		},
+		{
 			"include":"#constant"
 		},
 
@@ -22,10 +25,7 @@
 			"include": "#tyrano_labels"
 		},		
 		{
-			"include": "#tyrano_parameter"
-		},
-		{
-			"include": "#tyrano_tags"
+			"include": "#tyrano"
 		},
 
 		{
@@ -43,7 +43,17 @@
 				"match": "\\b(if|switch|case|continue|break|function|while|for|return|let|var|class)\\b"
 			}]
 		},
-
+		"strings": {
+			"name": "string.quoted.double.tyrano",
+			"begin":"\"",
+			"end":"\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.tyrano",
+					"match": "\\\\."
+				}
+			]
+		},
 
 		"constant":{
 			"name": "constant.language.tyrano",
@@ -67,30 +77,50 @@
 			"name":"keyword.other",
 			"match":"^\\*.*"
 		},
-
-		"tyrano_tags":{
-			"name":"support.class.tyrano",
-			"begin":"\\/\\*",
-			"end":"\\*\\/",
+		"tyrano":{
 			"patterns": [
-				{"include": "#tyrano_parameter"},
-				{"include": "#strings"}
+				{
+
+					"match":"(\\S+)\\s+(\\S)=\"(\\S*)\"",					
+					"captures": {
+						"1":{"patterns":[{"include":"#tyrano_tags"}]},
+						"2":{"patterns":[{"include":"#tyrano_parameter"}]},
+						"3":{"patterns":[{"include":"#double_quote"}]}
+					}
+				}
 			],
 			"repository":{
-				"tyrano_parameter":{
-					"name":"support.function.tyrano",
-					"match":"\\b(storage|loop|sprite_time|volume|time|buf|clear|effect|sebuf|name|vostorage|number|x|y|zoom|rotate|from_x|from_y|from_zoom|from_rotate|wait|layer|ease_type|color|graphic|folder|fit|left|top|width|height|mode|qrcode|debug|audio|url|target|skip|page|frame|opacity|marginl|margint|marginr|marginb|radius|vertical|visible|zindex|depth|reflect|pos|text|size|face|bold|edge|shadow|align|overwrite|fadeout|in_effect|in_delay|in_delay_scale|in_sync|in_shuffle|in_reverse|out_effect|out_delay|out_delay_scale|out_sync|out_shuffle|out_reverse|count|hmax|vmax|italic|effect_speed|speed|fix|savesnap|exp|preexp|hint|clickse|enterse|leavese|clickimg|enterimg|auto_next|role|font_color|borderstyle|mouseopacity|line|children|method|cross|video|mute|clickstop|rotateX|rotateY|rotateZ|scale|scaleX|scaleY|scaleZ|skew|skewX|skewY|perspective|keyframe|easing|delay|direction|pos_mode|ptext|memory|anim|pos_change_time|talk_focus|brightness_value|blur_value|talk_anim|talk_anim_time|talk_anim_value|jname|part|id|allow_storage|grayscale|sepia|saturate|hue|invert|brightness|contrast|blur|stack|ask|stop|title|length|initial|autocomplete|maxchars|variable_over|bgm_over|type|storage_cancel|target_cancel|label_ok|label_cancel|file|join|reload|camera|near|far|rot|tonemap|motion|texture|doubleside|lookat|finish|tonemap_value|light_amb|max_x|max_y|button_text|menu|overlap|reset)\\b"
+				"tyrano_tags":{
+					"patterns":[
+						{
+							"name":"support.class.tyrano",
+							"match":"\\b(playbgm|stopbgm|fadeinbgm|fadeoutbgm|xchgbgm|playse|stopse|fadeinse|fadeoutse|bgmopt|seopt|wbgm|wse|voconfig|vostart|vostop|speak_on|speak_off|camera|reset_camera|wait_camera|mask|mask_off|position|image|freeimage|free|ptext|mtext|backlay|wt|hidemessage|layopt|trans|bg|bg2|layermode|layermode_movie|free_layermode|filter|free_filter|clearfix|bgcamera|qr_config|stop_bgcamera|qr_define|config_record_label|s|wait|wait_cancel|quake|font|deffont|delay|resetdelay|configdelay|nowait|endnowait|resetfont|cancelskip|locate|glyph|showsave|showload|showmenu|showmenubutton|hidemenubutton|skipstart|skipstop|autostart|autostop|autoconfig|showlog|close|title|savesnap|autosave|autoload|preload|cursor|screen_full|sleepgame|awakegame|breakgame|dialog|plugin|sysview|loadcss|save_img|nolog|endnolog|pushlog|start_keyconfig|stop_keyconfig|apply_local_patch|check_web_patch|l|p|graph|r|er|cm|ct|current|ruby|jump|link|endlink|button|glink|clickable|loadjs|eval|clearvar|clearsysvar|clearstack|iscript|endscript|emb|if|elsif|else|endif|call|return|macro|endmacro|erasemacro|ignore|endignore|movie|bgmovie|wait_bgmovie|stop_bgmovie|web|trace|html|endhtml|anim|wa|stopanim|keyframe|endkeyframe|frame|kanim|stop_kanim|chara_ptext|chara_config|chara_new|chara_show|chara_hide|chara_hide_all|chara_delete|chara_mod|chara_move|chara_face|chara_layer|chara_layer_mod|chara_part|chara_part_reset|edit|commit|3d_init|3d_model_new|3d_sphere_new|3d_sprite_new|3d_event|3d_event_delete|3d_event_start|3d_event_stop|3d_box_new|3d_image_new|3d_show|3d_hide|3d_hide_all|3d_delete|3d_delete_all|3d_canvas_show|3d_canvas_hide|3d_close|3d_anim|3d_anim_stop|3d_scene|3d_camera|3d_gyro|3d_gyro_stop|3d_debug_camera|3d_motion|3d_debug|TYRANO|kag|ftag|startTag|TG|config)\\b"
+						}
+					]
 				},
-				"strings": {
-					"name": "string.quoted.double.tyrano",
-					"begin":"\"",
-					"end":"\""
+				"tyrano_parameter":{
+					"patterns":[
+						{
+							"name":"support.function.tyrano",
+							"match":"\\b(storage|loop|sprite_time|volume|time|buf|clear|effect|sebuf|name|vostorage|number|x|y|zoom|rotate|from_x|from_y|from_zoom|from_rotate|wait|layer|ease_type|color|graphic|folder|fit|left|top|width|height|mode|qrcode|debug|audio|url|target|skip|page|frame|opacity|marginl|margint|marginr|marginb|radius|vertical|visible|zindex|depth|reflect|pos|text|size|face|bold|edge|shadow|align|overwrite|fadeout|in_effect|in_delay|in_delay_scale|in_sync|in_shuffle|in_reverse|out_effect|out_delay|out_delay_scale|out_sync|out_shuffle|out_reverse|count|hmax|vmax|italic|effect_speed|speed|fix|savesnap|exp|preexp|hint|clickse|enterse|leavese|clickimg|enterimg|auto_next|role|font_color|borderstyle|mouseopacity|line|children|method|cross|video|mute|clickstop|rotateX|rotateY|rotateZ|scale|scaleX|scaleY|scaleZ|skew|skewX|skewY|perspective|keyframe|easing|delay|direction|pos_mode|ptext|memory|anim|pos_change_time|talk_focus|brightness_value|blur_value|talk_anim|talk_anim_time|talk_anim_value|jname|part|id|allow_storage|grayscale|sepia|saturate|hue|invert|brightness|contrast|blur|stack|ask|stop|title|length|initial|autocomplete|maxchars|variable_over|bgm_over|type|storage_cancel|target_cancel|label_ok|label_cancel|file|join|reload|camera|near|far|rot|tonemap|motion|texture|doubleside|lookat|finish|tonemap_value|light_amb|max_x|max_y|button_text|menu|overlap|reset)\\b"
+						}
+					]
+				},
+				"double_quote":{
+					"patterns":[
+						{
+							"name":"string.quoted.double.tyrano",
+							"begin":"\"",
+							"end":"\""
+						}
+					]
 				}
 			}
+			
 		},
 
-		"tyrano_variables":
-		{
+
+		"tyrano_variables":{
 			"name":"variable.other",
 			"match":"\\b(f\\.|sf\\.|tf\\.)\\w*\\b"
 		},
