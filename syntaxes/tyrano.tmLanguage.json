@@ -3,8 +3,11 @@
 	"name": "tyranoscript",
 	"patterns": [
 		{
-			"include": "#iscript"
+			"include": "#iscript1"
 		},
+		{
+			"include": "#iscript2"
+		},		
 		{
 			"include": "#strings"
 		},
@@ -41,8 +44,8 @@
 		}
 	],
 	"repository": {
-		"iscript":{
-			"begin":"(\\[)((?i:iscript))(\\])",
+		"iscript1":{
+			"begin":"\\s*(\\[)((?i:iscript))(\\])",
 			"beginCaptures": {
 				"1":{
 					"name":"keyword.operator.tyrano"
@@ -55,7 +58,7 @@
 				}
 			},
 
-			"end": "(\\[)((?i:endscript))\\s*((\\S*)=(\\S*))*(\\])",
+			"end": "\\s*(\\[)((?i:endscript))\\s*((\\S*)=(\\S*))*(\\])",
 			"endCaptures": {
 				"1":{
 					"name":"keyword.operator.tyrano"
@@ -72,7 +75,7 @@
 				"6":{
 					"name":"keyword.operator.tyrano"
 				}
-			},			
+			},
 			"patterns":[
 				{
 					"patterns": [
@@ -97,9 +100,57 @@
 					]
 				}
 			]
-
 		},
-
+		"iscript2":{
+			"begin":"(@)((?i:iscript))",
+			"beginCaptures": {
+				"1":{
+					"name":"keyword.operator.tyrano"
+				},
+				"2":{
+					"name":"support.class.tyrano"
+				}
+			},
+			"end": "(@)((?i:endscript))\\s*((\\S*)=(\\S*))*",
+			"endCaptures": {
+				"1":{
+					"name":"keyword.operator.tyrano"
+				},
+				"2":{
+					"name":"support.class.tyrano"
+				},
+				"4":{
+					"name":"support.function.tyrano"
+				},
+				"5":{
+					"name":"string.quoted.double.tyrano"
+				}
+			},
+			"patterns":[
+				{
+					"patterns": [
+						{
+							"name": "meta.embedded.block.js",
+							"contentName": "source.js",
+							"patterns": [
+								{
+									"include": "source.js"
+								},
+								{
+									"name":"variable.other",
+									"match":"\\b(f\\.|sf\\.|tf\\.)\\w*\\b"
+								},
+								{
+									"name": "support.function",
+									"match": "\\b(TYRANO|kag|ftag|startTag|TG|config)\\b"
+								}
+							]					
+						}
+		
+					]
+				}
+			]
+		},
 		"strings": {
 			"name": "string.quoted.double.tyrano",
 			"begin":"\"",

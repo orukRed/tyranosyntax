@@ -30,18 +30,8 @@
 		},
 		{
 			"language": "javascript",
-			"scopeName":"source.ks",
-			"path": "./snippet/javascript.snippet.json"
-			
-		}
-	]
-    },
-	"configurationDefaults": {
-		"javascript": {
-		  "editor.semanticHighlighting.enabled": true
-		},
-		"tyrano": {
-			"editor.semanticHighlighting.enabled": true
-		  }
-	}
+			"scopeName":"source.js",
+			"path": "./snippet/javascript.snippet.json"	
+		}]
+    }
 }
