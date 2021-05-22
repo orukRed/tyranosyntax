@@ -33,11 +33,9 @@
 		{
 			"include": "#tyrano_tags1"
 		},
-
 		{
 			"include": "#tyrano_tags2"
 		},
-
 		{
 			"include": "#numbers"
 		}
@@ -57,12 +55,7 @@
 				}
 			},
 
-			"comment": "(\\S*)(\\s*(\\S*)=(S*))+",
-			"comment1" : "(\\[)((?i:endcript)).*(\\])",
-
-			"end1": "(\\[)(endscript)\\s*(.+?=.+?)*(\\])",
-			"end2":"(\\[)\\s*(endscript)\\s*(.+?=.+?)*\\s*(\\])",
-			"end": "(\\[)((?i:endscript))(\\])",
+			"end": "(\\[)((?i:endscript))\\s*((\\S*)=(\\S*))*(\\])",
 			"endCaptures": {
 				"1":{
 					"name":"keyword.operator.tyrano"
@@ -70,9 +63,15 @@
 				"2":{
 					"name":"support.class.tyrano"
 				},
-				"3":{
+				"4":{
+					"name":"support.function.tyrano"
+				},
+				"5":{
+					"name":"string.quoted.double.tyrano"
+				},
+				"6":{
 					"name":"keyword.operator.tyrano"
-				}			
+				}
 			},			
 			"patterns":[
 				{
