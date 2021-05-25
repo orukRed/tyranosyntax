@@ -17,10 +17,13 @@ snippet.
 bug fixed.
 - When Adding [bg] tag by snippets, two [bg] tags create.
 - A little tag's parameter can't highlighting properly.
+- Adding syntax highlighting.(character's name parameter.)
 
-Adding syntax highlighting.(character's name parameter.)
+0.0.3
+- The javascript highlighting is applied to the text between iscript and endscript.
 
-
+0.0.4
+bug fixed.(Fixed the comment out being "//" instead of ";".)
 
 # issues
 

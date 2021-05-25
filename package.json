@@ -3,7 +3,7 @@
     "displayName": "TyranoScript syntax",
     "description": "Provides TyranoScript Adventure Game syntax for Visual Studio Code",
 	"publisher": "orukred-tyranosyntax",
-    "version": "0.0.3",
+    "version": "0.0.4",
 
     "engines": {
         "vscode": "^1.56.0"
@@ -17,7 +17,8 @@
             "aliases": ["tyranoscript", "tyrano"],
             "extensions": [".ks"],
             "configuration": "./language-configuration.json"
-        }],
+        }
+	],
         "grammars": [{
             "language": "tyrano",
             "scopeName": "source.ks",
@@ -31,7 +32,7 @@
 		{
 			"language": "javascript",
 			"scopeName":"source.js",
-			"path": "./snippet/javascript.snippet.json"	
+			"path": "./snippet/javascript.snippet.json"		
 		}]
     }
 }
