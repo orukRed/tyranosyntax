@@ -197,7 +197,7 @@
 			"patterns": [
 				{
 					"comment": "parameterあり  (\\S*)(\\s+(\\S*)=(S*))+",
-					"match":"(\\S*)(\\s*(\\S*)=(S*))+",
+					"match":"(\\S*)(\\s*(\\S*?)=(S*))+",
 					"captures": {
 						"1":{"patterns":[
 							{
