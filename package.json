@@ -3,7 +3,7 @@
     "displayName": "TyranoScript syntax",
     "description": "Provides TyranoScript Adventure Game syntax for Visual Studio Code",
 	"publisher": "orukred-tyranosyntax",
-    "version": "0.0.4",
+    "version": "0.0.5",
 
     "engines": {
         "vscode": "^1.56.0"

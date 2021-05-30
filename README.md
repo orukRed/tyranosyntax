@@ -1,29 +1,36 @@
 # tyrano syntax
 
-Adds TyranoScript language support by for visual studio code.
+ティラノスクリプトのハイライトやスニペットをサポートします。
 
 # Features
 
-* syntax highlighting
-* snippets fortag by tyranoscript
+* シンタックスハイライト
+* ティラノスクリプトのタグを追加するスニペット
 
 # Release Notes
 
 0.0.1
-syntax highlighting.
-snippet.
+シンタックスハイライト追加  
+スニペット追加
+
 
 0.0.2
-bug fixed.
-- When Adding [bg] tag by snippets, two [bg] tags create.
-- A little tag's parameter can't highlighting properly.
-- Adding syntax highlighting.(character's name parameter.)
+バグ修正
+- [bg]タグを追加したときに、２つ修正される問題の修正
+- 一部のタグが正しくハイライトされない問題の修正
+- \#が先頭にある行をハイライトするように設定
 
 0.0.3
-- The javascript highlighting is applied to the text between iscript and endscript.
+- javascriptのハイライトを追加(iscript～endscriptの間でのみ適用)
 
 0.0.4
-bug fixed.(Fixed the comment out being "//" instead of ";".)
+バグ修正
+コメントアウトのショートカットキーを入力時、";"ではなくて"//"が追加される問題
+
+0.0.5
+バグ修正
+- タグの属性値に=が含まれる場合に正しくハイライトされないのを修正
+
 
 # issues
 

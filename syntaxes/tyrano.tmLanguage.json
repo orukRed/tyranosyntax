@@ -3,6 +3,9 @@
 	"name": "tyranoscript",
 	"patterns": [
 		{
+			"include": "#tyrano_variables"
+		},
+		{
 			"include": "#iscript1"
 		},
 		{
@@ -30,9 +33,7 @@
 		{
 			"include": "#tyrano_sharp"
 		},
-		{
-			"include": "#tyrano_variables"
-		},
+
 		{
 			"include": "#tyrano_tags1"
 		},
