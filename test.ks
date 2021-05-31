@@ -12,3 +12,5 @@ f.test
 tf.test==""
 
 [if exp=tf.is_cg_open=="true"]
+
+[if exp="" cond="s"]
