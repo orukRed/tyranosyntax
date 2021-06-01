@@ -21,20 +21,58 @@ this is sentence
 
 [if exp="" cond="s"]
 
-endscript
+# fauigjoe
 
-/**/
-/**/
+#gaga
 
-/*
-	
-*/
+[s]
 
-/*
-
-*/
+[endscript stop=""]
 
 
-/*
+@fa
 
-*/
+@AAA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
