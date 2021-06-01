@@ -11,11 +11,17 @@
     "categories": [
         "Programming Languages"
     ],
+	"comment":"tyranoscriptのファイル開いた時extension.jsを起動",
+	"main": "extension.js",
+	"activationEvents": [
+		"onLanguage:tyrano"
+	],
     "contributes": {
         "languages": [{
             "id": "tyrano",
             "aliases": ["tyranoscript", "tyrano"],
             "extensions": [".ks"],
+			
             "configuration": "./language-configuration.json"
         }
 	],
@@ -34,5 +40,6 @@
 			"scopeName":"source.js",
 			"path": "./snippet/javascript.snippet.json"		
 		}]
+
     }
 }

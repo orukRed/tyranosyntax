@@ -31,7 +31,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 バグ修正
 - タグの属性値に=が含まれる場合に正しくハイライトされないのを修正
 
-
+0.0.6
+タグにマウスカーソルを重ねたときに簡易リファレンスを表示
 
 ## [Unreleased]
 
