@@ -1,11 +1,12 @@
 sdss
 
+
 [dialog name="" type="" text="" storage="" target="" storage_cancel="" target_cancel="" label_ok="" label_cancel=""]
 [iscript]
 
 if(true){
 
-}
+}er
 
 [endscript stop=""]
 f.test

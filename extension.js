@@ -19,11 +19,15 @@ class TagHoverProvider{
 
 	createMarkdownText(textValue){
 		if(!textValue) return null;
+		let textCopy = textValue["description"].slice();//非同期通信では引数で受け取った配列を変更してはいけない
+		let backQuoteStartIndex = textCopy.indexOf("[パラメータ]");
+		textCopy.splice(backQuoteStartIndex, 0, "```tyrano");
+		textCopy.push("```");
 		let sentence = 
 `
 ### ${textValue["prefix"]}
 
-${textValue["description"].join('\n\n')}
+${textCopy.join('  \n')}
 `
 		let markdownText = new vscode.MarkdownString(sentence);
 
