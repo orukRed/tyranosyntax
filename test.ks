@@ -31,7 +31,7 @@ this is sentence
 
 [endscript stop=""]
 
-*fgf
+*1
 
 @fa
 
