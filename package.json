@@ -4,7 +4,7 @@
     "description": "Provides TyranoScript Adventure Game syntax for Visual Studio Code",
 	"publisher": "orukred-tyranosyntax",
 	"repository": {
-		"type": "git",
+		"type": "git", 
 		"url": "https://github.com/orukRed/tyranosyntax"		
 	},
     "version": "0.1.0",
