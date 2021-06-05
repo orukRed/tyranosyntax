@@ -19,7 +19,8 @@ this is sentence
 this is sentence 
 
 [if exp=tf.is_cg_open=="true"]
-
+	[if exp=tf.is_cg_open=="true"]
+	[if exp="" cond="s"]
 [if exp="" cond="s"]
 
 # fauigjoe
@@ -30,6 +31,7 @@ this is sentence
 
 [endscript stop=""]
 
+*fgf
 
 @fa
 

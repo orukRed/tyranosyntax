@@ -4,7 +4,6 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-
 0.0.1
 
 シンタックスハイライト追加  
@@ -13,8 +12,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 0.0.2
 
 バグ修正
+
 - [bg]タグを追加したときに、２つ修正される問題の修正
+
 - 一部のタグが正しくハイライトされない問題の修正
+
 - \#が先頭にある行をハイライトするように設定
 
 0.0.3
@@ -29,11 +31,32 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 0.0.5
 
 バグ修正
+
 - タグの属性値に=が含まれる場合に正しくハイライトされないのを修正
 
-0.0.6
-タグにマウスカーソルを重ねたときに簡易リファレンスを表示
+0.1.0
 
-## [Unreleased]
+- タグにマウスカーソルを重ねたときに簡易リファレンスを表示
 
-- Initial release
+- シンタックスの表示形式を変更
+
+- ツールチップの実装
+  - ティラノスクリプトv5提供のタグにマウスカーソルを乗せると簡易的なタグの説明が表示されます。
+
+- アウトライン機能の実装
+  - ラベル(*から始まる行)
+  - ifタグ
+  - elseifタグ
+  - elseタグ
+  - endif
+  - ignore
+  - endignore
+  - jumpタグ
+  - callタグ
+  - buttonタグ
+  - glinkタグ
+  - linkタグ
+  - sタグ
+  - iscriptタグ
+  - endscriptタグ
+  - loadjsタグ
