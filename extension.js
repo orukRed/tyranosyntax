@@ -23,6 +23,8 @@ class TagHoverProvider{
 		let backQuoteStartIndex = textCopy.indexOf("[パラメータ]");
 		textCopy.splice(backQuoteStartIndex, 0, "```tyrano");
 		textCopy.push("```");
+
+//マークダウン崩れるのでここはインデント変えたらだめ
 		let sentence = 
 `
 ### ${textValue["prefix"]}
@@ -59,7 +61,7 @@ class OutlineProvider{
 		//ラムダ式
 		let symbols = [];//
 		for (let i = 0; i < document.lineCount; i++) {
-			let line = document.lineAt(i);
+			let line = document.lineAt(i);//i行目のドキュメントを取得
 			if(line.text.startsWith("@")){
 				let symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Function, line.range, line.range);
 				symbols.push(symbol);
