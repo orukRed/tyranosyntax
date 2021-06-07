@@ -91,11 +91,58 @@ class OutlineProvider{
 	}
 }
 
+
+/**
+ * 将来的に、ユーザーが任意のタグをShortcutで出力できるように
+ */
+class CreateTagByShortcutKey{
+
+	/**
+	 * shift + Enterで実行されるコマンド
+	 */
+	KeyPushShiftEnter(){
+		const editor = vscode.window.activeTextEditor;
+		let cursorPos = editor.selection.active;
+		editor.edit((editbuilder)=>{
+			editbuilder.insert(cursorPos, "[l][r]");
+		});
+	}
+
+	/**
+	 * ctrl + Enterで実行されるコマンド
+	 */
+	 KeyPushCtrlEnter(){
+		const editor = vscode.window.activeTextEditor;
+		let cursorPos = editor.selection.active;
+		editor.edit((editbuilder)=>{
+			editbuilder.insert(cursorPos, "[p]");
+		});
+	}
+
+	/**
+	 * alt + Enterで実行されるコマンド
+	 */
+	 KeyPushAltEnter(){
+		const editor = vscode.window.activeTextEditor;
+		let cursorPos = editor.selection.active;
+		editor.edit((editbuilder)=>{
+			editbuilder.insert(cursorPos, "#");
+		});
+	}
+}
+
+
 function activate(context){
 	//登録処理
 	//サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
 	context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TagHoverProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new OutlineProvider()));
+
+	let ctbs = new CreateTagByShortcutKey();
+
+	context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
+	context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
+	context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
 
 }
 

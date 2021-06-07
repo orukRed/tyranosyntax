@@ -7,7 +7,7 @@
 		"type": "git", 
 		"url": "https://github.com/orukRed/tyranosyntax"		
 	},
-    "version": "0.1.0",
+    "version": "0.1.1",
 
     "engines": {
         "vscode": "^1.56.0"
@@ -18,7 +18,10 @@
 	"comment":"tyranoscriptのファイル開いた時extension.jsを起動",
 	"main": "extension.js",
 	"activationEvents": [
-		"onLanguage:tyrano"
+		"onLanguage:tyrano",
+		"onCommand:tyrano.shiftEnter",
+		"onCommand:tyrano.ctrlEnter",
+		"onCommand:tyrano.altEnter"
 	],
     "contributes": {
         "languages": [{
@@ -43,7 +46,37 @@
 			"language": "javascript",
 			"scopeName":"source.js",
 			"path": "./snippet/javascript.snippet.json"		
-		}]
-
+		}],
+		"commands":[
+			{
+				"command":"tyrano.shiftEnter",
+				"title":"print [l][r]"
+			},
+			{
+				"command":"tyrano.ctrlEnter",
+				"title":"print [p]"
+			},
+			{
+				"command":"tyrano.altEnter",
+				"title":"print #"
+			}
+		],
+		"keybindings":[
+			{
+				"command":"tyrano.shiftEnter",
+				"key": "shift+enter"
+			},
+			{
+				"command":"tyrano.ctrlEnter",
+				"key": "ctrl+enter",
+				"mac": "cmd+r"
+			},
+			{
+				"command":"tyrano.altEnter",
+				"key": "alt+enter",
+				"mac": "option+enter"
+			}
+		]
+		
     }
 }
