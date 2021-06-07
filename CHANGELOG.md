@@ -61,6 +61,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - endscriptタグ
   - loadjsタグ
 
+0.1.1
+
+- 特定のタグ・記号の簡易出力(ショートカットキー)の追加
+  - [l][r] shift + enter
+  - [p] ctrl + enter
+  - \#  alt + enter
+
 ## [Unreleased]
 
 - Initial release
