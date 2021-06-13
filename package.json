@@ -23,15 +23,14 @@
 		"onCommand:tyrano.ctrlEnter",
 		"onCommand:tyrano.altEnter"
 	],
-    "contributes": {
+    "contributes": {		
         "languages": [{
             "id": "tyrano",
             "aliases": ["tyranoscript", "tyrano"],
             "extensions": [".ks"],
 			
             "configuration": "./language-configuration.json"
-        }
-	],
+     	   }],
         "grammars": [{
             "language": "tyrano",
             "scopeName": "source.ks",
@@ -76,7 +75,9 @@
 				"key": "alt+enter",
 				"mac": "option+enter"
 			}
+			
 		]
 		
     }
+	
 }
