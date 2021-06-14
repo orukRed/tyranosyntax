@@ -68,6 +68,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - [p] ctrl + enter
   - \#  alt + enter
 
+0.1.2
+
+- .ksファイル以外でもshift + enter等のショートカットキーでタグを入力できる不具合を修正
+
 ## [Unreleased]
 
 - Initial release
