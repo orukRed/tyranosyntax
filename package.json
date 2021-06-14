@@ -60,20 +60,25 @@
 				"title":"print #"
 			}
 		],
+		
 		"keybindings":[
 			{
 				"command":"tyrano.shiftEnter",
-				"key": "shift+enter"
+				"key": "shift+enter",
+				"when": "editorLangId == tyrano"
 			},
 			{
 				"command":"tyrano.ctrlEnter",
 				"key": "ctrl+enter",
-				"mac": "cmd+r"
+				"mac": "cmd+r",
+				"when": "editorLangId == tyrano"
 			},
 			{
 				"command":"tyrano.altEnter",
 				"key": "alt+enter",
-				"mac": "option+enter"
+				"mac": "option+enter",
+				"when": "editorLangId == tyrano"
+				
 			}
 			
 		]
