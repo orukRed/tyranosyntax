@@ -12,13 +12,10 @@ class TagHoverProvider{
 
 	constructor(){
 		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname+"./../snippet/tyrano.snippet.json","utf8"));
-		this.regExp = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/;
+		this.regExp = /(\w+)\s*((\S*)=\"?(\S*)\"?)*?/;//取得した行に対しての正規表現
 	}
 
 	private createMarkdownText(textValue:string) : vscode.MarkdownString | null{
-		interface textValue{
-			[key:string]:string;
-		}
 		if(!textValue) return null;
 		let textCopy = textValue['description'].slice();//非同期通信では引数で受け取った配列を変更してはいけない
 		let backQuoteStartIndex = textCopy.indexOf("[パラメータ]");
@@ -40,14 +37,24 @@ ${textCopy.join('  \n')}
 	public async provideHover(document:vscode.TextDocument, position:vscode.Position, token:vscode.CancellationToken) : Promise<vscode.Hover> {
 
 		let wordRange = document.getWordRangeAtPosition(position, this.regExp);
-		
+		let tmp = document.getWordRangeAtPosition(position);
+		console.log(tmp);
 		if (!wordRange) {
-			
 			return Promise.reject("no word here"); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却
 		}
 		
+		console.log("document.getText:"+document.getText(wordRange));
 		let matcher:RegExpMatchArray | null = document.getText(wordRange).match(this.regExp);
+		// let matcher = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
 		let markdownText = null;
+		console.log("matcher is ")
+		// console.log(matcher);
+		if(matcher != null){
+			matcher.forEach(element => {
+					console.log(element);
+			});
+		}
+		console.log("\n\n");
 		if(matcher != null){
 			markdownText = this.createMarkdownText(this.jsonTyranoSnippet["["+matcher[1]+"]"]);
 		}

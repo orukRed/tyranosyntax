@@ -17,7 +17,7 @@ const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 class TagHoverProvider {
     constructor() {
         this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "./../snippet/tyrano.snippet.json", "utf8"));
-        this.regExp = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/;
+        this.regExp = /(\w+)\s*((\S*)=\"?(\S*)\"?)*?/; //取得した行に対しての正規表現
     }
     createMarkdownText(textValue) {
         if (!textValue)
@@ -38,11 +38,23 @@ ${textCopy.join('  \n')}
     provideHover(document, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
             let wordRange = document.getWordRangeAtPosition(position, this.regExp);
+            let tmp = document.getWordRangeAtPosition(position);
+            console.log(tmp);
             if (!wordRange) {
                 return Promise.reject("no word here"); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却
             }
+            console.log("document.getText:" + document.getText(wordRange));
             let matcher = document.getText(wordRange).match(this.regExp);
+            // let matcher = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
             let markdownText = null;
+            console.log("matcher is ");
+            // console.log(matcher);
+            if (matcher != null) {
+                matcher.forEach(element => {
+                    console.log(element);
+                });
+            }
+            console.log("\n\n");
             if (matcher != null) {
                 markdownText = this.createMarkdownText(this.jsonTyranoSnippet["[" + matcher[1] + "]"]);
             }
