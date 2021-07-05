@@ -15,7 +15,7 @@ const fs = require("fs");
 class TagHoverProvider {
     constructor() {
         this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "./../snippet/tyrano.snippet.json", "utf8"));
-        this.regExp = /(\w+)\s*((\S*)=\"?(\S*)\")*/; //取得した行に対しての正規表現
+        this.regExp = /(\w+)(\s*((\w*)=\"(\S*)\")*)*/; //取得した行に対しての正規表現
     }
     createMarkdownText(textValue) {
         if (!textValue)
@@ -37,6 +37,7 @@ ${textCopy.join('  \n')}
         return __awaiter(this, void 0, void 0, function* () {
             let wordRange = document.getWordRangeAtPosition(position, this.regExp);
             if (!wordRange) {
+                console.log("error");
                 return Promise.reject("no word here"); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却
             }
             console.log(document.getText(wordRange));
