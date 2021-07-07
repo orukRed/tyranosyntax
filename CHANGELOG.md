@@ -72,6 +72,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - .ksファイル以外でもshift + enter等のショートカットキーでタグを入力できる不具合を修正
 
+0.1.3
+
+- 特定のタグの書き方でツールチップが正しく表示できない不具合を修正
+
 ## [Unreleased]
 
 - Initial release
