@@ -8,8 +8,8 @@ export class TagHoverProvider{
 	constructor(){
 		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname+"./../snippet/tyrano.snippet.json","utf8"));
 		
-		//FIXME:ダブルクォーテーションで囲まないと正しくツールチップが表示されない。
-		this.regExp = /(\w+)(\s*((\w*)=\"(\S*)\")*)*/;//取得した行に対しての正規表現
+		// this.regExp = /(\w+)(\s*((\w*)=\"(\S*)\")*)*/;//取得した行に対しての正規表現 bak
+		this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現
 	}
 
 	private createMarkdownText(textValue:string) : vscode.MarkdownString | null{
