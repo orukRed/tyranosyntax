@@ -5,7 +5,7 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 	MATCH_TEXTS:Array<string>
 	constructor() {
 		this.regExp = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/;
-		this.MATCH_TEXTS = ["if","elseif","else", "endif","ignore","endignore","jump", "call","button","link","s", "iscript", "endscript", "loadjs"];
+		this.MATCH_TEXTS = ["if","elsif","else", "endif","ignore","endignore","jump", "call","button","link","s", "iscript", "endscript", "loadjs"];
 	}
 	public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentSymbol[] | vscode.SymbolInformation[]>{
 		let symbols = [];
@@ -22,7 +22,7 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 			for(let j = 0; j < this.MATCH_TEXTS.length; j++){
 				if(matchText === this.MATCH_TEXTS[j]){
 					let symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Class, line.range, line.range);
-					symbols.push(symbol);	
+					symbols.push(symbol);
 				}
 			}
 
@@ -31,8 +31,6 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 				let symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Function, line.range, line.range);
 				symbols.push(symbol);
 			}
-
-
 		}
 		return symbols;
 
