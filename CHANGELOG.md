@@ -76,6 +76,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - 特定のタグの書き方でツールチップが正しく表示できない不具合を修正
 
+0.2.0
+
+- バグ修正
+- 
+
+
 ## [Unreleased]
 
 - Initial release
