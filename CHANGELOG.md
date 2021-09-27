@@ -76,11 +76,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - 特定のタグの書き方でツールチップが正しく表示できない不具合を修正
 
-0.2.0
+0.1.4
 
-- バグ修正
-- 
-
+- Macの場合に、ショートカットコマンドが正常に正しく機能しない不具合の修正
+  - [l][r] shift + enter
+  - [p] ctrl + enter(Macならcmd+enter)
 
 ## [Unreleased]
 

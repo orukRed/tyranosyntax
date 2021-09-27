@@ -73,12 +73,13 @@
 			{
 				"command": "tyrano.shiftEnter",
 				"key": "shift+enter",
+				"mac": "shift+enter",
 				"when": "editorLangId == tyrano"
 			},
 			{
 				"command": "tyrano.ctrlEnter",
 				"key": "ctrl+enter",
-				"mac": "cmd+r",
+				"mac": "cmd+enter",
 				"when": "editorLangId == tyrano"
 			},
 			{
