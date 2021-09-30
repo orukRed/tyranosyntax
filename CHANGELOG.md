@@ -82,6 +82,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - [l][r] shift + enter
   - [p] ctrl + enter(Macならcmd+enter)
 
+0.1.4
+
+- 0.1.4で一部修正できていませんでしたので修正しました。
+
 ## [Unreleased]
 
 - Initial release

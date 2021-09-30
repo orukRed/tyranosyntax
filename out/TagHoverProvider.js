@@ -14,7 +14,7 @@ const vscode = require("vscode");
 const fs = require("fs");
 class TagHoverProvider {
     constructor() {
-        this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "./../snippet/tyrano.snippet.json", "utf8"));
+        this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "/./../snippet/tyrano.snippet.json", "utf8"));
         this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/; //取得した行に対しての正規表現
     }
     createMarkdownText(textValue) {

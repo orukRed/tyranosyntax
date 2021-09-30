@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/orukRed/tyranosyntax"
 	},
-	"version": "0.2.0",
+	"version": "0.1.5",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -72,19 +72,19 @@
 		"keybindings": [
 			{
 				"command": "tyrano.shiftEnter",
-				"key": "shift+enter",
+				"win": "shift+enter",
 				"mac": "shift+enter",
 				"when": "editorLangId == tyrano"
 			},
 			{
 				"command": "tyrano.ctrlEnter",
-				"key": "ctrl+enter",
+				"win": "ctrl+enter",
 				"mac": "cmd+enter",
 				"when": "editorLangId == tyrano"
 			},
 			{
 				"command": "tyrano.altEnter",
-				"key": "alt+enter",
+				"win": "alt+enter",
 				"mac": "option+enter",
 				"when": "editorLangId == tyrano"
 			}
