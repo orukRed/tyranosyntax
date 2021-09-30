@@ -5,7 +5,7 @@ const vscode = require("vscode");
 class OutlineProvider {
     constructor() {
         this.regExp = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/;
-        this.MATCH_TEXTS = ["if", "elseif", "else", "endif", "ignore", "endignore", "jump", "call", "button", "link", "s", "iscript", "endscript", "loadjs"];
+        this.MATCH_TEXTS = ["if", "elsif", "else", "endif", "ignore", "endignore", "jump", "call", "button", "link", "s", "iscript", "endscript", "loadjs"];
     }
     provideDocumentSymbols(document, token) {
         let symbols = [];
