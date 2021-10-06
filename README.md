@@ -14,6 +14,7 @@
 
 ## Release Notes
 
+変更点については以下のリンクをご確認ください。
 [CHANGELOG.md](CHANGELOG.md)
 
 ## issues

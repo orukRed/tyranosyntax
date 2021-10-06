@@ -4,12 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-0.0.1
+## [0.0.1]
 
 シンタックスハイライト追加  
 スニペット追加
 
-0.0.2
+## [0.0.2]
 
 バグ修正
 
@@ -19,22 +19,22 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - \#が先頭にある行をハイライトするように設定
 
-0.0.3
+## [0.0.3]
 
 - javascriptのハイライトを追加(iscript～endscriptの間でのみ適用)
 
-0.0.4
+## [0.0.4]
 
 バグ修正
 コメントアウトのショートカットキーを入力時、";"ではなくて"//"が追加される問題
 
-0.0.5
+## [0.0.5]
 
 バグ修正
 
 - タグの属性値に=が含まれる場合に正しくハイライトされないのを修正
 
-0.1.0
+## [0.1.0]
 
 - タグにマウスカーソルを重ねたときに簡易リファレンスを表示
 
@@ -61,30 +61,31 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - endscriptタグ
   - loadjsタグ
 
-0.1.1
+## [0.1.1]
 
 - 特定のタグ・記号の簡易出力(ショートカットキー)の追加
   - [l][r] shift + enter
   - [p] ctrl + enter
   - \#  alt + enter
 
-0.1.2
+## [0.1.2]
 
 - .ksファイル以外でもshift + enter等のショートカットキーでタグを入力できる不具合を修正
 
-0.1.3
+## [0.1.3]
 
 - 特定のタグの書き方でツールチップが正しく表示できない不具合を修正
 
-0.1.4
+## [0.1.4]
 
 - Macの場合に、ショートカットコマンドが正常に正しく機能しない不具合の修正
   - [l][r] shift + enter
   - [p] ctrl + enter(Macならcmd+enter)
 
-0.1.5
+## [0.1.5]
 
 - 0.1.4で一部修正できていませんでしたので修正しました。
 
+## [0.1.6] - 2021-10-07
 
-- Initial release
+- 最新のタグ(Ver510h)のシンタックスハイライトに対応しました。
