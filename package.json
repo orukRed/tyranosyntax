@@ -72,21 +72,16 @@
 		"keybindings": [
 			{
 				"command": "tyrano.shiftEnter",
-<<<<<<< HEAD
+
 				"key": "shift+enter",
-=======
 				"win": "shift+enter",
->>>>>>> dev
 				"mac": "shift+enter",
 				"when": "editorLangId == tyrano"
 			},
 			{
 				"command": "tyrano.ctrlEnter",
-<<<<<<< HEAD
 				"key": "ctrl+enter",
-=======
 				"win": "ctrl+enter",
->>>>>>> dev
 				"mac": "cmd+enter",
 				"when": "editorLangId == tyrano"
 			},
