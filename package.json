@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/orukRed/tyranosyntax"
 	},
-	"version": "0.1.6",
+	"version": "0.2.0",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -55,24 +55,45 @@
 				"path": "./snippet/javascript.snippet.json"
 			}
 		],
+		"configuration": [
+			{
+				"title": "TyranoScript syntax",
+				"properties": {
+					"TyranoScript syntax.keyboard.shift + enter": {
+						"type": "string",
+						"default": "[l][r]",
+						"description": "キーボードのshift + enterを押下した際に入力される文字を設定します。"
+					},
+					"TyranoScript syntax.keyboard.ctrl + enter(cmd + enter)": {
+						"type": "string",
+						"default": "[p]",
+						"description": "キーボードのctrl + enter(macではcmd + enter)を押下した際に入力される文字を設定します。"
+					},
+					"TyranoScript syntax.keyboard.alt + enter(option + enter)": {
+						"type": "string",
+						"default": "#",
+						"description": "キーボードのalt + enter(macではoption + enter)を押下した際に入力される文字を設定します。"
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "tyrano.shiftEnter",
-				"title": "print [l][r]"
+				"title": "print shiftEnter"
 			},
 			{
 				"command": "tyrano.ctrlEnter",
-				"title": "print [p]"
+				"title": "print ctrlEnter"
 			},
 			{
 				"command": "tyrano.altEnter",
-				"title": "print #"
+				"title": "print altEnter"
 			}
 		],
 		"keybindings": [
 			{
 				"command": "tyrano.shiftEnter",
-
 				"key": "shift+enter",
 				"win": "shift+enter",
 				"mac": "shift+enter",
@@ -115,6 +136,7 @@
 		"vscode-test": "^1.5.0"
 	},
 	"dependencies": {
-		"fs": "0.0.1-security"
+		"fs": "0.0.1-security",
+		"vsce": "^2.5.3"
 	}
 }

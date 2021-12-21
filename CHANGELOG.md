@@ -89,3 +89,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.1.6] - 2021-10-07
 
 - 最新のタグ(Ver510h)のシンタックスハイライトに対応しました。
+
+## [0.2.0] - 2021-12-21
+
+- 以下のショートカットキーで入力する文字列を任意のものへと変更できるようにしました。setting.jsonより変更できます。
+  - [l][r] shift + enter
+  - [p] ctrl + enter
+  - \#  alt + enter

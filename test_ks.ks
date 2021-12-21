@@ -6,6 +6,13 @@
 [clearfix]
 [start_keyconfig]
 
+[l][r]
+[p]
+#
+
+
+
+
 
 [bg storage="room.jpg" time="100"]
 

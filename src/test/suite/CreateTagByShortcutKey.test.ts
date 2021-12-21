@@ -11,8 +11,15 @@ suite('KeyPushShiftEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
+		//値定義
 		let ctby = new CreateTagByShortcutKey();
-		ctby.KeyPushShiftEnter();
+		let excepted = true;
+
+		//実行
+		let actual = ctby.KeyPushShiftEnter();
+
+		//アサート
+		assert.strictEqual(actual, excepted);
 	});
 
 });
@@ -22,8 +29,15 @@ suite('KeyPushCtrlEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
+		//値定義
 		let ctby = new CreateTagByShortcutKey();
-		ctby.KeyPushCtrlEnter();
+		let excepted = true;
+
+		//実行
+		let actual = ctby.KeyPushCtrlEnter();
+
+		//アサート
+		assert.strictEqual(actual, excepted);
 	});
 });
 
@@ -32,7 +46,14 @@ suite('KeyPushAltEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
+		//値定義
 		let ctby = new CreateTagByShortcutKey();
-		ctby.KeyPushAltEnter();
+		let excepted = true;
+
+		//実行
+		let actual = ctby.KeyPushAltEnter();
+
+		//アサート
+		assert.strictEqual(actual, excepted);
 	});
 });

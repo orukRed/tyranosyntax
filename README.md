@@ -7,7 +7,7 @@
 * シンタックスハイライト
 * ティラノスクリプトのタグを追加するスニペット(ctrl + spaceで表示)
 * アウトラインの表示
-* 特定のタグ・記号の簡易出力(ショートカットキー)
+* ショートカットキーによる特定のタグ・記号の簡易出力(ショートカットキーはsetting.jsonで変更可)
   * [l][r] shift + enter
   * [p] ctrl + enter(Macならcmd+enter)
   * \#  alt + enter(Macならoption+enter)
