@@ -1,4 +1,5 @@
 #.vscodeは無視する
-*.vscode
+*.vscode/
+*.vscodeignore
 
 #.vsixは今後のために保持
