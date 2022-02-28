@@ -13,7 +13,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 バグ修正
 
-- [bg]タグを追加したときに、２つ修正される問題の修正
+- [bg]タグを追加したときに、2つ修正される問題の修正
 
 - 一部のタグが正しくハイライトされない問題の修正
 
@@ -21,7 +21,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.0.3]
 
-- javascriptのハイライトを追加(iscript～endscriptの間でのみ適用)
+- javascriptのハイライトを追加（iscript～endscriptの間でのみ適用）
 
 ## [0.0.4]
 
@@ -44,7 +44,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - ティラノスクリプトv5提供のタグにマウスカーソルを乗せると簡易的なタグの説明が表示されます。
 
 - アウトライン機能の実装
-  - ラベル(*から始まる行)
+  - ラベル（*から始まる行）
   - ifタグ
   - elseifタグ
   - elseタグ
@@ -63,7 +63,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.1.1]
 
-- 特定のタグ・記号の簡易出力(ショートカットキー)の追加
+- 特定のタグ・記号の簡易出力（ショートカットキー）の追加
   - [l][r] shift + enter
   - [p] ctrl + enter
   - \#  alt + enter
@@ -80,7 +80,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Macの場合に、ショートカットコマンドが正常に正しく機能しない不具合の修正
   - [l][r] shift + enter
-  - [p] ctrl + enter(Macならcmd+enter)
+  - [p] ctrl + enter（Macならcmd+enter）
 
 ## [0.1.5]
 
