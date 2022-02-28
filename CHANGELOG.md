@@ -88,7 +88,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.1.6] - 2021-10-07
 
-- 最新のタグ(Ver510h)のシンタックスハイライトに対応しました。
+- 最新のタグ（Ver510h）のシンタックスハイライトに対応しました。
 
 ## [0.2.0] - 2021-12-21
 
@@ -96,3 +96,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - [l][r] shift + enter
   - [p] ctrl + enter
   - \#  alt + enter
+
+## [0.2.1] - 2021-2-28
+
+- ラベルにハイフン（-）やアンダースコア（_）を使用した際に正しくハイライトされない問題を修正しました。

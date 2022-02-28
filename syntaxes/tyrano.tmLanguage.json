@@ -185,7 +185,7 @@
 		"tyrano_labels":{
 			"name":"keyword.other",
 			"comment":"^\\*.*",
-			"match": "^\\*[0-9a-zA-Z]+"
+			"match": "^\\*[0-9a-zA-Z\\-_]+"
 		},
 		"tyrano_sharp":{
 			"name":"variable.language",
