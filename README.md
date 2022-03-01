@@ -5,12 +5,12 @@
 ## Features
 
 * シンタックスハイライト
-* ティラノスクリプトのタグを追加するスニペット(ctrl + spaceで表示)
+* ティラノスクリプトのタグを追加するスニペット（ctrl + spaceで表示）
 * アウトラインの表示
-* ショートカットキーによる特定のタグ・記号の簡易出力(ショートカットキーはsetting.jsonで変更可)
+* ショートカットキーによる特定のタグ・記号の簡易出力（ショートカットキーはsetting.jsonで変更可）
   * [l][r] shift + enter
-  * [p] ctrl + enter(Macならcmd+enter)
-  * \#  alt + enter(Macならoption+enter)
+  * [p] ctrl + enter（Macならcmd+enter）
+  * \#  alt + enter（Macならoption+enter）
 
 ## Release Notes
 
@@ -19,4 +19,5 @@
 
 ## issues
 
-submit the [issues](https://github.com/orukRed/tyranosyntax/issues) if you mind any bug or have any suggestion.
+
+バグなどを見つけた場合[GitHubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)、もしくはTwitter（[@orukred](https://twitter.com/OrukRed)）にてご連絡ください。
