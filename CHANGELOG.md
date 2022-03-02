@@ -97,6 +97,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - [p] ctrl + enter
   - \#  alt + enter
 
-## [0.2.1] - 2021-2-28
+## [0.2.1] - 2022-2-28
 
 - ラベルにハイフン（-）やアンダースコア（_）を使用した際に正しくハイライトされない問題を修正しました。
+
+## [0.3.0] - 2022-3-XX
+
+- マーケットプレイスの検索で見つかりやすくしました。
