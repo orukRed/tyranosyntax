@@ -10,10 +10,7 @@
 		},
 		{
 			"include": "#iscript2"
-		},		
-		{
-			"include": "#strings"
-		},
+		},			
 		{
 			"include": "#comment_line"
 		},
@@ -21,24 +18,16 @@
 			"include": "#comment_block"
 		},
 		{
-			"include": "#tyrano_symbols"
-		},	
-	
-		{
 			"include": "#tyrano_labels"
 		},		
 		{
 			"include": "#tyrano_sharp"
 		},
-
 		{
-			"include": "#tyrano_tags1"
+			"include": "#tyrano_tag1"
 		},
 		{
-			"include": "#tyrano_tags2"
-		},
-		{
-			"include": "#numbers"
+			"include": "#tyrano_tag2"
 		}
 	],
 	"repository": {
@@ -55,7 +44,6 @@
 					"name":"keyword.operator.tyrano"
 				}
 			},
-
 			"end": "\\s*(\\[)((?i:endscript))\\s*((\\S*)=(\\S*))*(\\])",
 			"endCaptures": {
 				"1":{
@@ -76,26 +64,7 @@
 			},
 			"patterns":[
 				{
-					"patterns": [
-						{
-							"name": "meta.embedded.block.js",
-							"contentName": "source.js",
-							"patterns": [
-								{
-									"include": "source.js"
-								},
-								{
-									"name":"variable.other",
-									"match":"\\b(f\\.|sf\\.|tf\\.)\\w*\\b"
-								},
-								{
-									"name": "support.function",
-									"match": "\\b(TYRANO|kag|ftag|startTag|TG|config)\\b"
-								}
-							]					
-						}
-		
-					]
+					"include": "source.js"
 				}
 			]
 		},
@@ -126,42 +95,10 @@
 			},
 			"patterns":[
 				{
-					"patterns": [
-						{
-							"name": "meta.embedded.block.js",
-							"contentName": "source.js",
-							"patterns": [
-								{
-									"include": "source.js"
-								},
-								{
-									"name":"variable.other",
-									"match":"\\b(f\\.|sf\\.|tf\\.)\\w*\\b"
-								},
-								{
-									"name": "support.function",
-									"match": "\\b(TYRANO|kag|ftag|startTag|TG|config)\\b"
-								}
-							]					
-						}
-		
-					]
+					"include": "source.js"
 				}
 			]
 		},
-		"strings": {
-			"name": "string.quoted.double.tyrano",
-			"begin":"\"",
-			"end":"\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.tyrano",
-					"match": "\\\\."
-				}
-			]
-		},
-
-
 
 		"comment_line":{
 			"name": "comment.line.tyrano",
@@ -172,69 +109,91 @@
 			"begin":"\\/\\*",
 			"end":"\\*\\/"
 		},
-		"tyrano_symbols":{
-			"name":"keyword.operator",
-			"match":"(\\[|\\]|\\@)"
-		},
+
 		"tyrano_labels":{
-			"name":"constant.language",
+			"name":"constant.language.tyrano",
 			"comment":"^\\*.*",
 			"match": "^\\*[0-9a-zA-Z\\-_]+"
 		},
 		"tyrano_sharp":{
-			"name":"variable.language",
+			"name":"token.warn-token.tyrano",
+			"comment": "#chara_nameはptextタグの糖衣構文なのでsupport.class.tyranoとおなじのほうがいい？",
 			"match":"^#.*"
-		},		
+		},
 		"tyrano_variables":{
-			"name":"variable.other",
-			"match":"\\b(f\\.|sf\\.|tf\\.)\\w*\\b"
+			"name":"variable.parameter.tyrano",
+			"comment": "変数の正規表現。変数名には半角英数と全角文字、_ (アンダーバー) を使うことができる　先頭に数字はNG",
+			"match":"\\b(f\\.|sf\\.|tf\\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚ]*))\\b"
 		},
-		"tyrano_tags1":{
-			"patterns": [
-				{
-					"comment": "parameterあり  (\\S*)(\\s+(\\S*)=(S*))+",
-					"match":"(\\S*)(\\s+(\\S*?)=(S*))+",
-					"captures": {
-						"1":{"patterns":[
-							{
-								"name":"support.class.tyrano",
-								"match":"\\b(playbgm|stopbgm|fadeinbgm|fadeoutbgm|xchgbgm|playse|stopse|fadeinse|fadeoutse|bgmopt|seopt|wbgm|wse|voconfig|vostart|vostop|speak_on|speak_off|camera|reset_camera|wait_camera|mask|mask_off|position|image|freeimage|free|ptext|mtext|backlay|wt|hidemessage|layopt|trans|bg|bg2|layermode|layermode_movie|free_layermode|filter|free_filter|clearfix|bgcamera|qr_config|stop_bgcamera|qr_define|config_record_label|s|wait|wait_cancel|quake|font|deffont|delay|resetdelay|configdelay|nowait|endnowait|resetfont|cancelskip|locate|glyph|showsave|showload|showmenu|showmenubutton|hidemenubutton|skipstart|skipstop|autostart|autostop|autoconfig|showlog|close|title|savesnap|autosave|autoload|preload|cursor|screen_full|sleepgame|awakegame|breakgame|dialog|plugin|sysview|loadcss|save_img|nolog|endnolog|pushlog|start_keyconfig|stop_keyconfig|apply_local_patch|check_web_patch|l|p|graph|r|er|cm|ct|current|ruby|jump|link|endlink|button|glink|clickable|loadjs|eval|clearvar|clearsysvar|clearstack|iscript|endscript|emb|if|elsif|else|endif|call|return|macro|endmacro|erasemacro|ignore|endignore|movie|bgmovie|wait_bgmovie|stop_bgmovie|web|trace|html|endhtml|anim|wa|stopanim|keyframe|endkeyframe|frame|kanim|stop_kanim|chara_ptext|chara_config|chara_new|chara_show|chara_hide|chara_hide_all|chara_delete|chara_mod|chara_move|chara_face|chara_layer|chara_layer_mod|chara_part|chara_part_reset|edit|commit|3d_init|3d_model_new|3d_sphere_new|3d_sprite_new|3d_event|3d_event_delete|3d_event_start|3d_event_stop|3d_box_new|3d_image_new|3d_show|3d_hide|3d_hide_all|3d_delete|3d_delete_all|3d_canvas_show|3d_canvas_hide|3d_close|3d_anim|3d_anim_stop|3d_scene|3d_camera|3d_gyro|3d_gyro_stop|3d_debug_camera|3d_motion|3d_debug|iscript|endscript)\\b"
-							}
-						]},
-						"2":{"patterns":[
-							{
-							"name":"support.function.tyrano",
-							"match":"\\b(storage|loop|sprite_time|volume|time|buf|clear|effect|sebuf|name|vostorage|number|x|y|zoom|rotate|from_x|from_y|from_zoom|from_rotate|wait|layer|ease_type|color|graphic|folder|fit|left|top|width|height|mode|qrcode|debug|audio|url|target|skip|page|frame|opacity|marginl|margint|marginr|marginb|radius|vertical|visible|zindex|depth|reflect|pos|text|size|face|bold|edge|shadow|align|overwrite|fadeout|in_effect|in_delay|in_delay_scale|in_sync|in_shuffle|in_reverse|out_effect|out_delay|out_delay_scale|out_sync|out_shuffle|out_reverse|count|hmax|vmax|italic|effect_speed|speed|fix|savesnap|exp|preexp|hint|clickse|enterse|leavese|clickimg|enterimg|auto_next|role|font_color|borderstyle|mouseopacity|line|children|method|cross|video|mute|clickstop|rotateX|rotateY|rotateZ|scale|scaleX|scaleY|scaleZ|skew|skewX|skewY|perspective|keyframe|easing|delay|direction|pos_mode|ptext|memory|anim|pos_change_time|talk_focus|brightness_value|blur_value|talk_anim|talk_anim_time|talk_anim_value|jname|part|id|allow_storage|grayscale|sepia|saturate|hue|invert|brightness|contrast|blur|stack|ask|stop|title|length|initial|autocomplete|maxchars|variable_over|bgm_over|type|storage_cancel|target_cancel|label_ok|label_cancel|file|join|reload|camera|near|far|rot|tonemap|motion|texture|doubleside|lookat|finish|tonemap_value|light_amb|max_x|max_y|button_text|menu|overlap|reset|cond)\\b"
-							}
-						]},
-						"3":{"patterns":[
-							{
-							"name":"string.quoted.double.tyrano",
-							"begin": "\"",
-							"end":"\""
-							}
-						]},
-						"4":{"patterns":[
-							{
-								"name":"support.class.tyrano",
-								"match":"\\b(playbgm|stopbgm|fadeinbgm|fadeoutbgm|xchgbgm|playse|stopse|fadeinse|fadeoutse|bgmopt|seopt|wbgm|wse|voconfig|vostart|vostop|speak_on|speak_off|camera|reset_camera|wait_camera|mask|mask_off|position|image|freeimage|free|ptext|mtext|backlay|wt|hidemessage|layopt|trans|bg|bg2|layermode|layermode_movie|free_layermode|filter|free_filter|clearfix|bgcamera|qr_config|stop_bgcamera|qr_define|config_record_label|s|wait|wait_cancel|quake|font|deffont|delay|resetdelay|configdelay|nowait|endnowait|resetfont|cancelskip|locate|glyph|showsave|showload|showmenu|showmenubutton|hidemenubutton|skipstart|skipstop|autostart|autostop|autoconfig|showlog|close|title|savesnap|autosave|autoload|preload|cursor|screen_full|sleepgame|awakegame|breakgame|dialog|plugin|sysview|loadcss|save_img|nolog|endnolog|pushlog|start_keyconfig|stop_keyconfig|apply_local_patch|check_web_patch|l|p|graph|r|er|cm|ct|current|ruby|jump|link|endlink|button|glink|clickable|loadjs|eval|clearvar|clearsysvar|clearstack|iscript|endscript|emb|if|elsif|else|endif|call|return|macro|endmacro|erasemacro|ignore|endignore|movie|bgmovie|wait_bgmovie|stop_bgmovie|web|trace|html|endhtml|anim|wa|stopanim|keyframe|endkeyframe|frame|kanim|stop_kanim|chara_ptext|chara_config|chara_new|chara_show|chara_hide|chara_hide_all|chara_delete|chara_mod|chara_move|chara_face|chara_layer|chara_layer_mod|chara_part|chara_part_reset|edit|commit|3d_init|3d_model_new|3d_sphere_new|3d_sprite_new|3d_event|3d_event_delete|3d_event_start|3d_event_stop|3d_box_new|3d_image_new|3d_show|3d_hide|3d_hide_all|3d_delete|3d_delete_all|3d_canvas_show|3d_canvas_hide|3d_close|3d_anim|3d_anim_stop|3d_scene|3d_camera|3d_gyro|3d_gyro_stop|3d_debug_camera|3d_motion|3d_debug|TYRANO|kag|ftag|startTag|TG|config)\\b"
-							}
-						]}
-					}
+		"tyrano_tag_param":{
+			"comment": "タグの hoge=value  のところの正規表現",
+			"match_tmp": "(\\S+)[=\\<\\>\\!\\|\\&](\\S+)",
+			"match": "(\\S+)[=\\<\\>\\!\\|\\&](\\S+)",
+			"captures": {
+				"1":{
+					"comment": "黄色　タグのパラメータ名",
+					"name":"string.other.tyrano",
+					"patterns": [{
+						"comment": "パラメータ名の正規表現のとこに変数の正規表現あればそっちを優先",
+						"include":"#tyrano_variables"
+					}]
+				},
+				"2":{
+					"comment": "緑　パラメータに入れる値",
+					"name":"entity.other.attribute-name.tyrano"
 				}
-			]			
+			}
 		},
-		"tyrano_tags2":{
-			"name":"support.class.tyrano",					
-			"match":"\\b(playbgm|stopbgm|fadeinbgm|fadeoutbgm|xchgbgm|playse|stopse|fadeinse|fadeoutse|bgmopt|seopt|wbgm|wse|voconfig|vostart|vostop|speak_on|speak_off|camera|reset_camera|wait_camera|mask|mask_off|position|image|freeimage|free|ptext|mtext|backlay|wt|hidemessage|layopt|trans|bg|bg2|layermode|layermode_movie|free_layermode|filter|free_filter|clearfix|bgcamera|qr_config|stop_bgcamera|qr_define|config_record_label|s|wait|wait_cancel|quake|font|deffont|delay|resetdelay|configdelay|nowait|endnowait|resetfont|cancelskip|locate|glyph|showsave|showload|showmenu|showmenubutton|hidemenubutton|skipstart|skipstop|autostart|autostop|autoconfig|showlog|close|title|savesnap|autosave|autoload|preload|cursor|screen_full|sleepgame|awakegame|breakgame|dialog|plugin|sysview|loadcss|save_img|nolog|endnolog|pushlog|start_keyconfig|stop_keyconfig|apply_local_patch|check_web_patch|l|p|graph|r|er|cm|ct|current|ruby|jump|link|endlink|button|glink|clickable|loadjs|eval|clearvar|clearsysvar|clearstack|iscript|endscript|emb|if|elsif|else|endif|call|return|macro|endmacro|erasemacro|ignore|endignore|movie|bgmovie|wait_bgmovie|stop_bgmovie|web|trace|html|endhtml|anim|wa|stopanim|keyframe|endkeyframe|frame|kanim|stop_kanim|chara_ptext|chara_config|chara_new|chara_show|chara_hide|chara_hide_all|chara_delete|chara_mod|chara_move|chara_face|chara_layer|chara_layer_mod|chara_part|chara_part_reset|edit|commit|3d_init|3d_model_new|3d_sphere_new|3d_sprite_new|3d_event|3d_event_delete|3d_event_start|3d_event_stop|3d_box_new|3d_image_new|3d_show|3d_hide|3d_hide_all|3d_delete|3d_delete_all|3d_canvas_show|3d_canvas_hide|3d_close|3d_anim|3d_anim_stop|3d_scene|3d_camera|3d_gyro|3d_gyro_stop|3d_debug_camera|3d_motion|3d_debug|iscript|endscript)\\b"
 
+		"tyrano_tag_name":{
+			"comment":"tag_name hoge の部分?"
 		},
-		"numbers":{
-			"name": "constant.numeric.tyrano",
-			"match": "\\d"
+
+		"tyrano_tag1":{
+			"comment": "タグのハイライト []で囲むパターン",
+			"memo":"3のところで.*ってやってるけど、そこで]を取ってしまってるのが原因",
+			"match": "(\\[)(\\w+){1}\\s*(.*)(\\])",
+			"captures": {
+				"1":{
+					"comment":"[記号",
+					"name":"keyword.operator.tyrano"
+				},
+				"2":{
+					"comment": "青色　タグ名",
+					"name":"support.class.tyrano"
+				},				
+				"3":{
+					"comment":"param=value　のところ",
+					"patterns": [{
+						"include": "#tyrano_tag_param"
+					}]
+				},
+				"4":{
+					"comment":"]記号",
+					"name":"keyword.operator.tyrano"
+				}
+			}
+		},
+		"tyrano_tag2":{
+			"comment": "タグのハイライト 行頭が@のパターン",
+			"match": "(^@)(\\w+){1}\\s*(.*)(\\n)",
+			"captures": {
+				"1":{
+					"comment":"@記号",
+					"name":"keyword.operator.tyrano"
+				},
+				"2":{
+					"comment": "青色　タグ名",
+					"name":"support.class.tyrano"
+				},				
+				"3":{
+					"comment":"param=value　のところ",
+					"patterns": [{
+						"include": "#tyrano_tag_param"
+					}]
+				}
+			}
 		}
-
-
 	},
 	"scopeName": "source.ks"
 }
