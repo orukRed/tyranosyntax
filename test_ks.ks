@@ -78,9 +78,12 @@ function test_func(){
 [hoge]
 
 ;一応emb以外もテスト
-[jump storage="" target=""]
-[bg storage="1" time="2" wait="3" cross="4" method="5"]
-[html]
+[l][r]
+[jump storage="" target="aa"] [lr]
+[bg storage=hoge.ks]
+[bg storage="1" time="2" wait="3" cross="4" method="5"] [r]
+[html][lr]
+[endhtml]
 
 
 @iscript
