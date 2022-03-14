@@ -41,7 +41,11 @@
 			{
 				"language": "tyrano",
 				"scopeName": "source.ks",
-				"path": "./syntaxes/tyrano.tmLanguage.json"
+				"path": "./syntaxes/tyrano.tmLanguage.json",
+				"embeddedLanguages": {
+					"source.js":"html",
+					"meta.embedded.block.html":"html"
+				}
 			}
 		],
 		"snippets": [
@@ -49,11 +53,6 @@
 				"language": "tyrano",
 				"scopeName": "source.ks",
 				"path": "./snippet/tyrano.snippet.json"
-			},
-			{
-				"language": "javascript",
-				"scopeName": "source.js",
-				"path": "./snippet/javascript.snippet.json"
 			}
 		],
 		"configuration": [

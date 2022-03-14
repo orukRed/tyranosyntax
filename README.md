@@ -2,12 +2,14 @@
 
 ティラノスクリプトのハイライトやスニペットをサポートします。
 
-## Features
+## 機能
 
 * シンタックスハイライト
+  * setting.jsonのtextmateRulesを編集することでハイライト色を変更できます。
+  * <img src="./readme_img/highlight.png" width=700>
 * ティラノスクリプトのタグを追加するスニペット（ctrl + spaceで表示）
 * アウトラインの表示
-* ショートカットキーによる特定のタグ・記号の簡易出力（ショートカットキーはsetting.jsonで変更可）
+* ショートカットキーによる特定のタグ・記号の簡易出力（ショートカットキーは設定で変更可）
   * [l][r] shift + enter
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
@@ -18,6 +20,5 @@
 [CHANGELOG.md](CHANGELOG.md)
 
 ## issues
-
 
 バグなどを見つけた場合[GitHubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)、もしくはTwitter（[@orukred](https://twitter.com/OrukRed)）にてご連絡ください。

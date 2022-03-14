@@ -17,6 +17,115 @@
 *test1-test
 *test1_fa-rq22
 
+;test4
+;ハイライトの見直し
+;ラベルの色が変わっているか
+*start
+
+;test5
+;タグのハイライト方法が変更されているか
+[bg storage=room.jpg left="" top="" width="" height="" time="" wait="" cross="" method="" ]
+@bg name="ssss" storage="" left="" top="" width="" height="" time="" wait="" cross="" method=""
+
+;ハイライトされないことを確認
+bg storage=room.jpg left="" top="" width="" height="" time="" wait="" cross="" method="" 
+bg name="ssss" storage="" left="" top="" width="" height="" time="" wait="" cross="" method=""
+
+
+;iscriptタグ内の挙動確認
+;iscript内で変数や関数が正しくハイライトされているか
+[iscript]
+test_hoge = 1;
+let tmp = 1;
+function test_func(){
+	console.log("test sentense.");
+};
+[endscript stop=""]
+
+@iscript
+f.test = 1;
+function test_func(){
+	console.log("test sentense.");
+};
+@endscript
+
+function test_func(){
+	console.log("test sentense.");
+};
+;embタグ内で変数が正しくハイライトされているか
+;半角英数字のテスト
+[emb exp=f.aaaa12345=1]
+[emb exp=f.aaaa12345=1]
+;日本語テスト
+[emb exp=f.へんすう=1]
+[emb exp=f.へんすう=1]
+[emb exp=f.ヘンスウ=1]
+[emb exp=f.ヘンスウ=1]
+[emb exp=f.変数=1]
+[emb exp=f.変数=1]
+[emb exp=f.あいうえお=1]
+[emb exp=f.あいうえお=1]
+[emb exp=f.あいうえお１２３４５=1]
+[emb exp=f.あいうえお１２３４５=1]
+
+;複合テスト
+[emb exp=f.aA01234_へんすうヘンスウ変数=1]
+[emb exp=f.aA01234_へんすうヘンスウ変数=1]
+
+;自作タグ
+[hoge args=1]
+[p]
+[hoge]
+
+;一応emb以外もテスト
+[jump storage="" target=""]
+[bg storage="1" time="2" wait="3" cross="4" method="5"]
+[html]
+
+
+@iscript
+f.aaaa=1
+f.aaaa=1
+f.へんすう=1
+f.へんすう=1
+f.ヘンスウ=1
+f.ヘンスウ=1
+f.変数=1
+f.変数=1
+f.aA01234_へんすうヘンスウ変数=1
+f.aA01234_へんすうヘンスウ変数=1
+@endscript
+
+[iscript]
+f.aaaa=1
+f.aaaa=1
+f.へんすう=1
+f.へんすう=1
+f.ヘンスウ=1
+f.ヘンスウ=1
+f.変数=1
+f.変数=1
+f.aA01234_へんすうヘンスウ変数=1
+f.aA01234_へんすうヘンスウ変数=1
+[endscript]
+
+
+;先頭数字はエラーなのでここはハイライトされなくて良い
+[emb exp=f.1aaaa=1]
+[emb exp=f.１ああああ=1]
+;半角カナはエラーなのでハイライトされなくて良い
+[emb exp=f.ｱｲｳｴｵ=1]
+[emb exp=f.aaaaｱｲｳｴｵ=1]
+
+;#のハイライトが変更されているか
+#chara_name:chara_face
+
+;ラベルの色が変更されているか
+*label_name
+
+
+
+
 
 
 
@@ -55,7 +164,7 @@
 [chara_face name="akane" face="angry" storage="chara/akane/angry.png"]
 [chara_face name="akane" face="doki" storage="chara/akane/doki.png"]
 [chara_face name="akane" face="happy" storage="chara/akane/happy.png"]
-[chara_face name="akane" face="sad" storage="chara/akane/sad.png"]
+[chara_face name=akane face=sad storage=chara/akane/sad.png]
 ;yamato
 [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
 
