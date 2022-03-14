@@ -114,3 +114,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - 数値のハイライトを削除しました。
   - true,false,nullのハイライトを削除しました。
 - マウスホバーで表示されるチップツール、スニペットを最新のものに対応しました。
+
+## [0.3.1] - 2022-3-14
+
+- 同じ行に[]で囲んでタグがある時に一部の文字がハイライトされない不具合を修正しました。
