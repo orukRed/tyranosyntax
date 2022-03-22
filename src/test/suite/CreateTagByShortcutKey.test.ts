@@ -7,7 +7,7 @@ import { CreateTagByShortcutKey } from '../../CreateTagByShortcutKey';
 // import * as myExtension from '../../extension';
 
 
-suite('KeyPushShiftEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
@@ -25,7 +25,7 @@ suite('KeyPushShiftEnter関数', () => {
 });
 
 
-suite('KeyPushCtrlEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
@@ -42,7 +42,7 @@ suite('KeyPushCtrlEnter関数', () => {
 });
 
 
-suite('KeyPushAltEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushAltEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {

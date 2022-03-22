@@ -73,6 +73,32 @@
 						"type": "string",
 						"default": "#",
 						"description": "キーボードのalt + enter(macではoption + enter)を押下した際に入力される文字を設定します。"
+					},
+					"TyranoScript syntax.outline.tag":{
+						"type":"array",
+						"default":[
+							"if",
+							"elsif",
+							"else",
+							"endif",
+							"ignore",
+							"endignore",
+							"jump",
+							"call",
+							"button",
+							"link",
+							"iscript",
+							"endscript",
+							"loadjs",
+							"html",
+							"endhtml"
+						],
+						"description":"アウトラインで表示されるタグを設定します。"
+					},
+					"TyranoScript syntax.outline.blockComment":{
+						"type":"boolean",
+						"default":false,
+						"description":"/**/で囲んだ処理をアウトラインに表示させないようにします。\n現在β版の機能のため、/*や*/のある行にタグを配置すると正しく表示されない可能性があります。\n例：/*comment*/[p]、[p]/*comment*/、[p]/*、*/[p]"
 					}
 				}
 			}

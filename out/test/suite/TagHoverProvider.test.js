@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const TagHoverProvider_1 = require("../../TagHoverProvider");
 // import * as myExtension from '../../extension';
-suite('provideHover関数', () => {
+suite('TagHoverProvider.provideHover関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
         //値定義
@@ -20,7 +20,7 @@ suite('provideHover関数', () => {
         // assert.strictEqual(actual[0].name, excepted.text);
     });
 });
-suite('createMarkdownText関数', () => {
+suite('TagHoverProvider.createMarkdownText関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
     });

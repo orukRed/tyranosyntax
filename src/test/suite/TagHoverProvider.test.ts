@@ -7,7 +7,7 @@ import { TagHoverProvider } from '../../TagHoverProvider';
 // import * as myExtension from '../../extension';
 
 
-suite('provideHover関数', () => {
+suite('TagHoverProvider.provideHover関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
@@ -28,7 +28,7 @@ suite('provideHover関数', () => {
 
 });
 
-suite('createMarkdownText関数', () => {
+suite('TagHoverProvider.createMarkdownText関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {

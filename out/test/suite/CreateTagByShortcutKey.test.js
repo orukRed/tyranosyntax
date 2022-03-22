@@ -6,7 +6,7 @@ const assert = require("assert");
 const vscode = require("vscode");
 const CreateTagByShortcutKey_1 = require("../../CreateTagByShortcutKey");
 // import * as myExtension from '../../extension';
-suite('KeyPushShiftEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
         //値定義
@@ -18,7 +18,7 @@ suite('KeyPushShiftEnter関数', () => {
         assert.strictEqual(actual, excepted);
     });
 });
-suite('KeyPushCtrlEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
         //値定義
@@ -30,7 +30,7 @@ suite('KeyPushCtrlEnter関数', () => {
         assert.strictEqual(actual, excepted);
     });
 });
-suite('KeyPushAltEnter関数', () => {
+suite('CreateTagByShortcutKey.KeyPushAltEnter関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
         //値定義
