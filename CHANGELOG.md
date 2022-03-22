@@ -118,3 +118,28 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.3.1] - 2022-3-14
 
 - 同じ行に[]で囲んでタグがある時に一部の文字がハイライトされない不具合を修正しました。
+
+## [0.3.1] - 2022-3-22
+
+- アウトライン表示するタグを任意のものに変更できるようにしました。
+  - 設定->TyranoScript syntax->setting.jsonより変更してください。デフォルトでアウトライン表示されるタグは以下です。
+    - ラベル（*から始まる行）
+    - ifタグ
+    - elseifタグ
+    - elseタグ
+    - endif
+    - ignore
+    - endignore
+    - jumpタグ
+    - callタグ
+    - buttonタグ
+    - glinkタグ
+    - linkタグ
+    - iscriptタグ
+    - endscriptタグ
+    - loadjsタグ
+    - htmlタグ
+    - endhtmlタグ
+- コメントアウトしている行をアウトライン表示しないようにしました。
+  - ただし、/**/によるアウトラインはβ版のため正しく表示・非表示されない場合があります。不要の場合は設定を変更して機能を無効にしてください。
+- 変数をアウトライン表示するようにしました。
