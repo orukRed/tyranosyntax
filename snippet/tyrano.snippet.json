@@ -4368,7 +4368,7 @@
     "[bg]": {
         "prefix": "bg",
         "body": [
-            "[bg storage=\"\" time=\"\" wait=\"\" cross=\"\" position:指定しない場合は画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置することができます。配置位置を指定してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）=\"\" method=\"\"]"
+            "[bg storage=\"\" time=\"\" wait=\"\" cross=\"\" position=\"\" method=\"\"]"
         ],
         "description": [
             "背景の切り替えを簡易的に実行できます。",
