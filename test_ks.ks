@@ -2,14 +2,11 @@
 ;テスト用のファイル。
 ;ksファイルを使ったテストが必要な場合はこのファイルを使うこと。
 
-;test1
-;正しくタグのハイライトがされているか
+*test1-正しくタグのハイライトがされているか
 
-; test2
-; マウスホバーでチップツールが出る
+*test2-マウスホバーでチップツールが出る
 
-; test3
-; ラベルにアンダーバーやハイフンが使える
+*test3-ラベルにアンダーバーやハイフンが使える
 ; 日本語は動作未確認(対象外)
 *start
 *12345
@@ -17,13 +14,11 @@
 *test1-test
 *test1_fa-rq22
 
-;test4
-;ハイライトの見直し
+*test4-ハイライトの見直し
 ;ラベルの色が変わっているか
 *start
 
-;test5
-;タグのハイライト方法が変更されているか
+*test5-タグのハイライト方法が変更されているか
 [bg storage=room.jpg left="" top="" width="" height="" time="" wait="" cross="" method="" ]
 @bg name="ssss" storage="" left="" top="" width="" height="" time="" wait="" cross="" method=""
 
@@ -67,6 +62,9 @@ function test_func(){
 [emb exp=f.あいうえお=1]
 [emb exp=f.あいうえお１２３４５=1]
 [emb exp=f.あいうえお１２３４５=1]
+[emb exp=f.あいうえーお=1]
+[emb exp=f.ｱｲｳｴｵ=1]
+[emb exp=f.aaaaｱｲｳｴｵ=1]
 
 ;複合テスト
 [emb exp=f.aA01234_へんすうヘンスウ変数=1]
@@ -116,9 +114,7 @@ f.aA01234_へんすうヘンスウ変数=1
 ;先頭数字はエラーなのでここはハイライトされなくて良い
 [emb exp=f.1aaaa=1]
 [emb exp=f.１ああああ=1]
-;半角カナはエラーなのでハイライトされなくて良い
-[emb exp=f.ｱｲｳｴｵ=1]
-[emb exp=f.aaaaｱｲｳｴｵ=1]
+
 
 ;#のハイライトが変更されているか
 #chara_name:chara_face
@@ -126,6 +122,116 @@ f.aA01234_へんすうヘンスウ変数=1
 ;ラベルの色が変更されているか
 *label_name
 
+
+
+*test6-設定したタグのアウトラインが表示されているか確認
+
+[if]
+[elsif]
+[else] 
+[endif]
+[ignore]
+[endignore]
+[jump]
+[call]
+[button]
+[link]
+[s]
+[iscript]
+[endscript]
+[loadjs]
+[html]
+[endhtml]
+[hoge]
+
+
+@if
+@elsif
+@else 
+@endif
+@ignore
+@endignore
+@jump
+@call
+@button
+@link
+@s
+@iscript
+@endscript
+@loadjs
+@html
+@endhtml
+@hoge
+
+;コメントアウトしたラベルが表示されない
+; *comment_label
+*uncomment_label
+
+;ブロックコメントアウトしたタグ、ラベルが表示されない
+/*
+[if]
+[elsif]
+[else] 
+[endif]
+[ignore]
+[endignore]
+[jump]
+[call]
+[button]
+[link]
+[s]
+[iscript]
+[endscript]
+[loadjs]
+[html]
+[endhtml]
+[hoge]
+
+
+@if
+@elsif
+@else 
+@endif
+@ignore
+@endignore
+@jump
+@call
+@button
+@link
+@s
+@iscript
+@endscript
+@loadjs
+@html
+@endhtml
+@hoge
+
+*/
+
+
+;コメントアウトで表示されなくなる
+[hoge]/*comment*/
+/*
+*comment_label
+[hoge_comment]
+*/
+
+本来はアウトラインに表示されるはずだが、コードに問題があるため意図した動作とならない
+１つ下のは表示されず、２つ下のは表示されてしまう
+/*comment*/[hoge]
+/*[hoge] comment*/
+
+*test7-＠の前にハイライトがあるとハイライトされない問題の修正
+;タブが入ってるパターン
+			@bg storage="" time="" wait="" cross="" method=""
+
+
+;半角スペースが入ってるパターン
+            @bg storage="" time="" wait="" cross="" method=""
+
+
+;全角スペースが入ってるパターン
+　　　　@bg storage="" time="" wait="" cross="" method=""
 
 
 
