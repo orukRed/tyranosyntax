@@ -25,9 +25,6 @@
 			"include": "#tyrano_variables"
 		},
 		{
-			"include_tmp": "#tyrano_tag_param_invalid"
-		},
-		{
 			"include": "#tyrano_tag[]"
 		},
 		{
@@ -134,10 +131,11 @@
 			"comment": "タグの中のラベル表示につかう",
 			"match": "\\*[\\w\\-＠]+"
 		},
-		"tyrano_tag_param_invalid":{
+		"tyrano_tag_value_invalid":{
 			"name":"invalid.illegal.tyrano",
 			"comment":"ダブルクォーテーションが閉じられていない時にエラー",
-			"match":"(\")([\\s\\w\\.\\[\\]=']+)([^?!\"])"
+			"match_comment":"(ダブルクォーテーションから始まって)(value内で使われる文字)(否定先読み使ってダブルクォーテーションで終わってない)",
+			"match":"\"[\\w\\.\\[\\]\\s=']*(?!.*\")."
 		},
 		"tyrano_variables":{
 			"name":"variable.parameter.tyrano",
@@ -172,7 +170,7 @@
 					},{
 						"include": "#tyrano_labels_in_tag"
 					},{
-						"include_tmp": "#tyrano_tag_param_invalid"
+						"include_tmp": "#tyrano_tag_value_invalid"
 					}]
 				}
 			}
@@ -191,8 +189,6 @@
 				"2":{
 					"patterns": [{
 						"include":"#tyrano_tag_param"
-					},{
-						"include": "#tyrano_tag_param_invalid"
 					}]
 				}
 			}
