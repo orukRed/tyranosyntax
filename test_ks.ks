@@ -1,2 +1,1 @@
-@glink_skip_select color="skip_select_button" name="sel_skip1" target="*jump" x="&f.menu_glink_x" y="&f.menu_glink_y[0]" width="&f.menu_glink_width" height="&f.menu_glink_height" text="&f.scene_name[5]" exp="tf.menu_jump_target = 'section5-start'" cond="f.scene_read[5] == 0"
-[hoge tmp=f.temp]
+aaa

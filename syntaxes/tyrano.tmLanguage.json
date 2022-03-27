@@ -21,19 +21,19 @@
 		{
 			"include": "#tyrano_labels"
 		},		
-
 		{
 			"include": "#tyrano_variables"
+		},
+		{
+			"include_tmp": "#tyrano_tag_param_invalid"
 		},
 		{
 			"include": "#tyrano_tag[]"
 		},
 		{
 			"include": "#tyrano_tag@"
-		},
-		{
-			"include": "#tyrano_operator"
 		}
+
 	],
 	"repository": {
 		"iscript1":{
@@ -117,7 +117,7 @@
 		"tyrano_sharp":{
 			"name":"token.warn-token.tyrano",
 			"comment": "#chara_nameはptextタグの糖衣構文なのでsupport.class.tyranoとおなじのほうがいい？　とりあえず現状は行全部を同色ハイライト",
-			"match":"^#[\\w]"
+			"match":"^#.*"
 		},
 		"__tyrano_sharp_in_tag":{
 			"name":"token.warn-token.tyrano",
@@ -129,15 +129,15 @@
 			"comment":"ラベル表示に使う",
 			"match": "^\\*[\\w\\-＠]+"
 		},
-
 		"tyrano_labels_in_tag":{
 			"name":"constant.language.tyrano",
 			"comment": "タグの中のラベル表示につかう",
 			"match": "\\*[\\w\\-＠]+"
 		},
-		"tyrano_operator":{
-			"name": "keyword.operator.tyrano",
-			"match": "[\\[\\]]*"
+		"tyrano_tag_param_invalid":{
+			"name":"invalid.illegal.tyrano",
+			"comment":"ダブルクォーテーションが閉じられていない時にエラー",
+			"match":"(\")([\\s\\w\\.\\[\\]=']+)([^?!\"])"
 		},
 		"tyrano_variables":{
 			"name":"variable.parameter.tyrano",
@@ -159,8 +159,9 @@
 			"comment":"evalタグだとf.hoge=53とか、condパラメータでcond=f.hoge <= 1243 とかあるから注意",
 			"match_tmp": "(\\w+)=(\"?\\w+\"?)",
 			"comment":"パラメータに入れる値は、日本語英数字　ダブルクォーテーション　シングルクォーテーション　.　[　]　/　バックスラッシュ　&　|　<　>　=　!　,",
-			"match": "(\\w+)=([,'&|<>=!\\S\\s\"\/\\.\\\\]*\\s*)",
+			"match": "(\\w+)=([,'&|<>=!\\S\\s\"\/\\.\\\\]*)",
 			"captures": {
+
 				"1":{
 					"name":"string.other.tyrano"
 				},
@@ -170,7 +171,9 @@
 						"include": "#tyrano_variables"
 					},{
 						"include": "#tyrano_labels_in_tag"
-					}]					
+					},{
+						"include_tmp": "#tyrano_tag_param_invalid"
+					}]
 				}
 			}
 		},
@@ -188,6 +191,8 @@
 				"2":{
 					"patterns": [{
 						"include":"#tyrano_tag_param"
+					},{
+						"include": "#tyrano_tag_param_invalid"
 					}]
 				}
 			}
@@ -228,96 +233,9 @@
 			"patterns": [{
 				"include": "#tyrano_tag"
 			}]
-			
-		},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-		"tyrano_tag1yeeye":{
-			"comment": "タグのハイライト []で囲むパターン",
-			"match_tmp": "(\\[)(\\w+){1}\\s*(.*)(\\])",
-			"match": "(\\[)(\\w+){1}\\s*([^\\]]*)(\\])",
-			"captures": {
-				"1":{
-					"comment":"[記号",
-					"name":"keyword.operator.tyrano"
-				},
-				"2":{
-					"comment": "タグ名",
-					"name":"support.class.tyrano"
-				},				
-				"3":{
-					"comment":"param=value　のところ",
-					"patterns": [{
-						"include": "#tyrano_tag_param"
-					}]
-				},
-				"4":{
-					"comment":"]記号",
-					"name":"keyword.operator.tyrano"
-				}
-			}
-		},
-		"tyrano_tag2yeye":{
-			"comment": "タグのハイライト 行頭が@のパターン",
-			"match_tmp": "(^@)(\\w+){1}\\s*(.*)(\\n)",
-			"match": "(^[\\s]*@)(\\w+){1}\\s*(.*)(\\n)",
-			"captures": {
-				"1":{
-					"comment":"@記号",
-					"name":"keyword.operator.tyrano"
-				},
-				"2":{
-					"comment": "青色　タグ名",
-					"name":"support.class.tyrano"
-				},				
-				"3":{
-					"comment":"param=value　のところ",
-					"patterns": [{
-						"include": "#tyrano_tag_param"
-					}]
-				}
-			}
-		},
-		"tyrano_tag_padyreram_tmp":{
-			"comment": "タグの hoge=value  のところの正規表現",
-			"match_tmp": "(\\S+)[=\\<\\>\\!\\|\\&]([\\S\\s]+)",
-			"match": "(\\S+)[=\\<\\>\\!\\|\\&]([\\S\\s]+)",
-			"captures": {
-				"1":{
-					"comment": "黄色　タグのパラメータ名",
-					"name":"string.other.tyrano",
-					"patterns": [{
-						"comment": "パラメータ名の正規表現のとこに変数の正規表現あればそっちを優先",
-						"include":"#tyrano_variables"
-					}]
-				},
-				"2":{
-					"comment": "緑　パラメータに入れる値",
-					"name":"entity.other.attribute-name.tyrano"
-				}
-			}
 		}
+
+
 	},
 	"scopeName": "source.ks"
 }
