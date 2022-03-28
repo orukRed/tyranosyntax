@@ -260,12 +260,19 @@ image layer="0" name="hoge1, hoge2"
 ;@から始まるやつだと正しくハイライトされてる
 ;最終的に添え字をタグ名として認識する場合もある？とにかくこれを直す。
 [jump name="&f.hoge[0]" hoge=12]
+[jump name="&f.hoge[0]" hoge="12+f.hoge"]
+
+
 [lr]
-[jump name="&f.hoge[0]"]
+[jump name="&f.hoge[0]" target="*label1"]
 [jump name=&f.hoge[0]]
 [jump name=&f.hoge]
 
+あいうえお[l][r]
+ああああ[r]
 
+
+jump name="hoge"
 @jump name=f.hoge storage="hoge"
 @jump name="&f.hoge[0]" hoge=12
 [jump name=f.hoge[0] hoge=12]
@@ -293,3 +300,28 @@ image layer="0" name="hoge1, hoge2"
 [jump cond="f.hoge == 0"]
 [jump cond="f.hoge[0]==0"]
 [jump cond="f.hoge==0"]
+
+*test14-一部の日本語が非対応
+[jump cond="ほげ、ほげ"]
+[jump cond="ほげほげ。"]
+
+*test15-中括弧があるとハイライトされない
+[voconfig  vostorage="hoge{number}.mp3" number="1" ]
+@voconfig  vostorage="hoge{number}.mp3" number="1"
+
+*test16-末尾がf.mp3のファイルが有ると正しくハイライトされない
+[playse storage="hogef.mp3" cond="sf.v_on == 1"]
+@playse storage="hoge_f.mp3" cond="sf.v_on == 1"
+[playse storage="hogesf.mp3" cond="sf.v_on == 1"]
+@playse storage="hoge_sf.mp3" cond="sf.v_on == 1"
+[playse storage="hogetf.mp3" cond="sf.v_on == 1"]
+@playse storage="hoge_tf.mp3" cond="sf.v_on == 1"
+
+;正規表現の都合上、以下のパターンは正しくハイライトされない。
+;修正難度：高
+[playse storage="hoge-f.mp3" cond="sf.von == 1"]
+@playse storage="f.mp3" cond="sf.v_on == 1"
+[playse storage="hoge-sf.mp3" cond="sf.v_on == 1"]
+@playse storage="sf.mp3" cond="sf.v_on == 1"
+[playse storage="hoge-tf.mp3" cond="sf.v_on == 1"]
+@playse storage="tf.mp3" cond="sf.v_on == 1"
