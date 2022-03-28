@@ -265,11 +265,7 @@ image layer="0" name="hoge1, hoge2"
 [jump name=&f.hoge[0]]
 [jump name=&f.hoge]
 
-あいうえお[l][r]
-ああああ[r]
 
-
-jump name="hoge"
 @jump name=f.hoge storage="hoge"
 @jump name="&f.hoge[0]" hoge=12
 [jump name=f.hoge[0] hoge=12]
@@ -284,7 +280,7 @@ jump name="hoge"
 *test12-半角スペース混じりのexp属性で正しくハイライトされるようにする
 [hoge param=%hoge']
 [hoge exp="tf.param1='hoge1, hoge2'" cond="f.hoge2[1]==0"]
-@hoge param="hoge"
+@hoge param="hoge, hoge2" tab="f.hogfe"
 @hoge exp="tf.param1='hoge1'" cond="f.hoge2[1]==0"
 [eval exp="f.test2='文字列'"]
 @eval exp="f.test2='文字列'"
