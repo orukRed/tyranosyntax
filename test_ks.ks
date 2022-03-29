@@ -243,10 +243,6 @@ f.aA01234_へんすうヘンスウ変数=1
 @image layer="0" name="hoge1,hoge2" storage="button/auto.png"
 @image layer="0" name="hoge1, hoge2" storage="button/auto.png"
 
-image layer="0" name="hoge1,hoge2"
-image layer="0" name="hoge1, hoge2"
-
-[ ]
 
 *済test9-タグの属性の値にエンティティに使う変数が正しくハイライトされるようにするのと
 *test9_1-変数が変数用の色じゃなくて属性の値の色になってる
@@ -325,3 +321,7 @@ jump name="hoge"
 @playse storage="sf.mp3" cond="sf.v_on == 1"
 [playse storage="hoge-tf.mp3" cond="sf.v_on == 1"]
 @playse storage="tf.mp3" cond="sf.v_on == 1"
+
+*test16-パラメータの値で全角記号がハイライトされない
+[playse storage="ああああ「」・。。、！？あF！？？”’…。。。、・・・・" cond="sf.voice_on == 1"]
+@playse storage="ああああ「」・。。、！？あF！？？”’…。。。、・・・・" cond="sf.voice_on == 1"
