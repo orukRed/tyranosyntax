@@ -173,3 +173,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.5.2] - 2022-3-29
 
 - 全角記号未対応のものがあったため対応しました。
+
+## [0.5.3] - 2022-3-31
+
+- 一つの行にタグを複数個配置した時正しくハイライトされない問題を修正しました。

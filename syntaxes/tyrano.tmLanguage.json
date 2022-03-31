@@ -200,7 +200,7 @@
 		"tyrano_tag[]":{
 			"comment": "[]で囲んだタグのハイライト",
 			"tmp":"([^\\]]*)",
-			"match": "(\\[)(.*)(\\])",
+			"match": "(\\[)(.*?)(?<!\\[[0-9])(\\])",
 			"captures": {
 				"1":{
 					"name":"keyword.operator.tyrano"
