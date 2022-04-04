@@ -25,7 +25,7 @@
 			"include": "#tyrano_variables"
 		},
 		{
-			"include": "#tyrano_tag_tango"
+			"include": "#tyrano_tag_only"
 		},		
 		{
 			"include": "#tyrano_tag[]"
@@ -201,7 +201,7 @@
 		},
 
 		
-		"tyrano_tag_tango":{
+		"tyrano_tag_only":{
 			"comment": "タグ名だけでパラメータがないもののハイライト",
 			"comment":"FIXME:[]で囲んだタグの対応が複数あるのは良くないので修正すること",
 			"match": "(\\[)(\\w*)(\\])",
