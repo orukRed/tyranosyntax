@@ -17,9 +17,12 @@ async function main() {
 		//-extensionTestsPathに渡されます
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
+		// const testWorkSpace = path.resolve(__dirname, '../../../tyrano_test_project');
+
 		// Download VS Code, unzip it and run the integration test
 		// VS Codeをダウンロードして解凍し、統合テストを実行します
-		await runTests({ extensionDevelopmentPath, extensionTestsPath });
+		// await runTests({ extensionDevelopmentPath, extensionTestsPath,launchArgs:[testWorkSpace] });
+	 	await runTests({ extensionDevelopmentPath, extensionTestsPath });
 	} catch (err) {
 		console.error('Failed to run tests');
 		process.exit(1);

@@ -25,6 +25,9 @@
 			"include": "#tyrano_variables"
 		},
 		{
+			"include": "#tyrano_tag_tango"
+		},		
+		{
 			"include": "#tyrano_tag[]"
 		},
 		{
@@ -144,7 +147,7 @@
 			"comment2":"否定記号を使えば先頭数字を含まない任意の文字列、とかできるはず。",
 			"match_tmp":"\\b(f\\.|sf\\.|tf\\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚー]*))\\b",
 			"match_comment":"(tf. sf. f.)(頭文字数字は禁止)(任意の単語文字 []で配列添字も許可)",
-			"match":"\\b(f\\.|sf\\.|tf\\.)([^0-9０-９])([\\w\\[\\]]*)"
+			"match":"\\b(f\\.|sf\\.|tf\\.)([^0-9０-９])([\\.\\w\\[\\]]*)"
 		},
 		"tyrano_tag_name":{
 			"comment":"タグ名の正規表現 jumpとかbgとか",
@@ -182,7 +185,6 @@
 
 		"tyrano_tag":{
 			"match_comment": "(class)\\s*(param=hoge)*",
-			"match_tmp":"(\\S*)\\s*(\\S*)",
 			"match": "(\\S*)\\s*([\\S\\s]*)",
 			"captures": {
 				"1":{
@@ -197,10 +199,31 @@
 				}
 			}
 		},
+
+		
+		"tyrano_tag_tango":{
+			"comment": "タグ名だけでパラメータがないもののハイライト",
+			"comment":"FIXME:[]で囲んだタグの対応が複数あるのは良くないので修正すること",
+			"match": "(\\[)(\\w*)(\\])",
+			"captures": {
+				"1":{
+					"name":"keyword.operator.tyrano"
+				},
+				"2":{
+					"patterns": [{
+						"include": "#tyrano_tag"
+					}]
+				},
+				"3":{
+					"name":"keyword.operator.tyrano"
+				}
+			}			
+		},
+
 		"tyrano_tag[]":{
 			"comment": "[]で囲んだタグのハイライト",
-			"tmp":"([^\\]]*)",
-			"match": "(\\[)(.*?)(?<!\\[[0-9])(\\])",
+			"comment":"FIXME:[hoge param=val[tmp[0]] ] みたいな書き方には未対応 ",
+			"match": "(\\[)(.*?)(?<!\\[[0-9\\w\\_\\.]*)(\\])",
 			"captures": {
 				"1":{
 					"name":"keyword.operator.tyrano"
