@@ -6,13 +6,14 @@ const vscode = require("vscode");
 const CreateTagByShortcutKey_1 = require("./CreateTagByShortcutKey");
 const TagHoverProvider_1 = require("./TagHoverProvider");
 const OutlineProvider_1 = require("./OutlineProvider");
+const TyranoCompletionItemProvider_1 = require("./TyranoCompletionItemProvider");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 function activate(context) {
     //登録処理
     //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
     context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TagHoverProvider_1.TagHoverProvider()));
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new OutlineProvider_1.OutlineProvider()));
-    //context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider()));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider_1.TyranoCompletionItemProvider()));
     //ショートカットコマンドの登録
     let ctbs = new CreateTagByShortcutKey_1.CreateTagByShortcutKey();
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));

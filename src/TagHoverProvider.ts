@@ -33,7 +33,6 @@ ${textCopy.join('  \n')}
 
 		let wordRange = document.getWordRangeAtPosition(position, this.regExp);
 		if (!wordRange) {
-			console.log("error");
 			return Promise.reject("no word here"); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却
 		}
 		console.log(document.getText(wordRange));

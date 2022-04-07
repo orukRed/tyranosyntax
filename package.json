@@ -48,13 +48,6 @@
 				}
 			}
 		],
-		"snippets": [
-			{
-				"language": "tyrano",
-				"scopeName": "source.ks",
-				"path": "./snippet/tyrano.snippet.json"
-			}
-		],
 		"configuration": [
 			{
 				"title": "TyranoScript syntax",
