@@ -58,6 +58,11 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 
 
 
+	/**
+	 * 引数で渡した文字列に、アウトライン表示するタグが含まれているかを判定します。
+	 * @param text その行の文字列
+	 * @returns アウトライン表示するタグが含まれているならtrue,そうでないならfalse
+	 */
 	private isAddTagOutline(text:string):boolean{
 		const REGEX = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/;//タグ検出用の正規表現
 		const MATCH_TEXT = text.match(REGEX);//[hoge param=""]の形式のタグでマッチしてるかを探して変数に格納
@@ -81,6 +86,11 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 		return false;
 	}
 
+	/**
+	 * 引数で渡した文字列に、アウトライン表示する変数が含まれているかを判定します。
+	 * @param text その行の文字列
+	 * @returns アウトライン表示する変数が含まれているならtrue,そうでないならfalse
+	 */
 	private isAddVariableOutLine(text:string):boolean{		
 		if(text.search(this.REGEX_VARIABLE)!==-1){
 			return true;
@@ -88,6 +98,12 @@ export class OutlineProvider implements vscode.DocumentSymbolProvider{
 		return false;
 	}	
 
+
+	/**
+	 * 引数で渡した文字列に、アウトライン表示するラベルが含まれているかを判定します。
+	 * @param text その行の文字列
+	 * @returns アウトライン表示するラベルが含まれているならtrue,そうでないならfalse
+	 */
 	private isAddLabelOutLine(text:string):boolean{
 		//ラベルをアウトラインに表示
 		const REGEX = /^\*[0-9a-zA-Z\\-_]+/;//ラベル検出用正規表現

@@ -14,6 +14,7 @@ function activate(context) {
     context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TagHoverProvider_1.TagHoverProvider()));
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new OutlineProvider_1.OutlineProvider()));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider_1.TyranoCompletionItemProvider()));
+
     //ショートカットコマンドの登録
     let ctbs = new CreateTagByShortcutKey_1.CreateTagByShortcutKey();
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));

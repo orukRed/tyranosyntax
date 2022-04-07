@@ -46,6 +46,11 @@ class OutlineProvider {
         }
         return symbols;
     }
+    /**
+     * 引数で渡した文字列に、アウトライン表示するタグが含まれているかを判定します。
+     * @param text その行の文字列
+     * @returns アウトライン表示するタグが含まれているならtrue,そうでないならfalse
+     */
     isAddTagOutline(text) {
         const REGEX = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/; //タグ検出用の正規表現
         const MATCH_TEXT = text.match(REGEX); //[hoge param=""]の形式のタグでマッチしてるかを探して変数に格納
@@ -66,12 +71,22 @@ class OutlineProvider {
         }
         return false;
     }
+    /**
+     * 引数で渡した文字列に、アウトライン表示する変数が含まれているかを判定します。
+     * @param text その行の文字列
+     * @returns アウトライン表示する変数が含まれているならtrue,そうでないならfalse
+     */
     isAddVariableOutLine(text) {
         if (text.search(this.REGEX_VARIABLE) !== -1) {
             return true;
         }
         return false;
     }
+    /**
+     * 引数で渡した文字列に、アウトライン表示するラベルが含まれているかを判定します。
+     * @param text その行の文字列
+     * @returns アウトライン表示するラベルが含まれているならtrue,そうでないならfalse
+     */
     isAddLabelOutLine(text) {
         //ラベルをアウトラインに表示
         const REGEX = /^\*[0-9a-zA-Z\\-_]+/; //ラベル検出用正規表現

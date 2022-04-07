@@ -7,6 +7,7 @@ import {CreateTagByShortcutKey} from './CreateTagByShortcutKey';
 import {TagHoverProvider} from './TagHoverProvider';
 import {OutlineProvider} from './OutlineProvider';
 import {TyranoCompletionItemProvider} from './TyranoCompletionItemProvider';
+
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
@@ -22,6 +23,8 @@ export function activate(context: vscode.ExtensionContext){
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
+
+
 }
 
 export function deactivate(){

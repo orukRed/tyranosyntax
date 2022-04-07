@@ -26,7 +26,7 @@ async function main() {
                 '--disable-extensions'
             ]
         });
-        // await runTests({ extensionDevelopmentPath, extensionTestsPath });
+
     }
     catch (err) {
         console.error('Failed to run tests');
