@@ -327,34 +327,6 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
         //アサート
         assert.strictEqual(actual[0].name, excepted.text);
     });
-    test('正常系 sタグ[]', () => {
-        //値定義
-        const document = new MockTextDocument();
-        const token = new MockCancellationToken();
-        const op = new OutlineProvider_1.OutlineProvider();
-        const excepted = Object.defineProperty(document.lineAt(0), 'text', {
-            value: "[s]",
-            writable: false,
-        });
-        //実行
-        let actual = op.provideDocumentSymbols(document, token);
-        //アサート
-        assert.strictEqual(actual[0].name, excepted.text);
-    });
-    test('正常系 sタグ@', () => {
-        //値定義
-        const document = new MockTextDocument();
-        const token = new MockCancellationToken();
-        const op = new OutlineProvider_1.OutlineProvider();
-        const excepted = Object.defineProperty(document.lineAt(0), 'text', {
-            value: "@s",
-            writable: false,
-        });
-        //実行
-        let actual = op.provideDocumentSymbols(document, token);
-        //アサート
-        assert.strictEqual(actual[0].name, excepted.text);
-    });
     test('正常系 iscriptタグ[]', () => {
         //値定義
         const document = new MockTextDocument();

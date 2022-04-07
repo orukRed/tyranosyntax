@@ -23,8 +23,10 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
+				"${workspaceFolder}/../tyrano_test_project/",
+				"${workspaceFolder}/../tyrano_test_project/data/scenario/test.ks",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"

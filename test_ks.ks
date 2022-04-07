@@ -19,7 +19,7 @@
 *start
 
 *test5-タグのハイライト方法が変更されているか
-[bg storage=room left="" top="" width="" height="" time="" wait="" cross="" method="" ]
+[bg storage="room" left="" top="" width="" height="" time="" wait="" cross="" method="" ]
 @bg name="ssss" storage="" left="" top="" width="" height="" time="" wait="" cross="" method=""
 
 ;ハイライトされないことを確認
@@ -49,29 +49,29 @@ function test_func(){
 };
 ;embタグ内で変数が正しくハイライトされているか
 ;半角英数字のテスト
-[emb exp=f.aaaa12345=1]
-[emb exp=f.aaaa12345=1]
+[emb exp="f.aaaa12345=1"]
+[emb exp="f.aaaa12345=1"]
 ;日本語テスト
-[emb exp=f.へんすう=1]
-[emb exp=f.へんすう=1]
-[emb exp=f.ヘンスウ=1]
-[emb exp=f.ヘンスウ=1]
-[emb exp=f.変数=1]
-[emb exp=f.変数=1]
-[emb exp=f.あいうえお=1]
-[emb exp=f.あいうえお=1]
-[emb exp=f.あいうえお１２３４５=1]
-[emb exp=f.あいうえお１２３４５=1]
-[emb exp=f.あいうえーお=1]
-[emb exp=f.ｱｲｳｴｵ=1]
-[emb exp=f.aaaaｱｲｳｴｵ=1]
+[emb exp="f.へんすう=1"]
+[emb exp="f.へんすう=1"]
+[emb exp="f.ヘンスウ=1"]
+[emb exp="f.ヘンスウ=1"]
+[emb exp="f.変数=1"]
+[emb exp="f.変数=1"]
+[emb exp="f.あいうえお=1"]
+[emb exp="f.あいうえお=1"]
+[emb exp="f.あいうえお１２３４５=1"]
+[emb exp="f.あいうえお１２３４５=1"]
+[emb exp="f.あいうえーお=1"]
+[emb exp="f.ｱｲｳｴｵ=1"]
+[emb exp="f.aaaaｱｲｳｴｵ=1"]
 
 ;複合テスト
-[eval exp=f.aA01234_へんすうヘンスウ変数=1]
-[emb exp=f.aA01234_へんすうヘンスウ変数]
+[eval exp="f.aA01234_へんすうヘンスウ変数=1"]
+[emb exp="f.aA01234_へんすうヘンスウ変数"]
 
 ;自作タグ
-[hoge args=1]
+[hoge args="1"]
 [p]
 [hoge]
 
@@ -243,6 +243,9 @@ f.aA01234_へんすうヘンスウ変数=1
 @image layer="0" name="hoge1,hoge2" storage="button/auto.png"
 @image layer="0" name="hoge1, hoge2" storage="button/auto.png"
 
+image layer="0" name="hoge1,hoge2"
+image layer="0" name="hoge1, hoge2"
+
 
 *済test9-タグの属性の値にエンティティに使う変数が正しくハイライトされるようにするのと
 *test9_1-変数が変数用の色じゃなくて属性の値の色になってる
@@ -255,7 +258,7 @@ f.aA01234_へんすうヘンスウ変数=1
 *test10-タグの属性の値にエンティティで配列添字使った時に正しくハイライトされるようにする
 ;@から始まるやつだと正しくハイライトされてる
 ;最終的に添え字をタグ名として認識する場合もある？とにかくこれを直す。
-[jump name="&f.hoge[0]" hoge=12]
+[jump name="&f.hoge[0]" hoge="12"]
 [jump name="&f.hoge[0]" hoge="12+f.hoge"]
 
 
@@ -282,7 +285,7 @@ jump name="hoge"
 
 *test12-半角スペース混じりのexp属性で正しくハイライトされるようにする
 [hoge param=%hoge']
-[hoge exp="tf.param1='hoge1, hoge2'" cond="f.hoge2[1]==0"]
+[hoge exp="tf.param1='hoge1, hoge2'" cond="f.hoge2[1]<=f.hogehoge"]
 @hoge param="hoge, hoge2" tab="f.hogfe"
 @hoge exp="tf.param1='hoge1'" cond="f.hoge2[1]==0"
 [eval exp="f.test2='文字列'"]
@@ -306,22 +309,48 @@ jump name="hoge"
 @voconfig  vostorage="hoge{number}.mp3" number="1"
 
 *test16-末尾がf.mp3のファイルが有ると正しくハイライトされない
-[playse storage="hogef.mp3" cond="sf.v_on == 1"]
-@playse storage="hoge_f.mp3" cond="sf.v_on == 1"
-[playse storage="hogesf.mp3" cond="sf.v_on == 1"]
-@playse storage="hoge_sf.mp3" cond="sf.v_on == 1"
-[playse storage="hogetf.mp3" cond="sf.v_on == 1"]
-@playse storage="hoge_tf.mp3" cond="sf.v_on == 1"
+[playse storage="hogef.mp3" cond="sf.voice_on == 1"]
+@playse storage="hoge_f.mp3" cond="sf.voice_on == 1"
+[playse storage="hogesf.mp3" cond="sf.voice_on == 1"]
+@playse storage="hoge_sf.mp3" cond="sf.voice_on == 1"
+[playse storage="hogetf.mp3" cond="sf.voice_on == 1"]
+@playse storage="hoge_tf.mp3" cond="sf.voice_on == 1"
 
 ;正規表現の都合上、以下のパターンは正しくハイライトされない。
 ;修正難度：高
-[playse storage="hoge-f.mp3" cond="sf.von == 1"]
-@playse storage="f.mp3" cond="sf.v_on == 1"
-[playse storage="hoge-sf.mp3" cond="sf.v_on == 1"]
-@playse storage="sf.mp3" cond="sf.v_on == 1"
-[playse storage="hoge-tf.mp3" cond="sf.v_on == 1"]
-@playse storage="tf.mp3" cond="sf.v_on == 1"
+[playse storage="hoge-f.mp3" cond="sf.voice_on == 1"]
+@playse storage="f.mp3" cond="sf.voice_on == 1"
+[playse storage="hoge-sf.mp3" cond="sf.voice_on == 1"]
+@playse storage="sf.mp3" cond="sf.voice_on == 1"
+[playse storage="hoge-tf.mp3" cond="sf.voice_on == 1"]
+@playse storage="tf.mp3" cond="sf.voice_on == 1"
 
-*test16-パラメータの値で全角記号がハイライトされない
+*test17-パラメータの値で全角記号がハイライトされない
+
 [playse storage="ああああ「」・。。、！？あF！？？”’…。。。、・・・・" cond="sf.voice_on == 1"]
-@playse storage="ああああ「」・。。、！？あF！？？”’…。。。、・・・・" cond="sf.voice_on == 1"
+@playse storage="sf.mp3" cond="sf.voice_on == 1"
+
+;test18-一行にタグが複数個ある時正しくハイライトされていない
+[emb exp="f.hoge[0]" tmp="gas"] [jump storage="" target=""]
+[jump cond="f.hoge[0]==0"][l][r]
+[jump cond="f.hoge==0"][l][r]
+こんにちは、私は[name]です。[p][l][r]
+こんにちは、私は[p]です。[p]
+やれやれぼくは走り出した[l][r]
+[l][r]
+[p]
+
+;test19-タグ内のパラメータの値に変数を使う時添字に変数を使うと正しくハイライトされない問題
+[ptext layer="1" text="tf.tmp[hoge.id]"]
+[ptext layer="1" text="&tf.tit212le[0]"]
+[ptext layer="1" text="&tf.title[10]"]
+[ptext layer="1" text="&tf.title[0]" hoge="aa"]
+[ptext layer="1" text="&tf.title[0]" hoge="aa" ] [jump storage="" target=""]
+[emb exp="f.hoge[0]" tmp="gas"] [jump storage="" target=""]
+
+;test20-
+
+[jump storage="" target="" ]
+
+
+;実験用スペース
