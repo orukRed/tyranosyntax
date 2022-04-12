@@ -18,7 +18,7 @@ class TyranoCompletionItemProvider {
     constructor() {
         this.info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         //タグスニペットファイル読み込み
-        this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../snippet/tyrano.snippet.json", "utf8"))["array"];
+        this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../snippet/tyrano.snippet.json", "utf8"));
     }
     /**
      *

@@ -340,7 +340,7 @@ jump name="hoge"
 [l][r]
 [p]
 
-;test19-タグ内のパラメータの値に変数を使う時添字に変数を使うと正しくハイライトされない問題
+*test19-タグ内のパラメータの値に変数を使う時添字に変数を使うと正しくハイライトされない問題
 [ptext layer="1" text="tf.tmp[hoge.id]"]
 [ptext layer="1" text="&tf.tit212le[0]"]
 [ptext layer="1" text="&tf.title[10]"]
@@ -348,9 +348,32 @@ jump name="hoge"
 [ptext layer="1" text="&tf.title[0]" hoge="aa" ] [jump storage="" target=""]
 [emb exp="f.hoge[0]" tmp="gas"] [jump storage="" target=""]
 
-;test20-
 
-[jump storage="" target="" ]
+
+*test20-コメント、ラベル、シャープが行頭に空白あってもハイライトされる。
+;hoge1
+*hoge2
+#hoge3
+
+		;hoge1
+		*hoge2
+		#hoge3
+  ;hoge1
+  *hoge2
+  #hoge3
+
+;hoge1-foo_bar1
+*hoge2-foo_bar2
+#hoge3-foo_bar3
+
+
+[p ]
+[anim color="" ]
 
 
 ;実験用スペース
+
+HELLO
+WARNING
+HINT
+INFO

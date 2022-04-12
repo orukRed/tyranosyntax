@@ -19,7 +19,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	private info:InformationWorkSpace = InformationWorkSpace.getInstance();
 	public constructor(){
 		//タグスニペットファイル読み込み
-		this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname+"/./../snippet/tyrano.snippet.json","utf8"))["array"];
+		this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname+"/./../snippet/tyrano.snippet.json","utf8"));
 
 	}
 

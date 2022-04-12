@@ -107,7 +107,7 @@
 
 		"comment_line":{
 			"name": "comment.line.tyrano",
-			"match": "^;.*"
+			"match": "^\\s*;.*"
 		},
 		"comment_block":{
 			"name": "comment.block.tyrano",
@@ -117,7 +117,7 @@
 		"tyrano_sharp":{
 			"name":"token.warn-token.tyrano",
 			"comment": "#chara_nameはptextタグの糖衣構文なのでsupport.class.tyranoとおなじのほうがいい？　とりあえず現状は行全部を同色ハイライト",
-			"match":"^#.*"
+			"match":"^\\s*#[\\w-]*"
 		},
 		"__tyrano_sharp_in_tag":{
 			"name":"token.warn-token.tyrano",
@@ -127,7 +127,7 @@
 		"tyrano_labels":{
 			"name":"constant.language.tyrano",
 			"comment":"ラベル表示に使う",
-			"match": "^\\*[\\w\\-＠]+"
+			"match": "^\\s*\\*[\\w\\-＠]+"
 		},
 		"tyrano_labels_in_tag":{
 			"name":"constant.language.tyrano",

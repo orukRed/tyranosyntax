@@ -2,7 +2,7 @@
     "[playbgm]": {
         "prefix": "playbgm",
         "body": [
-            "[playbgm storage=\"\" loop=\"\" sprite_time=\"\" html5=\"\" volume=\"\"]"
+            "[playbgm storage=\"\" loop=\"\" sprite_time=\"\" html5=\"\" volume=\"\" cond=\"\"]"
         ],
         "description": [
             "BGMを再生します。",
@@ -30,6 +30,8 @@
             "    true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。",
             "  volume:",
             "    再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[playbgm storage=\"music.ogg\"]"
         ]
@@ -37,11 +39,13 @@
     "[stopbgm]": {
         "prefix": "stopbgm",
         "body": [
-            "[stopbgm]"
+            "[stopbgm cond=\"\"]"
         ],
         "description": [
             "再生しているBGMの再生を停止します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[stopbgm ]"
         ]
@@ -49,7 +53,7 @@
     "[fadeinbgm]": {
         "prefix": "fadeinbgm",
         "body": [
-            "[fadeinbgm storage=\"\" loop=\"\" sprite_time=\"\" html5=\"\" time=\"\" volume=\"\"]"
+            "[fadeinbgm storage=\"\" loop=\"\" sprite_time=\"\" html5=\"\" time=\"\" volume=\"\" cond=\"\"]"
         ],
         "description": [
             "BGMを徐々に再生します。",
@@ -67,6 +71,8 @@
             "    フェードインを行なっている時間をミリ秒で指定します。",
             "  volume:",
             "    BGMの再生音量を変更できます（0〜100）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[fadeinbgm storage=sample.ogg loop=false time=3000]"
         ]
@@ -74,7 +80,7 @@
     "[fadeoutbgm]": {
         "prefix": "fadeoutbgm",
         "body": [
-            "[fadeoutbgm time=\"\"]"
+            "[fadeoutbgm time=\"\" cond=\"\"]"
         ],
         "description": [
             "再生中のBGMをフェードアウトしながら停止します。",
@@ -82,6 +88,8 @@
             "[パラメータ]",
             "  time:",
             "    フェードアウトを行なっている時間をミリ秒で指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[fadeoutbgm time=3000]"
         ]
@@ -89,7 +97,7 @@
     "[xchgbgm]": {
         "prefix": "xchgbgm",
         "body": [
-            "[xchgbgm storage=\"\" loop=\"\" time=\"\"]"
+            "[xchgbgm storage=\"\" loop=\"\" time=\"\" cond=\"\"]"
         ],
         "description": [
             "【非推奨】BGMを入れ替えます。",
@@ -102,6 +110,8 @@
             "    true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます",
             "  time[必須]:",
             "    クロスフェードを行なっている時間をミリ秒で指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[xchgbgm storage=new.ogg loop=true time=3000]"
         ]
@@ -109,7 +119,7 @@
     "[playse]": {
         "prefix": "playse",
         "body": [
-            "[playse storage=\"\" buf=\"\" loop=\"\" sprite_time=\"\" clear=\"\" html5=\"\" volume=\"\"]"
+            "[playse storage=\"\" buf=\"\" loop=\"\" sprite_time=\"\" clear=\"\" html5=\"\" volume=\"\" cond=\"\"]"
         ],
         "description": [
             "効果音を再生します",
@@ -141,6 +151,8 @@
             "    true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。",
             "  volume:",
             "    効果音の再生音量を変更できます（0〜100）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[playse storage=sound.ogg loop=false ]"
         ]
@@ -148,13 +160,15 @@
     "[stopse]": {
         "prefix": "stopse",
         "body": [
-            "[stopse buf=\"\"]"
+            "[stopse buf=\"\" cond=\"\"]"
         ],
         "description": [
             "効果音を再生を停止します",
             "[パラメータ]",
             "  buf:",
             "    効果音を停止するスロットを指定できます。デフォルトは0",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[stopse ]"
         ]
@@ -162,7 +176,7 @@
     "[fadeinse]": {
         "prefix": "fadeinse",
         "body": [
-            "[fadeinse storage=\"\" loop=\"\" sprite_time=\"\" buf=\"\" html5=\"\" time=\"\"]"
+            "[fadeinse storage=\"\" loop=\"\" sprite_time=\"\" buf=\"\" html5=\"\" time=\"\" cond=\"\"]"
         ],
         "description": [
             "です。stopse を使用して下さい",
@@ -180,6 +194,8 @@
             "    true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。",
             "  time[必須]:",
             "    フェードインの時間をミリ秒で指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[fadeinse storage=sound.ogg loop=false time=2000 ]"
         ]
@@ -187,13 +203,15 @@
     "[fadeoutse]": {
         "prefix": "fadeoutse",
         "body": [
-            "[fadeoutse time=\"\"]"
+            "[fadeoutse time=\"\" cond=\"\"]"
         ],
         "description": [
             "効果音をフェードアウトします",
             "[パラメータ]",
             "  time:",
             "    フェードアウトを行なっている時間をミリ秒で指定します。buf",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[fadeoutse time=2000 ]"
         ]
@@ -201,7 +219,7 @@
     "[bgmopt]": {
         "prefix": "bgmopt",
         "body": [
-            "[bgmopt volume=\"\" effect=\"\" buf=\"\"]"
+            "[bgmopt volume=\"\" effect=\"\" buf=\"\" cond=\"\"]"
         ],
         "description": [
             "BGMの設定を変更できます",
@@ -213,6 +231,8 @@
             "    true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します",
             "  buf:",
             "    設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[bgmopt volume=50 ]"
         ]
@@ -220,7 +240,7 @@
     "[seopt]": {
         "prefix": "seopt",
         "body": [
-            "[seopt volume=\"\" effect=\"\" buf=\"\"]"
+            "[seopt volume=\"\" effect=\"\" buf=\"\" cond=\"\"]"
         ],
         "description": [
             "SEの設定を変更できます",
@@ -232,6 +252,8 @@
             "    true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します",
             "  buf:",
             "    設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[seopt volume=50 ]"
         ]
@@ -239,13 +261,15 @@
     "[wbgm]": {
         "prefix": "wbgm",
         "body": [
-            "[wbgm]"
+            "[wbgm cond=\"\"]"
         ],
         "description": [
             "BGMの再生完了を待ちます。playbgmでループ再生している場合は永遠に止まりますのでご注意下さい。",
             "このタグはPCゲーム、ブラウザゲームで利用できます。",
             "スマホアプリでは利用できませんのでご注意ください。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -253,13 +277,15 @@
     "[wse]": {
         "prefix": "wse",
         "body": [
-            "[wse]"
+            "[wse cond=\"\"]"
         ],
         "description": [
             "効果音の再生完了を待ちます。",
             "このタグはPCゲーム、ブラウザゲームで利用できます。",
             "スマホアプリでは利用できませんのでご注意ください。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -267,7 +293,7 @@
     "[voconfig]": {
         "prefix": "voconfig",
         "body": [
-            "[voconfig sebuf=\"\" name=\"\" vostorage=\"\" number=\"\"]"
+            "[voconfig sebuf=\"\" name=\"\" vostorage=\"\" number=\"\" cond=\"\"]"
         ],
         "description": [
             "ボイスを効率的に再生するための設定ができます。",
@@ -283,6 +309,8 @@
             "    音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます",
             "  number:",
             "    デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[voconfig sebuf=2 name=\"akane\" vostorage=\"akane_{number}.ogg\" number=1 ]",
             "[voconfig sebuf=2 name=\"yamato\" vostorage=\"yamato_{number}.ogg\" number=1 ]",
@@ -306,12 +334,14 @@
     "[vostart]": {
         "prefix": "vostart",
         "body": [
-            "[vostart]"
+            "[vostart cond=\"\"]"
         ],
         "description": [
             "voconfigで指定したボイスの自動再生を開始します。",
             "コレ以降、#で名前を指定した場合、紐付いたボイスが再生されていきます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -319,12 +349,14 @@
     "[vostop]": {
         "prefix": "vostop",
         "body": [
-            "[vostop]"
+            "[vostop cond=\"\"]"
         ],
         "description": [
             "voconfigで指定したボイスの自動再生を停止します。",
             "コレ以降、#で名前を指定しても、ボイスが紐付いて再生されることを防ぎます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -332,13 +364,15 @@
     "[speak_on]": {
         "prefix": "speak_on",
         "body": [
-            "[speak_on volume=\"\"]"
+            "[speak_on volume=\"\" cond=\"\"]"
         ],
         "description": [
             "ストーリーのシナリオを音声で読み上げることができます。",
             "[パラメータ]",
             "  volume:",
             "    読み上げのボリュームを設定できます(まだ実装)。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[speak_on ]"
         ]
@@ -346,7 +380,7 @@
     "[speak_off]": {
         "prefix": "speak_off",
         "body": [
-            "[speak_off volume=\"\"]"
+            "[speak_off volume=\"\" cond=\"\"]"
         ],
         "description": [
             "シナリオの読み上げをオフにします。",
@@ -354,6 +388,8 @@
             "[パラメータ]",
             "  volume:",
             "    読み上げのボリュームを設定できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[speak_off ]"
         ]
@@ -361,7 +397,7 @@
     "[camera]": {
         "prefix": "camera",
         "body": [
-            "[camera time=\"\" x=\"\" y=\"\" zoom=\"\" rotate=\"\" from_x=\"\" from_y=\"\" from_zoom=\"\" from_rotate=\"\" wait=\"\" layer=\"\" ease_type=\"\"]"
+            "[camera time=\"\" x=\"\" y=\"\" zoom=\"\" rotate=\"\" from_x=\"\" from_y=\"\" from_zoom=\"\" from_rotate=\"\" wait=\"\" layer=\"\" ease_type=\"\" cond=\"\"]"
         ],
         "description": [
             "カメラをズームやパンさせる演出を追加できます。",
@@ -405,6 +441,8 @@
             "    レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。",
             "  ease_type:",
             "    カメラの移動演出を指定できます。ease(開始時点と終了時点を滑らかに再生する)linear(一定の間隔で再生する)ease-in(開始時点をゆっくり再生する)ease-out(終了時点をゆっくり再生する)ease-in-out(開始時点と終了時点をゆっくり再生する)デフォルトはeaseです。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "@camera zoom=2 x=180 y=100 time=1000",
             "@camera x=-180 y=100 time=2000",
@@ -417,7 +455,7 @@
     "[reset_camera]": {
         "prefix": "reset_camera",
         "body": [
-            "[reset_camera time=\"\" wait=\"\" ease_type=\"\" layer=\"\"]"
+            "[reset_camera time=\"\" wait=\"\" ease_type=\"\" layer=\"\" cond=\"\"]"
         ],
         "description": [
             "カメラの位置を初期値に戻します。",
@@ -432,6 +470,8 @@
             "    カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。",
             "  layer:",
             "    レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -439,12 +479,14 @@
     "[wait_camera]": {
         "prefix": "wait_camera",
         "body": [
-            "[wait_camera]"
+            "[wait_camera cond=\"\"]"
         ],
         "description": [
             "このタグはカメラの操作中である場合、完了を待つことができます。",
             "例えば、cameraタグでwaitにfalseを指定して、ゲームを進行する場合、特定の位置で必ずカメラ演出の完了を待たせる事が出来ます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[camera zoom=2 x=180 y=100 time=5000]",
             "カメラ演出中[p]",
@@ -456,7 +498,7 @@
     "[mask]": {
         "prefix": "mask",
         "body": [
-            "[mask time=\"\" effect=\"\" color=\"\" graphic=\"\" folder=\"\"]"
+            "[mask time=\"\" effect=\"\" color=\"\" graphic=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲーム画面全体を豊富な効果とともに暗転させることができます。",
@@ -478,6 +520,8 @@
             "    暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください",
             "  folder:",
             "    graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";暗転開始",
             "[mask effect=\"fadeInDownBig\" time=2000]",
@@ -492,7 +536,7 @@
     "[mask_off]": {
         "prefix": "mask_off",
         "body": [
-            "[mask_off time=\"\" effect=\"\"]"
+            "[mask_off time=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "スクリーンマスクを消去してゲームを再開します。",
@@ -507,6 +551,8 @@
             "    slideOutLeft/slideOutRight/slideOutUp/",
             "    bounceOut /bounceOutDown/bounceOutLeft/",
             "    bounceOutRight/bounceOutUp",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";暗転開始",
             "[mask effect=\"fadeInDownBig\" time=2000]",
@@ -521,7 +567,7 @@
     "[bgcamera]": {
         "prefix": "bgcamera",
         "body": [
-            "[bgcamera name=\"\" wait=\"\" time=\"\" fit=\"\" left=\"\" top=\"\" width=\"\" height=\"\" mode=\"\" qrcode=\"\" debug=\"\" audio=\"\"]"
+            "[bgcamera name=\"\" wait=\"\" time=\"\" fit=\"\" left=\"\" top=\"\" width=\"\" height=\"\" mode=\"\" qrcode=\"\" debug=\"\" audio=\"\" cond=\"\"]"
         ],
         "description": [
             "背景をデバイスのカメラ入力に切り替えることができます。",
@@ -573,6 +619,8 @@
             "    QRコードが読み込まれたときにURLを表示するか否かを指定できます。デフォルトはfalse。trueでURLをアラート表示できます。",
             "  audio:",
             "    音声入力も反映するか否か。trueを指定すると音声もゲームに反映されます。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";背景にカメラの入力を表示",
             "[bgcamera time=2000]",
@@ -590,13 +638,15 @@
     "[qr_config]": {
         "prefix": "qr_config",
         "body": [
-            "[qr_config qrcode=\"\"]"
+            "[qr_config qrcode=\"\" cond=\"\"]"
         ],
         "description": [
             "QRコードの各種動作設定が可能です。",
             "[パラメータ]",
             "  qrcode:",
             "    QRコードを読み込んだときの動作を設定できます。「jump」（ゲーム内移動のQRのみ反応）「web」（他サイトへのリンクだけ反応）「all」（jumpとweb両方に反応）「off」（QRコードに反応しない）デフォルトは「off」",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";QRコードでティラノのジャップのみ有効にする",
             "[qr_config qrcode=\"jump\"]"
@@ -605,7 +655,7 @@
     "[stop_bgcamera]": {
         "prefix": "stop_bgcamera",
         "body": [
-            "[stop_bgcamera time=\"\" wait=\"\"]"
+            "[stop_bgcamera time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "[bgcamera]を非表示にします。",
@@ -614,6 +664,8 @@
             "    ミリ秒で指定。動画をフェードアウトして削除することが可能です。デフォルトは1000",
             "  wait:",
             "    trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[stop_bgcamera time=1000 ]"
         ]
@@ -621,7 +673,7 @@
     "[qr_define]": {
         "prefix": "qr_define",
         "body": [
-            "[qr_define url=\"\" storage=\"\" target=\"\" clear=\"\"]"
+            "[qr_define url=\"\" storage=\"\" target=\"\" clear=\"\" cond=\"\"]"
         ],
         "description": [
             "QRコードのURLをjumpに置き換えることができます。",
@@ -635,6 +687,8 @@
             "    ジャンプ先のラベルと指定する",
             "  clear:",
             "    trueを指定すると定義を削除することができます。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[qr_define url=\"https://tyrano.jp\" storage=\"scene1.ks\" target=\"test\" ]"
         ]
@@ -642,7 +696,7 @@
     "[loadjs]": {
         "prefix": "loadjs",
         "body": [
-            "[loadjs storage=\"\"]"
+            "[loadjs storage=\"\" cond=\"\"]"
         ],
         "description": [
             "外部JavaScriptファイルをロードします",
@@ -651,6 +705,8 @@
             "[パラメータ]",
             "  storage[必須]:",
             "    ロードするJSファイルを指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[loadjs storage=\"sample.js\" ]"
         ]
@@ -658,7 +714,7 @@
     "[movie]": {
         "prefix": "movie",
         "body": [
-            "[movie storage=\"\" skip=\"\" mute=\"\" volume=\"\"]"
+            "[movie storage=\"\" skip=\"\" mute=\"\" volume=\"\" cond=\"\"]"
         ],
         "description": [
             "ogv webm mp4 などに対応します",
@@ -674,6 +730,8 @@
             "    true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。",
             "  volume:",
             "    ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[movie storage=\"\" skip=false ]"
         ]
@@ -681,7 +739,7 @@
     "[bgmovie]": {
         "prefix": "bgmovie",
         "body": [
-            "[bgmovie storage=\"\" time=\"\" mute=\"\" volume=\"\" loop=\"\"]"
+            "[bgmovie storage=\"\" time=\"\" mute=\"\" volume=\"\" loop=\"\" cond=\"\"]"
         ],
         "description": [
             "ogv webm mp4 などに対応します",
@@ -704,6 +762,8 @@
             "    ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100",
             "  loop:",
             "    背景動画をループさせるかどうかを指定します。falseを指定すると動画の最後の状態で停止します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[bgmovie storage=\"test.webm\" ]"
         ]
@@ -711,11 +771,13 @@
     "[wait_bgmovie]": {
         "prefix": "wait_bgmovie",
         "body": [
-            "[wait_bgmovie]"
+            "[wait_bgmovie cond=\"\"]"
         ],
         "description": [
             "再生中の背景ムービーの完了を待ちます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -723,7 +785,7 @@
     "[stop_bgmovie]": {
         "prefix": "stop_bgmovie",
         "body": [
-            "[stop_bgmovie time=\"\" wait=\"\"]"
+            "[stop_bgmovie time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "bgmovieで再生した背景動画を停止します。",
@@ -732,6 +794,8 @@
             "    ミリ秒で指定すると、動画をフェードアウトして削除することが可能です。デフォルトは1000",
             "  wait:",
             "    trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[stop_bgmovie storage=\"\" skip=false ]"
         ]
@@ -739,11 +803,13 @@
     "[showsave]": {
         "prefix": "showsave",
         "body": [
-            "[showsave]"
+            "[showsave cond=\"\"]"
         ],
         "description": [
             "セーブ画面を表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[showsave]"
         ]
@@ -751,11 +817,13 @@
     "[showload]": {
         "prefix": "showload",
         "body": [
-            "[showload]"
+            "[showload cond=\"\"]"
         ],
         "description": [
             "ロード画面を表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[showload]"
         ]
@@ -763,11 +831,13 @@
     "[showmenu]": {
         "prefix": "showmenu",
         "body": [
-            "[showmenu]"
+            "[showmenu cond=\"\"]"
         ],
         "description": [
             "メニュ＾画面を表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[showmenu]"
         ]
@@ -775,11 +845,13 @@
     "[showmenubutton]": {
         "prefix": "showmenubutton",
         "body": [
-            "[showmenubutton]"
+            "[showmenubutton cond=\"\"]"
         ],
         "description": [
             "メニューボタンを表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[showmenubutton]"
         ]
@@ -787,11 +859,13 @@
     "[hidemenubutton]": {
         "prefix": "hidemenubutton",
         "body": [
-            "[hidemenubutton]"
+            "[hidemenubutton cond=\"\"]"
         ],
         "description": [
             "メニューボタンを非表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[hidemenubutton]"
         ]
@@ -799,11 +873,13 @@
     "[skipstart]": {
         "prefix": "skipstart",
         "body": [
-            "[skipstart]"
+            "[skipstart cond=\"\"]"
         ],
         "description": [
             "文字表示をスキップモードにします。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -811,11 +887,13 @@
     "[skipstop]": {
         "prefix": "skipstop",
         "body": [
-            "[skipstop]"
+            "[skipstop cond=\"\"]"
         ],
         "description": [
             "スキップモードを停止します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -823,12 +901,14 @@
     "[autostart]": {
         "prefix": "autostart",
         "body": [
-            "[autostart]"
+            "[autostart cond=\"\"]"
         ],
         "description": [
             "文字表示を一定間隔で自動的に進めます。",
             "進行速度はconfig.tjsのautoSpeedを確認して下さい",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -836,11 +916,13 @@
     "[autostop]": {
         "prefix": "autostop",
         "body": [
-            "[autostop]"
+            "[autostop cond=\"\"]"
         ],
         "description": [
             "オートモードを停止します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -848,7 +930,7 @@
     "[autoconfig]": {
         "prefix": "autoconfig",
         "body": [
-            "[autoconfig speed=\"\" clickstop=\"\"]"
+            "[autoconfig speed=\"\" clickstop=\"\" cond=\"\"]"
         ],
         "description": [
             "オートモードに関する設定",
@@ -857,6 +939,8 @@
             "    オート時のスピードをミリ秒で指定して下さい",
             "  clickstop:",
             "    画面クリック時にオートを停止するかどうかを指定します true(停止する デフォルト) false（停止しない）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -864,7 +948,7 @@
     "[anim]": {
         "prefix": "anim",
         "body": [
-            "[anim name=\"\" layer=\"\" left=\"\" top=\"\" width=\"\" height=\"\" opacity=\"\" color=\"\" time=\"\" effect=\"\"]"
+            "[anim name=\"\" layer=\"\" left=\"\" top=\"\" width=\"\" height=\"\" opacity=\"\" color=\"\" time=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "画像やボタン、レイヤなどの中身をアニメーションさせることができます",
@@ -895,6 +979,8 @@
             "  effect:",
             "    変化のエフェクトを指定します。指定できる文字列は以下の種類です",
             "    jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[ptext layer=1 page=fore text=\"文字列\" size=30 x=0 y=0 color=red vertical=true]",
             "",
@@ -916,11 +1002,13 @@
     "[wa]": {
         "prefix": "wa",
         "body": [
-            "[wa]"
+            "[wa cond=\"\"]"
         ],
         "description": [
             "実行中のアニメーションすべて終了するまで処理を待ちます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -928,13 +1016,15 @@
     "[stopanim]": {
         "prefix": "stopanim",
         "body": [
-            "[stopanim name=\"\"]"
+            "[stopanim name=\"\" cond=\"\"]"
         ],
         "description": [
             "実行中のアニメーションを強制的に停止します。",
             "[パラメータ]",
             "  name[必須]:",
             "    ここで指定した値が設定されている要素に対してアニメーションを停止します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -942,13 +1032,15 @@
     "[keyframe]": {
         "prefix": "keyframe",
         "body": [
-            "[keyframe name=\"\"]"
+            "[keyframe name=\"\" cond=\"\"]"
         ],
         "description": [
             "キーフレームアニメーションを定義します。定義したアニメーションは[kanim]タグで指定することで使用できます",
             "[パラメータ]",
             "  name[必須]:",
             "    キーブレームの名前を指定します。後に[kanim]タグを使用する際に指定する名前になります",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";----keyframeの定義",
             "[keyframe name=\"fuwafuwa\"]",
@@ -964,11 +1056,13 @@
     "[endkeyframe]": {
         "prefix": "endkeyframe",
         "body": [
-            "[endkeyframe]"
+            "[endkeyframe cond=\"\"]"
         ],
         "description": [
             "キーフレームアニメーション定義を終了します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -976,7 +1070,7 @@
     "[frame]": {
         "prefix": "frame",
         "body": [
-            "[frame p=\"\" x=\"\" y=\"\" z=\"\" rotate=\"\" rotateX=\"\" rotateY=\"\" rotateZ=\"\" scale=\"\" scaleX=\"\" scaleY=\"\" scaleZ=\"\" skew=\"\" skewX=\"\" skewY=\"\" perspective=\"\" opacity=\"\"]"
+            "[frame p=\"\" x=\"\" y=\"\" z=\"\" rotate=\"\" rotateX=\"\" rotateY=\"\" rotateZ=\"\" scale=\"\" scaleX=\"\" scaleY=\"\" scaleZ=\"\" skew=\"\" skewX=\"\" skewY=\"\" perspective=\"\" opacity=\"\" cond=\"\"]"
         ],
         "description": [
             "キーフレームアニメーションを定義します。定義したアニメーションは[kanim]タグで指定することで使用できます",
@@ -1015,6 +1109,8 @@
             "    遠近効果を付与することができます。一部ブラウザのみ",
             "  opacity:",
             "    0～1を指定することで、各要素の透明度を指定することができます、非表示にしたりすることができます。0で完全に透明になります。その他",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1022,7 +1118,7 @@
     "[kanim]": {
         "prefix": "kanim",
         "body": [
-            "[kanim name=\"\" layer=\"\" keyframe=\"\" time=\"\" easing=\"\" count=\"\" delay=\"\" direction=\"\" mode=\"\"]"
+            "[kanim name=\"\" layer=\"\" keyframe=\"\" time=\"\" easing=\"\" count=\"\" delay=\"\" direction=\"\" mode=\"\" cond=\"\"]"
         ],
         "description": [
             "キーフレームアニメーションを実行します。[keyframe]タグで定義した名前とアニメーションさせる画像やテキストを指定することで",
@@ -1046,6 +1142,8 @@
             "    偶数回のアニメーションを逆再生するか指定できます。 初期値は\"normal\" 偶数回逆再生させる場合は、\"alternate\"を指定します",
             "  mode:",
             "    再生前後の状態を指定できます。初期値は\"forwards\"で再生後の状態を維持します。 \"none\"を指定すると、再生後の状態を維持しません",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1053,7 +1151,7 @@
     "[stop_kanim]": {
         "prefix": "stop_kanim",
         "body": [
-            "[stop_kanim name=\"\" layer=\"\"]"
+            "[stop_kanim name=\"\" layer=\"\" cond=\"\"]"
         ],
         "description": [
             "キーフレームアニメーションを停止します。",
@@ -1062,6 +1160,8 @@
             "    アニメーションさせる停止する画像やテキストのnameを指定してください",
             "  layer:",
             "    nameを指定せずに、layerを指定することでそのlayerに属するエレメント全てにアニメーション停止を適用させることができます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1069,7 +1169,7 @@
     "[chara_ptext]": {
         "prefix": "chara_ptext",
         "body": [
-            "[chara_ptext name=\"\" face=\"\"]"
+            "[chara_ptext name=\"\" face=\"\" cond=\"\"]"
         ],
         "description": [
             "[chara_config ptext=\"hogehoge\"]という形式で定義した発言者のメッセージボックスにnameで指定した名前を設定できます。",
@@ -1083,6 +1183,8 @@
             "    [chara_new]で定義したnameを指定します。紐づいたjnameがptext欄に表示されます",
             "  face:",
             "    [chara_face]で定義したface名を指定してください",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1090,7 +1192,7 @@
     "[chara_config]": {
         "prefix": "chara_config",
         "body": [
-            "[chara_config pos_mode=\"\" ptext=\"\" time=\"\" memory=\"\" anim=\"\" pos_change_time=\"\" talk_focus=\"\" brightness_value=\"\" blur_value=\"\" talk_anim=\"\" talk_anim_time=\"\" talk_anim_value=\"\" effect=\"\"]"
+            "[chara_config pos_mode=\"\" ptext=\"\" time=\"\" memory=\"\" anim=\"\" pos_change_time=\"\" talk_focus=\"\" brightness_value=\"\" blur_value=\"\" talk_anim=\"\" talk_anim_time=\"\" talk_anim_value=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "キャラクター操作タグの基本設定を変更できます",
@@ -1121,6 +1223,8 @@
             "    talk_animが有効な場合のアニメーション量を指定できます。デフォルトは30。数値で指定してください。",
             "  effect:",
             "    キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1128,7 +1232,7 @@
     "[chara_new]": {
         "prefix": "chara_new",
         "body": [
-            "[chara_new name=\"\" storage=\"\" width=\"\" height=\"\" reflect=\"\" color=\"\" jname=\"\"]"
+            "[chara_new name=\"\" storage=\"\" width=\"\" height=\"\" reflect=\"\" color=\"\" jname=\"\" cond=\"\"]"
         ],
         "description": [
             "登場するキャラクターの情報を定義します。その後[chara_show ]で指定した名称で表示したり、画像を変更したりできます。",
@@ -1149,6 +1253,8 @@
             "    キャラクターの名前を表示するときの色を指定できます。0xRRGGBB 形式で指定します。",
             "  jname:",
             "    このキャラクターをネームスペースに表示する場合、適用する名称を指定できます。例えば、#yuko と指定すると　メッセージエリアに　ゆうこ　と表示できます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_new name=\"yuko\" storage=\"yuko.png\" jname=\"ゆうこ\"]"
         ]
@@ -1156,7 +1262,7 @@
     "[chara_show]": {
         "prefix": "chara_show",
         "body": [
-            "[chara_show name=\"\" time=\"\" layer=\"\" zindex=\"\" depth=\"\" page=\"\" wait=\"\" face=\"\" storage=\"\" reflect=\"\" width=\"\" height=\"\" left=\"\" top=\"\"]"
+            "[chara_show name=\"\" time=\"\" layer=\"\" zindex=\"\" depth=\"\" page=\"\" wait=\"\" face=\"\" storage=\"\" reflect=\"\" width=\"\" height=\"\" left=\"\" top=\"\" cond=\"\"]"
         ],
         "description": [
             "定義しておいたキャラクターを画面に表示します",
@@ -1189,6 +1295,8 @@
             "    \"キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。\"",
             "  top:",
             "    \"キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。\"",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_show name=\"yuko\" ]"
         ]
@@ -1196,7 +1304,7 @@
     "[chara_hide]": {
         "prefix": "chara_hide",
         "body": [
-            "[chara_hide name=\"\" wait=\"\" time=\"\" layer=\"\" pos_mode=\"\"]"
+            "[chara_hide name=\"\" wait=\"\" time=\"\" layer=\"\" pos_mode=\"\" cond=\"\"]"
         ],
         "description": [
             "[chara_show]タグで表示したキャラクターを退場させます。",
@@ -1211,6 +1319,8 @@
             "    削除対象のレイヤ。chara_showの時にレイヤ指定した場合は、指定します。デフォルトは０",
             "  pos_mode:",
             "    キャラクターの立ち位置自動調整が有効な場合にこの値にfalseを指定すると退場後に立ち位置の調整を行いません。デフォルトはtrueです",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_hide name=\"yuko\" ]"
         ]
@@ -1218,7 +1328,7 @@
     "[chara_hide_all]": {
         "prefix": "chara_hide_all",
         "body": [
-            "[chara_hide_all wait=\"\" time=\"\" layer=\"\"]"
+            "[chara_hide_all wait=\"\" time=\"\" layer=\"\" cond=\"\"]"
         ],
         "description": [
             "[chara_show]タグで表示したキャラクターを全員退場させます。",
@@ -1229,6 +1339,8 @@
             "    ミリ秒で指定します。指定した時間をかけて退場します。デフォルトは1000ミリ秒です",
             "  layer:",
             "    削除対象のレイヤ。chara_showの時にレイヤ指定した場合は、指定します。デフォルトは０",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_hide_all time=1000 wait=true]"
         ]
@@ -1236,13 +1348,15 @@
     "[chara_delete]": {
         "prefix": "chara_delete",
         "body": [
-            "[chara_delete name=\"\"]"
+            "[chara_delete name=\"\" cond=\"\"]"
         ],
         "description": [
             "定義しておいたキャラクター情報を削除します。（画面から消す場合は[chara_hide]を使用してください）",
             "[パラメータ]",
             "  name[必須]:",
             "    [chara_new]で定義したname属性を指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_delete=\"yuko\" ]"
         ]
@@ -1250,7 +1364,7 @@
     "[chara_mod]": {
         "prefix": "chara_mod",
         "body": [
-            "[chara_mod name=\"\" face=\"\" time=\"\" reflect=\"\" storage=\"\" wait=\"\" cross=\"\"]"
+            "[chara_mod name=\"\" face=\"\" time=\"\" reflect=\"\" storage=\"\" wait=\"\" cross=\"\" cond=\"\"]"
         ],
         "description": [
             "画面のキャラクター画像を変更します。表情を変更する場合などに便利でしょう",
@@ -1269,6 +1383,8 @@
             "    表情の変更完了を待つか否かを指定します。true or falseで指定。デフォルトは true",
             "  cross:",
             "    true or false を指定します。デフォルトはtrue。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い表情を残しながら上に重なる形で新しい表情を表示します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_mod name=\"yuko\" storage=\"newface.png\"]"
         ]
@@ -1276,7 +1392,7 @@
     "[chara_move]": {
         "prefix": "chara_move",
         "body": [
-            "[chara_move name=\"\" time=\"\" anim=\"\" left=\"\" top=\"\" width=\"\" height=\"\" wait=\"\" effect=\"\"]"
+            "[chara_move name=\"\" time=\"\" anim=\"\" left=\"\" top=\"\" width=\"\" height=\"\" wait=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "画面のキャラクター立ち位置を変更します。",
@@ -1300,6 +1416,8 @@
             "  effect:",
             "    変化のエフェクトを指定します。指定できる文字列は以下の種類です",
             "    jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_move name=\"yuko\" time=100 left=20 top=100 ]"
         ]
@@ -1307,7 +1425,7 @@
     "[chara_face]": {
         "prefix": "chara_face",
         "body": [
-            "[chara_face name=\"\" face=\"\" storage=\"\"]"
+            "[chara_face name=\"\" face=\"\" storage=\"\" cond=\"\"]"
         ],
         "description": [
             "キャラクターの表情画像を名称と共に登録できます",
@@ -1318,6 +1436,8 @@
             "    登録する表情の名前を指定してください",
             "  storage[必須]:",
             "    変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";表情の登録",
             "[chara_face name=\"yuko\" face=\"angry\" storage=\"newface.png\"]",
@@ -1334,7 +1454,7 @@
     "[chara_layer]": {
         "prefix": "chara_layer",
         "body": [
-            "[chara_layer name=\"\" part=\"\" id=\"\" storage=\"\" zindex=\"\"]"
+            "[chara_layer name=\"\" part=\"\" id=\"\" storage=\"\" zindex=\"\" cond=\"\"]"
         ],
         "description": [
             "キャラクターの表情を差分パーツを定義します。",
@@ -1350,6 +1470,8 @@
             "    差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。noneを指定するとデフォルトそのパーツがない状態を表現することができます",
             "  zindex:",
             "    数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_layer name=\"yuko\" part=mouse id=egao storage=\"image/egao.png\" ]"
         ]
@@ -1357,7 +1479,7 @@
     "[chara_layer_mod]": {
         "prefix": "chara_layer_mod",
         "body": [
-            "[chara_layer_mod name=\"\" part=\"\" zindex=\"\"]"
+            "[chara_layer_mod name=\"\" part=\"\" zindex=\"\" cond=\"\"]"
         ],
         "description": [
             "chara_layerで定義した設定を変更することができます。",
@@ -1368,6 +1490,8 @@
             "    変更したいパーツとして登録した名を指定します。",
             "  zindex:",
             "    数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。この設定は即時反映されず、次回表示時、反映されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_layer_mod name=\"yuko\" part=mouse zindex=20 ]"
         ]
@@ -1375,7 +1499,7 @@
     "[chara_part]": {
         "prefix": "chara_part",
         "body": [
-            "[chara_part name=\"\" time=\"\" wait=\"\" allow_storage=\"\"]"
+            "[chara_part name=\"\" time=\"\" wait=\"\" allow_storage=\"\" cond=\"\"]"
         ],
         "description": [
             "[chara_layer]で指定した差分を実際に表示切り替えする",
@@ -1394,6 +1518,8 @@
             "    true or false を指定します。trueを指定するとtimeで指定したフェードインの完了を待ちます。デフォルトはtrueです。",
             "  allow_storage:",
             "    true or false 。partの指定にidではなく直接画像ファイルを指定できます。画像はfgimageフォルダに配置してください。デフォルトはfalseです。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_part name=\"yuko\" mouse=aaa eye=bbb ]"
         ]
@@ -1401,7 +1527,7 @@
     "[chara_part_reset]": {
         "prefix": "chara_part_reset",
         "body": [
-            "[chara_part_reset name=\"\" part=\"\"]"
+            "[chara_part_reset name=\"\" part=\"\" cond=\"\"]"
         ],
         "description": [
             "[chara_part]で差分を変更した際、デフォルトの表情に戻すことができます。",
@@ -1411,6 +1537,8 @@
             "    [chara_new]で指定したキャラクター名を指定してください。",
             "  part:",
             "    特定のpartに絞ってリセットすることが可能です。デフォルトはすべてをデフォルトに戻します。ここに記述することで指定したpartのみリセットされます。カンマで区切ると複数指定することが可能です",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[chara_part_reset name=\"yuko\" ]"
         ]
@@ -1418,11 +1546,13 @@
     "[showlog]": {
         "prefix": "showlog",
         "body": [
-            "[showlog]"
+            "[showlog cond=\"\"]"
         ],
         "description": [
             "バックログを表示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[showlog]"
         ]
@@ -1430,7 +1560,7 @@
     "[filter]": {
         "prefix": "filter",
         "body": [
-            "[filter layer=\"\" name=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\"]"
+            "[filter layer=\"\" name=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤやオブジェクトを指定して、様々なフィルター効果を追加することができます。",
@@ -1457,6 +1587,8 @@
             "    0-100(デフォルト)を指定することで、画像の表示のコントラストを変更することができます",
             "  blur:",
             "    0(デフォルト)-任意の値[px] を指定することで、画像の表示をぼかすことができます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";特定のオブジェクトを指定して、フィルター効果。",
             "[filter layer=\"0\" name=\"chara_a\" grayscale=50 ]",
@@ -1468,7 +1600,7 @@
     "[free_filter]": {
         "prefix": "free_filter",
         "body": [
-            "[free_filter layer=\"\" name=\"\"]"
+            "[free_filter layer=\"\" name=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤやオブジェクトを指定して、filter効果を無効にします。",
@@ -1478,6 +1610,8 @@
             "    フィルターを打ち消すレイヤを指定します。指定がない場合、すべての効果が消されます",
             "  name:",
             "    フィルターを打ち消したい、nameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";特定のオブジェクトを指定して、フィルターを打ち消す。",
             "[free_filter layer=\"0\" name=\"chara_a\"]",
@@ -1489,7 +1623,7 @@
     "[web]": {
         "prefix": "web",
         "body": [
-            "[web url=\"\"]"
+            "[web url=\"\" cond=\"\"]"
         ],
         "description": [
             "指定したWebサイトをブラウザで開くことができます。",
@@ -1498,6 +1632,8 @@
             "[パラメータ]",
             "  url[必須]:",
             "    開きたいWebサイトのURLを入れてください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";クリック待ちを挟む",
             "公式サイトを開きます[p]",
@@ -1510,7 +1646,7 @@
     "[eval]": {
         "prefix": "eval",
         "body": [
-            "[eval exp=\"\"]"
+            "[eval exp=\"\" cond=\"\"]"
         ],
         "description": [
             "expで示された式を評価します。変数への値の代入などに使用されます。",
@@ -1518,6 +1654,8 @@
             "[パラメータ]",
             "  exp[必須]:",
             "    評価するTJS式を指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[eval exp=\"f.test=500\"]",
             ";↑ゲーム変数 test に数値を代入している",
@@ -1532,7 +1670,7 @@
     "[clearvar]": {
         "prefix": "clearvar",
         "body": [
-            "[clearvar exp=\"\"]"
+            "[clearvar exp=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲーム変数を消去します。",
@@ -1540,6 +1678,8 @@
             "[パラメータ]",
             "  exp:",
             "    変数名を指定できます。変数名を指定した場合はその変数だけを消去します。例えば「f.name」「sf.flag」のように指定します。省略した場合はすべての変数が消去されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1547,11 +1687,13 @@
     "[clearsysvar]": {
         "prefix": "clearsysvar",
         "body": [
-            "[clearsysvar]"
+            "[clearsysvar cond=\"\"]"
         ],
         "description": [
             "システム変数を全消去します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1559,7 +1701,7 @@
     "[clearstack]": {
         "prefix": "clearstack",
         "body": [
-            "[clearstack stack=\"\"]"
+            "[clearstack stack=\"\" cond=\"\"]"
         ],
         "description": [
             "システムが管理するスタックを消去します。",
@@ -1574,6 +1716,8 @@
             "[パラメータ]",
             "  stack:",
             "    call if macro のいづれかを指定できます。特定のスタックのみ削除することができます。指定しなければ全てのスタックを削除します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1581,7 +1725,7 @@
     "[close]": {
         "prefix": "close",
         "body": [
-            "[close ask=\"\"]"
+            "[close ask=\"\" cond=\"\"]"
         ],
         "description": [
             "ウィンドウを閉じます。",
@@ -1589,6 +1733,8 @@
             "[パラメータ]",
             "  ask:",
             "    true を指定すると、終了するかどうかの確認をします。false を 指定するとこの確認はありません。この属性を省略 すると、 true を指定したとみなされます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1596,7 +1742,7 @@
     "[trace]": {
         "prefix": "trace",
         "body": [
-            "[trace exp=\"\"]"
+            "[trace exp=\"\" cond=\"\"]"
         ],
         "description": [
             "expで指定された式を評価し、結果をコンソールに出力します。",
@@ -1607,6 +1753,8 @@
             "[パラメータ]",
             "  exp:",
             "    評価するTJS（JS）式を指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[trace exp=\"f.test\"]",
             "; ↑ ゲーム変数 test の内容を コンソール に出力する"
@@ -1615,7 +1763,7 @@
     "[body]": {
         "prefix": "body",
         "body": [
-            "[body bgimage=\"\" bgrepeat=\"\" bgcolor=\"\" bgcover=\"\" scWidth=\"\" scHeight=\"\"]"
+            "[body bgimage=\"\" bgrepeat=\"\" bgcolor=\"\" bgcover=\"\" scWidth=\"\" scHeight=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲーム描画領域の外側をカスタマイズすることができます。",
@@ -1634,6 +1782,8 @@
             "    ゲーム画面のオリジナル横幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscWidthに対応します。",
             "  scHeight:",
             "    ゲーム画面のオリジナル縦幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscHeightに対応します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[body bgimage=\"back.png\" bgcolor=\"black\" ]"
         ]
@@ -1641,7 +1791,7 @@
     "[title]": {
         "prefix": "title",
         "body": [
-            "[title name=\"\"]"
+            "[title name=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲームタイトルを指定します。",
@@ -1651,6 +1801,8 @@
             "[パラメータ]",
             "  name[必須]:",
             "    表示したいタイトルを指定してください",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[title name=\"変更後のタイトル\"]"
         ]
@@ -1658,12 +1810,14 @@
     "[iscript]": {
         "prefix": "iscript",
         "body": [
-            "[iscript]"
+            "[iscript cond=\"\"]"
         ],
         "description": [
             "[iscript]と[endscript]に囲まれた箇所にJavaScriptを記述することができます。",
             "TJSの式にも適応できますが、ティラノスクリプトとの動作互換はありません",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[iscript]",
             "",
@@ -1679,13 +1833,15 @@
     "[endscript]": {
         "prefix": "endscript",
         "body": [
-            "[endscript stop=\"\"]"
+            "[endscript stop=\"\" cond=\"\"]"
         ],
         "description": [
             "JavaScriptの記述を終了します",
             "[パラメータ]",
             "  stop:",
             "    endscriptに到達した時、ここにtrueを指定すると次のタグに進ませない。scriptの中でjumpした時などに指定する。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1693,7 +1849,7 @@
     "[html]": {
         "prefix": "html",
         "body": [
-            "[html left=\"\" top=\"\" name=\"\"]"
+            "[html left=\"\" top=\"\" name=\"\" cond=\"\"]"
         ],
         "description": [
             "[html]と[endhtml]の間に記述したHTMLを表示することができます。",
@@ -1711,6 +1867,8 @@
             "    HTMLの上端位置を指定します。（ピクセル）",
             "  name:",
             "    HTML領域に名前を指定することができます。この名前を使って、HTML領域に対してアニメーションなども実行できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";youtubeのプレイヤーを指定した位置に挿入します",
             ";yoububeから埋め込み用タグを取得してきています",
@@ -1730,11 +1888,13 @@
     "[endhtml]": {
         "prefix": "endhtml",
         "body": [
-            "[endhtml]"
+            "[endhtml cond=\"\"]"
         ],
         "description": [
             "HTMLの記述を終了します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1742,7 +1902,7 @@
     "[emb]": {
         "prefix": "emb",
         "body": [
-            "[emb exp=\"\"]"
+            "[emb exp=\"\" cond=\"\"]"
         ],
         "description": [
             "exp で示された式を評価(実行)し、その結果を埋め込みます。",
@@ -1750,6 +1910,8 @@
             "[パラメータ]",
             "  exp[必須]:",
             "    評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[eval exp=\"f.value1='変数の値だよ～ん'\"]",
             "とどこかで書いておいて、",
@@ -1760,13 +1922,15 @@
     "[if]": {
         "prefix": "if",
         "body": [
-            "[if exp=\"\"]"
+            "[if exp=\"\" cond=\"\"]"
         ],
         "description": [
             "式を評価し、その結果が true ( または 0 以外 ) ならば、 elsif・else・endif のいずれかまでにある文章やタグを実行し、 そうでない場合は無視します。",
             "[パラメータ]",
             "  exp[必須]:",
             "    評価する TJS 式を指定します。この式の結果が false ( または 0 な らば、elsif・else・endif タグまでの文章やタグが無視されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "; 例1",
             "[if exp=\"false\"]",
@@ -1806,7 +1970,7 @@
     "[elsif]": {
         "prefix": "elsif",
         "body": [
-            "[elsif exp=\"\"]"
+            "[elsif exp=\"\" cond=\"\"]"
         ],
         "description": [
             "if タグと endif タグの間で用いられます。 それまでの if タグまたは elsif タグの中身がひとつも実行されていないときに 式を評価し、その結果が真ならば elsif から次の elsif・else・endif までの間を実行します。",
@@ -1814,6 +1978,8 @@
             "[パラメータ]",
             "  exp[必須]:",
             "    評価する JS 式を指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1821,12 +1987,14 @@
     "[else]": {
         "prefix": "else",
         "body": [
-            "[else]"
+            "[else cond=\"\"]"
         ],
         "description": [
             "if タグもしくは elsif タグ と endif タグの間で用いられます。 if または elsif ブロックの中身がひとつも実行されていないとき、 else から endif までの間を実行します。",
             "使い方の例については、if タグの項目を参照してください。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1834,13 +2002,15 @@
     "[endif]": {
         "prefix": "endif",
         "body": [
-            "[endif exp=\"\"]"
+            "[endif exp=\"\" cond=\"\"]"
         ],
         "description": [
             "if文を終了します。必ずif文の終わりに記述する必要があります",
             "[パラメータ]",
             "  exp:",
             "    評価する TJS 式を指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1848,7 +2018,7 @@
     "[call]": {
         "prefix": "call",
         "body": [
-            "[call storage=\"\" target=\"\"]"
+            "[call storage=\"\" target=\"\" cond=\"\"]"
         ],
         "description": [
             "指定されたシナリオファイルの指定されたラベルで示される サブルーチンを呼び出します。",
@@ -1858,6 +2028,8 @@
             "    呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であると見なされます。",
             "  target:",
             "    呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1865,13 +2037,15 @@
     "[return]": {
         "prefix": "return",
         "body": [
-            "[return]"
+            "[return cond=\"\"]"
         ],
         "description": [
             "サブルーチンから呼び出し元に戻ります。",
             "KAG３の任意の場所へのリターンは廃止しました。",
             "（必要な場合はCallで代用してください）",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1879,7 +2053,7 @@
     "[macro]": {
         "prefix": "macro",
         "body": [
-            "[macro name=\"\"]"
+            "[macro name=\"\" cond=\"\"]"
         ],
         "description": [
             "マクロ記述を開始します。新しいタグを定義することが出来ます。",
@@ -1889,6 +2063,8 @@
             "[パラメータ]",
             "  name[必須]:",
             "    マクロの名前を指定してください。以後この名前で新しいタグが定義され呼び出せるようになります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[macro name=\"newtag\"][font color=0xff0000]新しいタグです[resetfont][endmacro]",
             "[newtag]",
@@ -1904,11 +2080,13 @@
     "[endmacro]": {
         "prefix": "endmacro",
         "body": [
-            "[endmacro]"
+            "[endmacro cond=\"\"]"
         ],
         "description": [
             "マクロの終了タグです",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1916,13 +2094,15 @@
     "[erasemacro]": {
         "prefix": "erasemacro",
         "body": [
-            "[erasemacro name=\"\"]"
+            "[erasemacro name=\"\" cond=\"\"]"
         ],
         "description": [
             "登録したマクロを削除します",
             "[パラメータ]",
             "  name[必須]:",
             "    削除するマクロ名を記述してください",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1930,13 +2110,15 @@
     "[savesnap]": {
         "prefix": "savesnap",
         "body": [
-            "[savesnap title=\"\"]"
+            "[savesnap title=\"\" cond=\"\"]"
         ],
         "description": [
             "現在のプレイ状況を一時保存します。その後、tyrano.ks　拡張の[setsave]を行うことで、ここで記録したセーブデータが保存されます。",
             "[パラメータ]",
             "  title[必須]:",
             "    セーブデータのタイトルを指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1944,7 +2126,7 @@
     "[autosave]": {
         "prefix": "autosave",
         "body": [
-            "[autosave title=\"\"]"
+            "[autosave title=\"\" cond=\"\"]"
         ],
         "description": [
             "このタグに到達した際、自動的にプレイ状況を保存します。自動セーブ機能に活用ください。",
@@ -1954,6 +2136,8 @@
             "[パラメータ]",
             "  title:",
             "    セーブデータのタイトルを指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[autosave]",
             "",
@@ -1982,11 +2166,13 @@
     "[autoload]": {
         "prefix": "autoload",
         "body": [
-            "[autoload]"
+            "[autoload cond=\"\"]"
         ],
         "description": [
             "[autosave]タグで保存されたデータを読み込みます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -1994,13 +2180,15 @@
     "[ignore]": {
         "prefix": "ignore",
         "body": [
-            "[ignore exp=\"\"]"
+            "[ignore exp=\"\" cond=\"\"]"
         ],
         "description": [
             "式を評価し、その結果が true ( または 0 以外 ) ならば、endignore タグまでにある文章 やタグが無視されます。",
             "[パラメータ]",
             "  exp[必須]:",
             "    評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2008,11 +2196,13 @@
     "[endignore]": {
         "prefix": "endignore",
         "body": [
-            "[endignore]"
+            "[endignore cond=\"\"]"
         ],
         "description": [
             "ignoreを終了します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2020,7 +2210,7 @@
     "[edit]": {
         "prefix": "edit",
         "body": [
-            "[edit name=\"\" length=\"\" initial=\"\" color=\"\" left=\"\" top=\"\" autocomplete=\"\" size=\"\" width=\"\" height=\"\" maxchars=\"\"]"
+            "[edit name=\"\" length=\"\" initial=\"\" color=\"\" left=\"\" top=\"\" autocomplete=\"\" size=\"\" width=\"\" height=\"\" maxchars=\"\" cond=\"\"]"
         ],
         "description": [
             "テキストボックスを表示します。",
@@ -2051,6 +2241,8 @@
             "    テキストボックスの高さを指定します",
             "  maxchars:",
             "    最大入力文字数",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[edit name=\"f.test\"]",
             "",
@@ -2070,7 +2262,7 @@
     "[preload]": {
         "prefix": "preload",
         "body": [
-            "[preload storage=\"\" wait=\"\"]"
+            "[preload storage=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "preloadタグを使用することで、素材ファイル（画像や音楽）を事前に読み込んでおくことができます。",
@@ -2080,6 +2272,8 @@
             "    事前に読み込む画像ファイルをフルパスでしていしてください。配列を渡すことでまとめて指定することもできます。",
             "  wait:",
             "    trueを指定すると、全ての読み込みが完了するまでゲームを停止します。NowLoadingの表示が必要でしょう。true or false デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";画像ファイルはフルパス（プロジェクトファイル以下）で指定してください",
             "[preload storage=\"data/fgimage/girl.jpg\"]",
@@ -2095,13 +2289,15 @@
     "[clearfix]": {
         "prefix": "clearfix",
         "body": [
-            "[clearfix name=\"\"]"
+            "[clearfix name=\"\" cond=\"\"]"
         ],
         "description": [
             "name属性を指定することで、該当する要素のみを削除することもできます。",
             "[パラメータ]",
             "  name:",
             "    fixレイヤーへ追加した時に名前を指定した場合、適応できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";fixレイヤーへの追加",
             "[ptext name=\"sample\" layer=fix page=fore text=\"テキストテキスト\" size=30 x=200 y=100 color=red ]",
@@ -2113,12 +2309,14 @@
     "[commit]": {
         "prefix": "commit",
         "body": [
-            "[commit]"
+            "[commit cond=\"\"]"
         ],
         "description": [
             "テキストボックスの値を確定して指定したname属性で指定した変数に値を格納します。",
             "注意点としてcommitが実行された段階で、テキストボックスなどのフォームが表示されている必要があります。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2126,7 +2324,7 @@
     "[cursor]": {
         "prefix": "cursor",
         "body": [
-            "[cursor storage=\"\"]"
+            "[cursor storage=\"\" cond=\"\"]"
         ],
         "description": [
             "storageに指定した画像ファイルがマウスカーソルに指定されます。data/imageフォルダ以下に配置してください。ファイルは形式は gif png jpg です。",
@@ -2135,6 +2333,8 @@
             "[パラメータ]",
             "  storage[必須]:",
             "    カーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[cursor storage=\"my_cursor.gif\"]"
         ]
@@ -2142,12 +2342,14 @@
     "[screen_full]": {
         "prefix": "screen_full",
         "body": [
-            "[screen_full]"
+            "[screen_full cond=\"\"]"
         ],
         "description": [
             "ゲーム画面をフルスクリーンにします。PCゲームのみ動作します",
             "ウィンドウに戻す場合は再度呼び出すことでウィンドウに戻ります",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[screen_full]"
         ]
@@ -2155,7 +2357,7 @@
     "[sleepgame]": {
         "prefix": "sleepgame",
         "body": [
-            "[sleepgame storage=\"\" target=\"\" next=\"\"]"
+            "[sleepgame storage=\"\" target=\"\" next=\"\" cond=\"\"]"
         ],
         "description": [
             "このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動することができます。",
@@ -2177,6 +2379,8 @@
             "    ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます",
             "  next:",
             "    true か　falseを指定。 falseを指定するとawakegameで戻ってくる時に次の命令へ移らなくなります。デフォルトはtrue",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[sleepgame storage=\"scene3.ks\" target=\"*start\" ]",
             "",
@@ -2187,7 +2391,7 @@
     "[awakegame]": {
         "prefix": "awakegame",
         "body": [
-            "[awakegame variable_over=\"\" bgm_over=\"\"]"
+            "[awakegame variable_over=\"\" bgm_over=\"\" cond=\"\"]"
         ],
         "description": [
             "[gamesleep]タグで一時停止していたゲームを再開します。",
@@ -2199,6 +2403,8 @@
             "    trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue",
             "  bgm_over:",
             "    trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2206,12 +2412,14 @@
     "[breakgame]": {
         "prefix": "breakgame",
         "body": [
-            "[breakgame]"
+            "[breakgame cond=\"\"]"
         ],
         "description": [
             "[gamesleep]タグで一時停止していたゲームを削除します。",
             "[gameawake]しない場合、このタグで削除してください。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2219,7 +2427,7 @@
     "[dialog]": {
         "prefix": "dialog",
         "body": [
-            "[dialog name=\"\" type=\"\" text=\"\" storage=\"\" target=\"\" storage_cancel=\"\" target_cancel=\"\" label_ok=\"\" label_cancel=\"\"]"
+            "[dialog name=\"\" type=\"\" text=\"\" storage=\"\" target=\"\" storage_cancel=\"\" target_cancel=\"\" label_ok=\"\" label_cancel=\"\" cond=\"\"]"
         ],
         "description": [
             "確認用のダイアログを表示します。",
@@ -2245,6 +2453,8 @@
             "    OKボタンの名前を好きなものに指定できます。デフォルトはOKです",
             "  label_cancel:",
             "    キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";警告ウィンドウのメッセージ表示",
             "[dialog type=\"alert\" text=\"メッセージ内容\" ]",
@@ -2260,7 +2470,7 @@
     "[plugin]": {
         "prefix": "plugin",
         "body": [
-            "[plugin name=\"\" storage=\"\"]"
+            "[plugin name=\"\" storage=\"\" cond=\"\"]"
         ],
         "description": [
             "外部プラグインを読み込むことができます。",
@@ -2282,6 +2492,8 @@
             "    data/othres/plugin以下の配置したフォルダ名（プラグイン名）を指定する",
             "  storage:",
             "    最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";テーマ変更",
             "[plugin name=\"original1\" ]",
@@ -2293,7 +2505,7 @@
     "[sysview]": {
         "prefix": "sysview",
         "body": [
-            "[sysview type=\"\" storage=\"\"]"
+            "[sysview type=\"\" storage=\"\" cond=\"\"]"
         ],
         "description": [
             "システム系機能で使用するHTMLファイルを変更できます。",
@@ -2302,6 +2514,8 @@
             "    save load backlog menu が指定可能",
             "  storage[必須]:",
             "    HTMLファイルのパスを指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[sysview type=\"save\" storage=\"./data/others/plugin/mytheme/html/save.html\" ]",
             "[sysview type=\"load\" storage=\"./data/others/plugin/mytheme/html/load.html\" ]",
@@ -2312,13 +2526,15 @@
     "[loadcss]": {
         "prefix": "loadcss",
         "body": [
-            "[loadcss file=\"\"]"
+            "[loadcss file=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲームの途中でCSSを読み込むことができます。",
             "[パラメータ]",
             "  file[必須]:",
             "    読み込みたいCSSファイルを指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";CSSファイルの読み込み",
             "[loadcss file=\"./data/others/css/mystyle.css\" ]"
@@ -2327,7 +2543,7 @@
     "[save_img]": {
         "prefix": "save_img",
         "body": [
-            "[save_img storage=\"\" folder=\"\"]"
+            "[save_img storage=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
             "セーブデータのサムネイルをキャプチャを変更することができます。",
@@ -2339,6 +2555,8 @@
             "    設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。",
             "  folder:",
             "    bgimageフォルダ以外から取得したい場合は、ここに指定します。例えば、othersやfgimage、imageなどです。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";サムネイル画像の変更",
             "[save_img storage=\"my_capture.png\" ]"
@@ -2347,12 +2565,14 @@
     "[nolog]": {
         "prefix": "nolog",
         "body": [
-            "[nolog]"
+            "[nolog cond=\"\"]"
         ],
         "description": [
             "このタグに到達すると、バックログへ一切追加されなくなります。",
             "[endnolog]タグに到達すると、バックログへの記録が再開されます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "ここはログに記録される[p]",
             "[nolog]",
@@ -2365,12 +2585,14 @@
     "[endnolog]": {
         "prefix": "endnolog",
         "body": [
-            "[endnolog]"
+            "[endnolog cond=\"\"]"
         ],
         "description": [
             "[nolog]タグでログ記録を停止している場合",
             "この[endnolog]タグで記録を再開する必要があります。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "ここはログに記録される[p]",
             "[nolog]",
@@ -2383,7 +2605,7 @@
     "[pushlog]": {
         "prefix": "pushlog",
         "body": [
-            "[pushlog text=\"\" join=\"\"]"
+            "[pushlog text=\"\" join=\"\" cond=\"\"]"
         ],
         "description": [
             "バックログに任意の文字列を追加できます。",
@@ -2395,6 +2617,8 @@
             "    バックログに追加する文字列を追加できます",
             "  join:",
             "    バックログを前の文字列に連結するか否かを指定できます。trueを指定すると前の文字列につなげます。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[pushlog text=\"ここに好きなログ文字列を記述できます\"]"
         ]
@@ -2402,11 +2626,13 @@
     "[start_keyconfig]": {
         "prefix": "start_keyconfig",
         "body": [
-            "[start_keyconfig]"
+            "[start_keyconfig cond=\"\"]"
         ],
         "description": [
             "キーコンフィグが無効の場合、再開することができます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[start_keyconfig]"
         ]
@@ -2414,7 +2640,7 @@
     "[stop_keyconfig]": {
         "prefix": "stop_keyconfig",
         "body": [
-            "[stop_keyconfig]"
+            "[stop_keyconfig cond=\"\"]"
         ],
         "description": [
             "キーコンフィグを一時的に無効にすることができます。",
@@ -2425,6 +2651,8 @@
             "・キーボード操作",
             "・マウスのスワイプ操作",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[stop_keyconfig]",
             "ここは無効。",
@@ -2436,7 +2664,7 @@
     "[apply_local_patch]": {
         "prefix": "apply_local_patch",
         "body": [
-            "[apply_local_patch file=\"\" reload=\"\"]"
+            "[apply_local_patch file=\"\" reload=\"\" cond=\"\"]"
         ],
         "description": [
             "V470以降で使用可",
@@ -2450,6 +2678,8 @@
             "    パッチファイルのパスを指定してください。exeファイルの階層を起点として指定します",
             "  reload:",
             "    true or false を指定。trueを指定すると反映後にゲームが再読込されます。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[apply_local_patch file=\"test.tpatch\" ]"
         ]
@@ -2457,7 +2687,7 @@
     "[check_web_patch]": {
         "prefix": "check_web_patch",
         "body": [
-            "[check_web_patch url=\"\"]"
+            "[check_web_patch url=\"\" cond=\"\"]"
         ],
         "description": [
             "V470以降で使用可",
@@ -2468,6 +2698,8 @@
             "[パラメータ]",
             "  url[必須]:",
             "    サーバのjsonファイルのURLをhttp:// から指定してください",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[check_web_patch url=\"http://tyrano.jp/patch/mygame.json\" ]"
         ]
@@ -2475,7 +2707,7 @@
     "[set_resizecall]": {
         "prefix": "set_resizecall",
         "body": [
-            "[set_resizecall storage=\"\"]"
+            "[set_resizecall storage=\"\" cond=\"\"]"
         ],
         "description": [
             "プレイ端末の画面比率が入れ替わったタイミングでシナリオを呼び出すことができます。",
@@ -2492,6 +2724,8 @@
             "[パラメータ]",
             "  storage[必須]:",
             "    呼び出すシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[call storage=\"resize.ks\"]",
             "",
@@ -2502,7 +2736,7 @@
     "[3d_init]": {
         "prefix": "3d_init",
         "body": [
-            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\"]"
+            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\" cond=\"\"]"
         ],
         "description": [
             "3D関連の機能を使用するために必要な宣言です。",
@@ -2520,6 +2754,8 @@
             "    カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１",
             "  far:",
             "    カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_init layer=0 ]"
         ]
@@ -2527,7 +2763,7 @@
     "[3d_model_new]": {
         "prefix": "3d_model_new",
         "body": [
-            "[3d_model_new name=\"\" storage=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" motion=\"\" folder=\"\"]"
+            "[3d_model_new name=\"\" storage=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" motion=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
             "外部ファイル形式の3Dモデルを読み込んで定義します。",
@@ -2550,6 +2786,8 @@
             "    ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。",
             "  folder:",
             "    ファイルの配置フォルダを変更できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_init layer=0]",
             "",
@@ -2560,7 +2798,7 @@
     "[3d_sphere_new]": {
         "prefix": "3d_sphere_new",
         "body": [
-            "[3d_sphere_new name=\"\" texture=\"\" color=\"\" pos=\"\" rot=\"\" scale=\"\" radius=\"\" width=\"\" height=\"\" tonemap=\"\"]"
+            "[3d_sphere_new name=\"\" texture=\"\" color=\"\" pos=\"\" rot=\"\" scale=\"\" radius=\"\" width=\"\" height=\"\" tonemap=\"\" cond=\"\"]"
         ],
         "description": [
             "球体の3Dモデルを定義します",
@@ -2585,6 +2823,8 @@
             "    球体の高さを指定します。デフォルトは30",
             "  tonemap:",
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_sphere_new name=\"tama\" ]",
             "[3d_show name=tama pos=\"365,145,0\" rot=\"0.92,-4.3,0\" scale=\"0.77,0.77,0.77\" time=2000]"
@@ -2593,7 +2833,7 @@
     "[3d_sprite_new]": {
         "prefix": "3d_sprite_new",
         "body": [
-            "[3d_sprite_new name=\"\" storage=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" folder=\"\"]"
+            "[3d_sprite_new name=\"\" storage=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
             "スプライトの3Dモデルを定義します。",
@@ -2613,6 +2853,8 @@
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
             "  folder:",
             "    ファイルの配置フォルダを変更できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_sprite_new name=\"yamato\" storage=\"doki.png\"]",
             "[3d_show name=\"yamato\"]"
@@ -2621,7 +2863,7 @@
     "[3d_event]": {
         "prefix": "3d_event",
         "body": [
-            "[3d_event name=\"\" storage=\"\" target=\"\"]"
+            "[3d_event name=\"\" storage=\"\" target=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。",
@@ -2635,6 +2877,8 @@
             "    移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます",
             "  target:",
             "    ジャンプ先のラベル名を指定します。省略すると先頭から実行されます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";3Dモデルの定義と表示",
             "[3d_model_new name=\"miruku\" storage=\"miruku/scene.gltf\" scale=300 pos=\"0,-300,500\" ]",
@@ -2667,13 +2911,15 @@
     "[3d_event_delete]": {
         "prefix": "3d_event_delete",
         "body": [
-            "[3d_event_delete name=\"\"]"
+            "[3d_event_delete name=\"\" cond=\"\"]"
         ],
         "description": [
             "登録した3Dイベントを無効化します。",
             "[パラメータ]",
             "  name[必須]:",
             "    3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";ボックスの表示",
             "[3d_box_new name=\"box\" width=100 height=100 depth=100 scale=2 tone=false color=\"0xFFFFFF\"]",
@@ -2688,12 +2934,14 @@
     "[3d_event_start]": {
         "prefix": "3d_event_start",
         "body": [
-            "[3d_event_start]"
+            "[3d_event_start cond=\"\"]"
         ],
         "description": [
             "登録した3Dイベントを開始します。",
             "イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2701,13 +2949,15 @@
     "[3d_event_stop]": {
         "prefix": "3d_event_stop",
         "body": [
-            "[3d_event_stop]"
+            "[3d_event_stop cond=\"\"]"
         ],
         "description": [
             "登録した3Dイベントを停止します。",
             "[3d_event_start]で再開できます。",
             "登録したイベント自体は消えません。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2715,7 +2965,7 @@
     "[3d_box_new]": {
         "prefix": "3d_box_new",
         "body": [
-            "[3d_box_new name=\"\" texture=\"\" color=\"\" width=\"\" height=\"\" depth=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\"]"
+            "[3d_box_new name=\"\" texture=\"\" color=\"\" width=\"\" height=\"\" depth=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" cond=\"\"]"
         ],
         "description": [
             "立方体の3Dモデルを定義します。",
@@ -2740,6 +2990,8 @@
             "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  tonemap:",
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";ボックスの定義と表示",
             "[3d_box_new name=\"mybox1\" ]",
@@ -2753,7 +3005,7 @@
     "[3d_image_new]": {
         "prefix": "3d_image_new",
         "body": [
-            "[3d_image_new name=\"\" texture=\"\" width=\"\" height=\"\" pos=\"\" rot=\"\" scale=\"\" doubleside=\"\" tonemap=\"\"]"
+            "[3d_image_new name=\"\" texture=\"\" width=\"\" height=\"\" pos=\"\" rot=\"\" scale=\"\" doubleside=\"\" tonemap=\"\" cond=\"\"]"
         ],
         "description": [
             "イメージの3Dモデルを定義します。",
@@ -2777,6 +3029,8 @@
             "    テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。",
             "  tonemap:",
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";3Dイメージ",
             "[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ]",
@@ -2786,7 +3040,7 @@
     "[3d_show]": {
         "prefix": "3d_show",
         "body": [
-            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\"]"
+            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" cond=\"\"]"
         ],
         "description": [
             "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
@@ -2803,6 +3057,8 @@
             "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
             "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";3Dイメージ",
             "[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ]",
@@ -2812,7 +3068,7 @@
     "[3d_hide]": {
         "prefix": "3d_hide",
         "body": [
-            "[3d_hide name=\"\" time=\"\" wait=\"\"]"
+            "[3d_hide name=\"\" time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dオブジェクトをゲーム画面から退場させます。",
@@ -2825,6 +3081,8 @@
             "    退場させるまでの時間をミリ秒で指定します。デフォルトは500",
             "  wait:",
             "    退場の完了を待つか否か。デフォルトはtrue。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";3Dイメージ",
             "[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ]",
@@ -2837,7 +3095,7 @@
     "[3d_hide_all]": {
         "prefix": "3d_hide_all",
         "body": [
-            "[3d_hide_all time=\"\" wait=\"\"]"
+            "[3d_hide_all time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "すべての3Dオブジェクトをゲーム画面から退場させます。",
@@ -2848,6 +3106,8 @@
             "    退場させるまでの時間をミリ秒で指定します。デフォルトは500",
             "  wait:",
             "    退場の完了を待つか否か。デフォルトはtrue。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2855,7 +3115,7 @@
     "[3d_delete]": {
         "prefix": "3d_delete",
         "body": [
-            "[3d_delete name=\"\"]"
+            "[3d_delete name=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dオブジェクトを削除します。",
@@ -2865,6 +3125,8 @@
             "[パラメータ]",
             "  name[必須]:",
             "    3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";3Dイメージ",
             "[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ]",
@@ -2880,12 +3142,14 @@
     "[3d_delete_all]": {
         "prefix": "3d_delete_all",
         "body": [
-            "[3d_delete_all]"
+            "[3d_delete_all cond=\"\"]"
         ],
         "description": [
             "3Dオブジェクトをすべて削除します。",
             "3Dシーンをリセットするときに利用します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2893,12 +3157,14 @@
     "[3d_canvas_show]": {
         "prefix": "3d_canvas_show",
         "body": [
-            "[3d_canvas_show]"
+            "[3d_canvas_show cond=\"\"]"
         ],
         "description": [
             "3Dキャンバスを表示にします。",
             "例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
         ]
@@ -2906,13 +3172,15 @@
     "[3d_canvas_hide]": {
         "prefix": "3d_canvas_hide",
         "body": [
-            "[3d_canvas_hide]"
+            "[3d_canvas_hide cond=\"\"]"
         ],
         "description": [
             "3Dキャンバスを非表示にします。",
             "3Dシーン自体は維持されます。",
             "例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
         ]
@@ -2920,13 +3188,15 @@
     "[3d_close]": {
         "prefix": "3d_close",
         "body": [
-            "[3d_close]"
+            "[3d_close cond=\"\"]"
         ],
         "description": [
             "3Dシーンをすべて削除します。",
             "このタグを使用すると3D系の機能は全て使えなくなります。",
             "もう一度使用する場合は[3d_init]タグを通過させてください。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2934,7 +3204,7 @@
     "[3d_anim]": {
         "prefix": "3d_anim",
         "body": [
-            "[3d_anim name=\"\" pos=\"\" rot=\"\" scale=\"\" time=\"\" wait=\"\" lookat=\"\" effect=\"\"]"
+            "[3d_anim name=\"\" pos=\"\" rot=\"\" scale=\"\" time=\"\" wait=\"\" lookat=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "シーン上の3Dオブジェクトをアニメーションさせることができます。",
@@ -2956,6 +3226,8 @@
             "  effect:",
             "    変化のエフェクトを指定します。指定できる文字列は以下の種類です",
             "    jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_model_new name=\"mymodel\" storage=\"mymodel/scene.gltf\" ]",
             "[3d_anim name=\"miruku\" pos=\"79,-458,727\" scale=\"318.45,318.45,318.45\" rot=\"0.13,-0.64,0\" effect=\"easeInCubic\" wait=true]"
@@ -2964,7 +3236,7 @@
     "[3d_anim_stop]": {
         "prefix": "3d_anim_stop",
         "body": [
-            "[3d_anim_stop name=\"\" finish=\"\"]"
+            "[3d_anim_stop name=\"\" finish=\"\" cond=\"\"]"
         ],
         "description": [
             "アニメーション中の3Dオブジェクトを停止することができます。",
@@ -2973,6 +3245,8 @@
             "    アニメーションを停止する3Dオブジェクトの名前を指定します。",
             "  finish:",
             "    true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -2980,7 +3254,7 @@
     "[3d_scene]": {
         "prefix": "3d_scene",
         "body": [
-            "[3d_scene tonemap=\"\" tonemap_value=\"\" light_amb=\"\"]"
+            "[3d_scene tonemap=\"\" tonemap_value=\"\" light_amb=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dのシーン全体に影響する設定を行うことができます。",
@@ -2991,6 +3265,8 @@
             "    トーンマッピングの強さを設定します。デフォルトは0.8です。",
             "  light_amb:",
             "    環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_scene light_amb=\"2\" tonemap=\"\"]"
         ]
@@ -2998,7 +3274,7 @@
     "[3d_camera]": {
         "prefix": "3d_camera",
         "body": [
-            "[3d_camera pos=\"\" rot=\"\" tonemap=\"\" lookat=\"\"]"
+            "[3d_camera pos=\"\" rot=\"\" tonemap=\"\" lookat=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dシーンのカメラを設定できます。",
@@ -3012,6 +3288,8 @@
             "    トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。",
             "  lookat:",
             "    シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_camera pos=\"10,20,30\" ]"
         ]
@@ -3019,7 +3297,7 @@
     "[3d_gyro]": {
         "prefix": "3d_gyro",
         "body": [
-            "[3d_gyro max_x=\"\" max_y=\"\" mode=\"\"]"
+            "[3d_gyro max_x=\"\" max_y=\"\" mode=\"\" cond=\"\"]"
         ],
         "description": [
             "スマホの傾きでカメラを制御することができます。",
@@ -3031,6 +3309,8 @@
             "    Y軸方向の傾き上限を角度で指定します。デフォルトは30",
             "  mode:",
             "    position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_gyro max_x=\"20\" max_y=\"20\" ]"
         ]
@@ -3038,7 +3318,7 @@
     "[3d_gyro_stop]": {
         "prefix": "3d_gyro_stop",
         "body": [
-            "[3d_gyro_stop]"
+            "[3d_gyro_stop cond=\"\"]"
         ],
         "description": [
             "スマホ限定",
@@ -3046,6 +3326,8 @@
             "カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定してください。",
             "再度ジャイロを有効にしたい場合は [3d_gyro] タグです。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3053,7 +3335,7 @@
     "[3d_debug_camera]": {
         "prefix": "3d_debug_camera",
         "body": [
-            "[3d_debug_camera button_text=\"\" menu=\"\"]"
+            "[3d_debug_camera button_text=\"\" menu=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整することができます。",
@@ -3067,6 +3349,8 @@
             "    デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」",
             "  menu:",
             "    デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示)",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_debug_camera ]"
         ]
@@ -3074,7 +3358,7 @@
     "[3d_motion]": {
         "prefix": "3d_motion",
         "body": [
-            "[3d_motion name=\"\" motion=\"\"]"
+            "[3d_motion name=\"\" motion=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dモデルのモーションを変更することができます。",
@@ -3083,6 +3367,8 @@
             "    3Dオブジェクトの名前を指定します。",
             "  motion[必須]:",
             "    モーション名を指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";モデルの定義。最初はRunningというモーションで表示。",
             "[3d_model_new name=\"Robot\" storage=\"Robot.glb\" pos=\"0,0,0\" scale=\"2\" motion=\"Running\" ]",
@@ -3096,7 +3382,7 @@
     "[3d_debug]": {
         "prefix": "3d_debug",
         "body": [
-            "[3d_debug name=\"\" button_text=\"\" menu=\"\" overlap=\"\" reset=\"\"]"
+            "[3d_debug name=\"\" button_text=\"\" menu=\"\" overlap=\"\" reset=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整することができます。",
@@ -3117,6 +3403,8 @@
             "    true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase",
             "  reset:",
             "    true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[3d_model_new name=\"Robot\" storage=\"Robot.glb\" ]",
             "[3d_show name=\"Robot\" rot=\"0.28,0.67,0\" pos=\"-129,-24,910\" scale=\"9.68\" ]",
@@ -3129,7 +3417,7 @@
     "[config_record_label]": {
         "prefix": "config_record_label",
         "body": [
-            "[config_record_label color=\"\" skip=\"\"]"
+            "[config_record_label color=\"\" skip=\"\" cond=\"\"]"
         ],
         "description": [
             "既読管理に関する設定を変更できます",
@@ -3138,6 +3426,8 @@
             "    既読時のテキスト色を0x000000形式で指定してください",
             "  skip:",
             "    未読スキップをの有効(true)、無効(false)を指定します。つまりfalseを指定すると、未読文章で止まります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3145,11 +3435,13 @@
     "[l]": {
         "prefix": "l",
         "body": [
-            "[l]"
+            "[l cond=\"\"]"
         ],
         "description": [
             "このタグの位置でクリック待ちを行います。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[l]",
             "テキスト表示[l][r]"
@@ -3158,11 +3450,13 @@
     "[p]": {
         "prefix": "p",
         "body": [
-            "[p]"
+            "[p cond=\"\"]"
         ],
         "description": [
             "改ページをともなうクリック待ちで使用できます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[p]",
             "テキスト表示[p][r]"
@@ -3171,7 +3465,7 @@
     "[graph]": {
         "prefix": "graph",
         "body": [
-            "[graph storage=\"\"]"
+            "[graph storage=\"\" cond=\"\"]"
         ],
         "description": [
             "任意の画像をメッセージ中に表示します。",
@@ -3182,6 +3476,8 @@
             "[パラメータ]",
             "  storage[必須]:",
             "    表示する画像ファイル名を指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "; heart にはハートマークの画像",
             "[macro name=\"heart\"][graph storage=\"heart.png\"][endmacro]",
@@ -3193,7 +3489,7 @@
     "[jump]": {
         "prefix": "jump",
         "body": [
-            "[jump storage=\"\" target=\"\"]"
+            "[jump storage=\"\" target=\"\" cond=\"\"]"
         ],
         "description": [
             "指定されたファイルの指定されたラベルに移動します",
@@ -3203,6 +3499,8 @@
             "    移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます",
             "  target:",
             "    ジャンプ先のラベル名を指定します。省略すると先頭から実行されます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "; second.ks というシナリオファイルの　*start　ラベルへ移動する",
             "[jump storage=second.ks target=*start]"
@@ -3211,11 +3509,13 @@
     "[r]": {
         "prefix": "r",
         "body": [
-            "[r]"
+            "[r cond=\"\"]"
         ],
         "description": [
             "改行します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[l]",
             "改行します[l][r]",
@@ -3225,11 +3525,13 @@
     "[er]": {
         "prefix": "er",
         "body": [
-            "[er]"
+            "[er cond=\"\"]"
         ],
         "description": [
             "現在の操作対象メッセージレイヤ(current指定)の文字を消去します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[l]",
             "メッセージをクリアします[l][er]",
@@ -3239,7 +3541,7 @@
     "[cm]": {
         "prefix": "cm",
         "body": [
-            "[cm]"
+            "[cm cond=\"\"]"
         ],
         "description": [
             "すべてのメッセージレイヤをクリアします。",
@@ -3247,6 +3549,8 @@
             "ただし、positionやlayoptで指定した値は引き継がれます",
             "[ct]タグのように 操作対象のメッセージレイヤが表ページの message0 に指定されるようなことはありません。 このタグを実行後も操作対象のレイヤは同じです。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[l]",
             "画面クリアする[l][cm]",
@@ -3256,13 +3560,15 @@
     "[ct]": {
         "prefix": "ct",
         "body": [
-            "[ct]"
+            "[ct cond=\"\"]"
         ],
         "description": [
             "メッセージレイヤをリセットします。",
             "すべてのメッセージレイヤの文字は消去され、操作対象のメッセージレイヤは 表ページの message0 に指定されます。",
             "font タグで指定した文字の属性、style タグ で指定したスタイルはすべて標準状態に戻ります。ただ し、position タグ や layopt タグで指定した属性は引き継が れます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "テキスト表示[l]",
             "画面クリアする[l][ct]",
@@ -3272,7 +3578,7 @@
     "[current]": {
         "prefix": "current",
         "body": [
-            "[current layer=\"\" page=\"\"]"
+            "[current layer=\"\" page=\"\" cond=\"\"]"
         ],
         "description": [
             "操作対象とするメッセージレイヤを指定します。以後、文章や font タグでの文字属性の指定、l タグ等のクリック待ちなどは、このレイヤに対して行われます。",
@@ -3282,6 +3588,8 @@
             "    操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます",
             "  page:",
             "    表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[current layer=\"message0\"]",
             "message0レイヤに表示されています[l]",
@@ -3292,7 +3600,7 @@
     "[position]": {
         "prefix": "position",
         "body": [
-            "[position layer=\"\" page=\"\" left=\"\" top=\"\" width=\"\" height=\"\" frame=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" marginl=\"\" margint=\"\" marginr=\"\" marginb=\"\" radius=\"\" vertical=\"\" visible=\"\"]"
+            "[position layer=\"\" page=\"\" left=\"\" top=\"\" width=\"\" height=\"\" frame=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" marginl=\"\" margint=\"\" marginr=\"\" marginb=\"\" radius=\"\" vertical=\"\" visible=\"\" cond=\"\"]"
         ],
         "description": [
             "メッセージレイヤに対する様々な属性を指定します。<br />",
@@ -3341,6 +3649,8 @@
             "  visible:",
             "    true に設定すると、メッセージレイヤが可視(表示状態)になります。",
             "    false に設定すると、メッセージレイヤは不可視(非表示状態)になります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";メッセージレイヤの位置とサイズを変更",
             "[position width=400 height=300 top=100 left=20]",
@@ -3351,7 +3661,7 @@
     "[fuki_start]": {
         "prefix": "fuki_start",
         "body": [
-            "[fuki_start layer=\"\"]"
+            "[fuki_start layer=\"\" cond=\"\"]"
         ],
         "description": [
             "メッセージレイヤを漫画のふきだし風に表現できます。<br />",
@@ -3360,6 +3670,8 @@
             "[パラメータ]",
             "  layer:",
             "    対象とするメッセージレイヤを指定します。デフォルトはmessage0",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";通常のメッセージレイヤに対して、ふきだしに適応したいデザインを設定する",
             "[font color=\"black\"]",
@@ -3388,12 +3700,14 @@
     "[fuki_stop]": {
         "prefix": "fuki_stop",
         "body": [
-            "[fuki_stop]"
+            "[fuki_stop cond=\"\"]"
         ],
         "description": [
             "ふきだし表示を停止します。",
             "メッセージレイヤのスタイルは[fuki_start]前の状態に戻ります。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3401,7 +3715,7 @@
     "[fuki_chara]": {
         "prefix": "fuki_chara",
         "body": [
-            "[fuki_chara name=\"\" left=\"\" top=\"\" sippo=\"\" sippo_left=\"\" sippo_top=\"\" sippo_width=\"\" sippo_top=\"\" max_width=\"\" fix_width=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" radius=\"\" font_color=\"\" font_size=\"\"]"
+            "[fuki_chara name=\"\" left=\"\" top=\"\" sippo=\"\" sippo_left=\"\" sippo_top=\"\" sippo_width=\"\" sippo_top=\"\" max_width=\"\" fix_width=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" radius=\"\" font_color=\"\" font_size=\"\" cond=\"\"]"
         ],
         "description": [
             "ふきだしを有効にしたとき、表示形式をキャラクター毎に設定できます。",
@@ -3441,6 +3755,8 @@
             "    フォントの色を指定できます。0xRRGGBB 形式で指定してください。",
             "  font_size:",
             "    フォントサイズを指定できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";ふきだしの表示位置をキャラごとに設定する",
             "[fuki_chara name=\"akane\" left=200 top=270 sippo_left=30 sippo_top=30 sippo=\"top\" max_width=300 radius=15]",
@@ -3453,7 +3769,7 @@
     "[image]": {
         "prefix": "image",
         "body": [
-            "[image storage=\"\" layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" x=\"\" y=\"\" width=\"\" height=\"\" folder=\"\" name=\"\" time=\"\" wait=\"\" zindex=\"\" depth=\"\" reflect=\"\" pos=\"\"]"
+            "[image storage=\"\" layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" x=\"\" y=\"\" width=\"\" height=\"\" folder=\"\" name=\"\" time=\"\" wait=\"\" zindex=\"\" depth=\"\" reflect=\"\" pos=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤに画像を表示します。キャラクター表示や背景切り替えなどに使用できます。前景レイヤは初期状態では非表示なのでvisible=trueとすることで表示されます",
@@ -3499,6 +3815,8 @@
             "    left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。",
             "    この属性を指定した場合は left 属性や top 属性は無視されます。",
             "    layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfig.tjsで事前に設定しておきましょう",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";画像ファイルを表示",
             "[layopt layer=1 visible=true]",
@@ -3511,7 +3829,7 @@
     "[freeimage]": {
         "prefix": "freeimage",
         "body": [
-            "[freeimage layer=\"\" page=\"\" time=\"\" wait=\"\"]"
+            "[freeimage layer=\"\" page=\"\" time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤに追加された要素をすべて削除します　レイヤ指定は必須です。",
@@ -3524,6 +3842,8 @@
             "    ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます",
             "  wait:",
             "    完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";イメージの表示",
             "[image layer=0 page=fore visible=true top=100 left=300 storage=chara.png]",
@@ -3541,7 +3861,7 @@
     "[free]": {
         "prefix": "free",
         "body": [
-            "[free layer=\"\" name=\"\" time=\"\" wait=\"\"]"
+            "[free layer=\"\" name=\"\" time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤに追加されたnameで指定された要素をすべて削除します　name指定は必須です。",
@@ -3554,6 +3874,8 @@
             "    ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます",
             "  wait:",
             "    削除の完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[backlay]",
             ";キャラクター表示",
@@ -3568,7 +3890,7 @@
     "[ptext]": {
         "prefix": "ptext",
         "body": [
-            "[ptext layer=\"\" page=\"\" text=\"\" x=\"\" y=\"\" vertical=\"\" size=\"\" face=\"\" color=\"\" bold=\"\" edge=\"\" shadow=\"\" name=\"\" width=\"\" align=\"\" time=\"\" overwrite=\"\"]"
+            "[ptext layer=\"\" page=\"\" text=\"\" x=\"\" y=\"\" vertical=\"\" size=\"\" face=\"\" color=\"\" bold=\"\" edge=\"\" shadow=\"\" name=\"\" width=\"\" align=\"\" time=\"\" overwrite=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤにテキストを表示します。前景レイヤに対してのみ実行します<br />",
@@ -3611,6 +3933,8 @@
             "    ミリ秒を指定します。指定した時間をかけて徐々に表示させることができます",
             "  overwrite:",
             "    true か false を指定します。同時にnameを指定している場合既に存在するptextの内容を変更できます。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[backlay]",
             "[ptext page=back text=\"テキストテキスト\" size=30 x=200 y=300 color=red vertical=true]",
@@ -3624,7 +3948,7 @@
     "[mtext]": {
         "prefix": "mtext",
         "body": [
-            "[mtext layer=\"\" page=\"\" text=\"\" x=\"\" y=\"\" vertical=\"\" size=\"\" face=\"\" color=\"\" width=\"\" align=\"\" name=\"\" bold=\"\" edge=\"\" shadow=\"\" fadeout=\"\" time=\"\" wait=\"\" in_effect=\"\" in_delay=\"\" in_delay_scale=\"\" in_sync=\"\" in_shuffle=\"\" in_reverse=\"\" out_effect=\"\" out_delay=\"\" out_delay_scale=\"\" out_sync=\"\" out_shuffle=\"\" out_reverse=\"\"]"
+            "[mtext layer=\"\" page=\"\" text=\"\" x=\"\" y=\"\" vertical=\"\" size=\"\" face=\"\" color=\"\" width=\"\" align=\"\" name=\"\" bold=\"\" edge=\"\" shadow=\"\" fadeout=\"\" time=\"\" wait=\"\" in_effect=\"\" in_delay=\"\" in_delay_scale=\"\" in_sync=\"\" in_shuffle=\"\" in_reverse=\"\" out_effect=\"\" out_delay=\"\" out_delay_scale=\"\" out_sync=\"\" out_shuffle=\"\" out_reverse=\"\" cond=\"\"]"
         ],
         "description": [
             "多彩な演出効果をもったテキストを画面上に表示します。",
@@ -3693,6 +4017,8 @@
             "    trueを指定すると、文字アニメーションのタイミングがランダムに実行されます。デフォルトはfalse",
             "  out_reverse:",
             "    trueを指定すると、文字が後ろから消えていきます。デフォルトはfalse\"",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";デフォルトは前景レイヤは配置されますので表示状態にしておく",
             "[layopt layer=0 visible=true]",
@@ -3702,7 +4028,7 @@
     "[backlay]": {
         "prefix": "backlay",
         "body": [
-            "[backlay layer=\"\"]"
+            "[backlay layer=\"\" cond=\"\"]"
         ],
         "description": [
             "指定したレイヤ、あるいはすべてのレイヤの情報を、表ページから裏ページに コピーします。",
@@ -3716,6 +4042,8 @@
             "    message0 または message1 を指定するとメッセージレイヤにな ります。",
             "    単に message とのみ指定した場合は、 current タグで指定した現在の操作対象のメッセージレイヤが 対象になります ( 裏ページのメッセージレイヤが操作対象であっても そのメッセージレイヤの表ページ→裏ページへのコピーが行われます )。",
             "    省略すると、すべてのレイヤの情報が裏ページにコピーされます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";背景変更をトランジションで実施",
             "@layopt layer=message0 visible=false",
@@ -3728,11 +4056,13 @@
     "[wt]": {
         "prefix": "wt",
         "body": [
-            "[wt]"
+            "[wt cond=\"\"]"
         ],
         "description": [
             "トランジションが終了するまで、待ちます。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[backlay]",
             "[image layer=base page=back storage=rouka.jpg]",
@@ -3744,7 +4074,7 @@
     "[link]": {
         "prefix": "link",
         "body": [
-            "[link storage=\"\" target=\"\"]"
+            "[link storage=\"\" target=\"\" cond=\"\"]"
         ],
         "description": [
             "link タグと endlink タグで囲まれた部分の文章を、 マウスやキーボードで選択可能にし、そこでクリックされたりキーを押されたときに、 ジャンプする先を指定できます。",
@@ -3754,6 +4084,8 @@
             "    ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます",
             "  target:",
             "    ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "選択肢を表示します[l][r][r]",
             "",
@@ -3781,11 +4113,13 @@
     "[endlink]": {
         "prefix": "endlink",
         "body": [
-            "[endlink]"
+            "[endlink cond=\"\"]"
         ],
         "description": [
             "ハイパーリンク（選択肢）の終了を示します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[link target=*select1]【１】選択肢　その１[endlink][r]",
             "[link target=*select2]【２】選択肢　その２[endlink][r]"
@@ -3794,12 +4128,14 @@
     "[s]": {
         "prefix": "s",
         "body": [
-            "[s]"
+            "[s cond=\"\"]"
         ],
         "description": [
             "シナリオファイルの実行を停止します。",
             "linkタグで選択肢表示した直後などに配置して利用する方法があります。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[link target=*select1]【１】選択肢　その１[endlink][r]",
             "[link target=*select2]【２】選択肢　その２[endlink][r]",
@@ -3809,13 +4145,15 @@
     "[wait]": {
         "prefix": "wait",
         "body": [
-            "[wait time=\"\"]"
+            "[wait time=\"\" cond=\"\"]"
         ],
         "description": [
             "ウェイトを入れます。time属性で指定した時間、操作できなくなります。",
             "[パラメータ]",
             "  time[必須]:",
             "    ウェイトをミリ秒で指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";2000ミリ秒（２秒）処理を停止します",
             "[wait time=2000]"
@@ -3824,12 +4162,14 @@
     "[wait_cancel]": {
         "prefix": "wait_cancel",
         "body": [
-            "[wait_cancel]"
+            "[wait_cancel cond=\"\"]"
         ],
         "description": [
             "[wait]タグで待ち状態のスタックが存在する場合、キャンセルできます。",
             "これは[wait]中にボタンクリックなどでジャンプした先でキャンセルするような使い方をします。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3837,12 +4177,14 @@
     "[hidemessage]": {
         "prefix": "hidemessage",
         "body": [
-            "[hidemessage]"
+            "[hidemessage cond=\"\"]"
         ],
         "description": [
             "メッセージレイヤを一時的に隠します。メニューから「メッセージを消す」を選んだのと 同じ動作を行います。",
             "クリック待ちを行った後、メッセージレイヤは表示され、 実行は継続します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3850,7 +4192,7 @@
     "[quake]": {
         "prefix": "quake",
         "body": [
-            "[quake count=\"\" wait=\"\" time=\"\" hmax=\"\" vmax=\"\"]"
+            "[quake count=\"\" wait=\"\" time=\"\" hmax=\"\" vmax=\"\" cond=\"\"]"
         ],
         "description": [
             "指定したミリ秒だけ、画面を揺らします。（KAGの文字数指定は未対応）",
@@ -3866,6 +4208,8 @@
             "    揺れの横方向への最大振幅を指定します。省略すると 10(px) が指定されたと見なされます。",
             "  vmax:",
             "    揺れの縦方向への最大振幅を指定します。省略すると 10(px) が指定されたと見なされます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[quake count=5 time=300 hmax=20]"
         ]
@@ -3873,7 +4217,7 @@
     "[font]": {
         "prefix": "font",
         "body": [
-            "[font size=\"\" color=\"\" bold=\"\" italic=\"\" face=\"\" edge=\"\" shadow=\"\" effect=\"\" effect_speed=\"\"]"
+            "[font size=\"\" color=\"\" bold=\"\" italic=\"\" face=\"\" edge=\"\" shadow=\"\" effect=\"\" effect_speed=\"\" cond=\"\"]"
         ],
         "description": [
             "文字の様々な属性を指定します。",
@@ -3900,6 +4244,8 @@
             "    /zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none",
             "  effect_speed:",
             "    effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[font size=40 bold=true]",
             "この文字は大きく、そして太字で表示されます。",
@@ -3910,7 +4256,7 @@
     "[deffont]": {
         "prefix": "deffont",
         "body": [
-            "[deffont size=\"\" color=\"\" bold=\"\" italic=\"\" edge=\"\" shadow=\"\" effect_speed=\"\"]"
+            "[deffont size=\"\" color=\"\" bold=\"\" italic=\"\" edge=\"\" shadow=\"\" effect_speed=\"\" cond=\"\"]"
         ],
         "description": [
             "現在操作対象のメッセージレイヤに対する、デフォルトの文字属性を指定します。",
@@ -3931,6 +4277,8 @@
             "    文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してくださいeffect",
             "  effect_speed:",
             "    effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3938,7 +4286,7 @@
     "[delay]": {
         "prefix": "delay",
         "body": [
-            "[delay speed=\"\"]"
+            "[delay speed=\"\" cond=\"\"]"
         ],
         "description": [
             "文字の表示速度を指定します。",
@@ -3946,6 +4294,8 @@
             "[パラメータ]",
             "  speed:",
             "    文字の表示速度を指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3953,11 +4303,13 @@
     "[resetdelay]": {
         "prefix": "resetdelay",
         "body": [
-            "[resetdelay]"
+            "[resetdelay cond=\"\"]"
         ],
         "description": [
             "文字の表示速度をデフォルト速度に戻します",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3965,7 +4317,7 @@
     "[configdelay]": {
         "prefix": "configdelay",
         "body": [
-            "[configdelay speed=\"\"]"
+            "[configdelay speed=\"\" cond=\"\"]"
         ],
         "description": [
             "デフォルトの文字の表示速度を指定します。",
@@ -3974,6 +4326,8 @@
             "[パラメータ]",
             "  speed:",
             "    文字の表示速度を指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3981,11 +4335,13 @@
     "[nowait]": {
         "prefix": "nowait",
         "body": [
-            "[nowait]"
+            "[nowait cond=\"\"]"
         ],
         "description": [
             "待ち時間なしに、テキストを配置します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -3993,11 +4349,13 @@
     "[endnowait]": {
         "prefix": "endnowait",
         "body": [
-            "[endnowait]"
+            "[endnowait cond=\"\"]"
         ],
         "description": [
             "テキストメッセージは前回nowaitタグを指定した時のスピードへ戻ります",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -4005,12 +4363,14 @@
     "[resetfont]": {
         "prefix": "resetfont",
         "body": [
-            "[resetfont]"
+            "[resetfont cond=\"\"]"
         ],
         "description": [
             "font タグで指定した文字の属性をデフォルトに戻します。",
             "文字属性は、メッセージレイヤごとに個別に設定できます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -4018,7 +4378,7 @@
     "[layopt]": {
         "prefix": "layopt",
         "body": [
-            "[layopt layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" opacity=\"\"]"
+            "[layopt layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" opacity=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤの属性を指定します。",
@@ -4035,6 +4395,8 @@
             "    layer 属性で指定したレイヤの上端位置を指定します。 省略すると位置は変更しません。　layer 属性に message0 や message1 を指定した場合は、むしろ position タグで位置等を指定してください。",
             "  opacity:",
             "    レイヤの不透明度を指定します。０～２５５の範囲で指定してください（２５５で全くの不透明）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ";メッセージレイヤを消去",
             "@layopt layer=message0 visible=false",
@@ -4049,7 +4411,7 @@
     "[ruby]": {
         "prefix": "ruby",
         "body": [
-            "[ruby text=\"\"]"
+            "[ruby text=\"\" cond=\"\"]"
         ],
         "description": [
             "次の一文字に対するルビを指定します。",
@@ -4058,6 +4420,8 @@
             "[パラメータ]",
             "  text[必須]:",
             "    ルビとして表示させる文字を指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[ruby text=\"かん\"]漢[ruby text=\"じ\"]字"
         ]
@@ -4065,7 +4429,7 @@
     "[mark]": {
         "prefix": "mark",
         "body": [
-            "[mark color=\"\" font_color=\"\" size=\"\"]"
+            "[mark color=\"\" font_color=\"\" size=\"\" cond=\"\"]"
         ],
         "description": [
             "テキストに蛍光ペンでマーカーを引いたような効果をつけることができます。",
@@ -4077,6 +4441,8 @@
             "    マーカーを引いたときのフォントの色を指定できます。0xRRGGBB 形式で指定してください。指定しないときはゲーム中のフォント色を継承します。",
             "  size:",
             "    マーカーのサイズを指定できます。0〜100の間で指定してください。例えば50だとテキストの半分までマーカーがひかれます。10だと下線になります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。",
             "",
@@ -4086,11 +4452,13 @@
     "[endmark]": {
         "prefix": "endmark",
         "body": [
-            "[endmark]"
+            "[endmark cond=\"\"]"
         ],
         "description": [
             "[mark]タグで開始したテキストマーカーを終了します。",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。",
             "",
@@ -4100,12 +4468,14 @@
     "[cancelskip]": {
         "prefix": "cancelskip",
         "body": [
-            "[cancelskip]"
+            "[cancelskip cond=\"\"]"
         ],
         "description": [
             "スキップ状態の解除を行います。",
             "プレイヤーにスキップ状態の停止を強制させることができます",
             "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
@@ -4113,7 +4483,7 @@
     "[locate]": {
         "prefix": "locate",
         "body": [
-            "[locate x=\"\" y=\"\"]"
+            "[locate x=\"\" y=\"\" cond=\"\"]"
         ],
         "description": [
             "グラフィックボタンの表示位置を指定します。",
@@ -4123,6 +4493,8 @@
             "    横方向位置指定",
             "  y:",
             "    縦方向位置指定",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[locate x=20 y=100]",
             "[button graphic=\"oda.png\" target=*oda]",
@@ -4134,7 +4506,7 @@
     "[button]": {
         "prefix": "button",
         "body": [
-            "[button graphic=\"\" storage=\"\" target=\"\" name=\"\" x=\"\" y=\"\" width=\"\" height=\"\" fix=\"\" savesnap=\"\" folder=\"\" exp=\"\" preexp=\"\" hint=\"\" clickse=\"\" enterse=\"\" leavese=\"\" clickimg=\"\" enterimg=\"\" visible=\"\" auto_next=\"\" role=\"\"]"
+            "[button graphic=\"\" storage=\"\" target=\"\" name=\"\" x=\"\" y=\"\" width=\"\" height=\"\" fix=\"\" savesnap=\"\" folder=\"\" exp=\"\" preexp=\"\" hint=\"\" clickse=\"\" enterse=\"\" leavese=\"\" clickimg=\"\" enterimg=\"\" visible=\"\" auto_next=\"\" role=\"\" cond=\"\"]"
         ],
         "description": [
             "グラフィカルボタンを表示します。",
@@ -4190,6 +4562,8 @@
             "    true or false を指定します。falseを指定すると、fixの場合、[return]で戻った時に次のタグへ進ませません。",
             "  role:",
             "    ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。fullscreen(フルスクリーン切り替え)。quicksave(クイックセーブ実行)。quickload(クイックロード実行)。auto（オート開始）。sleepgame（ゲームの状態を保存してジャンプ）",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[locate x=20 y=100]",
             "[button graphic=\"oda.png\" target=*oda]",
@@ -4201,7 +4575,7 @@
     "[glink]": {
         "prefix": "glink",
         "body": [
-            "[glink color=\"\" font_color=\"\" storage=\"\" target=\"\" name=\"\" text=\"\" font_color=\"\" x=\"\" y=\"\" width=\"\" height=\"\" preexp=\"\" exp=\"\" size=\"\" face=\"\" graphic=\"\" enterimg=\"\" clickse=\"\" enterse=\"\" leavese=\"\" cm=\"\"]"
+            "[glink color=\"\" font_color=\"\" storage=\"\" target=\"\" name=\"\" text=\"\" font_color=\"\" x=\"\" y=\"\" width=\"\" height=\"\" preexp=\"\" exp=\"\" size=\"\" face=\"\" graphic=\"\" enterimg=\"\" clickse=\"\" enterse=\"\" leavese=\"\" cm=\"\" cond=\"\"]"
         ],
         "description": [
             "グラフィカルなボタンを表示することができます。画像は必要ありません",
@@ -4257,6 +4631,8 @@
             "    ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。",
             "  cm:",
             "    デフォルトはtrue。glinkは通常、ボタンをクリック後、自動的に[cm]タグが実行されます。falseを指定するとこの[cm]を実行しません。プレイヤー入力などの決定をglinkで行いたい場合はfalseを指定しておき、[commit]後に手動で[cm]を実行してボタンや入力ボックスを消してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[glink target=\"j1\" text=\"選択肢１\" size=20 width=\"500\" y=300]",
             "[glink target=\"j2\" text=\"選択肢２\" size=30 width=\"500\" y=400]",
@@ -4268,7 +4644,7 @@
     "[clickable]": {
         "prefix": "clickable",
         "body": [
-            "[clickable width=\"\" height=\"\" x=\"\" y=\"\" borderstyle=\"\" color=\"\" opacity=\"\" mouseopacity=\"\" storage=\"\" target=\"\"]"
+            "[clickable width=\"\" height=\"\" x=\"\" y=\"\" borderstyle=\"\" color=\"\" opacity=\"\" mouseopacity=\"\" storage=\"\" target=\"\" cond=\"\"]"
         ],
         "description": [
             "透明なクリック可能領域を設定することができます。",
@@ -4297,6 +4673,8 @@
             "    クリックされた際のジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。",
             "  target:",
             "    クリックされた際のジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[locate x=20 y=100]",
             "[clickable width=200 height=300 target=*oda]",
@@ -4310,7 +4688,7 @@
     "[glyph]": {
         "prefix": "glyph",
         "body": [
-            "[glyph line=\"\" fix=\"\" left=\"\" top=\"\"]"
+            "[glyph line=\"\" fix=\"\" left=\"\" top=\"\" cond=\"\"]"
         ],
         "description": [
             "クリック待ち記号を表示する位置を設定できます",
@@ -4324,6 +4702,8 @@
             "    fix 属性を true にしたときに記号を表示する位置のうち、左端位置を 指定します",
             "  top:",
             "    fix 属性を true にしたときに記号を表示する位置のうち、上端位置を 指定します",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[glyph fix=true left=200 top=100 ]"
         ]
@@ -4331,7 +4711,7 @@
     "[trans]": {
         "prefix": "trans",
         "body": [
-            "[trans layer=\"\" children=\"\" time=\"\" method=\"\"]"
+            "[trans layer=\"\" children=\"\" time=\"\" method=\"\" cond=\"\"]"
         ],
         "description": [
             "指定したレイヤでトランジションを行います。",
@@ -4358,6 +4738,8 @@
             "    zoomInRight/zoomInUp/slideInDown/slideInLeft/",
             "    slideInRight/slideInUp/bounceIn /bounceInDown/",
             "    bounceInLeft/bounceInRight/bounceInUp/rollIn(V450以前)指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[backlay]",
             "[image storage=fg0 layer=0 page=back]",
@@ -4368,7 +4750,7 @@
     "[bg]": {
         "prefix": "bg",
         "body": [
-            "[bg storage=\"\" time=\"\" wait=\"\" cross=\"\" position:指定しない場合は画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置することができます。配置位置を指定してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）=\"\" method=\"\"]"
+            "[bg storage=\"\" time=\"\" wait=\"\" cross=\"\" position:指定しない場合は画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置することができます。配置位置を指定してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）=\"\" method=\"\" cond=\"\"]"
         ],
         "description": [
             "背景の切り替えを簡易的に実行できます。",
@@ -4391,6 +4773,8 @@
             "    zoomInRight/zoomInUp/slideInDown/slideInLeft/slideInRight/",
             "    slideInUp/bounceIn /bounceInDown/bounceInLeft/",
             "    bounceInRight/bounceInUp/rollIn/vanishIn/puffIn(V450以前)指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[bg storage=fg0.png time=1500 wait=true]"
         ]
@@ -4398,7 +4782,7 @@
     "[bg2]": {
         "prefix": "bg2",
         "body": [
-            "[bg2 name=\"\" storage=\"\" left=\"\" top=\"\" width=\"\" height=\"\" time=\"\" wait=\"\" cross=\"\" method=\"\"]"
+            "[bg2 name=\"\" storage=\"\" left=\"\" top=\"\" width=\"\" height=\"\" time=\"\" wait=\"\" cross=\"\" method=\"\" cond=\"\"]"
         ],
         "description": [
             "背景の切り替えを簡易的に実行できます。",
@@ -4429,6 +4813,8 @@
             "    zoomInRight/zoomInUp/slideInDown/slideInLeft/slideInRight/",
             "    slideInUp/bounceIn /bounceInDown/bounceInLeft/",
             "    bounceInRight/bounceInUp/rollIn/vanishIn/puffIn(V450以前)指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[bg storage=fg0.png time=1500 wait=true]"
         ]
@@ -4436,7 +4822,7 @@
     "[layermode]": {
         "prefix": "layermode",
         "body": [
-            "[layermode name=\"\" graphic=\"\" color=\"\" mode=\"\" folder=\"\" opacity=\"\" time=\"\" wait=\"\"]"
+            "[layermode name=\"\" graphic=\"\" color=\"\" mode=\"\" folder=\"\" opacity=\"\" time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤの合成を行うことができます。",
@@ -4459,6 +4845,8 @@
             "    合成はフェードインで行われます。合成が完了する時間をミリ秒(１秒",
             "  wait:",
             "    合成の完了を待つか否かを指定できます。trueかfalseを指定してください。デフォルトはtrueです",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[layermode graphic=fg0.png time=1500 mode=overlay]"
         ]
@@ -4466,7 +4854,7 @@
     "[layermode_movie]": {
         "prefix": "layermode_movie",
         "body": [
-            "[layermode_movie name=\"\" video=\"\" volume=\"\" mute=\"\" loop=\"\" speed=\"\" mode=\"\" opacity=\"\" time=\"\" left=\"\" top=\"\" width=\"\" height=\"\" fit=\"\" wait=\"\"]"
+            "[layermode_movie name=\"\" video=\"\" volume=\"\" mute=\"\" loop=\"\" speed=\"\" mode=\"\" opacity=\"\" time=\"\" left=\"\" top=\"\" width=\"\" height=\"\" fit=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "ゲーム画面に動画を合成を行うことができます。",
@@ -4507,6 +4895,8 @@
             "    true or false 演出を画面いっぱいに引き伸ばすことができます。デフォルトはtrue",
             "  wait:",
             "    動作効果の再生完了を待つか否かをtrueかfalseで指定できます。デフォルトはfalseです",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[layermode_movie video=test.webm time=1500 wait=true]"
         ]
@@ -4514,7 +4904,7 @@
     "[free_layermode]": {
         "prefix": "free_layermode",
         "body": [
-            "[free_layermode name=\"\" time=\"\" wait=\"\"]"
+            "[free_layermode name=\"\" time=\"\" wait=\"\" cond=\"\"]"
         ],
         "description": [
             "レイヤの合成を取り消します",
@@ -4525,6 +4915,8 @@
             "    合成はフェードアウトで消えていきます。フェードアウトにかかる時間をミリ秒で指定できます。デフォルトは500ミリ秒です",
             "  wait:",
             "    フェードアウトの完了を待つか否かをtrueかfalseで指定できます。デフォルトはtrueです。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             "[free_layermode name=\"test\"]"
         ]
