@@ -14,6 +14,13 @@
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
 
+## 機能（Web版）
+
+[Web版vscode](https://vscode.dev/)でも一部機能が使用可能です。
+ver0.7.0現在ではシンタックスハイライト以外の機能追加予定はありません。
+
+* シンタックスハイライト
+
 ## Release Notes
 
 変更点については以下のリンクをご確認ください。

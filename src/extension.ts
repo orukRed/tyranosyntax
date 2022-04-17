@@ -8,6 +8,7 @@ import { TagHoverProvider } from './TagHoverProvider';
 import { OutlineProvider } from './OutlineProvider';
 import { TyranoCompletionItemProvider } from './TyranoCompletionItemProvider';
 import { TyranoDiagnostic } from './TyranoDiagnostic';
+const kstg = require("kstg");//kstgのインストール https://github.com/komsomolskinari/kstg
 
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
@@ -25,8 +26,17 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
 
+	//パス機能呼び出しテスト
+	// 	let hoge = kstg.parse(`
+	// *start
+	// [cm  ]
+	// [hoge param="val1"]
+	// [clearfix]
+	// [start_keyconfig]
+	// [bg storage="room.jpg" time="100" cond=f.a=1 ]
+	// `);
 
-
+	// console.log(hoge);
 
 	// //診断機能の登録
 	// const tyranoDiagnostic = new TyranoDiagnostic();
