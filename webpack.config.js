@@ -1,68 +1,47 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Generated using webpack-cli https://github.com/webpack/webpack-cli
 
-//@ts-check
-"use strict";
+const path = require('path');
 
-//@ts-check
-/** @typedef {import('webpack').Configuration} WebpackConfig **/
+const isProduction = process.env.NODE_ENV == 'production';
 
-const path = require("path");
-const webpack = require("webpack");
 
-/** @type WebpackConfig */
-const webExtensionConfig = {
-  mode: "none", // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-  target: "webworker", // extensions run in a webworker context
-  entry: {
-    extension: "./src/web/extension.ts", // source of the web extension main file
-    "test/suite/index": "./src/web/test/suite/index.ts", // source of the web extension test runner
-  },
-  output: {
-    filename: "[name].js",
-    path: path.join(__dirname, "./dist/web"),
-    libraryTarget: "commonjs",
-  },
-  resolve: {
-    mainFields: ["browser", "module", "main"], // look for `browser` entry point in imported node modules
-    extensions: [".ts", ".js"], // support ts-files and js-files
-    alias: {
-      // provides alternate implementation for node module and source files
+const config = {
+    entry: './src/index.ts',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
     },
-    fallback: {
-      // Webpack 5 no longer polyfills Node.js core modules automatically.
-      // see https://webpack.js.org/configuration/resolve/#resolvefallback
-      // for the list of Node.js core module polyfills.
-      assert: require.resolve("assert"),
-    },
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: "ts-loader",
-          },
-        ],
-      },
+    plugins: [
+        // Add your plugins here
+        // Learn more about plugins from https://webpack.js.org/configuration/plugins/
     ],
-  },
-  plugins: [
-    new webpack.ProvidePlugin({
-      process: "process/browser", // provide a shim for the global `process` variable
-    }),
-  ],
-  externals: {
-    vscode: "commonjs vscode", // ignored because it doesn't exist
-  },
-  performance: {
-    hints: false,
-  },
-  devtool: "nosources-source-map", // create a source map that points to the original source file
+    module: {
+        rules: [
+            {
+                test: /\.(ts|tsx)$/i,
+                loader: 'ts-loader',
+                exclude: ['/node_modules/'],
+            },
+            {
+                test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
+                type: 'asset',
+            },
+
+            // Add your rules for custom modules here
+            // Learn more about loaders from https://webpack.js.org/loaders/
+        ],
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+    },
 };
 
-module.exports = [webExtensionConfig];
+module.exports = () => {
+    if (isProduction) {
+        config.mode = 'production';
+        
+        
+    } else {
+        config.mode = 'development';
+    }
+    return config;
+};

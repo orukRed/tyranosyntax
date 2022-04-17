@@ -1,0 +1,1 @@
+{"version":3,"file":"main.js","mappings":"mBAAAA,QAAQC,IAAI,iB","sources":["webpack://tyranosyntax/./src/index.ts"],"sourcesContent":["console.log(\"Hello World!\");\n"],"names":["console","log"],"sourceRoot":""}

@@ -23,7 +23,7 @@
   ],
   "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
   "main": "./out/extension.js",
-  "browser": "./dist/web/extension.js",
+  "browser": "./out/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run package-web",
     "compile-web": "webpack",
@@ -153,11 +153,15 @@
     "@types/vscode": "^1.65.0",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
+    "@webpack-cli/generators": "^2.4.2",
     "eslint": "^8.12.0",
     "glob": "^7.2.0",
     "mocha": "^9.2.2",
+    "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
-    "vscode-test": "^1.5.0"
+    "vscode-test": "^1.5.0",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "ansi-regex": "^6.0.1",
