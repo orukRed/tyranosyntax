@@ -1,5 +1,6 @@
 #.vscodeは無視する
 *.vscode/
 *.vscodeignore
+.gitignore
 
-#.vsixは今後のために保持
+#TODO:いまはgithubにあげちゃってるのでいつか直す

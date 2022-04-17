@@ -39,21 +39,29 @@ class TyranoCompletionItemProvider {
         }
     }
     /**
-     * TODO:変数の予測変換
+     * ラベルの予測変換
+     * *から始まる単語なら予測変換をだす
+     */
+    conpletionLabel() {
+        // comp.kind = vscode.CompletionItemKind.Variable;
+    }
+    /**
+     * //TODO:変数の予測変換
      * f. sf. tf. のいずれかから始まった時予測変換を出す。
      */
     completionVariable() {
+        // comp.kind = vscode.CompletionItemKind.Variable;
     }
     //TODO:[1].storageとかならプロジェクト内のファイルパスを取得
-    //TODO:[2].targetとかならラベルの一覧を取得
     /**
-     * パラメータの値の予測変換
+     * ファイルの予測変換
      *
      */
-    completionValue() {
+    completionFile() {
         //メモ
         //storageパラメータとかでは、必要なフォルダのファイルだけを候補に出したい。例：bgのstorageならbgimageフォルダだけとか。
         // storageパラメータのdescriptionに書いてある文字列によって分岐させる？背景、bgimageって単語があるならbgimage,音楽、BGM,があるならbgmフォルダとか。
+        // comp.kind = vscode.CompletionItemKind.File;
     }
     //TODO:CompletionItemListを編集して必須のパラメータがわかるようにする
     /**

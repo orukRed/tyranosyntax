@@ -8,25 +8,25 @@ import * as vscode from 'vscode';
  */
 export class InformationWorkSpace {
 
-	private static instance:InformationWorkSpace = new InformationWorkSpace();
-	private readonly DATA_DIRECTORY:string = "/data";				//projectRootPath/data
-	private readonly TYRANO_DIRECTORY:string = "/tyrano";		//projectRootPath/tyrano
+	private static instance: InformationWorkSpace = new InformationWorkSpace();
+	private readonly DATA_DIRECTORY: string = "/data";				//projectRootPath/data
+	private readonly TYRANO_DIRECTORY: string = "/tyrano";		//projectRootPath/tyrano
 
-	private dataPathList:string[] = [];											//projectRootPath/data の中に入っているファイルのパス
-	private projectRootPath:string|null = null;							//プロジェクトのルートパス。index.htmlがあるディレクトリが対象。
+	private dataPathList: string[] = [];											//projectRootPath/data の中に入っているファイルのパス
+	private projectRootPath: string | null = null;							//プロジェクトのルートパス。index.htmlがあるディレクトリが対象。
 
-	public static getInstance():InformationWorkSpace{
+	public static getInstance(): InformationWorkSpace {
 		return this.instance;
 	}
 
-	private constructor(){
+	private constructor() {
 
 		//今開いてるプロジェクトのルートパスを読み込む。
 		this.projectRootPath = this.getProjectRootPath();
 
 		//ファイルを再帰的に取得する
 		this.dataPathList = this.getProjectFiles(this.projectRootPath);
-			
+
 	}
 
 
@@ -36,13 +36,13 @@ export class InformationWorkSpace {
 	 * フォルダ開いてない場合、undefined.
 	 * @returns プロジェクトのルートパス。フォルダを開いていないならundefined.
 	 */
-	 private getProjectRootPath():string{
+	private getProjectRootPath(): string {
 		//フォルダ開いてない場合、相対パスたどってプロジェクトのルートパス取ろうと思ったけど万が一Cドライブ直下とかにアクセスすると大惨事なのでNG.
-		if(vscode.workspace.workspaceFolders === undefined){
+		if (vscode.workspace.workspaceFolders === undefined) {
 			return "";
 		}
 
-		return  vscode.workspace.workspaceFolders[0].uri.fsPath;
+		return vscode.workspace.workspaceFolders[0].uri.fsPath;
 	}
 
 	/**
@@ -50,9 +50,9 @@ export class InformationWorkSpace {
 	 * @param projectRootPath プロジェクトのルートパス
 	 * @returns プロジェクトのルートパスが存在するなら存在するファイルパスを文字列型の配列で返却。
 	 */
-	private getProjectFiles(projectRootPath:string):string[]{
+	private getProjectFiles(projectRootPath: string): string[] {
 		//ルートパスが存在していない場合
-		if(projectRootPath === undefined){
+		if (projectRootPath === undefined) {
 			return [];
 		}
 
