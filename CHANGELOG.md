@@ -187,3 +187,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - 予測変換（β版）を実装しました。
 - 予測変換の実装に伴い以前のスニペット機能を削除しました。
 - #やラベルを使用する際、行頭に空白があってもハイライトされるようにしました。
+
+## [0.7.0] - 2022-4-18
+
+- Web版vscodeにて一部機能を使用可能にしました。
