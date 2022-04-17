@@ -191,3 +191,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.7.0] - 2022-4-18
 
 - Web版vscodeにて一部機能を使用可能にしました。
+
+## [0.7.1] - 2022-4-18
+
+- ライブラリの依存関係を更新しました。
