@@ -3,20 +3,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
-const CreateTagByShortcutKey_1 = require("./CreateTagByShortcutKey");
-const TagHoverProvider_1 = require("./TagHoverProvider");
-const OutlineProvider_1 = require("./OutlineProvider");
+const TyranoCreateTagByShortcutKey_1 = require("./TyranoCreateTagByShortcutKey");
+const TyranoTagHoverProvider_1 = require("./TyranoTagHoverProvider");
+const TyranoOutlineProvider_1 = require("./TyranoOutlineProvider");
 const TyranoCompletionItemProvider_1 = require("./TyranoCompletionItemProvider");
 const kstg = require("kstg"); //kstgのインストール https://github.com/komsomolskinari/kstg
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 function activate(context) {
     //登録処理
     //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
-    context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TagHoverProvider_1.TagHoverProvider()));
-    context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new OutlineProvider_1.OutlineProvider()));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider_1.TyranoTagHoverProvider()));
+    context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new TyranoOutlineProvider_1.TyranoOutlineProvider()));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider_1.TyranoCompletionItemProvider()));
     //ショートカットコマンドの登録
-    let ctbs = new CreateTagByShortcutKey_1.CreateTagByShortcutKey();
+    let ctbs = new TyranoCreateTagByShortcutKey_1.TyranoCreateTagByShortcutKey();
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));

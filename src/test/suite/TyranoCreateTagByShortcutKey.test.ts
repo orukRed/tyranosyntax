@@ -3,16 +3,16 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import { CreateTagByShortcutKey } from '../../CreateTagByShortcutKey';
+import { TyranoCreateTagByShortcutKey } from '../../TyranoCreateTagByShortcutKey';
 // import * as myExtension from '../../extension';
 
 
-suite('CreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
+suite('TyranoCreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
 		//値定義
-		let ctby = new CreateTagByShortcutKey();
+		let ctby = new TyranoCreateTagByShortcutKey();
 		let excepted = true;
 
 		//実行
@@ -25,12 +25,12 @@ suite('CreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
 });
 
 
-suite('CreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
+suite('TyranoCreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
 		//値定義
-		let ctby = new CreateTagByShortcutKey();
+		let ctby = new TyranoCreateTagByShortcutKey();
 		let excepted = true;
 
 		//実行
@@ -42,12 +42,12 @@ suite('CreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
 });
 
 
-suite('CreateTagByShortcutKey.KeyPushAltEnter関数', () => {
+suite('TyranoCreateTagByShortcutKey.KeyPushAltEnter関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('正常系', () => {
 		//値定義
-		let ctby = new CreateTagByShortcutKey();
+		let ctby = new TyranoCreateTagByShortcutKey();
 		let excepted = true;
 
 		//実行

@@ -9,7 +9,7 @@ import { InformationWorkSpace } from './InformationWorkSpace';
  * →理想はタグごとのパラメータによってscenarioディレクトリだけのスニペットが出るとかbgディレクトリだけのスニペットが出るとか。
  * [2]シナリオ中で定義した変数とマクロを読み込んでスニペット登録
  * →テキストエディタに変更加わるたびにワークスペースに更新掛ける必要がある。
- * [3]公式で提供されているマクロのスニペット登録
+ * OK.[3]公式で提供されているタグの予測変換登録
  * 
  * 実装順は312
  */
@@ -34,12 +34,11 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * @returns 
 	 */
 	public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
-
-
 		const leftBracketPosition: number = document.lineAt(position).text.lastIndexOf("\[");
+		const atSignPosition: number = document.lineAt(position).text.indexOf("@");
 
 		//"["がないならスキップ。処理高速化のため。 
-		if (leftBracketPosition !== -1) {
+		if (leftBracketPosition !== -1 || atSignPosition !== -1) {
 			return this.completionParameter(document, position, token, context, leftBracketPosition);
 		} else {
 			return this.completionTag();	//FIXME:同じ行に2つ以上タグを置くとタグ名の候補が正しく表示されない(↑のif文に入っている）
@@ -50,11 +49,12 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
 
 	/**
-	 * ラベルの予測変換
+	 * //TODO:ラベルの予測変換
 	 * *から始まる単語なら予測変換をだす
 	 */
 	private conpletionLabel() {
 		// comp.kind = vscode.CompletionItemKind.Variable;
+		//「target="」「target_cancel="」が直前にあるならラベルの一覧を候補表示
 	}
 
 	/**
@@ -97,8 +97,8 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		//name:そのまんま。middle.jsonを見て。
 		//item2:タグのパラメータ。0,1,2,3...って順に。
 		for (const item in this.tyranoTagSnippets) {
-			tagName = this.tyranoTagSnippets[item]["name"].toString().replace("[", "").replace("]", "");//スニペットのnameに"[]"が付いてるので取り除く
-			if (linePrefix.indexOf("[" + tagName) !== -1) {//タグ名があるならパラメータ検索をする  //FIXME:bgとbg2が区別できていないため、両方に存在するパラメータが重複する。
+			tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString());
+			if (linePrefix.indexOf("[" + tagName) !== -1 || linePrefix.indexOf("@" + tagName) !== -1) {//タグ名があるならパラメータ検索をする  //FIXME:bgとbg2が区別できていないため、両方に存在するパラメータが重複する。
 				for (const item2 in this.tyranoTagSnippets[item]["parameters"]) {
 					if (document.lineAt(position).text.lastIndexOf(this.tyranoTagSnippets[item]["parameters"][item2]["name"]) === -1) {	//その行にパラメータの名前が含まれていないなら //FIXME: 一行に複数個タグがある時、一つのタグで使ったパラメータが他のタグで予測候補として表示されない
 						let comp = new vscode.CompletionItem(this.tyranoTagSnippets[item]["parameters"][item2]["name"]);
@@ -123,10 +123,11 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		let completions: vscode.CompletionItem[] = new Array();
 		for (let item in this.tyranoTagSnippets) {
 			let tmpJsonData = this.tyranoTagSnippets[item];
-			let textLabel: string = tmpJsonData["name"].toString().replace("[", "").replace("]", "");//"[]"が付いてるので取り除く
+			let textLabel: string = this.removeBracket(tmpJsonData["name"].toString());
 
 			let comp = new vscode.CompletionItem(textLabel);
-			comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
+			const inputType = vscode.workspace.getConfiguration().get('TyranoScript syntax.completionTag.inputType');
+			inputType === "@" ? comp.insertText = new vscode.SnippetString("@" + textLabel + " $0") : comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
 			comp.documentation = new vscode.MarkdownString(tmpJsonData["description"]);
 			comp.kind = vscode.CompletionItemKind.Class;
 			comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };//ここに、サンプル2のような予測候補を出すコマンド
@@ -134,5 +135,15 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		};
 
 		return completions;
+	}
+
+
+	/**
+	 * 引数に入れた文字列からbracket[]を取り除きます。
+	 * @param str []を取り除く文字列
+	 * @returns []を取り除いた文字列
+	 */
+	private removeBracket(str: string): string {
+		return str.replace(/\[*/g, "").replace(/\]*/g, "");;
 	}
 }

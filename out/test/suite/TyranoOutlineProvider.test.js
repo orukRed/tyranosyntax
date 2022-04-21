@@ -45,7 +45,7 @@ class MockTextLine {
         this.range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(this.text.length, this.text.length));
     }
 }
-suite('OutlineProvider.provideDocumentSymbols関数', () => {
+suite('TyranoOutlineProvider.provideDocumentSymbols関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系 ifタグ[]', () => {
         //値定義
@@ -454,7 +454,7 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
         assert.deepStrictEqual(actual, []);
     });
 });
-suite('OutlineProvider.isAddTagOutline関数', () => {
+suite('TyranoOutlineProvider.isAddTagOutline関数', () => {
     test('正常系 @endscriptタグが送られてくる', () => {
         //値定義
         const op = new TyranoOutlineProvider_1.TyranoOutlineProvider();
@@ -506,7 +506,7 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
         assert.deepStrictEqual(actual, excepted);
     });
 });
-suite('OutlineProvider.isAddVariableOutLine関数', () => {
+suite('TyranoOutlineProvider.isAddVariableOutLine関数', () => {
     test('正常系 f.hoge1', () => {
         //値定義
         const op = new TyranoOutlineProvider_1.TyranoOutlineProvider();
@@ -556,7 +556,7 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
         assert.deepStrictEqual(actual, excepted);
     });
 });
-suite('OutlineProvider.isAddLabelOutLine関数', () => {
+suite('TyranoOutlineProvider.isAddLabelOutLine関数', () => {
     test('正常系 *hoge', () => {
         //値定義
         const op = new TyranoOutlineProvider_1.TyranoOutlineProvider();
@@ -590,4 +590,4 @@ suite('OutlineProvider.isAddLabelOutLine関数', () => {
         assert.deepStrictEqual(actual, excepted);
     });
 });
-//# sourceMappingURL=OutlineProvider.test.js.map
+//# sourceMappingURL=TyranoOutlineProvider.test.js.map
