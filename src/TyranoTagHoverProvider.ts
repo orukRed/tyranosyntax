@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-export class TagHoverProvider {
+export class TyranoTagHoverProvider {
 	private jsonTyranoSnippet: string
 	private regExp: RegExp
 

@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.7.1",
+  "version": "0.8.0",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -107,9 +107,22 @@
             ],
             "description": "アウトラインで表示されるタグを設定します。"
           },
+          "TyranoScript syntax.completionTag.inputType": {
+            "type": "string",
+            "default": "[ ]",
+            "description": "タグの予測変換をする時に、@から始まるタグか[ ]で囲むタグかを選択します。\nただし、現在のカーソルより左に[ ]や@がある場合にはこのオプションは無視され、[ ]で囲んだタグとして予測変換されます。",
+            "enum": [
+              "[ ]",
+              "@"
+            ],
+            "enumDescriptions": [
+              "タグの予測変換をするとき、[ ]で囲んだタグを出力します。",
+              "タグの予測変換をするとき、@から始まるタグを出力します。"
+            ]
+          },
           "TyranoScript syntax.outline.blockComment": {
             "type": "boolean",
-            "default": false,
+            "default": true,
             "description": "/**/で囲んだ処理をアウトラインに表示させないようにします。\n現在β版の機能のため、/*や*/のある行にタグを配置すると正しく表示されない可能性があります。\n例：/*comment*/[p]、[p]/*comment*/、[p]/*、*/[p]"
           }
         }

@@ -3,10 +3,10 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import { OutlineProvider } from '../../OutlineProvider';
+import { TyranoOutlineProvider } from '../../TyranoOutlineProvider';
 // import * as myExtension from '../../extension';
 
-class MockTextDocument implements vscode.TextDocument{
+class MockTextDocument implements vscode.TextDocument {
 	mockTextLine = new MockTextLine();
 	uri!: vscode.Uri; //!で限定代入アサーション null,undefinedでないことをアサート
 	fileName!: string;
@@ -46,16 +46,16 @@ class MockTextDocument implements vscode.TextDocument{
 	}
 }
 
-class MockCancellationToken implements vscode.CancellationToken{
+class MockCancellationToken implements vscode.CancellationToken {
 	isCancellationRequested!: boolean;
 	onCancellationRequested!: vscode.Event<any>;
-	
+
 }
 
-class MockTextLine implements vscode.TextLine{
+class MockTextLine implements vscode.TextLine {
 	lineNumber!: number;
-	text="1";
-	range = new vscode.Range(new vscode.Position(0,0), new vscode.Position(this.text.length, this.text.length));
+	text = "1";
+	range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(this.text.length, this.text.length));
 	rangeIncludingLineBreak!: vscode.Range;
 	firstNonWhitespaceCharacterIndex!: number;
 	isEmptyOrWhitespace!: boolean;
@@ -63,20 +63,20 @@ class MockTextLine implements vscode.TextLine{
 
 
 
-suite('OutlineProvider.provideDocumentSymbols関数', () => {
+suite('TyranoOutlineProvider.provideDocumentSymbols関数', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 	test('正常系 ifタグ[]', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[if exp=\"true\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[if exp=\"true\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -86,14 +86,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@if exp=\"true\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@if exp=\"true\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -103,14 +103,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[elsif exp=\"true\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[elsif exp=\"true\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -120,14 +120,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@elsif exp=\"true\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@elsif exp=\"true\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -137,14 +137,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[else]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[else]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -154,14 +154,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@else",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@else",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -171,14 +171,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[endif]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[endif]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -188,14 +188,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@endif",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@endif",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -205,14 +205,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[ignore exp=\"\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[ignore exp=\"\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -222,14 +222,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@ignore exp=\"\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@ignore exp=\"\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -239,14 +239,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[endignore]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[endignore]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -256,14 +256,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@endignore",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@endignore",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -273,14 +273,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[jump storage=\"test.ks\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[jump storage=\"test.ks\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -290,14 +290,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@jump storage=\"test.ks\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@jump storage=\"test.ks\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -307,14 +307,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[call storage=\"test.ks\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[call storage=\"test.ks\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -324,14 +324,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@call storage=\"test.ks\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@call storage=\"test.ks\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -341,14 +341,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[button storage=\"test.ks\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[button storage=\"test.ks\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -358,14 +358,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@button storage=\"test.ks\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@button storage=\"test.ks\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -375,14 +375,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[link storage=\"test.ks\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[link storage=\"test.ks\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -392,14 +392,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@link storage=\"test.ks\"",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@link storage=\"test.ks\"",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -409,14 +409,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[iscript]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[iscript]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -426,14 +426,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@iscript",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@iscript",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -443,14 +443,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[endscript]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[endscript]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -460,14 +460,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@endscript",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@endscript",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -477,14 +477,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"[loadjs storage=\"\"]",
-			writable:false,
-		});		
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "[loadjs storage=\"\"]",
+			writable: false,
+		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -494,14 +494,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"@loadjs storage=\"\"",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "@loadjs storage=\"\"",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -513,14 +513,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"*test_label",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "*test_label",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート
 		assert.strictEqual(actual[0].name, excepted.text);
@@ -530,14 +530,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"\*\/",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "\*\/",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
 		assert.deepStrictEqual(actual, []);
@@ -547,14 +547,14 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 		//値定義
 		const document = new MockTextDocument();
 		const token = new MockCancellationToken();
-		const op = new OutlineProvider();
-		const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-			value:"/*",
-			writable:false,
+		const op = new TyranoOutlineProvider();
+		const excepted = Object.defineProperty(document.lineAt(0), 'text', {
+			value: "/*",
+			writable: false,
 		});
 
 		//実行
-		let actual = op.provideDocumentSymbols(document,token)!;
+		let actual = op.provideDocumentSymbols(document, token)!;
 
 		//アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
 		assert.deepStrictEqual(actual, []);
@@ -563,11 +563,11 @@ suite('OutlineProvider.provideDocumentSymbols関数', () => {
 
 });
 
-suite('OutlineProvider.isAddTagOutline関数', () => {
+suite('TyranoOutlineProvider.isAddTagOutline関数', () => {
 
-	test('正常系 @endscriptタグが送られてくる', ()=>{
+	test('正常系 @endscriptタグが送られてくる', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -578,9 +578,9 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 [endscript]タグが送られてくる', ()=>{
+	test('正常系 [endscript]タグが送られてくる', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -591,9 +591,9 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 [jump storage="hoge.ks"]タグが送られてくる', ()=>{
+	test('正常系 [jump storage="hoge.ks"]タグが送られてくる', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -605,9 +605,9 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
 	});
 
 
-	test('異常系 @fooタグが送られてくる(package.jsonで定義されていないタグ)', ()=>{
+	test('異常系 @fooタグが送られてくる(package.jsonで定義されていないタグ)', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = false;
 
 		//実行
@@ -618,9 +618,9 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('異常系 [foo]タグが送られてくる(package.jsonで定義されていないタグ)', ()=>{
+	test('異常系 [foo]タグが送られてくる(package.jsonで定義されていないタグ)', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = false;
 
 		//実行
@@ -633,11 +633,11 @@ suite('OutlineProvider.isAddTagOutline関数', () => {
 
 });
 
-suite('OutlineProvider.isAddVariableOutLine関数', () => {
+suite('TyranoOutlineProvider.isAddVariableOutLine関数', () => {
 
-	test('正常系 f.hoge1', ()=>{
+	test('正常系 f.hoge1', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -646,9 +646,9 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 sf.hoge1', ()=>{
+	test('正常系 sf.hoge1', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -659,9 +659,9 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 tf.hoge1', ()=>{
+	test('正常系 tf.hoge1', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -672,9 +672,9 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('異常系 .hoge1', ()=>{
+	test('異常系 .hoge1', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = false;
 
 		//実行
@@ -685,9 +685,9 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 [emb exp=f.1aaaa=1]', ()=>{
+	test('正常系 [emb exp=f.1aaaa=1]', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -698,15 +698,15 @@ suite('OutlineProvider.isAddVariableOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	
+
 
 });
 
-suite('OutlineProvider.isAddLabelOutLine関数', () => {
+suite('TyranoOutlineProvider.isAddLabelOutLine関数', () => {
 
-	test('正常系 *hoge', ()=>{
+	test('正常系 *hoge', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
@@ -715,38 +715,38 @@ suite('OutlineProvider.isAddLabelOutLine関数', () => {
 		assert.deepStrictEqual(actual, excepted);
 	});
 
-	test('正常系 *hoge-hoge', ()=>{
+	test('正常系 *hoge-hoge', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
 		let actual = (op as any).isAddLabelOutLine('*hoge-hoge');
 
 		assert.deepStrictEqual(actual, excepted);
-	});	
+	});
 
-	test('正常系 *hoge_hoge', ()=>{
+	test('正常系 *hoge_hoge', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = true;
 
 		//実行
 		let actual = (op as any).isAddLabelOutLine('*hoge_hoge');
 
 		assert.deepStrictEqual(actual, excepted);
-	});	
+	});
 
-	test('異常系 */', ()=>{
+	test('異常系 */', () => {
 		//値定義
-		const op = new OutlineProvider();
+		const op = new TyranoOutlineProvider();
 		const excepted = false;
 
 		//実行
 		let actual = (op as any).isAddLabelOutLine('*/');
 
 		assert.deepStrictEqual(actual, excepted);
-	});	
+	});
 
 
 });

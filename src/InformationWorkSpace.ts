@@ -52,7 +52,7 @@ export class InformationWorkSpace {
 	 */
 	private getProjectFiles(projectRootPath: string): string[] {
 		//ルートパスが存在していない場合
-		if (projectRootPath === undefined) {
+		if (projectRootPath === undefined || projectRootPath === "") {
 			return [];
 		}
 
@@ -60,9 +60,16 @@ export class InformationWorkSpace {
 			fs.readdirSync(dir, { withFileTypes: true }).flatMap(dirent =>
 				dirent.isFile() ? [`${dir}/${dirent.name}`] : listFiles(`${dir}/${dirent.name}`))
 
-		return listFiles(projectRootPath);
+		try {
+			let ret = listFiles(projectRootPath);//絶対パスで取得
+			ret = ret.map(e => {//相対パスに変換
+				return e.replace(projectRootPath + "/", '');
+
+			});
+			return ret
+		} catch (error) {
+			console.log(error);
+			return [];
+		}
 	}
-
-
-
 }

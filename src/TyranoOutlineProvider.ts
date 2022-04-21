@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 
-export class OutlineProvider implements vscode.DocumentSymbolProvider {
+export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
 	MATCH_TEXTS: Array<string> | undefined;
 	private readonly REGEX_VARIABLE = /\b(f\.|sf\.|tf\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚ]*))\b/;//変数検出用のアウトライン
 	constructor() {
