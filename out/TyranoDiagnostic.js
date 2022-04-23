@@ -4,7 +4,6 @@ exports.TyranoDiagnostic = void 0;
 const vscode = require("vscode");
 const fs = require("fs");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
-const kstg = require("kstg"); //kstgのインストール https://github.com/komsomolskinari/kstg
 class TyranoDiagnostic {
     constructor() {
         this.collection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
@@ -14,20 +13,17 @@ class TyranoDiagnostic {
      * パーサーのテストに使う
      */
     hoge() {
-        console.log("関数start");
         const info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         try {
-            let loadModule = require('./module-loader').loadModule;
-            let appContext = loadModule(__dirname + '/test_parser.js');
+            let loadModule = require('./lib/module-loader.js').loadModule;
+            let appContext = loadModule(__dirname + '/lib/tyrano_parser.js');
             let hoge1 = fs.readFileSync(info.getProjectRootPath() + info.DATA_DIRECTORY + "/scenario/scene1.ks").toString();
-            // let hoge = appContext.hogeParser.parseScenario('[bg storage = "hoge.ks"]');
-            let hoge = appContext.hogeParser.parseScenario(hoge1);
+            let hoge = appContext.tyranoParser.parseScenario(hoge1);
             console.log(hoge);
         }
         catch (error) {
             console.log(error);
         }
-        console.log("関数終わり");
     }
     /**
      * 診断機能を作成する

@@ -1,6 +1,5 @@
 //拡張機能のエントリポイント
 
-
 import * as vscode from 'vscode';
 
 import { TyranoCreateTagByShortcutKey } from './TyranoCreateTagByShortcutKey';
@@ -8,7 +7,6 @@ import { TyranoTagHoverProvider } from './TyranoTagHoverProvider';
 import { TyranoOutlineProvider } from './TyranoOutlineProvider';
 import { TyranoCompletionItemProvider } from './TyranoCompletionItemProvider';
 import { TyranoDiagnostic } from './TyranoDiagnostic';
-
 
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
