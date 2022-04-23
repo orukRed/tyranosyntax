@@ -6,7 +6,7 @@
 
 * シンタックスハイライト
   * setting.jsonのtextmateRulesを編集することでハイライト色を変更できます。
-  * <img src="./readme_img/highlight.png" width=700>
+  * <img src="readme_img/highlight.png" width=700>
 * ティラノスクリプトのタグを追加するインテリセンス（ctrl + spaceで表示、設定より@開始のタグか[ ]で囲むタグか変更可能）
 * 任意のタグのアウトライン表示（setting.jsonより編集可能）
 * ショートカットキーによる特定のタグ・記号の簡易出力（ショートカットキーは設定で変更可）
@@ -28,5 +28,7 @@ ver0.8.0現在ではシンタックスハイライト以外の機能追加予定
 
 ## issues
 
-バグなどを見つけた場合[Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)、もしくはTwitter（[@orukred](https://twitter.com/OrukRed)）にてご連絡ください。
-
+バグなどを見つけた場合、以下のいずれかでご連絡ください。
+- [Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)
+- [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
+- [Githubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)
