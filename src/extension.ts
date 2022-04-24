@@ -25,8 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
 
 	//パース機能呼び出しテスト
-	const hoge11: TyranoDiagnostic = new TyranoDiagnostic();
-	hoge11.hoge();
+	// const hoge11: TyranoDiagnostic = new TyranoDiagnostic();
+	// hoge11.hoge();
 
 
 	// //診断機能の登録

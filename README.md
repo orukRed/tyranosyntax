@@ -6,13 +6,16 @@
 
 * シンタックスハイライト
   * setting.jsonのtextmateRulesを編集することでハイライト色を変更できます。
-  * <img src="readme_img/highlight.png" width=700>
+  * <img src="./readme_img/highlight.png" width=700>
 * ティラノスクリプトのタグを追加するインテリセンス（ctrl + spaceで表示、設定より@開始のタグか[ ]で囲むタグか変更可能）
 * 任意のタグのアウトライン表示（setting.jsonより編集可能）
 * ショートカットキーによる特定のタグ・記号の簡易出力（ショートカットキーは設定で変更可）
   * [l][r] shift + enter
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
+* 診断機能
+  * hogehoge
+
 
 ## 機能（Web版）
 

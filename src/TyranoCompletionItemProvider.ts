@@ -105,6 +105,9 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 						comp.insertText = new vscode.SnippetString(this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "=\"$0\" ");
 						comp.documentation = new vscode.MarkdownString(this.tyranoTagSnippets[item]["parameters"][item2]["description"]);
 						comp.kind = vscode.CompletionItemKind.Function;
+						if (this.tyranoTagSnippets[item]["parameters"][item2]["required"]) {
+							comp.label = this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "(必須)";
+						}
 						completions.push(comp);
 					}
 				}
