@@ -125,12 +125,12 @@
     "tyrano_labels": {
       "name": "constant.language.tyrano",
       "comment": "ラベル表示に使う",
-      "match": "^\\s*\\*[\\w\\-＠]+"
+      "match": "^\\s*\\*[\\w]+"
     },
     "tyrano_labels_in_tag": {
       "name": "constant.language.tyrano",
       "comment": "タグの中のラベル表示につかう",
-      "match": "\\*[\\w\\-＠]+"
+      "match": "\\*[\\w]+"
     },
     "tyrano_tag_value_invalid": {
       "name": "invalid.illegal.tyrano",
