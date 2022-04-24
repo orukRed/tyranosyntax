@@ -13,6 +13,9 @@
   * [l][r] shift + enter
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
+* 診断機能
+  * hogehoge
+
 
 ## 機能（Web版）
 
@@ -28,5 +31,7 @@ ver0.8.0現在ではシンタックスハイライト以外の機能追加予定
 
 ## issues
 
-バグなどを見つけた場合[Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)、もしくはTwitter（[@orukred](https://twitter.com/OrukRed)）にてご連絡ください。
-
+バグなどを見つけた場合、以下のいずれかでご連絡ください。
+- [Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)
+- [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
+- [Githubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)

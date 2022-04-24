@@ -7,7 +7,6 @@ const TyranoCreateTagByShortcutKey_1 = require("./TyranoCreateTagByShortcutKey")
 const TyranoTagHoverProvider_1 = require("./TyranoTagHoverProvider");
 const TyranoOutlineProvider_1 = require("./TyranoOutlineProvider");
 const TyranoCompletionItemProvider_1 = require("./TyranoCompletionItemProvider");
-const kstg = require("kstg"); //kstgのインストール https://github.com/komsomolskinari/kstg
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 function activate(context) {
     //登録処理
@@ -20,16 +19,9 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
-    //パス機能呼び出しテスト
-    // 	let hoge = kstg.parse(`
-    // *start
-    // [cm  ]
-    // [hoge param="val1"]
-    // [clearfix]
-    // [start_keyconfig]
-    // [bg storage="room.jpg" time="100" cond=f.a=1 ]
-    // `);
-    // console.log(hoge);
+    //パース機能呼び出しテスト
+    // const hoge11: TyranoDiagnostic = new TyranoDiagnostic();
+    // hoge11.hoge();
     // //診断機能の登録
     // const tyranoDiagnostic = new TyranoDiagnostic();
     // //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする

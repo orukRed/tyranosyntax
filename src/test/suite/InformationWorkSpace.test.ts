@@ -29,7 +29,7 @@ suite('InformationWorkSpace.getProjectFiles', () => {
 
 		const expect = ['room.jpg', 'rouka.jpg', 'title.jpg'];
 
-		assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + "/data/bgimage"), expect);
+		assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + info.DATA_DIRECTORY + "/bgimage"), expect);
 	});
 
 	test('異常系 不正なパスを与える', () => {

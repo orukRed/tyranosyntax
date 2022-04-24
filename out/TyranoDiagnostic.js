@@ -2,10 +2,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDiagnostic = void 0;
 const vscode = require("vscode");
-// export class TyranoDiagnostic implements vscode.CodeActionProvider {
+const fs = require("fs");
+const InformationWorkSpace_1 = require("./InformationWorkSpace");
 class TyranoDiagnostic {
     constructor() {
         this.collection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
+    }
+    /**
+     * 診断機能テスト用
+     * パーサーのテストに使う
+     */
+    hoge() {
+        const info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        try {
+            let loadModule = require('./lib/module-loader.js').loadModule;
+            let appContext = loadModule(__dirname + '/lib/tyrano_parser.js');
+            let hoge1 = fs.readFileSync(info.getProjectRootPath() + info.DATA_DIRECTORY + "/scenario/scene1.ks").toString();
+            let hoge = appContext.tyranoParser.parseScenario(hoge1);
+            console.log(hoge);
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
     /**
      * 診断機能を作成する

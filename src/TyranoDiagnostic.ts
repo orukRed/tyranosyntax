@@ -1,14 +1,34 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import { InformationWorkSpace } from './InformationWorkSpace';
 
-// export class TyranoDiagnostic implements vscode.CodeActionProvider {
 export class TyranoDiagnostic {
 
 	public readonly collection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 	constructor() {
-
 	}
 
+	/**
+	 * 診断機能テスト用
+	 * パーサーのテストに使う
+	 */
+	public hoge() {
 
+		const info = InformationWorkSpace.getInstance();
+
+		try {
+
+			let loadModule = require('./lib/module-loader.js').loadModule;
+			let appContext = loadModule(__dirname + '/lib/tyrano_parser.js');
+			let hoge1 = fs.readFileSync(info.getProjectRootPath() + info.DATA_DIRECTORY + "/scenario/scene1.ks").toString();
+			let hoge = appContext.tyranoParser.parseScenario(hoge1);
+			console.log(hoge)
+
+		} catch (error) {
+			console.log(error);
+		}
+
+	}
 
 	/**
 	 * 診断機能を作成する

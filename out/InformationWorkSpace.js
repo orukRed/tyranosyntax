@@ -11,12 +11,6 @@ class InformationWorkSpace {
     constructor() {
         this.DATA_DIRECTORY = "/data"; //projectRootPath/data
         this.TYRANO_DIRECTORY = "/tyrano"; //projectRootPath/tyrano
-        this.dataPathList = []; //projectRootPath/data の中に入っているファイルのパス
-        this.projectRootPath = null; //プロジェクトのルートパス。index.htmlがあるディレクトリが対象。
-        //今開いてるプロジェクトのルートパスを読み込む。
-        this.projectRootPath = this.getProjectRootPath();
-        //ファイルを再帰的に取得する
-        this.dataPathList = this.getProjectFiles(this.projectRootPath);
     }
     static getInstance() {
         return this.instance;
