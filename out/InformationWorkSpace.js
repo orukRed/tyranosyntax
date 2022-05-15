@@ -11,13 +11,22 @@ class InformationWorkSpace {
     constructor() {
         this.DATA_DIRECTORY = "/data"; //projectRootPath/data
         this.TYRANO_DIRECTORY = "/tyrano"; //projectRootPath/tyrano
+        this.DATA_BGIMAGE = "/bgimage";
+        this.DATA_BGM = "/bgm";
+        this.DATA_FGIMAGE = "/fgimage";
+        this.DATA_IMAGE = "/image";
+        this.DATA_OTHERS = "/others";
+        this.DATA_SCENARIO = "/scenario";
+        this.DATA_SOUND = "/sound";
+        this.DATA_SYSTEM = "/system";
+        this.DATA_VIDEO = "/video";
     }
     static getInstance() {
         return this.instance;
     }
     /**
-     * フォルダ開いてるなら、開いてるフォルダ(index.htmlのあるフォルダ)のルートパスを取得します。
-     * フォルダ開いてない場合、undefined.
+     * フォルダを開いてるなら、開いてるフォルダ(index.htmlのあるフォルダ)のルートパスを取得します。
+     * フォルダを開いてない場合、undefined.
      * @returns プロジェクトのルートパス。フォルダを開いていないならundefined.
      */
     getProjectRootPath() {
@@ -29,6 +38,7 @@ class InformationWorkSpace {
     }
     /**
      * プロジェクトに存在するファイルパスを取得します。
+     * 使用例:
      * @param projectRootPath プロジェクトのルートパス
      * @returns プロジェクトのルートパスが存在するなら存在するファイルパスを文字列型の配列で返却。
      */

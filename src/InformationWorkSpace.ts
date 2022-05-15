@@ -7,9 +7,19 @@ import * as vscode from 'vscode';
  */
 export class InformationWorkSpace {
 
-	private static instance: InformationWorkSpace = new InformationWorkSpace();
 	public readonly DATA_DIRECTORY: string = "/data";				//projectRootPath/data
 	public readonly TYRANO_DIRECTORY: string = "/tyrano";		//projectRootPath/tyrano
+	public readonly DATA_BGIMAGE: string = "/bgimage";
+	public readonly DATA_BGM: string = "/bgm";
+	public readonly DATA_FGIMAGE: string = "/fgimage";
+	public readonly DATA_IMAGE: string = "/image";
+	public readonly DATA_OTHERS: string = "/others";
+	public readonly DATA_SCENARIO: string = "/scenario";
+	public readonly DATA_SOUND: string = "/sound";
+	public readonly DATA_SYSTEM: string = "/system";
+	public readonly DATA_VIDEO: string = "/video";
+
+	private static instance: InformationWorkSpace = new InformationWorkSpace();
 
 	public static getInstance(): InformationWorkSpace {
 		return this.instance;
@@ -19,8 +29,8 @@ export class InformationWorkSpace {
 	}
 
 	/**
-	 * フォルダ開いてるなら、開いてるフォルダ(index.htmlのあるフォルダ)のルートパスを取得します。
-	 * フォルダ開いてない場合、undefined.
+	 * フォルダを開いてるなら、開いてるフォルダ(index.htmlのあるフォルダ)のルートパスを取得します。
+	 * フォルダを開いてない場合、undefined.
 	 * @returns プロジェクトのルートパス。フォルダを開いていないならundefined.
 	 */
 	public getProjectRootPath(): string {
@@ -34,6 +44,7 @@ export class InformationWorkSpace {
 
 	/**
 	 * プロジェクトに存在するファイルパスを取得します。
+	 * 使用例:
 	 * @param projectRootPath プロジェクトのルートパス
 	 * @returns プロジェクトのルートパスが存在するなら存在するファイルパスを文字列型の配列で返却。
 	 */

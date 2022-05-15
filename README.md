@@ -13,9 +13,11 @@
   * [l][r] shift + enter
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
-* 診断機能
-  * hogehoge
+* 診断機能(※1)
+  * 未定義マクロの使用報告
 
+
+※1：ティラノスクリプトのルートプロジェクト(index.htmlの存在しているフォルダ)をフォルダで開いているときのみ使用可能です。
 
 ## 機能（Web版）
 
