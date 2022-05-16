@@ -2,31 +2,33 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDiagnostic = void 0;
 const vscode = require("vscode");
-const fs = require("fs");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
-const util_1 = require("util");
-const InformationTyranoScript_1 = require("./InformationTyranoScript");
+const InformationProjectData_1 = require("./InformationProjectData");
 class TyranoDiagnostic {
     constructor() {
         this.collection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
+        //ティラノスクリプトに関する情報
+        this.informationTyranoScript = InformationProjectData_1.InformationProjectData.getInstance();
+        //ファイルパス取得用
+        this.informationWorkSpace = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         //パーサー
         this.loadModule = require('./lib/module-loader.js').loadModule;
         this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
         this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
-        this.informationTyranoScript = InformationTyranoScript_1.InformationTyranoScript.getInstance();
-        this.informationWorkSpace = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        this.tyranoTag = this.informationTyranoScript.getDefaultTag();
+        this.tyranoDefaultTag = this.informationTyranoScript.getDefaultTag();
     }
+    ;
     /**
      * 診断機能を作成する
      * @param document
      * @param commandDiagnostics
      */
-    createDiagnostics(document, commandDiagnostics) {
+    async createDiagnostics(document, commandDiagnostics) {
         console.log("createDiagnostics");
         let diagnostics = [];
         //マクロが定義されているかどうかのチェック
-        this.detectionNotDefineMacro("test_diagnostic.ks", document, diagnostics);
+        // this.detectionNotDefineMacro("test_diagnostic.ks", document, diagnostics);
+        diagnostics = diagnostics.concat(await this.detectionNotDefineMacro("test_diagnostic.ks"));
         //WARNINGやらERRORのテスト
         {
             let docText = document.getText();
@@ -79,7 +81,7 @@ class TyranoDiagnostic {
      * @param document
      * @param diagnostics
      */
-    detectionNotDefineMacro(scenarioFile, document, diagnostics) {
+    async detectionNotDefineMacro(scenarioFile) {
         //first.ksから順番にファイルを読み込んでいく処理
         //流れとしては以下で実装可能なはず
         // first.ksからjump,call,link,button,glink,clickableタグのある先へどんどん飛んでいく。
@@ -87,48 +89,68 @@ class TyranoDiagnostic {
         // ファイルごとに全て処理をパーサーに与える
         // 各linterで必要な処理を実装
         // ※以下の処理は検出しないこと
-        // 		ユーザー入力による変数の値の変更
-        //		iscriptタグに埋め込まれた処理
-        // const scenarioFilePath: Thenable<Uint8Array> = vscode.workspace.fs.readFile(vscode.Uri.file(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenarioFile));//vscode.fsだと戻り地が非同期だからできなさそう？
-        const scenarioFilePath = fs.readFileSync(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenarioFile);
-        const textData = new util_1.TextDecoder().decode(scenarioFilePath);
-        console.log(textData);
-        const parsedData = this.parser.tyranoParser.parseScenario(textData);
+        // ユーザー入力による変数の値の変更
+        //	iscriptタグに埋め込まれた処理
+        //if,elseif,else,iscript,htmlで定義された中身はスキップする(終了タグがあるまでifで分岐して処理させない)
+        //array_s[data]["pm"]["cond"]がある場合はスキップする
+        //ティラノスクリプトのタグ
+        //初期値は公式で提供されているもの
+        let tyranoTag = this.tyranoDefaultTag.slice();
+        const document = await this.getScenarioDocument(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenarioFile); //引数のパスのシナリオ全文取得
+        const parsedData = this.parser.tyranoParser.parseScenario(document.getText()); //構文解析
         const array_s = parsedData["array_s"];
         console.log(array_s);
+        let diagnostics = [];
         for (let data in array_s) {
             //タグが公式や定義済みのもの場合
-            if (!this.tyranoTag.includes(array_s[data]["name"])) {
+            if (!tyranoTag.includes(array_s[data]["name"])) {
                 console.log(array_s[data]["name"] + "は定義されていないよ");
-                //マクロの名前がリストに保存されてないならdiagnosticに保存
-                let firstIndex = document.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
-                let lastIndex = document.lineAt(array_s[data]["line"]).text.lastIndexOf(array_s[data]["name"]); // 該当行からタグの定義場所(終了位置)探す
-                let range = new vscode.Range(array_s[data]["line"], firstIndex, array_s[data]["line"], lastIndex);
+                let tagFirstIndex = document.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
+                let tagLastIndex = document.lineAt(array_s[data]["line"]).text.lastIndexOf(array_s[data]["name"]); // 該当行からタグの定義場所(終了位置)探す
+                let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
                 let diag = new vscode.Diagnostic(range, "タグ" + array_s[data]["name"] + "は未定義の可能性があります。", vscode.DiagnosticSeverity.Warning);
                 diagnostics.push(diag);
             }
             else {
                 console.log(array_s[data]["name"] + "は定義済だよ");
                 //タグがマクロなら
-                if (data["name"] === "macro") {
+                if (array_s[data]["name"] === "macro") {
                     //マクロの名前をリストかなんかに保存しておく。
-                    this.tyranoTag.push(array_s[data]["pm"]["name"]);
+                    tyranoTag.push(array_s[data]["pm"]["name"]);
                 }
                 //タグがジャンプ系のタグなら
                 if (this.JUMP_TAG.includes(data["name"])) {
                     //ファイル名とターゲット名をjsonとかリストかなんかに保存
+                    //同じファイルかつ同じターゲットには二度と入らないようにする
+                    //hoge.push({"scenario":"foo.ks","label":"*bar"},)
                     //再帰関数で同じ関数を呼び出す
                     //this.detectionNotDefineMacro(data["pm"]["storage"]);
                 }
             }
         }
         console.log("----------------");
+        return diagnostics;
         //first.ks（最初のファイル）なら処理終わり
         //それ以外のファイルなら再帰関数の呼び出しもとに戻る
-        if (scenarioFile === "first.ks") {
-        }
-        else {
-        }
+        // if (scenarioFile === "first.ks") {
+        // 	return diagnostics;
+        // } else {
+        // 	return diagnostics;
+        // }
+    }
+    hoge() {
+    }
+    /**
+ * 引数で指定したシナリオファイルの全文を取得します。
+ * @param scenarioFilePath シナリオファイルのパス
+ * @returns
+ */
+    async getScenarioDocument(scenarioFilePath) {
+        return vscode.workspace.openTextDocument(scenarioFilePath)
+            .then(value => {
+            return value;
+        }, err => {
+        });
     }
 }
 exports.TyranoDiagnostic = TyranoDiagnostic;

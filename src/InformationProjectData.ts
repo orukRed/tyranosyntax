@@ -5,11 +5,11 @@ import * as vscode from 'vscode';
  * ティラノスクリプトに関する情報。
  * シングルトン。
  */
-export class InformationTyranoScript {
+export class InformationProjectData {
 
-	private static instance: InformationTyranoScript = new InformationTyranoScript();
+	private static instance: InformationProjectData = new InformationProjectData();
 
-	public static getInstance(): InformationTyranoScript {
+	public static getInstance(): InformationProjectData {
 		return this.instance;
 	}
 
