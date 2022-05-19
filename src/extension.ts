@@ -35,12 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 	if (vscode.workspace.workspaceFolders !== undefined && fs.existsSync(vscode.workspace.workspaceFolders[0].uri.fsPath + "/index.html")) {
 		const tyranoDiagnostic = new TyranoDiagnostic();
 		//ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
-		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics(e.document, tyranoDiagnostic.collection)));
-		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => {
-			if (vscode.window.activeTextEditor && e) {
-				tyranoDiagnostic.createDiagnostics(vscode.window.activeTextEditor.document, tyranoDiagnostic.collection);
-			}
-		}));
+		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics()));
+		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => tyranoDiagnostic.createDiagnostics()));
 
 	}
 
