@@ -180,8 +180,8 @@ export class TyranoDiagnostic {
 					//こっからtargetパラメータ---------------------------
 
 					//storageが指定されてないなら現在開いているファイルとする
-					if (array_s[data]["pm"]["scenario"] === undefined) {
-						array_s[data]["pm"]["scenario"] = scenario;
+					if (array_s[data]["pm"]["storage"] === undefined) {
+						array_s[data]["pm"]["storage"] = scenario;
 					}
 
 					//targetがundefinedでない && targetの値が変数でない && targetで指定したラベルがstorageで指定したファイルの中に存在していない 
@@ -198,7 +198,7 @@ export class TyranoDiagnostic {
 						let tagFirstIndex: number = (await scenarioDocument).lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]);	// 該当行からタグの定義場所(開始位置)探す
 						let tagLastIndex: number = (await scenarioDocument).lineAt(array_s[data]["line"]).text.length - 1;	// 該当行からタグの定義場所(終了位置)探す
 						let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-						let diag = new vscode.Diagnostic(range, "変数を使う場合は戦闘に'&'が必要です。", vscode.DiagnosticSeverity.Error);
+						let diag = new vscode.Diagnostic(range, "変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
 						diagnostics.push(diag);
 					}
 
