@@ -161,7 +161,7 @@ export class TyranoDiagnostic {
 							let diag = new vscode.Diagnostic(range, "storageパラメータは末尾が'.ks'である必要があります。", vscode.DiagnosticSeverity.Error);
 							diagnostics.push(diag);
 						} else {
-							let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Information);
+							let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
 							diagnostics.push(diag);
 						}
 					}
