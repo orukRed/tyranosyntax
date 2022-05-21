@@ -21,6 +21,7 @@ class TyranoDiagnostic {
     async createDiagnostics() {
         let variables = new Map(); //プロジェクトで定義された変数を格納<variableName,value>
         const scenarioFiles = this.informationWorkSpace.getProjectFiles(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO);
+        let diagnosticArray = []; //診断結果を一時的に保存する配列
         //マクロ未定義の検出(過去バージョン)
         // this.__detectionNotDefineMacro("test_diagnostic.ks");
         //シナリオからマクロ定義を読み込む
@@ -28,9 +29,11 @@ class TyranoDiagnostic {
         // //シナリオ名とラベルを読み込む <scenarioName, labels>
         let scenarioAndLabels = await this.loadDefinedScenarioAndLabels();
         //未定義のマクロを使用しているか検出
-        await this.detectionNotDefineMacro(tyranoTag, scenarioFiles);
+        await this.detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray);
         //存在しないシナリオファイル、未定義のラベルを検出
-        await this.detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles);
+        await this.detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles, diagnosticArray);
+        //診断結果をセット
+        this.diagnosticCollection.set(diagnosticArray);
     }
     /**
      * シナリオで定義されているタグを返却します。
@@ -58,7 +61,7 @@ class TyranoDiagnostic {
      * 未定義のマクロを使用しているか検出します。
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
-    async detectionNotDefineMacro(tyranoTag, scenarioFiles) {
+    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray) {
         for (const scenario of scenarioFiles) {
             const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenario; //シナリオファイルの絶対パス取得
             const scenarioDocument = this.getScenarioDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
@@ -75,7 +78,7 @@ class TyranoDiagnostic {
                     diagnostics.push(diag);
                 }
             }
-            this.diagnosticCollection.set((await scenarioDocument).uri, diagnostics);
+            diagnosticArray.push([(await scenarioDocument).uri, diagnostics]);
         }
     }
     /**
@@ -108,7 +111,7 @@ class TyranoDiagnostic {
      * @param scenarioAndLabels
      * @param scenarioFiles
      */
-    async detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles) {
+    async detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles, diagnosticArray) {
         var _a, _b;
         for (const scenario of scenarioFiles) {
             const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenario; //シナリオファイルの絶対パス取得
@@ -130,7 +133,7 @@ class TyranoDiagnostic {
                             diagnostics.push(diag);
                         }
                         else {
-                            let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
+                            let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Information);
                             diagnostics.push(diag);
                         }
                     }
@@ -166,7 +169,7 @@ class TyranoDiagnostic {
                     }
                 }
             }
-            this.diagnosticCollection.set((await scenarioDocument).uri, diagnostics);
+            diagnosticArray.push([(await scenarioDocument).uri, diagnostics]);
         }
     }
     /**
