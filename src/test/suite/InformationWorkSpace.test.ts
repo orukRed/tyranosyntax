@@ -35,7 +35,6 @@ suite('InformationWorkSpace.getProjectFiles', () => {
 	test('異常系 不正なパスを与える', () => {
 		//値定義
 		const info = InformationWorkSpace.getInstance();
-
 		assert.deepStrictEqual((info as any).getProjectFiles("hoge/foo/bar/"), []);
 	});
 
