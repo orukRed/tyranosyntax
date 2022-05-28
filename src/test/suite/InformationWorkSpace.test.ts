@@ -27,9 +27,9 @@ suite('InformationWorkSpace.getProjectFiles', () => {
 		//値定義
 		const info = InformationWorkSpace.getInstance();
 
-		const expect = ['room.jpg', 'rouka.jpg', 'title.jpg'];
+		const expect = ["bgimage/room.jpg", "bgimage/rouka.jpg", "bgimage/title.jpg", "bgm/music.ogg", "image/config/bg_config.jpg"];
 
-		assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + info.DATA_DIRECTORY + "/bgimage"), expect);
+		assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + info.DATA_DIRECTORY, [".jpg", ".ogg"], false), expect);
 	});
 
 	test('異常系 不正なパスを与える', () => {

@@ -21,8 +21,8 @@ suite('InformationWorkSpace.getProjectFiles', () => {
     test('正常系 プロジェクトパスだとファイル多すぎるのでbgimageフォルダを指定', () => {
         //値定義
         const info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        const expect = ['room.jpg', 'rouka.jpg', 'title.jpg'];
-        assert.deepStrictEqual(info.getProjectFiles(info.getProjectRootPath() + info.DATA_DIRECTORY + "/bgimage"), expect);
+        const expect = ["bgimage/room.jpg", "bgimage/rouka.jpg", "bgimage/title.jpg", "bgm/music.ogg", "image/config/bg_config.jpg"];
+        assert.deepStrictEqual(info.getProjectFiles(info.getProjectRootPath() + info.DATA_DIRECTORY, [".jpg", ".ogg"], false), expect);
     });
     test('異常系 不正なパスを与える', () => {
         //値定義

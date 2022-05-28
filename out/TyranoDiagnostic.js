@@ -2,42 +2,36 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDiagnostic = void 0;
 const vscode = require("vscode");
+const fs = require("fs");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const InformationProjectData_1 = require("./InformationProjectData");
 class TyranoDiagnostic {
     constructor() {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
         //ティラノスクリプトに関する情報
-        this.informationProjectData = InformationProjectData_1.InformationProjectData.getInstance();
+        this.infoPd = InformationProjectData_1.InformationProjectData.getInstance();
         //ファイルパス取得用
-        this.informationWorkSpace = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         //パーサー
         this.loadModule = require('./lib/module-loader.js').loadModule;
         this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
         this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
-        this.tyranoDefaultTag = this.informationProjectData.getDefaultTag();
+        this.tyranoDefaultTag = this.infoPd.getDefaultTag();
     }
     ;
     async createDiagnostics() {
         let variables = new Map(); //プロジェクトで定義された変数を格納<variableName,value>
-        const dataFiles = this.informationWorkSpace.getProjectFiles(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY);
-        const scenarioFiles = this.informationWorkSpace.getProjectFiles(this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO);
+        const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-        let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), dataFiles);
+        // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
         //シナリオ名とラベルを読み込む <scenarioName, labels>
         // let scenarioAndLabels = await this.loadDefinedScenarioAndLabels(scenarioFiles);
         //未定義のマクロを使用しているか検出
-        await this.detectionNotDefineMacro(tyranoTag, dataFiles, diagnosticArray);
+        // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
         //存在しないシナリオファイル、未定義のラベルを検出
-        // await this.detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles, diagnosticArray);
-        // ラベル関係は、以下のアルゴリズムのが良さそう？
-        /**
-         * 1.シナリオを順番に読み込む
-         * 2.シナリオでジャンプ系タグが来るたびに、storageがあるならstorageがプロジェクト内に存在するか確かめる。（storageに相対パスを指定する場合、カレントディレクトリはそのscenarioフォルダ）
-         * 2.5.storageがなければ現在開いているファイルをstorageとする
-         * 3.storageのファイルを構文解析にかけて目的のラベルがあるかを調べる。ないならdiagに入れる。
-         */
+        await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
+        // await this.__detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles, diagnosticArray);
         //診断結果をセット
         this.diagnosticCollection.set(diagnosticArray);
     }
@@ -46,20 +40,10 @@ class TyranoDiagnostic {
      * @param 現在定義されているティラノスクリプトのタグのリスト
      * @return ティラノ公式タグ+読み込んだ定義済みマクロの名前の配列
      */
-    async loadDefinedMacroByScenarios(tyranoTag, dataFiles) {
-        for (const scenario of dataFiles) {
-            if (!scenario.endsWith(".ks")) {
-                continue;
-            }
-            const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
-            // let parsedData: object
-            // try {
-            // 	parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析				
-            // } catch (error) {
-            // 	console.log(error);
-            // 	parsedData = {};
-            // }
+    async loadDefinedMacroByScenarios(tyranoTag, scenarioFiles) {
+        for (const scenario of scenarioFiles) {
+            // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario;//dataファイルにあるシナリオの絶対パス取得
+            const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
             const parsedData = this.parser.tyranoParser.parseScenario((await scenarioDocument).getText()); //構文解析
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
@@ -76,13 +60,10 @@ class TyranoDiagnostic {
      * 未定義のマクロを使用しているか検出します。
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
-    async detectionNotDefineMacro(tyranoTag, dataFiles, diagnosticArray) {
-        for (const scenario of dataFiles) {
-            if (!scenario.endsWith(".ks")) {
-                continue;
-            }
-            const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
+    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray) {
+        for (const scenario of scenarioFiles) {
+            // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
+            const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
@@ -99,103 +80,206 @@ class TyranoDiagnostic {
             diagnosticArray.push([scenarioDocument.uri, diagnostics]);
         }
     }
-    /**
-     * ファイルにあるシナリオと、シナリオ内で定義されたラベルを取得します。
-     * @returns
-     */
-    async loadDefinedScenarioAndLabels(dataFiles) {
-        let scenarioAndLabels = new Map();
-        for (const scenario of dataFiles) {
-            if (!scenario.endsWith(".ks")) {
-                continue;
-            }
-            const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenario; //scenarioファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
-            const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
-            const array_s = parsedData["array_s"];
-            let labels = [];
-            for (let data in array_s) {
-                //ラベルなら
-                if (array_s[data]["name"] === "label") {
-                    labels.push("*" + array_s[data]["pm"]["label_name"]);
-                    labels.push(array_s[data]["pm"]["label_name"]);
-                }
-            }
-            //シナリオ名とラベルを保存
-            scenarioAndLabels.set(scenario, labels);
-        }
-        return scenarioAndLabels;
-    }
-    /**
-     * jump系タグで使われているシナリオファイルとラベルが存在するor定義されたものであるか診断します。
-     * @param scenarioAndLabels
-     * @param scenarioFiles
-     */
-    async detectionNotExistScenarioAndLabels(scenarioAndLabels, dataFiles, diagnosticArray) {
-        var _a, _b;
-        for (const scenario of dataFiles) {
-            if (!scenario.endsWith(".ks")) {
-                continue;
-            }
-            const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenario; //scenarioファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
-            // const scenarioDocument = this.getScenarioDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
+    async detectionNotExistScenarioAndLabels(scenarioFiles, diagnosticArray) {
+        for (const scenario of scenarioFiles) {
+            // ラベル関係は、以下のアルゴリズムのが良さそう？
+            /**
+             * 1.data直下の全シナリオを順番に読み込む
+             * 2.シナリオでジャンプ系タグが来るたびに、storageがあるならstorageがプロジェクト内に存在するか確かめる。（storageに相対パスを指定する場合、カレントディレクトリはscenarioフォルダ）
+             * 2.5.storageがなければ現在開いているファイルをstorageとする
+             * 3.storageで指定したファイルを構文解析にかけて目的のラベルがあるかを調べる。ないならdiagに入れる。continueする。
+             * 4.storageがOKならtargetの指定に入る
+             * 5.storageで指定されたファイルを読み込んで(シナリオフォルダをカレントディレクトリとして、storageの値をプラスする)、targetで指定したラベルがあればループ抜けてOK.
+             * 6.ラベル無ければdiagに入れる。
+             * 別途パラメータに変数指定した場合の関数も作る？
+             * 再帰関数にすればfor文の数少なくなるかも？
+             */
+            /**
+             * パースデータ取得関数はどこかでまとめると良いかも。array_sを戻り値とする。引数で指定したシナリオのパースデータ取得とかそんな感じで。
+             *
+             */
+            //scenarioにはothers/plugin/other_macro_define_folder/other_macro_define.ks'が入っている。
+            const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
-                //ジャンプ系タグなら
+                //storageに付いての処理(指定したファイルが有るかどうか)
                 if (this.JUMP_TAG.includes(array_s[data]["name"])) {
-                    // [...hoge]でスプレッド構文 Array.prototype.concat()相当のことが簡潔書ける
-                    // storageがundefinedでない && storageの値が変数でない && storageで指定した値がscenarioAndLabelsのkeyに存在している（シナリオ中に存在するシナリオファイルである）
-                    if (await array_s[data]["pm"]["storage"] !== undefined && !this.isValueIsVariable(array_s[data]["pm"]["storage"]) && !((_a = [...scenarioAndLabels.keys()]) === null || _a === void 0 ? void 0 : _a.includes(array_s[data]["pm"]["storage"]))) {
+                    if (array_s[data]["pm"]["storage"] !== undefined) {
                         let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]); // 該当行からタグの定義場所(開始位置)探す
                         let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length; // 該当行からタグの定義場所(終了位置)探す
                         let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-                        if (!array_s[data]["pm"]["storage"].endsWith(".ks")) {
-                            let diag = new vscode.Diagnostic(range, "storageパラメータは末尾が'.ks'である必要があります。", vscode.DiagnosticSeverity.Error);
-                            diagnostics.push(diag);
+                        if (this.isValueIsVariable(array_s[data]["pm"]["storage"])) {
+                            if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["storage"])) {
+                                let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
+                                diagnostics.push(diag);
+                                continue;
+                            }
                         }
                         else {
-                            let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
-                            diagnostics.push(diag);
+                            if (!array_s[data]["pm"]["storage"].endsWith(".ks")) {
+                                let diag = new vscode.Diagnostic(range, "storageパラメータは末尾が'.ks'である必要があります。", vscode.DiagnosticSeverity.Error);
+                                diagnostics.push(diag);
+                                continue;
+                            }
+                            if (!fs.existsSync(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
+                                let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
+                                diagnostics.push(diag);
+                                continue;
+                            }
                         }
                     }
-                    //targeteがundefinedでない && targetが変数である && アンパサンドがないなら
-                    //おそらくパラメータに変数使うやつまとめて全部検出できる。全てのパラメータ文字列を配列に入れて、forで回しして、とかで。
-                    if (await array_s[data]["pm"]["storage"] !== undefined && this.isValueIsVariable(array_s[data]["pm"]["storage"]) && !this.isExistAmpersandAtBeginning(array_s[data]["pm"]["storage"])) {
-                        let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]); // 該当行からタグの定義場所(開始位置)探す
-                        let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length; // 該当行からタグの定義場所(終了位置)探す
-                        let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-                        let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
-                        diagnostics.push(diag);
-                    }
-                    //こっからtargetパラメータ---------------------------
                     //storageが指定されてないなら現在開いているファイルとする
+                    //scenarioがscenarioフォルダにない時にバグる
                     if (array_s[data]["pm"]["storage"] === undefined) {
-                        array_s[data]["pm"]["storage"] = scenario;
+                        let tmp = scenario.replace(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/", '');
+                        array_s[data]["pm"]["storage"] = scenario.replace(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/", ''); //scenarioフォルダをカレントディレクトリとした、シナリオフォルダへの相対パスとする。
+                        console.log(array_s[data]["pm"]["storage"]);
                     }
-                    //targetがundefinedでない && targetの値が変数でない && targetで指定したラベルがstorageで指定したファイルの中に存在していない 
-                    if (await array_s[data]["pm"]["target"] !== undefined && !this.isValueIsVariable(array_s[data]["pm"]["target"]) && !((_b = scenarioAndLabels.get(array_s[data]["pm"]["storage"])) === null || _b === void 0 ? void 0 : _b.includes(array_s[data]["pm"]["target"]))) {
+                    // targetについての処理
+                    if (array_s[data]["pm"]["target"] !== undefined) {
                         let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
                         let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length; // 該当行からタグの定義場所(終了位置)探す
                         let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-                        let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "にラベル" + array_s[data]["pm"]["target"] + "は存在していません。", vscode.DiagnosticSeverity.Error);
-                        diagnostics.push(diag);
-                    }
-                    //targeteがundefinedでない && targetが変数である && アンパサンドがないなら	
-                    if (await array_s[data]["pm"]["target"] !== undefined && this.isValueIsVariable(array_s[data]["pm"]["target"]) && !this.isExistAmpersandAtBeginning(array_s[data]["pm"]["target"])) {
-                        let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
-                        let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length; // 該当行からタグの定義場所(終了位置)探す
-                        let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-                        let diag = new vscode.Diagnostic(range, "変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
-                        diagnostics.push(diag);
+                        if (this.isValueIsVariable(array_s[data]["pm"]["target"])) {
+                            if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["target"])) {
+                                let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
+                                diagnostics.push(diag);
+                                continue;
+                            }
+                        }
+                        else if (!this.isValueIsVariable(array_s[data]["pm"]["storage"])) { //targetがundefinedじゃない&&storageが変数でもない
+                            //targetから*を外して表記ゆれ防ぐ
+                            array_s[data]["pm"]["target"] = array_s[data]["pm"]["target"].replace("*", "");
+                            let isLabelExsit = false;
+                            //ファイル探索して、該当のラベルがあればisLabelExsitをtrueにして操作打ち切る
+                            //							const storageScenarioDocument = await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);//引数のパスのシナリオ全文取得
+                            //ファイルオープンする時にproj/data/scenario + "/" + storage
+                            const storageScenarioDocument = await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]); //引数のパスのシナリオ全文取得
+                            const storageParsedData = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
+                            const storageArray_s = storageParsedData["array_s"];
+                            for (let storageData in storageArray_s) {
+                                if ((storageArray_s[storageData]["pm"]["label_name"] === array_s[data]["pm"]["target"])) {
+                                    isLabelExsit = true;
+                                    break;
+                                }
+                            }
+                            if (!isLabelExsit) {
+                                let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["target"] + "は存在しないラベルです。", vscode.DiagnosticSeverity.Error);
+                                diagnostics.push(diag);
+                                continue;
+                            }
+                        }
                     }
                 }
             }
             diagnosticArray.push([scenarioDocument.uri, diagnostics]);
         }
     }
+    // /**
+    //  * ファイルにあるシナリオと、シナリオ内で定義されたラベルを取得します。
+    //  * @returns 
+    //  */
+    // private async loadDefinedScenarioAndLabels(dataFiles: string[]): Promise<Map<string, string[]>> {
+    // 	let scenarioAndLabels = new Map<string, string[]>();
+    // 	for (const scenario of dataFiles) {
+    // 		if (!scenario.endsWith(".ks")) {
+    // 			continue;
+    // 		}
+    // 		const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + scenario; //scenarioファイルにあるシナリオの絶対パス取得
+    // 		const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath);//引数のパスのシナリオ全文取得
+    // 		const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+    // 		const array_s = parsedData["array_s"];
+    // 		let labels = []
+    // 		for (let data in array_s) {
+    // 			//ラベルなら
+    // 			if (array_s[data]["name"] === "label") {
+    // 				labels.push("*" + array_s[data]["pm"]["label_name"]);
+    // 				labels.push(array_s[data]["pm"]["label_name"]);
+    // 			}
+    // 		}
+    // 		//シナリオ名とラベルを保存
+    // 		scenarioAndLabels.set(scenarioFileAbsolutePath, labels);
+    // 	}
+    // 	return scenarioAndLabels
+    // }
+    // /**
+    //  * jump系タグで使われているシナリオファイルとラベルが存在するor定義されたものであるか診断します。
+    //  * @param scenarioAndLabels 
+    //  * @param scenarioFiles 
+    //  */
+    // private async __detectionNotExistScenarioAndLabels(scenarioAndLabels: Map<string, string[]>, dataFiles: string[], diagnosticArray: any[]) {
+    // 	for (const scenario of dataFiles) {
+    // 		if (!scenario.endsWith(".ks")) {
+    // 			continue;
+    // 		}
+    // 		const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + scenario; //scenarioファイルにあるシナリオの絶対パス取得
+    // 		const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath);//引数のパスのシナリオ全文取得
+    // 		// const scenarioDocument = this.getScenarioDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
+    // 		const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+    // 		const array_s = parsedData["array_s"];
+    // 		let diagnostics: vscode.Diagnostic[] = [];
+    // 		for (let data in array_s) {
+    // 			//ジャンプ系タグなら
+    // 			if (this.JUMP_TAG.includes(array_s[data]["name"])) {
+    // 				// [...hoge]でスプレッド構文 Array.prototype.concat()相当のことが簡潔書ける
+    // 				// storageがundefinedでない && storageの値が変数でない && storageで指定した値がscenarioAndLabelsのkeyに存在している（シナリオ中に存在するシナリオファイルである）
+    // 				// if (await array_s[data]["pm"]["storage"] !== undefined && !this.isValueIsVariable(array_s[data]["pm"]["storage"]) && ![...scenarioAndLabels.keys()]?.includes(array_s[data]["pm"]["storage"])) {
+    // 				if (await array_s[data]["pm"]["storage"] !== undefined && !this.isValueIsVariable(array_s[data]["pm"]["storage"]) && !fs.existsSync(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
+    // 					let tagFirstIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]);	// 該当行からタグの定義場所(開始位置)探す
+    // 					let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length;	// 該当行からタグの定義場所(終了位置)探す
+    // 					let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+    // 					if (!array_s[data]["pm"]["storage"].endsWith(".ks")) {
+    // 						let diag = new vscode.Diagnostic(range, "storageパラメータは末尾が'.ks'である必要があります。", vscode.DiagnosticSeverity.Error);
+    // 						diagnostics.push(diag);
+    // 					} else {
+    // 						let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
+    // 						diagnostics.push(diag);
+    // 					}
+    // 				}
+    // 				//targeteがundefinedでない && targetが変数である && アンパサンドがないなら
+    // 				//TODO:おそらくパラメータに変数使うやつまとめて全部検出できる。全てのパラメータ文字列を配列に入れて、forで回しして、とかで。
+    // 				if (await array_s[data]["pm"]["storage"] !== undefined && this.isValueIsVariable(array_s[data]["pm"]["storage"]) && !this.isExistAmpersandAtBeginning(array_s[data]["pm"]["storage"])) {
+    // 					let tagFirstIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]);	// 該当行からタグの定義場所(開始位置)探す
+    // 					let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length;	// 該当行からタグの定義場所(終了位置)探す
+    // 					let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+    // 					let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
+    // 					diagnostics.push(diag);
+    // 				}
+    // 				//こっからtargetパラメータ---------------------------
+    // 				//storageが指定されてないなら現在開いているファイルとする
+    // 				if (array_s[data]["pm"]["storage"] === undefined) {
+    // 					array_s[data]["pm"]["storage"] = scenario;
+    // 				}
+    // 				//targetがundefinedでない && targetの値が変数でない && targetで指定したラベルがstorageで指定したファイルの中に存在していない &&storageが変数でないなら
+    // 				if (
+    // 					await array_s[data]["pm"]["target"] !== undefined &&
+    // 					!this.isValueIsVariable(await array_s[data]["pm"]["target"]) &&
+    // 					!scenarioAndLabels.get(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]) &&
+    // 					// ![...scenarioAndLabels.keys()]?.includes(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + await array_s[data]["pm"]["storage"]) &&
+    // 					!this.isValueIsVariable(await array_s[data]["pm"]["storage"])) {
+    // 					let tagFirstIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]);	// 該当行からタグの定義場所(開始位置)探す
+    // 					let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length;	// 該当行からタグの定義場所(終了位置)探す
+    // 					let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+    // 					let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "にラベル" + array_s[data]["pm"]["target"] + "は存在していません。", vscode.DiagnosticSeverity.Error);
+    // 					diagnostics.push(diag);
+    // 					console.log("------------------");
+    // 					console.log(scenarioAndLabels.get(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]));
+    // 				}
+    // 				//targeteがundefinedでない && targetが変数である && アンパサンドがないなら	
+    // 				if (await array_s[data]["pm"]["target"] !== undefined && this.isValueIsVariable(array_s[data]["pm"]["target"]) && !this.isExistAmpersandAtBeginning(array_s[data]["pm"]["target"])) {
+    // 					let tagFirstIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]);	// 該当行からタグの定義場所(開始位置)探す
+    // 					let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length;	// 該当行からタグの定義場所(終了位置)探す
+    // 					let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+    // 					let diag = new vscode.Diagnostic(range, "変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
+    // 					diagnostics.push(diag);
+    // 				}
+    // 			}
+    // 		}
+    // 		diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+    // 	}
+    // }
     /**
      * 引数に入れた値の先頭に&記号があるかを判断します。
      * @returns trueなら&がある、 falseなら&がない
@@ -240,7 +324,7 @@ class TyranoDiagnostic {
             //初期値は公式で提供されているもの
         }
         let tyranoTag = this.tyranoDefaultTag.slice(); //公式タグの定義
-        const scenarioFileAbsolutePath = this.informationWorkSpace.getProjectRootPath() + this.informationWorkSpace.DATA_DIRECTORY + this.informationWorkSpace.DATA_SCENARIO + "/" + scenarioFile; //シナリオファイルの絶対パス取得
+        const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + scenarioFile; //シナリオファイルの絶対パス取得
         const scenarioDocument = await vscode.workspace.openTextDocument(scenarioFileAbsolutePath); //引数のパスのシナリオ全文取得
         // const scenarioDocument = await this.getScenarioDocument(scenarioFileAbsolutePath);		//引数のパスのシナリオ全文取得
         const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析

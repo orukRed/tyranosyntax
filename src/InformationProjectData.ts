@@ -9,6 +9,8 @@ export class InformationProjectData {
 
 	private static instance: InformationProjectData = new InformationProjectData();
 
+
+
 	public static getInstance(): InformationProjectData {
 		return this.instance;
 	}
@@ -36,5 +38,8 @@ export class InformationProjectData {
 
 		return tyranoDefaultTag;
 	}
+
+
+
 
 }

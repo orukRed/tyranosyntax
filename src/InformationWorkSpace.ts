@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-
+import * as path from 'path';
 /**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
  * シングルトン。
@@ -46,24 +46,39 @@ export class InformationWorkSpace {
 	 * プロジェクトに存在するファイルパスを取得します。
 	 * 使用例:
 	 * @param projectRootPath プロジェクトのルートパス
+	 * @param permissionExtension 取得するファイルパスの拡張子。無指定ですべてのファイル取得。
+	 * @param isAbsolute 絶対パスで返すかどうか。trueなら絶対パス。falseで相対パス。
 	 * @returns プロジェクトのルートパスが存在するなら存在するファイルパスを文字列型の配列で返却。
 	 */
-	public getProjectFiles(projectRootPath: string): string[] {
+	public getProjectFiles(projectRootPath: string, permissionExtension: string[] = [], isAbsolute: boolean = false): string[] {
 		//ルートパスが存在していない場合
 		if (projectRootPath === undefined || projectRootPath === "") {
 			return [];
 		}
 
-		const listFiles = (dir: string): string[] =>
-			fs.readdirSync(dir, { withFileTypes: true }).flatMap(dirent =>
-				dirent.isFile() ? [`${dir}/${dirent.name}`] : listFiles(`${dir}/${dirent.name}`))
 
+		//指定したファイルパスの中のファイルのうち、permissionExtensionの中に入ってる拡張子のファイルパスのみを取得
+		const listFiles = (dir: string): string[] =>
+			fs.readdirSync(dir, { withFileTypes: true }).
+				flatMap(dirent =>
+					dirent.isFile() ?
+						[`${dir}/${dirent.name}`].filter(file => {
+							if (permissionExtension.length <= 0) {
+								return file;
+							}
+							return permissionExtension.includes(path.extname(file))
+						}) :
+						listFiles(`${dir}/${dirent.name}`))
 		try {
 			let ret = listFiles(projectRootPath);//絶対パスで取得
-			ret = ret.map(e => {//相対パスに変換
-				return e.replace(projectRootPath + "/", '');
 
-			});
+			//相対パスに変換
+			if (!isAbsolute) {
+				ret = ret.map(e => {
+					return e.replace(projectRootPath + "/", '');
+				});
+			}
+
 			return ret
 		} catch (error) {
 			console.log(error);
