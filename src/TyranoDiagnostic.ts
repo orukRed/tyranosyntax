@@ -34,10 +34,9 @@ export class TyranoDiagnostic {
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
 		//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
 		// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
-		//シナリオ名とラベルを読み込む <scenarioName, labels>
-		// let scenarioAndLabels = await this.loadDefinedScenarioAndLabels(scenarioFiles);
 		//未定義のマクロを使用しているか検出
 		// await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
+
 		//存在しないシナリオファイル、未定義のラベルを検出
 		await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
 
@@ -171,7 +170,7 @@ export class TyranoDiagnostic {
 								diagnostics.push(diag);
 								continue;
 							}
-						} else if (array_s[data]["pm"]["storage"] !== undefined && !this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) {//targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
+						} else if (!this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) {//targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
 							//targetから*を外して表記ゆれ防ぐ
 							array_s[data]["pm"]["target"] = array_s[data]["pm"]["target"].replace("*", "");
 
@@ -184,7 +183,6 @@ export class TyranoDiagnostic {
 									await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
 							const storageParsedData: object = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
 							const storageArray_s = storageParsedData["array_s"];
-
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
 							for (let storageData in storageArray_s) {
 								if ((storageArray_s[storageData]["pm"]["label_name"] === array_s[data]["pm"]["target"])) {
@@ -219,6 +217,9 @@ export class TyranoDiagnostic {
 	 * @returns trueなら値は変数 falseなら値は変数でない
 	 */
 	private isValueIsIncludeVariable(value: string): boolean {
+		if (value === undefined) {
+			return false;
+		}
 		//いずれの変数ともマッチしないならvalueに変数は含まれていない
 		if (value.match(/f\.[a-zA-Z_]\w*/) === null &&
 			value.match(/sf\.[a-zA-Z_]\w*/) === null &&
