@@ -13,9 +13,12 @@
   * [l][r] shift + enter
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
-* 診断機能
-  * hogehoge
+* 診断機能(※1)
+  * ジャンプ系タグにてstorage,targetで指定した先が未定義の場合の検出
+  * ジャンプ系タグにてstorage,targetで使用する場合、先頭に&があるかどうかの検出(&がない場合エラー)
+* ツールチップの表示(マウスカーソルをタグに乗せることで表示されます。)
 
+※1：ティラノスクリプトのルートプロジェクト(index.htmlの存在しているフォルダ)をフォルダで開いているときのみ使用可能です。
 
 ## 機能（Web版）
 

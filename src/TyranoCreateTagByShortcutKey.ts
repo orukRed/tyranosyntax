@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 
 export class TyranoCreateTagByShortcutKey {
 
-
-
 	/**
 	 * shift + Enterで実行されるコマンド
 	 * @returns true:正常終了 else:異常終了
