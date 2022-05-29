@@ -31,7 +31,6 @@ class TyranoDiagnostic {
         // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
         //存在しないシナリオファイル、未定義のラベルを検出
         await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
-        // await this.__detectionNotExistScenarioAndLabels(scenarioAndLabels, scenarioFiles, diagnosticArray);
         //診断結果をセット
         this.diagnosticCollection.set(diagnosticArray);
     }
@@ -130,13 +129,6 @@ class TyranoDiagnostic {
                             }
                         }
                     }
-                    //storageが指定されてないなら現在開いているファイルとする
-                    //scenarioがscenarioフォルダにない時にバグる
-                    if (array_s[data]["pm"]["storage"] === undefined) {
-                        let tmp = scenario.replace(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/", '');
-                        array_s[data]["pm"]["storage"] = scenario.replace(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/", ''); //scenarioフォルダをカレントディレクトリとした、シナリオフォルダへの相対パスとする。
-                        console.log(array_s[data]["pm"]["storage"]);
-                    }
                     // targetについての処理
                     if (array_s[data]["pm"]["target"] !== undefined) {
                         let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
@@ -149,16 +141,18 @@ class TyranoDiagnostic {
                                 continue;
                             }
                         }
-                        else if (!this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) { //targetがundefinedじゃない&&storageが変数でもない
+                        else if (array_s[data]["pm"]["storage"] !== undefined && !this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) { //targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
                             //targetから*を外して表記ゆれ防ぐ
                             array_s[data]["pm"]["target"] = array_s[data]["pm"]["target"].replace("*", "");
-                            let isLabelExsit = false;
                             //ファイル探索して、該当のラベルがあればisLabelExsitをtrueにして操作打ち切る
-                            //							const storageScenarioDocument = await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);//引数のパスのシナリオ全文取得
-                            //ファイルオープンする時にproj/data/scenario + "/" + storage
-                            const storageScenarioDocument = await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]); //引数のパスのシナリオ全文取得
+                            //storageが指定されてない(undefined)ならscenarioに入ってるパス（自分自身のシナリオファイル）を入れる
+                            //storageが指定されてるなら指定先を取得
+                            let storageScenarioDocument = (array_s[data]["pm"]["storage"] === undefined) ?
+                                await vscode.workspace.openTextDocument(scenario) :
+                                await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
                             const storageParsedData = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
                             const storageArray_s = storageParsedData["array_s"];
+                            let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか
                             for (let storageData in storageArray_s) {
                                 if ((storageArray_s[storageData]["pm"]["label_name"] === array_s[data]["pm"]["target"])) {
                                     isLabelExsit = true;
@@ -178,17 +172,11 @@ class TyranoDiagnostic {
         }
     }
     /**
-     * 引数に入れた変数混じりの文字列に&記号があるかを判断します。
+     * 引数に入れた値の先頭に&記号があるかを判断します。
      * @returns trueなら&がある、 falseなら&がない
      */
     isExistAmpersandAtBeginning(value) {
-        //いずれともマッチしないならアンパサンドがない
-        if (value.match(/&f\.[a-zA-Z_]\w*/) === null &&
-            value.match(/&sf\.[a-zA-Z_]\w*/) === null &&
-            value.match(/&tf\.[a-zA-Z_]\w*/) === null) {
-            return false;
-        }
-        return true;
+        return value.indexOf("&") === 0 ? true : false;
     }
     /**
      * 引数に入れた値が変数を含むかどうかを判断します。
