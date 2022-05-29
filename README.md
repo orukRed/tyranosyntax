@@ -14,7 +14,7 @@
   * [p] ctrl + enter（Macならcmd+enter）
   * \#  alt + enter（Macならoption+enter）
 * 診断機能(※1)
-  * ジャンプ系タグにてstorage,targetで指定した先が未定義の場合の検出
+  * ジャンプ系("jump", "call", "link", "button", "glink", "clickable")タグにてstorage,targetで指定した先が未定義の場合の検出
   * ジャンプ系タグにてstorage,targetで使用する場合、先頭に&があるかどうかの検出(&がない場合エラー)
 * ツールチップの表示(マウスカーソルをタグに乗せることで表示されます。)
 
