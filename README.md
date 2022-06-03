@@ -18,7 +18,7 @@
   * ジャンプ系タグにてstorage,targetで使用する場合、先頭に&があるかどうかの検出(&がない場合エラー)
 * ツールチップの表示(マウスカーソルをタグに乗せることで表示されます。)
 
-※1：ティラノスクリプトのルートプロジェクト(index.htmlの存在しているフォルダ)をフォルダで開いているときのみ使用可能です。
+※1：ティラノスクリプトのルートプロジェクト(index.htmlとdataフォルダとtyranoフォルダが存在しているフォルダ)が含まれるフォルダを開いているときのみ使用可能です。
 
 ## 機能（Web版）
 
@@ -35,6 +35,8 @@ ver0.8.0現在ではシンタックスハイライト以外の機能追加予定
 ## issues
 
 バグなどを見つけた場合、以下のいずれかでご連絡ください。
+出力ウィンドウにTyranoScript syntaxから出力されたログが記載されています。
+（ある場合は）ログも一緒に送ってくださると製作者が喜びます！
 - [Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)

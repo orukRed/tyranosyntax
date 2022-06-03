@@ -8,6 +8,7 @@ import { TyranoTagHoverProvider } from './TyranoTagHoverProvider';
 import { TyranoOutlineProvider } from './TyranoOutlineProvider';
 import { TyranoCompletionItemProvider } from './TyranoCompletionItemProvider';
 import { TyranoDiagnostic } from './TyranoDiagnostic';
+import { TyranoLogger } from './TyranoLogger';
 
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
@@ -15,20 +16,18 @@ export function activate(context: vscode.ExtensionContext) {
 	//登録処理
 	//サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
 	context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider()));
+	TyranoLogger.print("TyranoTagHoverProvider activate");
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new TyranoOutlineProvider()));
+	TyranoLogger.print("TyranoOutlineProvider activate");
 	context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider()));
-
+	TyranoLogger.print("TyranoCompletionItemProvider activate");
 
 	//ショートカットコマンドの登録
 	let ctbs = new TyranoCreateTagByShortcutKey();
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
 	context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
-
-	//パース機能呼び出しテスト
-	// const hoge11: TyranoDiagnostic = new TyranoDiagnostic();
-	// hoge11.hoge();
-
+	TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
 
 	//診断機能の登録
 	//ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
@@ -37,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 		//ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
 		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics()));
 		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => tyranoDiagnostic.createDiagnostics()));
-
+		TyranoLogger.print("TyranoDiagnostic activate");
 	}
 
 	//ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。
