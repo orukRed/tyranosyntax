@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { InformationWorkSpace as workspace } from './InformationWorkSpace';
 import { TextDecoder } from 'util';
 import { InformationProjectData as project } from './InformationProjectData';
+import { TyranoLogger } from './TyranoLogger';
 
 
 
@@ -24,13 +25,14 @@ export class TyranoDiagnostic {
 	private tyranoDefaultTag: string[] = this.infoPd.getDefaultTag();
 
 	constructor() {
+
 	}
 
 
 	public async createDiagnostics() {
 
 		let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
-		const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+		const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
 		//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
 		// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
@@ -46,6 +48,7 @@ export class TyranoDiagnostic {
 
 		//診断結果をセット
 		this.diagnosticCollection.set(diagnosticArray);
+
 	}
 
 
@@ -151,7 +154,7 @@ export class TyranoDiagnostic {
 								continue;
 							}
 
-							if (!fs.existsSync(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
+							if (!fs.existsSync(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
 								let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
 								diagnostics.push(diag);
 								continue;
@@ -180,7 +183,7 @@ export class TyranoDiagnostic {
 							let storageScenarioDocument: vscode.TextDocument =
 								(array_s[data]["pm"]["storage"] === undefined) ?
 									await vscode.workspace.openTextDocument(scenario) :
-									await vscode.workspace.openTextDocument(this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
+									await vscode.workspace.openTextDocument(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
 							const storageParsedData: object = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
 							const storageArray_s = storageParsedData["array_s"];
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
