@@ -11,7 +11,7 @@ suite('InformationWorkSpace.getProjectRootPath', () => {
     test('正常系', () => {
         //値定義
         const info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        // assert.strictEqual((info as any).getProjectRootPath(), "");//絶対パス取得するのでgithubにあげられない。
+        // assert.strictEqual((info as any).getWorkspaceRootPath(), "");//絶対パス取得するのでgithubにあげられない。
     });
 });
 suite('InformationWorkSpace.getProjectFiles', () => {

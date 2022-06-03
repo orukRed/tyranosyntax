@@ -30,7 +30,7 @@ class InformationWorkSpace {
      * フォルダを開いてない場合、undefined.
      * @returns プロジェクトのルートパス。フォルダを開いていないならundefined.
      */
-    getProjectRootPath() {
+    getWorkspaceRootPath() {
         //フォルダ開いてない場合、相対パスたどってプロジェクトのルートパス取ろうと思ったけど万が一Cドライブ直下とかにアクセスすると大惨事なのでNG.
         if (vscode.workspace.workspaceFolders === undefined) {
             return "";
