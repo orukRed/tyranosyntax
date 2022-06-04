@@ -5,6 +5,7 @@ const vscode = require("vscode");
 const fs = require("fs");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const InformationProjectData_1 = require("./InformationProjectData");
+const TyranoLogger_1 = require("./TyranoLogger");
 class TyranoDiagnostic {
     constructor() {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
@@ -12,23 +13,39 @@ class TyranoDiagnostic {
         this.infoPd = InformationProjectData_1.InformationProjectData.getInstance();
         //ファイルパス取得用
         this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        //ティラノスクリプトのプロジェクトのルートパス
+        this.tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
         //パーサー
         this.loadModule = require('./lib/module-loader.js').loadModule;
         this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
         this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
         this.tyranoDefaultTag = this.infoPd.getDefaultTag();
+        this.tyranoProjectPaths.forEach(element => {
+            TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
+        });
     }
     ;
     async createDiagnostics() {
-        let variables = new Map(); //プロジェクトで定義された変数を格納<variableName,value>
-        const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+        // let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
         let diagnosticArray = []; //診断結果を一時的に保存する配列
-        //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-        // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
-        //未定義のマクロを使用しているか検出
-        // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
-        //存在しないシナリオファイル、未定義のラベルを検出
-        await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
+        for (let path of this.tyranoProjectPaths) {
+            const absoluteScenarioFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+            //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
+            // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles,path);
+            //未定義のマクロを使用しているか検出
+            // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray,path);
+            //存在しないシナリオファイル、未定義のラベルを検出
+            await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray, path);
+        }
+        // let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
+        // const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+        // let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
+        // //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
+        // // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
+        // //未定義のマクロを使用しているか検出
+        // // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
+        // //存在しないシナリオファイル、未定義のラベルを検出
+        // await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
         //診断結果をセット
         this.diagnosticCollection.set(diagnosticArray);
     }
@@ -37,8 +54,8 @@ class TyranoDiagnostic {
      * @param 現在定義されているティラノスクリプトのタグのリスト
      * @return ティラノ公式タグ+読み込んだ定義済みマクロの名前の配列
      */
-    async loadDefinedMacroByScenarios(tyranoTag, scenarioFiles) {
-        for (const scenario of scenarioFiles) {
+    async loadDefinedMacroByScenarios(tyranoTag, absoluteScenarioFilePaths) {
+        for (const scenario of absoluteScenarioFilePaths) {
             // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario;//dataファイルにあるシナリオの絶対パス取得
             const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
             const parsedData = this.parser.tyranoParser.parseScenario((await scenarioDocument).getText()); //構文解析
@@ -57,7 +74,7 @@ class TyranoDiagnostic {
      * 未定義のマクロを使用しているか検出します。
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
-    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray) {
+    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray, projectPath) {
         for (const scenario of scenarioFiles) {
             // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
             const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
@@ -77,25 +94,14 @@ class TyranoDiagnostic {
             diagnosticArray.push([scenarioDocument.uri, diagnostics]);
         }
     }
-    async detectionNotExistScenarioAndLabels(scenarioFiles, diagnosticArray) {
+    /**
+     * jump系タグで指定したstorageやtargetに付いての診断を行います。
+     * @param scenarioFiles 診断するシナリオファイルの絶対パスのリスト
+     * @param diagnosticArray 参照渡しで更新する診断結果
+     * @param projectPath 診断するプロジェクトの絶対パス
+     */
+    async detectionNotExistScenarioAndLabels(scenarioFiles, diagnosticArray, projectPath) {
         for (const scenario of scenarioFiles) {
-            // ラベル関係は、以下のアルゴリズムのが良さそう？
-            /**
-             * 1.data直下の全シナリオを順番に読み込む
-             * 2.シナリオでジャンプ系タグが来るたびに、storageがあるならstorageがプロジェクト内に存在するか確かめる。（storageに相対パスを指定する場合、カレントディレクトリはscenarioフォルダ）
-             * 2.5.storageがなければ現在開いているファイルをstorageとする
-             * 3.storageで指定したファイルを構文解析にかけて目的のラベルがあるかを調べる。ないならdiagに入れる。continueする。
-             * 4.storageがOKならtargetの指定に入る
-             * 5.storageで指定されたファイルを読み込んで(シナリオフォルダをカレントディレクトリとして、storageの値をプラスする)、targetで指定したラベルがあればループ抜けてOK.
-             * 6.ラベル無ければdiagに入れる。
-             * 別途パラメータに変数指定した場合の関数も作る？
-             * 再帰関数にすればfor文の数少なくなるかも？
-             */
-            /**
-             * パースデータ取得関数はどこかでまとめると良いかも。array_sを戻り値とする。引数で指定したシナリオのパースデータ取得とかそんな感じで。
-             *
-             */
-            //scenarioにはothers/plugin/other_macro_define_folder/other_macro_define.ks'が入っている。
             const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
@@ -120,7 +126,7 @@ class TyranoDiagnostic {
                                 diagnostics.push(diag);
                                 continue;
                             }
-                            if (!fs.existsSync(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
+                            if (!fs.existsSync(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
                                 let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
@@ -147,7 +153,7 @@ class TyranoDiagnostic {
                             //storageが指定されてるなら指定先を取得
                             let storageScenarioDocument = (array_s[data]["pm"]["storage"] === undefined) ?
                                 await vscode.workspace.openTextDocument(scenario) :
-                                await vscode.workspace.openTextDocument(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
+                                await vscode.workspace.openTextDocument(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
                             const storageParsedData = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
                             const storageArray_s = storageParsedData["array_s"];
                             let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか

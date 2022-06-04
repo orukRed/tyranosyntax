@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
-const fs = require("fs");
 const TyranoCreateTagByShortcutKey_1 = require("./TyranoCreateTagByShortcutKey");
 const TyranoTagHoverProvider_1 = require("./TyranoTagHoverProvider");
 const TyranoOutlineProvider_1 = require("./TyranoOutlineProvider");
@@ -28,7 +27,7 @@ function activate(context) {
     TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
     //診断機能の登録
     //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
-    if (vscode.workspace.workspaceFolders !== undefined && fs.existsSync(vscode.workspace.workspaceFolders[0].uri.fsPath + "/index.html")) {
+    if (vscode.workspace.workspaceFolders !== undefined) {
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
         context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics()));
