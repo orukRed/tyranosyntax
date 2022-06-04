@@ -28,8 +28,10 @@ export class InformationWorkSpace {
 	private constructor() {
 	}
 
+
+
 	/**
-	 * フォルダを開いてるなら、開いてるフォルダ(index.htmlのあるフォルダ)のルートパスを取得します。
+	 * フォルダを開いてるなら、vscodeで開いているルートパスのディレクトリを取得します。
 	 * フォルダを開いてない場合、undefined.
 	 * @returns プロジェクトのルートパス。フォルダを開いていないならundefined.
 	 */
@@ -40,6 +42,26 @@ export class InformationWorkSpace {
 		}
 
 		return vscode.workspace.workspaceFolders[0].uri.fsPath;
+	}
+
+
+	public getTyranoScriptProjectRootPaths(): string[] {
+		//フォルダ開いてないなら早期リターン
+		if (this.getWorkspaceRootPath() === undefined) {
+			return [];
+		}
+
+		//指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
+		const listFiles = (dir: string): string[] =>
+			fs.readdirSync(dir, { withFileTypes: true }).
+				flatMap(dirent =>
+					dirent.isFile() ?
+						[`${dir}/${dirent.name}` + "/.."].filter(file => dirent.name === "index.html") :
+						listFiles(`${dir}/${dirent.name}`))
+
+		const ret = listFiles(this.getWorkspaceRootPath());
+
+		return ret;
 	}
 
 	/**

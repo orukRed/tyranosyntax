@@ -4,6 +4,7 @@ import { InformationWorkSpace as workspace } from './InformationWorkSpace';
 import { TextDecoder } from 'util';
 import { InformationProjectData as project } from './InformationProjectData';
 import { TyranoLogger } from './TyranoLogger';
+import { exit } from 'process';
 
 
 
@@ -17,6 +18,9 @@ export class TyranoDiagnostic {
 	//ファイルパス取得用
 	private readonly infoWs: workspace = workspace.getInstance();
 
+	//ティラノスクリプトのプロジェクトのルートパス
+	private readonly tyranoProjectPaths: string[] = this.infoWs.getTyranoScriptProjectRootPaths();
+
 	//パーサー
 	private loadModule = require('./lib/module-loader.js').loadModule;
 	private parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
@@ -24,23 +28,45 @@ export class TyranoDiagnostic {
 
 	private tyranoDefaultTag: string[] = this.infoPd.getDefaultTag();
 
-	constructor() {
 
+	constructor() {
+		this.tyranoProjectPaths.forEach(element => {
+			TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
+		});
 	}
 
 
 	public async createDiagnostics() {
 
-		let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
-		const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
-		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
-		//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-		// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
-		//未定義のマクロを使用しているか検出
-		// await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
+		// let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
 
-		//存在しないシナリオファイル、未定義のラベルを検出
-		await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
+		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
+		for (let path of this.tyranoProjectPaths) {
+			const absoluteScenarioFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+			//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
+			// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles,path);
+			//未定義のマクロを使用しているか検出
+			// await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray,path);
+
+			//存在しないシナリオファイル、未定義のラベルを検出
+			await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray, path);
+		}
+
+
+
+
+
+
+		// let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
+		// const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+		// let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
+		// //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
+		// // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
+		// //未定義のマクロを使用しているか検出
+		// // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
+
+		// //存在しないシナリオファイル、未定義のラベルを検出
+		// await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
 
 
 
@@ -59,9 +85,9 @@ export class TyranoDiagnostic {
 	 * @param 現在定義されているティラノスクリプトのタグのリスト
 	 * @return ティラノ公式タグ+読み込んだ定義済みマクロの名前の配列
 	 */
-	private async loadDefinedMacroByScenarios(tyranoTag: string[], scenarioFiles: string[]): Promise<string[]> {
+	private async loadDefinedMacroByScenarios(tyranoTag: string[], absoluteScenarioFilePaths: string[]): Promise<string[]> {
 
-		for (const scenario of scenarioFiles) {
+		for (const scenario of absoluteScenarioFilePaths) {
 			// const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario;//dataファイルにあるシナリオの絶対パス取得
 			const scenarioDocument = await vscode.workspace.openTextDocument(scenario);//引数のパスのシナリオ全文取得
 			const parsedData: object = this.parser.tyranoParser.parseScenario((await scenarioDocument).getText()); //構文解析
@@ -81,7 +107,7 @@ export class TyranoDiagnostic {
 	 * 未定義のマクロを使用しているか検出します。
 	 * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
 	 */
-	private async detectionNotDefineMacro(tyranoTag: string[], scenarioFiles: string[], diagnosticArray: any[]) {
+	private async detectionNotDefineMacro(tyranoTag: string[], scenarioFiles: string[], diagnosticArray: any[], projectPath: string) {
 		for (const scenario of scenarioFiles) {
 			// const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
 			const scenarioDocument = await vscode.workspace.openTextDocument(scenario);//引数のパスのシナリオ全文取得
@@ -105,27 +131,16 @@ export class TyranoDiagnostic {
 		}
 	}
 
-	private async detectionNotExistScenarioAndLabels(scenarioFiles: string[], diagnosticArray: any[]) {
+	/**
+	 * jump系タグで指定したstorageやtargetに付いての診断を行います。
+	 * @param scenarioFiles 診断するシナリオファイルの絶対パスのリスト
+	 * @param diagnosticArray 参照渡しで更新する診断結果
+	 * @param projectPath 診断するプロジェクトの絶対パス
+	 */
+	private async detectionNotExistScenarioAndLabels(scenarioFiles: string[], diagnosticArray: any[], projectPath: string) {
 		for (const scenario of scenarioFiles) {
-			// ラベル関係は、以下のアルゴリズムのが良さそう？
-			/**
-			 * 1.data直下の全シナリオを順番に読み込む
-			 * 2.シナリオでジャンプ系タグが来るたびに、storageがあるならstorageがプロジェクト内に存在するか確かめる。（storageに相対パスを指定する場合、カレントディレクトリはscenarioフォルダ）
-			 * 2.5.storageがなければ現在開いているファイルをstorageとする
-			 * 3.storageで指定したファイルを構文解析にかけて目的のラベルがあるかを調べる。ないならdiagに入れる。continueする。
-			 * 4.storageがOKならtargetの指定に入る
-			 * 5.storageで指定されたファイルを読み込んで(シナリオフォルダをカレントディレクトリとして、storageの値をプラスする)、targetで指定したラベルがあればループ抜けてOK.
-			 * 6.ラベル無ければdiagに入れる。
-			 * 別途パラメータに変数指定した場合の関数も作る？
-			 * 再帰関数にすればfor文の数少なくなるかも？
-			 */
 
-			/**
-			 * パースデータ取得関数はどこかでまとめると良いかも。array_sを戻り値とする。引数で指定したシナリオのパースデータ取得とかそんな感じで。
-			 * 
-			 */
 
-			//scenarioにはothers/plugin/other_macro_define_folder/other_macro_define.ks'が入っている。
 			const scenarioDocument = await vscode.workspace.openTextDocument(scenario);//引数のパスのシナリオ全文取得
 			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
@@ -154,7 +169,7 @@ export class TyranoDiagnostic {
 								continue;
 							}
 
-							if (!fs.existsSync(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
+							if (!fs.existsSync(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"])) {
 								let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
 								diagnostics.push(diag);
 								continue;
@@ -183,7 +198,7 @@ export class TyranoDiagnostic {
 							let storageScenarioDocument: vscode.TextDocument =
 								(array_s[data]["pm"]["storage"] === undefined) ?
 									await vscode.workspace.openTextDocument(scenario) :
-									await vscode.workspace.openTextDocument(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
+									await vscode.workspace.openTextDocument(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
 							const storageParsedData: object = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
 							const storageArray_s = storageParsedData["array_s"];
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
