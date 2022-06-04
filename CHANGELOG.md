@@ -217,4 +217,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - [s] などといった、タグ名の後に半角スペースがない場合にチップツールが効かなくなっている不具合を修正しました。
 - 特定の状況下で出力ウィンドウにTyranoScript syntaxという名前のログが出力されるようになりました。
   - 使用いただく分には特に変わり有りませんが、バグ報告いただいた際にログなどもいただければ非常に嬉しいです。
-- index.htmlのあるフォルダを開いていなくても、vscodeでワークスペースとして開いたフォルダ内にindex.htmlやdata,tyranoフォルダがあれば診断機能が実施されるようになりました。
+- index.htmlのあるフォルダを開いていなくても、vscodeでワークスペースとして開いたフォルダ内にindex.htmlがあれば診断機能が実施されるようになりました。
