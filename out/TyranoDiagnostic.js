@@ -193,7 +193,8 @@ class TyranoDiagnostic {
         //いずれの変数ともマッチしないならvalueに変数は含まれていない
         if (value.match(/f\.[a-zA-Z_]\w*/) === null &&
             value.match(/sf\.[a-zA-Z_]\w*/) === null &&
-            value.match(/tf\.[a-zA-Z_]\w*/) === null) {
+            value.match(/tf\.[a-zA-Z_]\w*/) === null &&
+            value.match(/mp\.[a-zA-Z_]\w*/) === null) {
             return false;
         }
         return true;

@@ -24,7 +24,7 @@ export class InformationProjectData {
 	 */
 	public getDefaultTag(): string[] {
 		let tyranoDefaultTag: string[] = [];
-		JSON.parse(fs.readFileSync(__dirname + "/./../Tiptool/tyrano.tiptool.json", "utf8"),
+		JSON.parse(fs.readFileSync(__dirname + "/./../Tooltip/tyrano.Tooltip.json", "utf8"),
 			(key, value) => {
 				if (key === "prefix") {
 					tyranoDefaultTag.push(value);

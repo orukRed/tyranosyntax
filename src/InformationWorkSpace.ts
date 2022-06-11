@@ -51,13 +51,14 @@ export class InformationWorkSpace {
 			return [];
 		}
 
-		//指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
+		// 指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
 		const listFiles = (dir: string): string[] =>
 			fs.readdirSync(dir, { withFileTypes: true }).
 				flatMap(dirent =>
 					dirent.isFile() ?
-						[`${dir}/${dirent.name}` + "/.."].filter(file => dirent.name === "index.html") :
+						[`${dir}/${dirent.name}`].filter(file => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
 						listFiles(`${dir}/${dirent.name}`))
+
 
 		const ret = listFiles(this.getWorkspaceRootPath());
 
