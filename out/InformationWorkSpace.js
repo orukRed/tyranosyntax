@@ -42,10 +42,10 @@ class InformationWorkSpace {
         if (this.getWorkspaceRootPath() === undefined) {
             return [];
         }
-        //指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
+        // 指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
         const listFiles = (dir) => fs.readdirSync(dir, { withFileTypes: true }).
             flatMap(dirent => dirent.isFile() ?
-            [`${dir}/${dirent.name}` + "/.."].filter(file => dirent.name === "index.html") :
+            [`${dir}/${dirent.name}`].filter(file => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
             listFiles(`${dir}/${dirent.name}`));
         const ret = listFiles(this.getWorkspaceRootPath());
         return ret;

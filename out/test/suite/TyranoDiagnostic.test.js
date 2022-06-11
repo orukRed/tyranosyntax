@@ -23,6 +23,11 @@ suite('TyranoDiagnostic.isValueIsVariable', () => {
         const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
         assert.strictEqual(diag.isValueIsVariable("tf.hoge"), true);
     });
+    test('mp.hoge true返却', () => {
+        //値定義
+        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
+        assert.strictEqual(diag.isValueIsVariable("mp.hoge"), true);
+    });
     test('&f.hoge true返却', () => {
         //値定義
         const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
@@ -37,6 +42,11 @@ suite('TyranoDiagnostic.isValueIsVariable', () => {
         //値定義
         const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
         assert.strictEqual(diag.isValueIsVariable("&tf.hoge"), true);
+    });
+    test('&tf.hoge true返却', () => {
+        //値定義
+        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
+        assert.strictEqual(diag.isValueIsVariable("&mp.hoge"), true);
     });
     test('hoge false返却', () => {
         //値定義
