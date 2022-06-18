@@ -33,7 +33,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * @param context 
 	 * @returns 
 	 */
-	public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+	public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 		const leftBracketPosition: number = document.lineAt(position).text.lastIndexOf("\[");
 		const atSignPosition: number = document.lineAt(position).text.indexOf("@");
 
@@ -88,7 +88,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * 
 	 * 
 	 */
-	private completionParameter(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext, leftBracketPosition: number): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+	private async completionParameter(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext, leftBracketPosition: number): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 		const linePrefix = document.lineAt(position).text.substring(leftBracketPosition, position.character);//最も後ろのタグを取得。//FIXME:パラメータの値に配列使ってる時に引っかからない 
 		let tagName: String = "";//正規表現で検索かけるタグ名。jumpとかpとかimageとか。
 		let completions: vscode.CompletionItem[] = new Array();
@@ -122,7 +122,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * タグの予測変換
 	 * 
 	 */
-	private completionTag(): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
+	private async completionTag(): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 		let completions: vscode.CompletionItem[] = new Array();
 		for (let item in this.tyranoTagSnippets) {
 			let tmpJsonData = this.tyranoTagSnippets[item];

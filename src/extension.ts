@@ -36,8 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const tyranoDiagnostic = new TyranoDiagnostic();
 		//ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
-		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics()));
-		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => tyranoDiagnostic.createDiagnostics()));
+		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => tyranoDiagnostic.createDiagnostics()));
+		context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(async e => tyranoDiagnostic.createDiagnostics()));
 		TyranoLogger.print("TyranoDiagnostic activate");
 	}
 

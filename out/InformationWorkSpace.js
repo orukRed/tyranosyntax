@@ -37,6 +37,10 @@ class InformationWorkSpace {
         }
         return vscode.workspace.workspaceFolders[0].uri.fsPath;
     }
+    /**
+     * vscodeで開いたフォルダ内に存在するティラノスクリプトのプロジェクトのパスを取得します。
+     * @returns
+     */
     getTyranoScriptProjectRootPaths() {
         //フォルダ開いてないなら早期リターン
         if (this.getWorkspaceRootPath() === undefined) {
@@ -45,7 +49,7 @@ class InformationWorkSpace {
         // 指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
         const listFiles = (dir) => fs.readdirSync(dir, { withFileTypes: true }).
             flatMap(dirent => dirent.isFile() ?
-            [`${dir}/${dirent.name}`].filter(file => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
+            [`${dir}/${dirent.name}`].filter((file) => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
             listFiles(`${dir}/${dirent.name}`));
         const ret = listFiles(this.getWorkspaceRootPath());
         return ret;

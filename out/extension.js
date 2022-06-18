@@ -30,8 +30,8 @@ function activate(context) {
     if (vscode.workspace.workspaceFolders !== undefined) {
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
-        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => tyranoDiagnostic.createDiagnostics()));
-        context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => tyranoDiagnostic.createDiagnostics()));
+        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => tyranoDiagnostic.createDiagnostics()));
+        context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(async (e) => tyranoDiagnostic.createDiagnostics()));
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
     }
     //ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。

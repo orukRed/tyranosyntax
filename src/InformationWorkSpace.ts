@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { assert } from 'console';
+import { AssertionError } from 'assert';
 /**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
  * シングルトン。
@@ -45,6 +47,10 @@ export class InformationWorkSpace {
 	}
 
 
+	/**
+	 * vscodeで開いたフォルダ内に存在するティラノスクリプトのプロジェクトのパスを取得します。
+	 * @returns 
+	 */
 	public getTyranoScriptProjectRootPaths(): string[] {
 		//フォルダ開いてないなら早期リターン
 		if (this.getWorkspaceRootPath() === undefined) {
@@ -56,9 +62,8 @@ export class InformationWorkSpace {
 			fs.readdirSync(dir, { withFileTypes: true }).
 				flatMap(dirent =>
 					dirent.isFile() ?
-						[`${dir}/${dirent.name}`].filter(file => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
+						[`${dir}/${dirent.name}`].filter((file) => dirent.name === "index.html").map(str => str.replace("/index.html", "")) :
 						listFiles(`${dir}/${dirent.name}`))
-
 
 		const ret = listFiles(this.getWorkspaceRootPath());
 

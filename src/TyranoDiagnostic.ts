@@ -5,6 +5,7 @@ import { TextDecoder } from 'util';
 import { InformationProjectData as project } from './InformationProjectData';
 import { TyranoLogger } from './TyranoLogger';
 import { exit } from 'process';
+import { format } from 'path';
 
 
 
@@ -33,8 +34,60 @@ export class TyranoDiagnostic {
 		this.tyranoProjectPaths.forEach(element => {
 			TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
 		});
+		this.hoge();
+
 	}
 
+	public async hoge() {
+		console.log("ティラノの構文解析器がJSファイルに使えるかどうかのテスト");
+
+		const scenarioDocument = await vscode.workspace.openTextDocument(`ここにURL`);//引数のパスのシナリオ全文取得
+
+		//ティラノのパーサーにかける
+		{
+			// console.log("tyrano");
+			// const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+			// const array_s = parsedData["array_s"];
+			// console.log(array_s);
+		}
+
+
+		//jsのパーサーにかける
+		{
+			//acorn-loose
+			console.log("acorn-loose");
+			var acornLoose = require("acorn-loose");
+			const parsedData: object = acornLoose.parse(scenarioDocument.getText()); //構文解析
+			const parsedData_body = parsedData["body"];
+			// console.log(parsedData_body);
+			const searchWord = "/^\s*TYRANO.kag.ftag.master_tag./" //行頭に「TYRANO.kag.ftag.master_tag.」が来てるなら
+
+			var estraverse = require("estraverse");
+			estraverse.traverse(parsedData, {
+				enter: function (node: { type: string; }, parent: any) {
+					console.log(node);
+					if (node.type == 'FunctionExpression' || node.type == 'FunctionDeclaration')
+						return estraverse.VisitorOption.Skip;
+				},
+				leave: function (node: { type: string; id: { name: any; }; }, parent: any) {
+					if (node.type == 'VariableDeclarator')
+						console.log(node.id.name);
+				}
+
+			});
+
+			// for (let data in )
+			// for (let data in array_s) {
+			// 	//タグがマクロなら
+			// 	if (array_s[data]["name"] === "macro") {
+			// 		//マクロの名前をリストかなんかに保存しておく。
+			// 		tyranoTag.push(await array_s[data]["pm"]["name"]);
+			// 	}
+			// }
+
+		}
+
+	}
 
 	public async createDiagnostics() {
 
@@ -43,8 +96,12 @@ export class TyranoDiagnostic {
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
 		for (let path of this.tyranoProjectPaths) {
 			const absoluteScenarioFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+			// const absoluteScenarioJavaScriptFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".js"], true);
 			//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
 			// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles,path);
+
+
+
 			//未定義のマクロを使用しているか検出
 			// await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray,path);
 
