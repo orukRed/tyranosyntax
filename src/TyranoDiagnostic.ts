@@ -64,10 +64,18 @@ export class TyranoDiagnostic {
 
 			var estraverse = require("estraverse");
 			estraverse.traverse(parsedData, {
-				enter: function (node: { type: string; }, parent: any) {
-					console.log(node);
-					if (node.type == 'FunctionExpression' || node.type == 'FunctionDeclaration')
-						return estraverse.VisitorOption.Skip;
+				// enter: function (node: { type: string; }, parent: any) {
+				// 	console.log(node);
+				// 	if (node.type == 'FunctionExpression' || node.type == 'FunctionDeclaration')
+				// 		return estraverse.VisitorOption.Skip;
+				// },
+				enter: function (node: any, parent: any) {
+					console.log(parent);
+					if (node.type === 'CallExpression' && node.callee.name === 'eval' && node.arguments[0].type === 'Literal') {
+						// node = esprima.parse(node.arguments[0].value).body[0];
+						parent.init = node.expression;
+						console.log(parent);
+					}
 				},
 				leave: function (node: { type: string; id: { name: any; }; }, parent: any) {
 					if (node.type == 'VariableDeclarator')
@@ -75,7 +83,6 @@ export class TyranoDiagnostic {
 				}
 
 			});
-
 			// for (let data in )
 			// for (let data in array_s) {
 			// 	//タグがマクロなら
@@ -98,12 +105,12 @@ export class TyranoDiagnostic {
 			const absoluteScenarioFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true);
 			// const absoluteScenarioJavaScriptFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".js"], true);
 			//シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-			// let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles,path);
+			let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
 
 
 
 			//未定義のマクロを使用しているか検出
-			// await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray,path);
+			await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
 
 			//存在しないシナリオファイル、未定義のラベルを検出
 			await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray, path);
@@ -164,7 +171,7 @@ export class TyranoDiagnostic {
 	 * 未定義のマクロを使用しているか検出します。
 	 * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
 	 */
-	private async detectionNotDefineMacro(tyranoTag: string[], scenarioFiles: string[], diagnosticArray: any[], projectPath: string) {
+	private async detectionNotDefineMacro(tyranoTag: string[], scenarioFiles: string[], diagnosticArray: any[]) {
 		for (const scenario of scenarioFiles) {
 			// const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
 			const scenarioDocument = await vscode.workspace.openTextDocument(scenario);//引数のパスのシナリオ全文取得
