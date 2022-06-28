@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.10.1",
+  "version": "0.11.0",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -124,6 +124,11 @@
             "type": "boolean",
             "default": true,
             "description": "/**/で囲んだ処理をアウトラインに表示させないようにします。\n現在β版の機能のため、/*や*/のある行にタグを配置すると正しく表示されない可能性があります。\n例：/*comment*/[p]、[p]/*comment*/、[p]/*、*/[p]"
+          },
+          "TyranoScript syntax.diagnostic.isEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
           }
         }
       }

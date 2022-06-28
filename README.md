@@ -41,6 +41,6 @@ ver0.10.0現在ではシンタックスハイライト以外の機能追加予�
 出力ウィンドウにTyranoScript syntaxから出力されたログが記載されています。
 （ある場合は）ログも一緒に送ってくださると製作者が喜びます！
 
-* [Googleフォームから報告](https://docs.google.com/forms/d/e/1FAIpQLSfnh0HFcxWe3PfNEpLvZ1-_prC5OMZbYhmb-rS8Zk1VaiarBw/viewform)
+* [Googleフォームから報告](https://orukred.github.io/Contact.html)
 * [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 * [Githubにissueを立てる](https://github.com/orukRed/tyranosyntax/issues)
