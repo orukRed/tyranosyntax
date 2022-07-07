@@ -10,7 +10,7 @@ const estraverse = require("estraverse");
 
 export class TyranoDiagnostic {
 
-	private diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
+	public static diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 
 	//ティラノスクリプトに関する情報
 	private readonly infoPd: project = project.getInstance();;
@@ -37,15 +37,7 @@ export class TyranoDiagnostic {
 
 	public async createDiagnostics() {
 		console.log("診断開始");
-		////診断機能OFFなら診断しない処理
 
-		// const isDiagnostic: boolean | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.outline.diagnostic.isEnabled');
-		// console.log("isDiagnostic: " + isDiagnostic);
-		// if (!isDiagnostic) {
-		// 	return;
-		// }
-
-		// let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
 
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
 		for (let path of this.tyranoProjectPaths) {
@@ -68,7 +60,7 @@ export class TyranoDiagnostic {
 
 
 		//診断結果をセット
-		this.diagnosticCollection.set(diagnosticArray);
+		TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
 		console.log("診断終了");
 	}
 

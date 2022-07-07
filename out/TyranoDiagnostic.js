@@ -10,7 +10,6 @@ const acornLoose = require("acorn-loose");
 const estraverse = require("estraverse");
 class TyranoDiagnostic {
     constructor() {
-        this.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
         //ティラノスクリプトに関する情報
         this.infoPd = InformationProjectData_1.InformationProjectData.getInstance();
         //ファイルパス取得用
@@ -29,13 +28,6 @@ class TyranoDiagnostic {
     ;
     async createDiagnostics() {
         console.log("診断開始");
-        ////診断機能OFFなら診断しない処理
-        // const isDiagnostic: boolean | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.outline.diagnostic.isEnabled');
-        // console.log("isDiagnostic: " + isDiagnostic);
-        // if (!isDiagnostic) {
-        // 	return;
-        // }
-        // let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         for (let path of this.tyranoProjectPaths) {
             const absoluteScenarioFilePaths = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
@@ -50,7 +42,7 @@ class TyranoDiagnostic {
             await this.detectionNotExistScenarioAndLabels(absoluteScenarioFilePaths, diagnosticArray, path);
         }
         //診断結果をセット
-        this.diagnosticCollection.set(diagnosticArray);
+        TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
         console.log("診断終了");
     }
     /**
@@ -253,4 +245,5 @@ class TyranoDiagnostic {
     }
 }
 exports.TyranoDiagnostic = TyranoDiagnostic;
+TyranoDiagnostic.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 //# sourceMappingURL=TyranoDiagnostic.js.map
