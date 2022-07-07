@@ -28,7 +28,7 @@ class TyranoCompletionItemProvider {
      * @param context
      * @returns
      */
-    provideCompletionItems(document, position, token, context) {
+    async provideCompletionItems(document, position, token, context) {
         const leftBracketPosition = document.lineAt(position).text.lastIndexOf("\[");
         const atSignPosition = document.lineAt(position).text.indexOf("@");
         //"["がないならスキップ。処理高速化のため。 
@@ -71,7 +71,7 @@ class TyranoCompletionItemProvider {
      *
      *
      */
-    completionParameter(document, position, token, context, leftBracketPosition) {
+    async completionParameter(document, position, token, context, leftBracketPosition) {
         const linePrefix = document.lineAt(position).text.substring(leftBracketPosition, position.character); //最も後ろのタグを取得。//FIXME:パラメータの値に配列使ってる時に引っかからない 
         let tagName = ""; //正規表現で検索かけるタグ名。jumpとかpとかimageとか。
         let completions = new Array();
@@ -102,7 +102,7 @@ class TyranoCompletionItemProvider {
      * タグの予測変換
      *
      */
-    completionTag() {
+    async completionTag() {
         let completions = new Array();
         for (let item in this.tyranoTagSnippets) {
             let tmpJsonData = this.tyranoTagSnippets[item];

@@ -6,9 +6,10 @@ const fs = require("fs");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const InformationProjectData_1 = require("./InformationProjectData");
 const TyranoLogger_1 = require("./TyranoLogger");
+const acornLoose = require("acorn-loose");
+const estraverse = require("estraverse");
 class TyranoDiagnostic {
     constructor() {
-        this.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
         //ティラノスクリプトに関する情報
         this.infoPd = InformationProjectData_1.InformationProjectData.getInstance();
         //ファイルパス取得用
@@ -26,28 +27,23 @@ class TyranoDiagnostic {
     }
     ;
     async createDiagnostics() {
-        // let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
+        console.log("診断開始");
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         for (let path of this.tyranoProjectPaths) {
-            const absoluteScenarioFiles = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true);
+            const absoluteScenarioFilePaths = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
+            const absoluteJavaScriptModuleFilePaths = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".js"], true); //dataディレクトリ内の.jsファイルを取得
             //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-            // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles,path);
+            let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFilePaths);
+            //プラグインで追加したタグを追加
+            tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(absoluteJavaScriptModuleFilePaths));
             //未定義のマクロを使用しているか検出
-            // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray,path);
+            await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFilePaths, diagnosticArray);
             //存在しないシナリオファイル、未定義のラベルを検出
-            await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray, path);
+            await this.detectionNotExistScenarioAndLabels(absoluteScenarioFilePaths, diagnosticArray, path);
         }
-        // let variables = new Map<string, any>();//プロジェクトで定義された変数を格納<variableName,value>
-        // const absoluteScenarioFiles = this.infoWs.getProjectFiles(this.infoWs.getWorkspaceRootPath() + this.infoWs.DATA_DIRECTORY, [".ks"], true);
-        // let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
-        // //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-        // // let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFiles);
-        // //未定義のマクロを使用しているか検出
-        // // await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFiles, diagnosticArray);
-        // //存在しないシナリオファイル、未定義のラベルを検出
-        // await this.detectionNotExistScenarioAndLabels(absoluteScenarioFiles, diagnosticArray);
         //診断結果をセット
-        this.diagnosticCollection.set(diagnosticArray);
+        TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
+        console.log("診断終了");
     }
     /**
      * シナリオで定義されているタグを返却します。
@@ -74,7 +70,7 @@ class TyranoDiagnostic {
      * 未定義のマクロを使用しているか検出します。
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
-    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray, projectPath) {
+    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray) {
         for (const scenario of scenarioFiles) {
             // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
             const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
@@ -212,6 +208,42 @@ class TyranoDiagnostic {
         }
         return false;
     }
+    /**
+     * 引数で渡した配列のファイルパスのjsモジュールを読み込み、タグ追加構文があれば配列にまとめて返却します。
+     * @param absoluteFilesPaths jsmoduleの絶対パスの配列
+     * @returns
+     */
+    async SearchJavaScriptForAddedTags(absoluteFilesPaths) {
+        //戻り地で返却するjsモジュールに定義されているタグ名の配列
+        let returnTags = [];
+        for (const filePath of absoluteFilesPaths) {
+            const javaScriptModule = await vscode.workspace.openTextDocument(filePath); //何故か通らない
+            // const javaScriptModule = await vscode.workspace.openTextDocument(``);	//これは通る
+            const parsedData = acornLoose.parse(javaScriptModule.getText());
+            estraverse.traverse(parsedData, {
+                enter: (node) => {
+                    try {
+                        if (node.type === "AssignmentExpression" && node.operator === "=") {
+                            if (node.left.object.object.object.object.name.toUpperCase() === "TYRANO" &&
+                                node.left.object.object.object.property.name === "kag" &&
+                                node.left.object.object.property.name === "ftag" &&
+                                node.left.object.property.name === "master_tag") {
+                                returnTags.push(node.left.property.name);
+                            }
+                        }
+                    }
+                    catch (error) {
+                        //例外が発生した場合は何もしない
+                        //読み込み方の都合上どうしても意図せずに例外が発生することがあるため、
+                        //例外が発生した場合はスキップするためにcatchを使用する
+                    }
+                }
+            });
+        }
+        returnTags = [...new Set(returnTags)]; // 重複を削除
+        return returnTags;
+    }
 }
 exports.TyranoDiagnostic = TyranoDiagnostic;
+TyranoDiagnostic.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 //# sourceMappingURL=TyranoDiagnostic.js.map
