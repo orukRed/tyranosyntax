@@ -111,7 +111,7 @@ export class TyranoDiagnostic {
 
 		for (const scenario of vscode.workspace.textDocuments) {
 			//.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
-			if (!scenario.uri.toString().endsWith(".ks") || !scenario.uri.toString().includes(projectPath)) {
+			if (!scenario.uri.toString().endsWith(".ks") || !await this.isFileExistInFolder("", "")) {
 				continue;
 			}
 			const parsedData: object = this.parser.tyranoParser.parseScenario((scenario).getText()); //構文解析
@@ -134,10 +134,10 @@ export class TyranoDiagnostic {
 	private async detectionNotDefineMacro(tyranoTag: string[], diagnosticArray: any[], projectPath: string) {
 		for (const scenario of vscode.workspace.textDocuments) {
 			//.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
-			if (!scenario.uri.toString().endsWith(".ks") || !scenario.uri.toString().includes(projectPath)) {
+			if (!scenario.uri.toString().endsWith(".ks") || !await this.isFileExistInFolder("", "")) {
 				continue;
 			}
-
+			console.log("OK");
 			const parsedData: object = this.parser.tyranoParser.parseScenario(scenario.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
@@ -308,12 +308,13 @@ export class TyranoDiagnostic {
 
 		for (const scenario of vscode.workspace.textDocuments) {
 			//.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
-			if (!scenario.uri.toString().endsWith(".js") || !scenario.uri.toString().includes(projectPath)) {
+			if (!scenario.uri.toString().endsWith(".js") || !await this.isFileExistInFolder("", "")) {
+				console.log(`${scenario.fileName}は通さない`);
 				continue;
 			}
-
+			console.log(`★★${scenario.fileName}は通す★★`);
 			const parsedData: object = acornLoose.parse(scenario.getText());
-			estraverse.traverse(parsedData, {
+			await estraverse.traverse(parsedData, {
 				enter: (node: any) => {
 					try {
 						if (node.type === "AssignmentExpression" && node.operator === "=") {
@@ -334,7 +335,19 @@ export class TyranoDiagnostic {
 		}
 
 		returnTags = [...new Set(returnTags)];// 重複を削除
+		console.log(returnTags);
 		return returnTags;
 
+	}
+
+	/**
+ * 引数で与えたファイルが、引数で与えたフォルダの中に存在しているか再帰的に調べる。
+ * @param file 
+ * @param folder 
+ * @returns 
+ */
+	private async isFileExistInFolder(file: string, folder: string): Promise<boolean> {
+		// !scenario.fileName.includes(projectPath) //これはダメ
+		return true;
 	}
 }
