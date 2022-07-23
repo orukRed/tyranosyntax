@@ -3,6 +3,20 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { assert } from 'console';
 import { AssertionError } from 'assert';
+
+export class TyranoResourceType {
+	public static readonly BGIMAGE: string = "bgimage";
+	public static readonly BGM: string = "bgm";
+	public static readonly FGIMAGE: string = "fgimage";
+	public static readonly IMAGE: string = "image";
+	public static readonly OTHERS: string = "others";
+	public static readonly SCENARIO: string = "scenario";
+	public static readonly SOUND: string = "sound";
+	public static readonly SYSTEM: string = "system";
+	public static readonly VIDEO: string = "video";
+}
+
+
 /**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
  * シングルトン。
@@ -21,6 +35,19 @@ export class InformationWorkSpace {
 	public readonly DATA_SYSTEM: string = "/system";
 	public readonly DATA_VIDEO: string = "/video";
 
+
+	private _scriptFileMap: Map<string, string> = new Map<string, string>();//ファイルパスと、中身(全文)
+
+
+	//プロジェクト内の素材リソースのMap
+	//keyはbgimage,bgm,fgimage.image.others,scenario,sound,system,videoとする。
+	//valueは各フォルダに入っている素材のファイル名のリスト。
+	//追加するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").concat["foo.png"]);
+	//削除するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").splice["foo.png"]);
+	private _resourceFilePathMap: Map<string, Map<string, string[]>> = new Map<string, Map<string, string[]>>();//string,string,string[] の順にプロジェクトパス、bgimageとかのフォルダ、絶対パスのリスト
+
+
+
 	private static instance: InformationWorkSpace = new InformationWorkSpace();
 
 	public static getInstance(): InformationWorkSpace {
@@ -28,9 +55,15 @@ export class InformationWorkSpace {
 	}
 
 	private constructor() {
+		//スクリプトファイルパスを初期化
+		for (let projectPaths of this.getTyranoScriptProjectRootPaths()) {
+			let absoluteScenarioFilePaths = this.getProjectFiles(projectPaths + this.DATA_DIRECTORY, [".ks"], true);//dataディレクトリ内の.ksファイルを取得
+			absoluteScenarioFilePaths = absoluteScenarioFilePaths.concat(this.getProjectFiles(projectPaths + this.DATA_DIRECTORY, [".ks"], true));//dataディレクトリ内の.jsファイルを取得
+			absoluteScenarioFilePaths.forEach(element => {
+				this.updateScriptFileMap(element);
+			});
+		}
 	}
-
-
 
 	/**
 	 * フォルダを開いてるなら、vscodeで開いているルートパスのディレクトリを取得します。
@@ -42,7 +75,6 @@ export class InformationWorkSpace {
 		if (vscode.workspace.workspaceFolders === undefined) {
 			return "";
 		}
-
 		return vscode.workspace.workspaceFolders[0].uri.fsPath;
 	}
 
@@ -68,6 +100,26 @@ export class InformationWorkSpace {
 		const ret = listFiles(this.getWorkspaceRootPath());
 
 		return ret;
+	}
+
+
+	/**
+	 * スクリプトファイルパスとその中身のMapを更新
+	 * @param filePath 
+	 */
+	public async updateScriptFileMap(filePath: string) {
+		vscode.workspace.fs.readFile(vscode.Uri.file(filePath)).then(async text => {
+			this._scriptFileMap.set(filePath, text.toString());
+		});
+	}
+
+	/**
+	 * プロジェクトごとのリソースファイルパスを更新
+	 * @param projectRootPath 
+	 */
+	public async updateResourceFilePathMap(projectRootPath: string) {
+		this._resourceFilePathMap.set(projectRootPath, new Map<string, string[]>());
+		this._resourceFilePathMap.get(projectRootPath)?.set("", ["", ""]);
 	}
 
 	/**
@@ -113,4 +165,12 @@ export class InformationWorkSpace {
 			return [];
 		}
 	}
+
+	public get scriptFileMap(): Map<string, string> {
+		return this._scriptFileMap;
+	}
+	public get resourceFilePathMap(): Map<string, Map<string, string[]>> {
+		return this._resourceFilePathMap;
+	}
+
 }

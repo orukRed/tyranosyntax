@@ -20,41 +20,70 @@ class TyranoDiagnostic {
         this.loadModule = require('./lib/module-loader.js').loadModule;
         this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
         this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
+        //基本タグを取得
         this.tyranoDefaultTag = this.infoPd.getDefaultTag();
+        this.isDiagnosing = false;
         this.tyranoProjectPaths.forEach(element => {
             TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
         });
     }
     ;
-    async createDiagnostics() {
-        console.log("診断開始");
+    /**
+     *
+     * @param changedTextDocument 変更されたテキストドキュメント、もしくは現在のアクティブテキストエディタのパス
+     * @returns
+     */
+    async createDiagnostics(changedTextDocument) {
+        //診断実行中もしくは変更されたテキストエディタが無いなら診断しない
+        if (this.isDiagnosing || changedTextDocument === undefined) {
+            return;
+        }
+        //ログへの変更なら診断しない
+        if (changedTextDocument.fileName === "extension-output-orukred-tyranosyntax.tyranosyntax-#1-TyranoScript syntax") {
+            return;
+        }
+        //changeTextDocumentの値でresourceFileMapを更新
+        //メモリに保存しているMapに対して診断開始
+        this.isDiagnosing = true;
+        TyranoLogger_1.TyranoLogger.print(`diagnostic start.`);
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         for (let path of this.tyranoProjectPaths) {
+            TyranoLogger_1.TyranoLogger.print(`[${path}] parsing start.`);
             const absoluteScenarioFilePaths = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
+            TyranoLogger_1.TyranoLogger.print(`[${path}] .ks file paths got.`);
             const absoluteJavaScriptModuleFilePaths = this.infoWs.getProjectFiles(path + this.infoWs.DATA_DIRECTORY, [".js"], true); //dataディレクトリ内の.jsファイルを取得
+            TyranoLogger_1.TyranoLogger.print(`[${path}] .js file paths got.`);
             //シナリオからマクロ定義を読み込む  jsで定義されたタグ以外は問題なさそう
-            let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), absoluteScenarioFilePaths);
+            let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), path);
+            TyranoLogger_1.TyranoLogger.print(`[${path}] macro tag definition loaded.`);
             //プラグインで追加したタグを追加
-            tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(absoluteJavaScriptModuleFilePaths));
+            tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(path));
+            TyranoLogger_1.TyranoLogger.print(`[${path}] plugin tag definition loaded.`);
             //未定義のマクロを使用しているか検出
-            await this.detectionNotDefineMacro(tyranoTag, absoluteScenarioFilePaths, diagnosticArray);
+            await this.detectionNotDefineMacro(tyranoTag, diagnosticArray, path);
+            TyranoLogger_1.TyranoLogger.print(`[${path}] macro detection finished.`);
             //存在しないシナリオファイル、未定義のラベルを検出
             await this.detectionNotExistScenarioAndLabels(absoluteScenarioFilePaths, diagnosticArray, path);
+            TyranoLogger_1.TyranoLogger.print(`[${path}] scenario and label detection finished.`);
         }
         //診断結果をセット
+        TyranoLogger_1.TyranoLogger.print(`diagnostic set`);
         TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
-        console.log("診断終了");
+        TyranoLogger_1.TyranoLogger.print("diagnostic end");
+        this.isDiagnosing = false;
     }
     /**
      * シナリオで定義されているタグを返却します。
      * @param 現在定義されているティラノスクリプトのタグのリスト
      * @return ティラノ公式タグ+読み込んだ定義済みマクロの名前の配列
      */
-    async loadDefinedMacroByScenarios(tyranoTag, absoluteScenarioFilePaths) {
-        for (const scenario of absoluteScenarioFilePaths) {
-            // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario;//dataファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
-            const parsedData = this.parser.tyranoParser.parseScenario((await scenarioDocument).getText()); //構文解析
+    async loadDefinedMacroByScenarios(tyranoTag, projectPath) {
+        for (const scenario of vscode.workspace.textDocuments) {
+            //.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
+            if (!scenario.uri.toString().endsWith(".ks") || !scenario.uri.toString().includes(projectPath)) {
+                continue;
+            }
+            const parsedData = this.parser.tyranoParser.parseScenario((scenario).getText()); //構文解析
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
                 //タグがマクロなら
@@ -70,24 +99,28 @@ class TyranoDiagnostic {
      * 未定義のマクロを使用しているか検出します。
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
-    async detectionNotDefineMacro(tyranoTag, scenarioFiles, diagnosticArray) {
-        for (const scenario of scenarioFiles) {
-            // const scenarioFileAbsolutePath = this.infoWs.getProjectRootPath() + this.infoWs.DATA_DIRECTORY + "/" + scenario; //dataファイルにあるシナリオの絶対パス取得
-            const scenarioDocument = await vscode.workspace.openTextDocument(scenario); //引数のパスのシナリオ全文取得
-            const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+    async detectionNotDefineMacro(tyranoTag, diagnosticArray, projectPath) {
+        for (const scenario of vscode.workspace.textDocuments) {
+            //.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
+            if (!scenario.uri.toString().endsWith(".ks") || !scenario.uri.toString().includes(projectPath)) {
+                continue;
+            }
+            const parsedData = this.parser.tyranoParser.parseScenario(scenario.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
                 //タグが定義されていない場合
                 if (!tyranoTag.includes(array_s[data]["name"])) {
-                    let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
-                    let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.lastIndexOf(array_s[data]["name"]); // 該当行からタグの定義場所(終了位置)探す
+                    let tagFirstIndex = scenario.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
+                    let tagLastIndex = scenario.lineAt(array_s[data]["line"]).text.lastIndexOf(array_s[data]["name"]); // 該当行からタグの定義場所(終了位置)探す
                     let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
                     let diag = new vscode.Diagnostic(range, "タグ" + array_s[data]["name"] + "は未定義です。", vscode.DiagnosticSeverity.Error);
                     diagnostics.push(diag);
                 }
             }
-            diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+            if (diagnostics.length !== 0) {
+                diagnosticArray.push([scenario.uri, diagnostics]);
+            }
         }
     }
     /**
@@ -168,7 +201,9 @@ class TyranoDiagnostic {
                     }
                 }
             }
-            diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+            if (diagnostics.length !== 0) {
+                diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+            }
         }
     }
     /**
@@ -213,12 +248,15 @@ class TyranoDiagnostic {
      * @param absoluteFilesPaths jsmoduleの絶対パスの配列
      * @returns
      */
-    async SearchJavaScriptForAddedTags(absoluteFilesPaths) {
-        //戻り地で返却するjsモジュールに定義されているタグ名の配列
+    async SearchJavaScriptForAddedTags(projectPath) {
+        //戻り値で返却するjsモジュールに定義されているタグ名の配列
         let returnTags = [];
-        for (const filePath of absoluteFilesPaths) {
-            const javaScriptModule = await vscode.workspace.openTextDocument(filePath);
-            const parsedData = acornLoose.parse(javaScriptModule.getText());
+        for (const scenario of vscode.workspace.textDocuments) {
+            //.ks拡張子以外、もしくはプロジェクトに存在しないファイルならスキップ
+            if (!scenario.uri.toString().endsWith(".js") || !scenario.uri.toString().includes(projectPath)) {
+                continue;
+            }
+            const parsedData = acornLoose.parse(scenario.getText());
             estraverse.traverse(parsedData, {
                 enter: (node) => {
                     try {
