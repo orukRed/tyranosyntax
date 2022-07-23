@@ -262,8 +262,7 @@ export class TyranoDiagnostic {
 		let returnTags: string[] = [];
 
 		for (const filePath of absoluteFilesPaths) {
-			const javaScriptModule = await vscode.workspace.openTextDocument(filePath);	//何故か通らない
-			// const javaScriptModule = await vscode.workspace.openTextDocument(``);	//これは通る
+			const javaScriptModule = await vscode.workspace.openTextDocument(filePath);
 
 			const parsedData: object = acornLoose.parse(javaScriptModule.getText());
 			estraverse.traverse(parsedData, {
