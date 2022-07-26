@@ -14,7 +14,7 @@ import { InformationWorkSpace } from './InformationWorkSpace';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	//登録処理
 	//サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
 	context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider()));
@@ -35,22 +35,49 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
+
+
 	//診断機能の登録
 	//ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
 	if (vscode.workspace.workspaceFolders !== undefined) {
-		let tyranoDiagnostic = new TyranoDiagnostic();
-
+		const tyranoDiagnostic = new TyranoDiagnostic();
+		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
 		TyranoLogger.print("TyranoDiagnostic activate");
 		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));
 		//設定で診断機能の自動実行ONにしてるなら許可
 		if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
-			//ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
-			context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => tyranoDiagnostic.createDiagnostics()));
-			context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(async e => tyranoDiagnostic.createDiagnostics()));
+			//ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
+			context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => {
+				await infoWs.updateScenarioFileMap(e.document.fileName);
+				tyranoDiagnostic.createDiagnostics(e.document);
+
+			}));
 			TyranoLogger.print("Auto diagnostic activate");
 		} else {
 			TyranoLogger.print("Auto diagnostic is not activate");
 		}
+
+		//scriptFileの値
+		const scriptFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{js}', false, false, false);
+		scriptFileSystemWatcher.onDidCreate(async e => {
+			await infoWs.updateScriptFileMap(e.fsPath);
+		});
+		scriptFileSystemWatcher.onDidChange(async e => {
+			await infoWs.updateScriptFileMap(e.fsPath);
+		});
+
+
+
+		//resourceFileMapも同様にファイルウォッチャー設定
+		const resourceFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json}', false, false, false);
+		resourceFileSystemWatcher.onDidCreate(async e => {
+		});
+		resourceFileSystemWatcher.onDidChange(async e => {
+			infoWs.updateResourceFilePathMap(e.fsPath);
+		});
+		resourceFileSystemWatcher.onDidDelete(async e => {
+
+		});
 
 	}
 
@@ -64,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * 診断機能のアルゴリズム改善までの間、一時的にコマンドから診断実装可能にするのでその処理を置いとく関数
  */
-export function tmpDiagnostic() {
+export async function tmpDiagnostic() {
 	//activate内で直接createDiagnosticを呼び出すと、エラーが出る
 	//おそらくクラス内で定義した変数がコマンドからの呼び出しに対応していない？
 	//のでここに専用の関数
@@ -72,7 +99,7 @@ export function tmpDiagnostic() {
 
 	TyranoLogger.print("manual diagnostic start");
 	let tyranoDiagnostic: TyranoDiagnostic = new TyranoDiagnostic();
-	tyranoDiagnostic.createDiagnostics();
+	await tyranoDiagnostic.createDiagnostics(vscode.window.activeTextEditor?.document);
 	TyranoLogger.print("manual diagnostic end");
 }
 

@@ -1,5 +1,13 @@
 import * as vscode from 'vscode';
-require('date-utils');
+
+
+export class ErrorLevel {
+	public static readonly DEBUG = "DEBUG";
+	public static readonly INFO = "INFO";
+	public static readonly WARN = "WARN";
+	public static readonly ERROR = "ERROR";
+	public static readonly FATAL = "FATAL";
+}
 
 /**
  * staticクラス。
@@ -7,15 +15,13 @@ require('date-utils');
  */
 export class TyranoLogger {
 
-	// public static print = vscode.window.createOutputChannel("TyranoScript syntax").appendLine;
 	private static channel = vscode.window.createOutputChannel("TyranoScript syntax");
+
 	private constructor() { }
-
-	public static print(text: string) {
-		const currentTime = new Intl.DateTimeFormat('UTC', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(Date.now());
-		TyranoLogger.channel.appendLine(`${currentTime}  ${text}`);
+	public static print(text: string, errorLevel: ErrorLevel = ErrorLevel.DEBUG) {
+		const currentTime = new Date();
+		TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);
 	}
-
 
 }
 
