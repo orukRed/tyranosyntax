@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { InformationWorkSpace as workspace } from './InformationWorkSpace';
 import { TextDecoder } from 'util';
 import { InformationProjectData as project } from './InformationProjectData';
-import { TyranoLogger } from './TyranoLogger';
+import { ErrorLevel, TyranoLogger } from './TyranoLogger';
 
 const acornLoose = require("acorn-loose");
 const estraverse = require("estraverse");
@@ -29,7 +29,14 @@ export class TyranoDiagnostic {
 	//基本タグを取得
 	private tyranoDefaultTag: string[] = this.infoPd.getDefaultTag();
 
-	private isDiagnosing: boolean = false;
+	private _isDiagnosing: boolean = false;
+	public get isDiagnosing(): boolean {
+		return this._isDiagnosing;
+	}
+	public set isDiagnosing(value: boolean) {
+		this._isDiagnosing = value;
+	}
+
 
 	constructor() {
 		this.tyranoProjectPaths.forEach(element => {
@@ -45,8 +52,8 @@ export class TyranoDiagnostic {
 	 */
 	public async createDiagnostics(changedTextDocumentPath: string | undefined) {
 
-		//診断実行中もしくは変更されたテキストエディタが無いなら診断しない
-		if (this.isDiagnosing || changedTextDocumentPath === undefined) {
+		//変更されたテキストエディタが無いなら診断しない
+		if (changedTextDocumentPath === undefined) {
 			return;
 		}
 
@@ -57,9 +64,6 @@ export class TyranoDiagnostic {
 
 		const diagnosticProjectPath = await this.infoWs.getProjectPathByFilePath(changedTextDocumentPath);
 
-
-		//メモリに保存しているMapに対して診断開始
-		this.isDiagnosing = true;
 
 		TyranoLogger.print(`diagnostic start.`);
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
@@ -84,8 +88,6 @@ export class TyranoDiagnostic {
 		TyranoLogger.print(`diagnostic set`);
 		TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
 		TyranoLogger.print("diagnostic end");
-		this.isDiagnosing = false;
-
 
 	}
 

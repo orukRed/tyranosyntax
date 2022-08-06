@@ -22,20 +22,26 @@ class TyranoDiagnostic {
         this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
         //基本タグを取得
         this.tyranoDefaultTag = this.infoPd.getDefaultTag();
-        this.isDiagnosing = false;
+        this._isDiagnosing = false;
         this.tyranoProjectPaths.forEach(element => {
             TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
         });
     }
     ;
+    get isDiagnosing() {
+        return this._isDiagnosing;
+    }
+    set isDiagnosing(value) {
+        this._isDiagnosing = value;
+    }
     /**
      *
      * @param changedTextDocumentPath 変更されたテキストドキュメント、もしくは現在のアクティブテキストエディタのパス
      * @returns
      */
     async createDiagnostics(changedTextDocumentPath) {
-        //診断実行中もしくは変更されたテキストエディタが無いなら診断しない
-        if (this.isDiagnosing || changedTextDocumentPath === undefined) {
+        //変更されたテキストエディタが無いなら診断しない
+        if (changedTextDocumentPath === undefined) {
             return;
         }
         //ログへの変更なら診断しない
@@ -43,8 +49,6 @@ class TyranoDiagnostic {
             return;
         }
         const diagnosticProjectPath = await this.infoWs.getProjectPathByFilePath(changedTextDocumentPath);
-        //メモリに保存しているMapに対して診断開始
-        this.isDiagnosing = true;
         TyranoLogger_1.TyranoLogger.print(`diagnostic start.`);
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
@@ -63,7 +67,6 @@ class TyranoDiagnostic {
         TyranoLogger_1.TyranoLogger.print(`diagnostic set`);
         TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
         TyranoLogger_1.TyranoLogger.print("diagnostic end");
-        this.isDiagnosing = false;
     }
     /**
      * シナリオで定義されているタグを返却します。

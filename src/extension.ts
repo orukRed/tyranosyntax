@@ -50,9 +50,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
 			//ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
 			context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => {
-				if (path.extname(e.document.fileName) === ".ks") {
-					await infoWs.updateScenarioFileMap(e.document.fileName);
-					await tyranoDiagnostic.createDiagnostics(e.document.fileName);
+				if (path.extname(e.document.fileName) === ".ks" && !tyranoDiagnostic.isDiagnosing) {
+					tyranoDiagnostic.isDiagnosing = true;
+					infoWs.updateScenarioFileMap(e.document.fileName);
+					try {
+
+						await tyranoDiagnostic.createDiagnostics(e.document.fileName);
+					} catch (error) {
+						console.log(error);
+						TyranoLogger.print(`診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`, ErrorLevel.ERROR);
+					} finally {
+						tyranoDiagnostic.isDiagnosing = false;
+					}
 				}
 			}));
 			TyranoLogger.print("Auto diagnostic activate");
