@@ -128,7 +128,7 @@
           },
           "TyranoScript syntax.autoDiagnostic.isEnabled": {
             "type": "boolean",
-            "default": false,
+            "default": true,
             "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
           }
         }

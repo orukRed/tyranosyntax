@@ -55,7 +55,6 @@ export class TyranoDiagnostic {
 			return;
 		}
 
-
 		//メモリに保存しているMapに対して診断開始
 		this.isDiagnosing = true;
 
@@ -97,11 +96,11 @@ export class TyranoDiagnostic {
 	 */
 	private async loadDefinedMacroByScenarios(tyranoTag: string[], absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>, projectPath: string): Promise<string[]> {
 		for (const [filePath, textDocument] of absoluteScenarioFilePathMap) {
-			//現在見ているプロジェクト外のシナリオファイルならcontinue
-			if (!filePath.includes(projectPath)) {
+			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(textDocument.fileName);
+			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+			if (projectPath !== projectPathOfDiagFile) {
 				continue;
 			}
-			console.log(`${filePath}\n${projectPath}\n\n`);
 			const parsedData: object = this.parser.tyranoParser.parseScenario(textDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			for (let data in array_s) {
@@ -122,10 +121,12 @@ export class TyranoDiagnostic {
 	private async detectionNotDefineMacro(tyranoTag: string[], absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>, diagnosticArray: any[], projectPath: string) {
 		// for (const filePath of absoluteScenarioFilePathMap.keys()) {
 		for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
-			//現在見ているプロジェクト外のシナリオファイルならcontinue
-			if (!filePath.includes(projectPath)) {
+			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
+			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+			if (projectPath !== projectPathOfDiagFile) {
 				continue;
 			}
+
 			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
@@ -154,10 +155,12 @@ export class TyranoDiagnostic {
 	 */
 	private async detectionNotExistScenarioAndLabels(absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>, diagnosticArray: any[], projectPath: string) {
 		for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
-			//現在見ているプロジェクト外のシナリオファイルならcontinue
-			if (!filePath.includes(projectPath)) {
+			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
+			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+			if (projectPath !== projectPathOfDiagFile) {
 				continue;
 			}
+
 			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
@@ -214,7 +217,8 @@ export class TyranoDiagnostic {
 							let storageScenarioDocument: vscode.TextDocument | undefined =
 								(array_s[data]["pm"]["storage"] === undefined) ?
 									scenarioDocument :
-									await vscode.workspace.openTextDocument(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
+									this.infoWs.scenarioFileMap.get(this.infoWs.convertToAbsolutePathFromRelativePath(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + array_s[data]["pm"]["storage"]))
+
 							if (storageScenarioDocument === undefined) {
 								let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["target"] + "ファイル解析中に下線の箇所でエラーが発生しました。開発者への報告をお願いします。", vscode.DiagnosticSeverity.Error);
 								diagnostics.push(diag);
@@ -294,10 +298,12 @@ export class TyranoDiagnostic {
 		//戻り値で返却するjsモジュールに定義されているタグ名の配列
 		let returnTags: string[] = [];
 		for (const filePath of absoluteScenarioFilePathMap.keys()) {
-			//現在見ているプロジェクト外のシナリオファイルならcontinue
-			if (!filePath.includes(projectPath)) {
+			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(filePath);
+			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+			if (projectPath !== projectPathOfDiagFile) {
 				continue;
 			}
+
 			const parsedData: object = acornLoose.parse(absoluteScenarioFilePathMap.get(filePath));
 			estraverse.traverse(parsedData, {
 				enter: (node: any) => {

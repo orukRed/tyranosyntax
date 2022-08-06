@@ -74,11 +74,11 @@ class TyranoDiagnostic {
      */
     async loadDefinedMacroByScenarios(tyranoTag, absoluteScenarioFilePathMap, projectPath) {
         for (const [filePath, textDocument] of absoluteScenarioFilePathMap) {
-            //現在見ているプロジェクト外のシナリオファイルならcontinue
-            if (!filePath.includes(projectPath)) {
+            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(textDocument.fileName);
+            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+            if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            console.log(`${filePath}\n${projectPath}\n\n`);
             const parsedData = this.parser.tyranoParser.parseScenario(textDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
@@ -98,8 +98,9 @@ class TyranoDiagnostic {
     async detectionNotDefineMacro(tyranoTag, absoluteScenarioFilePathMap, diagnosticArray, projectPath) {
         // for (const filePath of absoluteScenarioFilePathMap.keys()) {
         for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
-            //現在見ているプロジェクト外のシナリオファイルならcontinue
-            if (!filePath.includes(projectPath)) {
+            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
+            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+            if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
@@ -126,8 +127,9 @@ class TyranoDiagnostic {
      */
     async detectionNotExistScenarioAndLabels(absoluteScenarioFilePathMap, diagnosticArray, projectPath) {
         for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
-            //現在見ているプロジェクト外のシナリオファイルならcontinue
-            if (!filePath.includes(projectPath)) {
+            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
+            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+            if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
@@ -180,7 +182,7 @@ class TyranoDiagnostic {
                             //storageが指定されてるなら指定先を取得
                             let storageScenarioDocument = (array_s[data]["pm"]["storage"] === undefined) ?
                                 scenarioDocument :
-                                await vscode.workspace.openTextDocument(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + "/" + array_s[data]["pm"]["storage"]);
+                                this.infoWs.scenarioFileMap.get(this.infoWs.convertToAbsolutePathFromRelativePath(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + array_s[data]["pm"]["storage"]));
                             if (storageScenarioDocument === undefined) {
                                 let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["target"] + "ファイル解析中に下線の箇所でエラーが発生しました。開発者への報告をお願いします。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
@@ -253,8 +255,9 @@ class TyranoDiagnostic {
         //戻り値で返却するjsモジュールに定義されているタグ名の配列
         let returnTags = [];
         for (const filePath of absoluteScenarioFilePathMap.keys()) {
-            //現在見ているプロジェクト外のシナリオファイルならcontinue
-            if (!filePath.includes(projectPath)) {
+            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(filePath);
+            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+            if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
             const parsedData = acornLoose.parse(absoluteScenarioFilePathMap.get(filePath));

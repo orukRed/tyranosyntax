@@ -1,9 +1,6 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { assert } from 'console';
-import { AssertionError } from 'assert';
-import { getVSCodeDownloadUrl } from 'vscode-test/out/util';
 
 export class TyranoResourceType {
 	public static readonly BGIMAGE: string = "bgimage";
@@ -117,11 +114,18 @@ export class InformationWorkSpace {
 	 * @param filePath 
 	 */
 	public async updateScriptFileMap(filePath: string) {
+		if (path.extname(filePath) !== ".js") {
+			return;
+		}
 		let textDocument = await vscode.workspace.openTextDocument(filePath);
 		this._scriptFileMap.set(textDocument.fileName, textDocument.getText());
 	}
 
 	public async updateScenarioFileMap(filePath: string) {
+		//.ks拡張子以外ならシナリオではないのでreturn
+		if (path.extname(filePath) !== ".ks") {
+			return;
+		}
 		let textDocument = await vscode.workspace.openTextDocument(filePath);
 		this._scenarioFileMap.set(textDocument.fileName, textDocument);
 	}
@@ -133,8 +137,8 @@ export class InformationWorkSpace {
 	 * @param projectRootPath 
 	 */
 	public async updateResourceFilePathMap(projectRootPath: string) {
-		this._resourceFilePathMap.set(projectRootPath, new Map<string, string[]>());
-		this._resourceFilePathMap.get(projectRootPath)?.set("", ["", ""]);
+		// this._resourceFilePathMap.set(projectRootPath, new Map<string, string[]>());
+		// this._resourceFilePathMap.get(projectRootPath)?.set("", ["", ""]);
 	}
 
 	/**
@@ -179,6 +183,37 @@ export class InformationWorkSpace {
 			console.log(error);
 			return [];
 		}
+	}
+
+	/**
+	 * 引数で指定したファイルパスからプロジェクトパス（index.htmlのあるフォルダパス）を取得します。
+	 * @param filePath 
+	 * @returns 
+	 */
+	public async getProjectPathByFilePath(filePath: string): Promise<string> {
+
+		let searchDir;
+		do {
+			const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
+			if (delimiterIndex === -1) {
+				return "";
+			}
+
+			//filePathに存在するpathDelimiiter以降の文字列を削除
+			filePath = filePath.substring(0, delimiterIndex);
+			//フォルダ検索
+			searchDir = fs.readdirSync(filePath, 'utf-8');
+			//index.htmlが見つからないならループ
+		} while (searchDir.filter(e => e === "index.html").length <= 0);
+		return filePath;
+	}
+
+	/**
+	 * 引数で与えたファイルの相対パスから、絶対パスを返します。
+	 * @param relativePath 
+	 */
+	public convertToAbsolutePathFromRelativePath(relativePath: string): string {
+		return path.resolve(relativePath);
 	}
 
 	public get scriptFileMap(): Map<string, string> {

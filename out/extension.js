@@ -10,6 +10,7 @@ const TyranoCompletionItemProvider_1 = require("./TyranoCompletionItemProvider")
 const TyranoDiagnostic_1 = require("./TyranoDiagnostic");
 const TyranoLogger_1 = require("./TyranoLogger");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
+const path = require("path");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 async function activate(context) {
     //登録処理
@@ -37,8 +38,10 @@ async function activate(context) {
         if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
             //ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
             context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
-                await infoWs.updateScenarioFileMap(e.document.fileName);
-                tyranoDiagnostic.createDiagnostics(e.document);
+                if (path.extname(e.document.fileName) === ".ks") {
+                    await infoWs.updateScenarioFileMap(e.document.fileName);
+                    tyranoDiagnostic.createDiagnostics(e.document);
+                }
             }));
             TyranoLogger_1.TyranoLogger.print("Auto diagnostic activate");
         }
