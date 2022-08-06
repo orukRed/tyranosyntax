@@ -57,7 +57,7 @@ var tyranoParser = {
             }
         }
         if (error_str != "") {
-            alert(error_str);
+            // alert(error_str);
         }
         return map_config;
     },
@@ -218,7 +218,7 @@ var tyranoParser = {
             map_label: map_label,
         };
         if (this.deep_if != 0) {
-            alert("[if]と[endif]の数が一致しません。シナリオを見直してみませんか？");
+            // alert("[if]と[endif]の数が一致しません。シナリオを見直してみませんか？");
             this.deep_if = 0;
         }
         return result_obj;

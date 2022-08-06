@@ -1,20 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TyranoLogger = void 0;
+exports.TyranoLogger = exports.ErrorLevel = void 0;
 const vscode = require("vscode");
-require('date-utils');
+class ErrorLevel {
+}
+exports.ErrorLevel = ErrorLevel;
+ErrorLevel.DEBUG = "DEBUG";
+ErrorLevel.INFO = "INFO";
+ErrorLevel.WARN = "WARN";
+ErrorLevel.ERROR = "ERROR";
+ErrorLevel.FATAL = "FATAL";
 /**
  * staticクラス。
  * ログ出力用のクラス。
  */
 class TyranoLogger {
     constructor() { }
-    static print(text) {
-        const currentTime = new Intl.DateTimeFormat('UTC', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(Date.now());
-        TyranoLogger.channel.appendLine(`${currentTime}  ${text}`);
+    static print(text, errorLevel = ErrorLevel.DEBUG) {
+        const currentTime = new Date();
+        TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);
     }
 }
 exports.TyranoLogger = TyranoLogger;
-// public static print = vscode.window.createOutputChannel("TyranoScript syntax").appendLine;
 TyranoLogger.channel = vscode.window.createOutputChannel("TyranoScript syntax");
 //# sourceMappingURL=TyranoLogger.js.map
