@@ -42,6 +42,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	if (vscode.workspace.workspaceFolders !== undefined) {
 		const tyranoDiagnostic = new TyranoDiagnostic();
 		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
+		await infoWs.initializeMaps();
+
 		TyranoLogger.print("TyranoDiagnostic activate");
 		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));
 		//設定で診断機能の自動実行ONにしてるなら許可
@@ -50,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => {
 				if (path.extname(e.document.fileName) === ".ks") {
 					await infoWs.updateScenarioFileMap(e.document.fileName);
-					tyranoDiagnostic.createDiagnostics(e.document);
+					await tyranoDiagnostic.createDiagnostics(e.document.fileName);
 				}
 			}));
 			TyranoLogger.print("Auto diagnostic activate");
@@ -80,6 +82,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		});
 
+		//すべてのプロジェクトに対して初回診断実行
+		for (let i of infoWs.getTyranoScriptProjectRootPaths()) {
+			tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
+		}
+
 	}
 
 
@@ -100,7 +107,7 @@ export async function tmpDiagnostic() {
 
 	TyranoLogger.print("manual diagnostic start");
 	let tyranoDiagnostic: TyranoDiagnostic = new TyranoDiagnostic();
-	await tyranoDiagnostic.createDiagnostics(vscode.window.activeTextEditor?.document);
+	await tyranoDiagnostic.createDiagnostics(vscode.window.activeTextEditor?.document.fileName);
 	TyranoLogger.print("manual diagnostic end");
 }
 

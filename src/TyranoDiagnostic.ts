@@ -40,41 +40,44 @@ export class TyranoDiagnostic {
 
 	/**
 	 * 
-	 * @param changedTextDocument 変更されたテキストドキュメント、もしくは現在のアクティブテキストエディタのパス
+	 * @param changedTextDocumentPath 変更されたテキストドキュメント、もしくは現在のアクティブテキストエディタのパス
 	 * @returns 
 	 */
-	public async createDiagnostics(changedTextDocument: vscode.TextDocument | undefined) {
+	public async createDiagnostics(changedTextDocumentPath: string | undefined) {
 
 		//診断実行中もしくは変更されたテキストエディタが無いなら診断しない
-		if (this.isDiagnosing || changedTextDocument === undefined) {
+		if (this.isDiagnosing || changedTextDocumentPath === undefined) {
 			return;
 		}
 
 		//ログへの変更なら診断しない
-		if (changedTextDocument.fileName === "extension-output-orukred-tyranosyntax.tyranosyntax-#1-TyranoScript syntax") {
+		if (changedTextDocumentPath === "extension-output-orukred-tyranosyntax.tyranosyntax-#1-TyranoScript syntax") {
 			return;
 		}
+
+		const diagnosticProjectPath = await this.infoWs.getProjectPathByFilePath(changedTextDocumentPath);
+
 
 		//メモリに保存しているMapに対して診断開始
 		this.isDiagnosing = true;
 
 		TyranoLogger.print(`diagnostic start.`);
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
-		for (let path of this.tyranoProjectPaths) {
-			TyranoLogger.print(`[${path}] parsing start.`);
 
-			let tyranoTag: string[] = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), this.infoWs.scenarioFileMap, path);
-			TyranoLogger.print(`[${path}] macro tag definition loaded.`);
-			//プラグインで追加したタグを追加
-			tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(this.infoWs.scriptFileMap, path));
-			TyranoLogger.print(`[${path}] plugin tag definition loaded.`);
-			//未定義のマクロを使用しているか検出
-			await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, path);
-			TyranoLogger.print(`[${path}] macro detection finished.`);
-			//存在しないシナリオファイル、未定義のラベルを検出
-			await this.detectionNotExistScenarioAndLabels(this.infoWs.scenarioFileMap, diagnosticArray, path);
-			TyranoLogger.print(`[${path}] scenario and label detection finished.`);
-		}
+		TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
+
+		let tyranoTag: string[] = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), this.infoWs.scenarioFileMap, diagnosticProjectPath);
+		TyranoLogger.print(`[${diagnosticProjectPath}] macro tag definition loaded.`);
+		//プラグインで追加したタグを追加
+		tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(this.infoWs.scriptFileMap, diagnosticProjectPath));
+		TyranoLogger.print(`[${diagnosticProjectPath}] plugin tag definition loaded.`);
+		//未定義のマクロを使用しているか検出
+		await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
+		TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
+		//存在しないシナリオファイル、未定義のラベルを検出
+		await this.detectionNotExistScenarioAndLabels(this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
+		TyranoLogger.print(`[${diagnosticProjectPath}] scenario and label detection finished.`);
+
 
 
 		//診断結果をセット

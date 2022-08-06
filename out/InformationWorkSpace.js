@@ -42,21 +42,27 @@ class InformationWorkSpace {
         //追加するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").concat["foo.png"]);
         //削除するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").splice["foo.png"]);
         this._resourceFilePathMap = new Map(); //string,string,string[] の順にプロジェクトパス、bgimageとかのフォルダ、絶対パスのリスト
-        for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
-            //スクリプトファイルパスを初期化
-            let absoluteScriptFilePaths = this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".js"], true); //dataディレクトリ内の.jsファイルを取得
-            absoluteScriptFilePaths.forEach(element => {
-                this.updateScriptFileMap(element);
-            });
-            //シナリオファイルを初期化
-            let absoluteScenarioFilePaths = this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
-            absoluteScenarioFilePaths.forEach(element => {
-                this.updateScenarioFileMap(element);
-            });
-        }
     }
     static getInstance() {
         return this.instance;
+    }
+    /**
+     * マップファイルの初期化。
+     * 本当はコンストラクタに書きたいのですがコンストラクタはasync使えないのでここに。await initializeMaps();の形でコンストラクタの直後に呼んで下さい。
+     */
+    async initializeMaps() {
+        for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
+            //スクリプトファイルパスを初期化
+            let absoluteScriptFilePaths = this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".js"], true); //dataディレクトリ内の.jsファイルを取得
+            for (let i of absoluteScriptFilePaths) {
+                await this.updateScriptFileMap(i);
+            }
+            //シナリオファイルを初期化
+            let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
+            for (let i of await absoluteScenarioFilePaths) {
+                await this.updateScenarioFileMap(i);
+            }
+        }
     }
     /**
      * フォルダを開いてるなら、vscodeで開いているルートパスのディレクトリを取得します。

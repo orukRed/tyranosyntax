@@ -32,6 +32,7 @@ async function activate(context) {
     if (vscode.workspace.workspaceFolders !== undefined) {
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        await infoWs.initializeMaps();
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));
         //設定で診断機能の自動実行ONにしてるなら許可
@@ -40,7 +41,7 @@ async function activate(context) {
             context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
                 if (path.extname(e.document.fileName) === ".ks") {
                     await infoWs.updateScenarioFileMap(e.document.fileName);
-                    tyranoDiagnostic.createDiagnostics(e.document);
+                    await tyranoDiagnostic.createDiagnostics(e.document.fileName);
                 }
             }));
             TyranoLogger_1.TyranoLogger.print("Auto diagnostic activate");
@@ -65,6 +66,10 @@ async function activate(context) {
         });
         resourceFileSystemWatcher.onDidDelete(async (e) => {
         });
+        //すべてのプロジェクトに対して初回診断実行
+        for (let i of infoWs.getTyranoScriptProjectRootPaths()) {
+            tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
+        }
     }
     //ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。
     //context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(TYRANO_MODE, new Hoge()));
@@ -81,7 +86,7 @@ async function tmpDiagnostic() {
     var _a;
     TyranoLogger_1.TyranoLogger.print("manual diagnostic start");
     let tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
-    await tyranoDiagnostic.createDiagnostics((_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document);
+    await tyranoDiagnostic.createDiagnostics((_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document.fileName);
     TyranoLogger_1.TyranoLogger.print("manual diagnostic end");
 }
 exports.tmpDiagnostic = tmpDiagnostic;
