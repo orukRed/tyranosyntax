@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.12.1]- 2022-08-18
+
+- ESLint等による不要なjsへの診断を防ぐため、診断アルゴリズムを一部変更しました。
+  - ただし、tyranosyntax以外の拡張機能がある場合や、プロジェクト内のファイル編集状況によってはESLintが起動してしまう可能性があります。
+  - 確実にjsファイルへの診断を防ぐ場合、ignoreファイルなどを作成することを推奨します。
+
 ## [0.12.0]- 2022-08-06
 
 - 自動診断をONにしたときの挙動を一部修正しました。これにより自動診断をONにしても差し支えないレベルにパフォーマンスが向上しています。
