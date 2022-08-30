@@ -3,14 +3,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
 const vscode = require("vscode");
-const TyranoCreateTagByShortcutKey_1 = require("./TyranoCreateTagByShortcutKey");
-const TyranoTagHoverProvider_1 = require("./TyranoTagHoverProvider");
-const TyranoOutlineProvider_1 = require("./TyranoOutlineProvider");
-const TyranoCompletionItemProvider_1 = require("./TyranoCompletionItemProvider");
-const TyranoDiagnostic_1 = require("./TyranoDiagnostic");
+const path = require("path");
+const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
+const TyranoTagHoverProvider_1 = require("./subscriptions/TyranoTagHoverProvider");
+const TyranoOutlineProvider_1 = require("./subscriptions/TyranoOutlineProvider");
+const TyranoCompletionItemProvider_1 = require("./subscriptions/TyranoCompletionItemProvider");
+const TyranoDiagnostic_1 = require("./subscriptions/TyranoDiagnostic");
 const TyranoLogger_1 = require("./TyranoLogger");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
-const path = require("path");
+const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProvider");
+const TyranoReferenceProvider_1 = require("./subscriptions/TyranoReferenceProvider");
+const TyranoRenameProvider_1 = require("./subscriptions/TyranoRenameProvider");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 async function activate(context) {
     //登録処理
@@ -27,6 +30,11 @@ async function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
     TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
+    //sky-novelのCodingSupporter.tsの１２３行目付近を参考に
+    /**
+     *
+     *
+     */
     //診断機能の登録
     //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
     if (vscode.workspace.workspaceFolders !== undefined) {
@@ -34,7 +42,13 @@ async function activate(context) {
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         await infoWs.initializeMaps();
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
-        context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic)); //手動診断のコマンドON
+        context.subscriptions.push(vscode.languages.registerDefinitionProvider(TYRANO_MODE, new TyranoDefinitionProvider_1.TyranoDefinitionProvider())); //定義元への移動
+        context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider_1.TyranoReferenceProvider())); //参照先の表示
+        context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider_1.TyranoRenameProvider())); //シンボルの名前変更
+        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
+            //マクロとかを更新する処理
+        }));
         //設定で診断機能の自動実行ONにしてるなら許可
         if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
             //ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
@@ -68,11 +82,11 @@ async function activate(context) {
             await infoWs.updateScriptFileMap(e.fsPath);
         });
         //resourceFileMapも同様にファイルウォッチャー設定
-        const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json}', false, false, false);
+        const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json,webm,mp4}', false, false, false);
         resourceFileSystemWatcher.onDidCreate(async (e) => {
         });
         resourceFileSystemWatcher.onDidChange(async (e) => {
-            infoWs.updateResourceFilePathMap(e.fsPath);
+            // infoWs.updateResourceFilePathMap(e.fsPath);
         });
         resourceFileSystemWatcher.onDidDelete(async (e) => {
         });

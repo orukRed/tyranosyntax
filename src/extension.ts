@@ -2,15 +2,18 @@
 
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 
-import { TyranoCreateTagByShortcutKey } from './TyranoCreateTagByShortcutKey';
-import { TyranoTagHoverProvider } from './TyranoTagHoverProvider';
-import { TyranoOutlineProvider } from './TyranoOutlineProvider';
-import { TyranoCompletionItemProvider } from './TyranoCompletionItemProvider';
-import { TyranoDiagnostic } from './TyranoDiagnostic';
+import { TyranoCreateTagByShortcutKey } from './subscriptions/TyranoCreateTagByShortcutKey';
+import { TyranoTagHoverProvider } from './subscriptions/TyranoTagHoverProvider';
+import { TyranoOutlineProvider } from './subscriptions/TyranoOutlineProvider';
+import { TyranoCompletionItemProvider } from './subscriptions/TyranoCompletionItemProvider';
+import { TyranoDiagnostic } from './subscriptions/TyranoDiagnostic';
 import { ErrorLevel, TyranoLogger } from './TyranoLogger';
 import { InformationWorkSpace } from './InformationWorkSpace';
-import * as path from 'path';
+import { TyranoDefinitionProvider } from './subscriptions/TyranoDefinitionProvider';
+import { TyranoReferenceProvider } from './subscriptions/TyranoReferenceProvider';
+import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
@@ -32,7 +35,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
 
-
+	//sky-novelのCodingSupporter.tsの１２３行目付近を参考に
+	/**	
+	 * 
+	 * 
+	 */
 
 
 
@@ -45,7 +52,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		await infoWs.initializeMaps();
 
 		TyranoLogger.print("TyranoDiagnostic activate");
-		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));
+		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));//手動診断のコマンドON
+		context.subscriptions.push(vscode.languages.registerDefinitionProvider(TYRANO_MODE, new TyranoDefinitionProvider()));//定義元への移動
+		context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
+		context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
+
+		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => {
+			//マクロとかを更新する処理
+		}));
+
 		//設定で診断機能の自動実行ONにしてるなら許可
 		if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
 			//ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
@@ -54,7 +69,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					tyranoDiagnostic.isDiagnosing = true;
 					infoWs.updateScenarioFileMap(e.document.fileName);
 					try {
-
 						await tyranoDiagnostic.createDiagnostics(e.document.fileName);
 					} catch (error) {
 						console.log(error);
@@ -81,11 +95,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 		//resourceFileMapも同様にファイルウォッチャー設定
-		const resourceFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json}', false, false, false);
+		const resourceFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json,webm,mp4}', false, false, false);
 		resourceFileSystemWatcher.onDidCreate(async e => {
 		});
 		resourceFileSystemWatcher.onDidChange(async e => {
-			infoWs.updateResourceFilePathMap(e.fsPath);
+			// infoWs.updateResourceFilePathMap(e.fsPath);
 		});
 		resourceFileSystemWatcher.onDidDelete(async e => {
 
@@ -97,9 +111,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 
 	}
-
-
-
 	//ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。
 	//context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(TYRANO_MODE, new Hoge()));
 

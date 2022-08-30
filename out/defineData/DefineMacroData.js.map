@@ -1,0 +1,1 @@
+{"version":3,"file":"DefineMacroData.js","sourceRoot":"","sources":["../../src/defineData/DefineMacroData.ts"],"names":[],"mappings":";;;AAEA,MAAa,eAAe;IAK3B,YAAmB,QAAgB,EAAE,QAAgB,EAAE,QAAyB;QAC/E,IAAI,CAAC,QAAQ,GAAG,QAAQ,CAAC;QACzB,IAAI,CAAC,gBAAgB,GAAG,QAAQ,CAAC;QACjC,IAAI,CAAC,QAAQ,GAAG,QAAQ,CAAC;IAC1B,CAAC;CAED;AAXD,0CAWC"}

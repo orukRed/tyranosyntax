@@ -4,6 +4,10 @@ exports.InformationWorkSpace = exports.TyranoResourceType = void 0;
 const fs = require("fs");
 const vscode = require("vscode");
 const path = require("path");
+const ResourceFileData_1 = require("./defineData/ResourceFileData");
+/**
+ * bgimageなどのリソースタイプ。
+ */
 class TyranoResourceType {
 }
 exports.TyranoResourceType = TyranoResourceType;
@@ -36,12 +40,8 @@ class InformationWorkSpace {
         this.DATA_VIDEO = this.pathDelimiter + "video";
         this._scriptFileMap = new Map(); //ファイルパスと、中身(全文)
         this._scenarioFileMap = new Map(); //ファイルパスと、中身(全文)
-        //プロジェクト内の素材リソースのMap
-        //keyはbgimage,bgm,fgimage.image.others,scenario,sound,system,videoとする。
-        //valueは各フォルダに入っている素材のファイル名のリスト。
-        //追加するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").concat["foo.png"]);
-        //削除するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").splice["foo.png"]);
-        this._resourceFilePathMap = new Map(); //string,string,string[] の順にプロジェクトパス、bgimageとかのフォルダ、絶対パスのリスト
+        this._resourceFileMap = new Map();
+        this.defineMacro = null;
     }
     static getInstance() {
         return this.instance;
@@ -59,9 +59,15 @@ class InformationWorkSpace {
             }
             //シナリオファイルを初期化
             let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
-            for (let i of await absoluteScenarioFilePaths) {
+            for (let i of absoluteScenarioFilePaths) {
                 await this.updateScenarioFileMap(i);
             }
+            //リソースファイルを取得
+            let absoluteResourceFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"], true); //dataディレクトリ内の.ksファイルを取得
+            for (let i of absoluteResourceFilePaths) {
+                await this.updateResourceFileMap(i);
+            }
+            //プロジェクトで定義されているマクロを取得
         }
     }
     /**
@@ -115,13 +121,13 @@ class InformationWorkSpace {
         let textDocument = await vscode.workspace.openTextDocument(filePath);
         this._scenarioFileMap.set(textDocument.fileName, textDocument);
     }
-    /**
-     * プロジェクトごとのリソースファイルパスを更新
-     * @param projectRootPath
-     */
-    async updateResourceFilePathMap(projectRootPath) {
-        // this._resourceFilePathMap.set(projectRootPath, new Map<string, string[]>());
-        // this._resourceFilePathMap.get(projectRootPath)?.set("", ["", ""]);
+    async updateResourceFileMap(filePath) {
+        //以下の拡張子以外ならリソースではないのでreturn
+        if (![".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"].includes(path.extname(filePath))) {
+            return;
+        }
+        //ファイル名とFilePathをなんとかして取得
+        this._resourceFileMap.set(TyranoResourceType.BGIMAGE, new ResourceFileData_1.ResourceFileData("fileName", "filePath"));
     }
     /**
      * プロジェクトに存在するファイルパスを取得します。
@@ -191,11 +197,11 @@ class InformationWorkSpace {
     get scriptFileMap() {
         return this._scriptFileMap;
     }
-    get resourceFilePathMap() {
-        return this._resourceFilePathMap;
-    }
     get scenarioFileMap() {
         return this._scenarioFileMap;
+    }
+    get resourceFileMap() {
+        return this._resourceFileMap;
     }
 }
 exports.InformationWorkSpace = InformationWorkSpace;

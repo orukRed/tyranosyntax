@@ -1,7 +1,12 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { ResourceFileData } from './defineData/ResourceFileData';
+import { DefineMacroData } from './defineData/DefineMacroData';
 
+/**
+ * bgimageなどのリソースタイプ。
+ */
 export class TyranoResourceType {
 	public static readonly BGIMAGE: string = "bgimage";
 	public static readonly BGM: string = "bgm";
@@ -20,6 +25,12 @@ export class TyranoResourceType {
  * シングルトン。
  */
 export class InformationWorkSpace {
+	private static instance: InformationWorkSpace = new InformationWorkSpace();
+	private constructor() { }
+	public static getInstance(): InformationWorkSpace {
+		return this.instance;
+	}
+
 	public pathDelimiter = (process.platform === "win32") ? "\\" : "/";
 	public readonly DATA_DIRECTORY: string = this.pathDelimiter + "data";				//projectRootPath/data
 	public readonly TYRANO_DIRECTORY: string = this.pathDelimiter + "tyrano";		//projectRootPath/tyrano
@@ -33,28 +44,10 @@ export class InformationWorkSpace {
 	public readonly DATA_SYSTEM: string = this.pathDelimiter + "system";
 	public readonly DATA_VIDEO: string = this.pathDelimiter + "video";
 
-
 	private _scriptFileMap: Map<string, string> = new Map<string, string>();//ファイルパスと、中身(全文)
 	private _scenarioFileMap: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();//ファイルパスと、中身(全文)
-
-
-
-	//プロジェクト内の素材リソースのMap
-	//keyはbgimage,bgm,fgimage.image.others,scenario,sound,system,videoとする。
-	//valueは各フォルダに入っている素材のファイル名のリスト。
-	//追加するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").concat["foo.png"]);
-	//削除するときはresourceFileMap.set("bgimage",resourceMap.get("bgimage").splice["foo.png"]);
-	private _resourceFilePathMap: Map<string, Map<string, string[]>> = new Map<string, Map<string, string[]>>();//string,string,string[] の順にプロジェクトパス、bgimageとかのフォルダ、絶対パスのリスト
-
-
-
-	private static instance: InformationWorkSpace = new InformationWorkSpace();
-
-	public static getInstance(): InformationWorkSpace {
-		return this.instance;
-	}
-
-	private constructor() { }
+	private _resourceFileMap: Map<TyranoResourceType, ResourceFileData> = new Map<TyranoResourceType, ResourceFileData>();
+	private defineMacro: DefineMacroData | null = null;
 
 	/**
 	 * マップファイルの初期化。
@@ -69,9 +62,16 @@ export class InformationWorkSpace {
 			}
 			//シナリオファイルを初期化
 			let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true);//dataディレクトリ内の.ksファイルを取得
-			for (let i of await absoluteScenarioFilePaths) {
+			for (let i of absoluteScenarioFilePaths) {
 				await this.updateScenarioFileMap(i);
 			}
+			//リソースファイルを取得
+			let absoluteResourceFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"], true);//dataディレクトリ内の.ksファイルを取得
+			for (let i of absoluteResourceFilePaths) {
+				await this.updateResourceFileMap(i);
+			}
+
+			//プロジェクトで定義されているマクロを取得
 
 		}
 	}
@@ -140,15 +140,15 @@ export class InformationWorkSpace {
 		this._scenarioFileMap.set(textDocument.fileName, textDocument);
 	}
 
+	public async updateResourceFileMap(filePath: string) {
+		//以下の拡張子以外ならリソースではないのでreturn
+		if (![".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"].includes(path.extname(filePath))) {
+			return;
+		}
 
+		//ファイル名とFilePathをなんとかして取得
+		this._resourceFileMap.set(TyranoResourceType.BGIMAGE, new ResourceFileData("fileName", "filePath"));
 
-	/**
-	 * プロジェクトごとのリソースファイルパスを更新
-	 * @param projectRootPath 
-	 */
-	public async updateResourceFilePathMap(projectRootPath: string) {
-		// this._resourceFilePathMap.set(projectRootPath, new Map<string, string[]>());
-		// this._resourceFilePathMap.get(projectRootPath)?.set("", ["", ""]);
 	}
 
 	/**
@@ -229,10 +229,10 @@ export class InformationWorkSpace {
 	public get scriptFileMap(): Map<string, string> {
 		return this._scriptFileMap;
 	}
-	public get resourceFilePathMap(): Map<string, Map<string, string[]>> {
-		return this._resourceFilePathMap;
-	}
 	public get scenarioFileMap(): Map<string, vscode.TextDocument> {
 		return this._scenarioFileMap;
+	}
+	public get resourceFileMap(): Map<TyranoResourceType, ResourceFileData> {
+		return this._resourceFileMap;
 	}
 }
