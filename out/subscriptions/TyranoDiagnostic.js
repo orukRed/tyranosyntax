@@ -6,8 +6,6 @@ const fs = require("fs");
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const InformationProjectData_1 = require("../InformationProjectData");
 const TyranoLogger_1 = require("../TyranoLogger");
-const acornLoose = require("acorn-loose");
-const estraverse = require("estraverse");
 class TyranoDiagnostic {
     constructor() {
         //ティラノスクリプトに関する情報
@@ -27,7 +25,6 @@ class TyranoDiagnostic {
             TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
         });
     }
-    ;
     get isDiagnosing() {
         return this._isDiagnosing;
     }
@@ -52,11 +49,8 @@ class TyranoDiagnostic {
         TyranoLogger_1.TyranoLogger.print(`diagnostic start.`);
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
-        let tyranoTag = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), this.infoWs.scenarioFileMap, diagnosticProjectPath);
-        TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] macro tag definition loaded.`);
-        //プラグインで追加したタグを追加
-        tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(this.infoWs.scriptFileMap, diagnosticProjectPath));
-        TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] plugin tag definition loaded.`);
+        let tyranoTag = this.tyranoDefaultTag.slice();
+        tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath).keys()));
         //未定義のマクロを使用しているか検出
         await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
@@ -67,31 +61,6 @@ class TyranoDiagnostic {
         TyranoLogger_1.TyranoLogger.print(`diagnostic set`);
         TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
         TyranoLogger_1.TyranoLogger.print("diagnostic end");
-    }
-    /**
-     * シナリオで定義されているタグを返却します。
-     * @param tyranoTag 現在のタグです。
-     * @param absoluteScenarioFilePathMap シナリオファイルのパスを格納したMap
-     * @returns シナリオで使われているタグ
-     */
-    async loadDefinedMacroByScenarios(tyranoTag, absoluteScenarioFilePathMap, projectPath) {
-        for (const [filePath, textDocument] of absoluteScenarioFilePathMap) {
-            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(textDocument.fileName);
-            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
-            if (projectPath !== projectPathOfDiagFile) {
-                continue;
-            }
-            const parsedData = this.parser.tyranoParser.parseScenario(textDocument.getText()); //構文解析
-            const array_s = parsedData["array_s"];
-            for (let data in array_s) {
-                //タグがマクロなら
-                if (array_s[data]["name"] === "macro") {
-                    //マクロの名前をリストかなんかに保存しておく。
-                    tyranoTag.push(await array_s[data]["pm"]["name"]);
-                }
-            }
-        }
-        return tyranoTag;
     }
     /**
      * 未定義のマクロを使用しているか検出します。
@@ -247,44 +216,6 @@ class TyranoDiagnostic {
             return true;
         }
         return false;
-    }
-    /**
-     * 引数で渡した配列のファイルパスのjsモジュールを読み込み、タグ追加構文があれば配列にまとめて返却します。
-     * @param absoluteFilesPaths jsmoduleの絶対パスとテキストのMap
-     * @returns
-     */
-    async SearchJavaScriptForAddedTags(absoluteScenarioFilePathMap, projectPath) {
-        //戻り値で返却するjsモジュールに定義されているタグ名の配列
-        let returnTags = [];
-        for (const filePath of absoluteScenarioFilePathMap.keys()) {
-            const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(filePath);
-            //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
-            if (projectPath !== projectPathOfDiagFile) {
-                continue;
-            }
-            const parsedData = acornLoose.parse(absoluteScenarioFilePathMap.get(filePath));
-            estraverse.traverse(parsedData, {
-                enter: (node) => {
-                    try {
-                        if (node.type === "AssignmentExpression" && node.operator === "=") {
-                            if (node.left.object.object.object.object.name.toUpperCase() === "TYRANO" &&
-                                node.left.object.object.object.property.name === "kag" &&
-                                node.left.object.object.property.name === "ftag" &&
-                                node.left.object.property.name === "master_tag") {
-                                returnTags.push(node.left.property.name);
-                            }
-                        }
-                    }
-                    catch (error) {
-                        //例外が発生した場合は何もしない
-                        //読み込み方の都合上どうしても意図せずに例外が発生することがあるため、
-                        //例外が発生した場合はスキップするためにcatchを使用する
-                    }
-                }
-            });
-        }
-        returnTags = [...new Set(returnTags)]; // 重複を削除
-        return returnTags;
     }
 }
 exports.TyranoDiagnostic = TyranoDiagnostic;

@@ -1,9 +1,12 @@
 
 import * as vscode from 'vscode';
 import { ConstantVariables } from '../ConstantVariables';
+import { InformationProjectData } from '../InformationProjectData';
+import { InformationWorkSpace } from '../InformationWorkSpace';
 
 export class TyranoDefinitionProvider {
 
+	private infoWs = InformationWorkSpace.getInstance();
 	constructor() {
 
 	}
@@ -18,26 +21,26 @@ export class TyranoDefinitionProvider {
 	 * @return A definition or a thenable that resolves to such. The lack of a result can be
 	 * signaled by returning `undefined` or `null`.
 	 */
-	provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition | vscode.DefinitionLink[]> {
-		console.log("provideImplementation");
-		console.log(`document:${document.fileName}\nposition:${position.line}\ntoken:${token}\n`);
+	async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
 
-		const parsedWord = document.getText(document.getWordRangeAtPosition(position, ConstantVariables.variableAndTagParseRegExp));//現在位置の単語を取得。
+		const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
+		let parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
+		const array_s = parsedData["array_s"];
 
-		//タグを分ける正規表現
-		console.log(`parsedWord:${parsedWord}`);
+		//F12押した付近のタグのデータを取得
+		let tagNumber: string = "";
+		for (let data in array_s) {
+			console.log(data);
+			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
+			if (array_s[data]["column"] > position.character) {
+				break;
+			}
+			tagNumber = data;
+		}
+		//カーソル位置のマクロのMapデータ取得
+		const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(array_s[tagNumber]["name"]);
 
-		return new vscode.Location(vscode.Uri.file("C:\\Users\\yamaguchi\\Desktop\\test.txt"), new vscode.Position(0, 0)); //なんかここに返せばいいっぽい
-
-		/**
- * vscode.Definition
- * 1 つまたは複数の場所として表されるシンボルの定義。ほとんどのプログラミング言語では、シンボルが定義される場所は 1 つだけです。
- * 
- * vscode.LocationLink[]
- * 2 つの場所の接続を表します。元の範囲を含む、通常の場所に関する追加のメタデータを提供します。
- */
-
-		return null;//未定義の場合null
+		return retMacroData?.location;
 	}
 
 

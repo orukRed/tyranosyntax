@@ -176,6 +176,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/traverse": "^7.19.4",
     "@types/date-utils": "^1.2.2",
     "@types/estraverse": "^5.1.1",
     "@types/glob": "^7.2.0",

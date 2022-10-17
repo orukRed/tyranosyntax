@@ -2,10 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefineMacroData = void 0;
 class DefineMacroData {
-    constructor(fileName, filePath, location) {
-        this.fileName = fileName;
-        this.absoluteFilePath = filePath;
-        this.location = location;
+    constructor(macroName, location) {
+        this._macroName = ""; //マクロ名。[hoge]などのhoge部分。
+        this._location = null; //定義ジャンプに使う位置情報
+        this._macroName = macroName;
+        this._location = location;
+    }
+    get macroName() {
+        return this._macroName;
+    }
+    get location() {
+        return this._location;
     }
 }
 exports.DefineMacroData = DefineMacroData;

@@ -5,6 +5,10 @@ const fs = require("fs");
 const vscode = require("vscode");
 const path = require("path");
 const ResourceFileData_1 = require("./defineData/ResourceFileData");
+const DefineMacroData_1 = require("./defineData/DefineMacroData");
+const TyranoLogger_1 = require("./TyranoLogger");
+const babel = require("@babel/parser");
+const babelTraverse = require("@babel/traverse").default;
 /**
  * bgimageなどのリソースタイプ。
  */
@@ -41,7 +45,10 @@ class InformationWorkSpace {
         this._scriptFileMap = new Map(); //ファイルパスと、中身(全文)
         this._scenarioFileMap = new Map(); //ファイルパスと、中身(全文)
         this._resourceFileMap = new Map();
-        this.defineMacro = null;
+        this._defineMacroMap = new Map(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
+        //パーサー
+        this.loadModule = require('./lib/module-loader.js').loadModule;
+        this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
     }
     static getInstance() {
         return this.instance;
@@ -51,16 +58,26 @@ class InformationWorkSpace {
      * 本当はコンストラクタに書きたいのですがコンストラクタはasync使えないのでここに。await initializeMaps();の形でコンストラクタの直後に呼んで下さい。
      */
     async initializeMaps() {
+        TyranoLogger_1.TyranoLogger.print(`InformationWorkSpace.initializeMaps()`);
+        //macroMapbyMacroNameの最初のキーをプロジェクト名で初期化
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
+            this.defineMacroMap.set(projectPath, new Map());
+        }
+        for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
+            TyranoLogger_1.TyranoLogger.print(`${projectPath} is loading...`);
             //スクリプトファイルパスを初期化
+            TyranoLogger_1.TyranoLogger.print(`${projectPath}'s scripts is loading...`);
             let absoluteScriptFilePaths = this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".js"], true); //dataディレクトリ内の.jsファイルを取得
             for (let i of absoluteScriptFilePaths) {
                 await this.updateScriptFileMap(i);
+                await this.updateMacroDataMapByJs(i);
             }
             //シナリオファイルを初期化
+            TyranoLogger_1.TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
             let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
             for (let i of absoluteScenarioFilePaths) {
                 await this.updateScenarioFileMap(i);
+                await this.updateMacroDataMapByKs(i);
             }
             //リソースファイルを取得
             let absoluteResourceFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"], true); //dataディレクトリ内の.ksファイルを取得
@@ -120,6 +137,45 @@ class InformationWorkSpace {
         }
         let textDocument = await vscode.workspace.openTextDocument(filePath);
         this._scenarioFileMap.set(textDocument.fileName, textDocument);
+    }
+    async updateMacroDataMapByJs(absoluteScenarioFilePath) {
+        const reg = /[^a-zA-Z0-9_$]/g;
+        // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
+        const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
+        const parsedData = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
+        const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
+        babelTraverse(parsedData, {
+            enter: (path) => {
+                var _a;
+                try {
+                    //path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
+                    if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
+                        let str = path.toString().split(".")[4]; //MacroNameの部分を抽出
+                        if (str != undefined && str != null) {
+                            (_a = this.defineMacroMap.get(projectPath)) === null || _a === void 0 ? void 0 : _a.set(str, new DefineMacroData_1.DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column))));
+                        }
+                    }
+                }
+                catch (error) {
+                    //例外発生するのは許容？
+                    // console.log(error);
+                }
+            },
+        });
+    }
+    async updateMacroDataMapByKs(absoluteScenarioFilePath) {
+        var _a;
+        //ここに構文解析してマクロ名とURI.file,positionを取得する
+        const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
+        if (scenarioData != undefined) {
+            const parsedData = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
+            const array_s = parsedData["array_s"];
+            for (let data in array_s) {
+                if (array_s[data]["name"] === "macro") {
+                    (_a = this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))) === null || _a === void 0 ? void 0 : _a.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], 0))));
+                }
+            }
+        }
     }
     async updateResourceFileMap(filePath) {
         //以下の拡張子以外ならリソースではないのでreturn
@@ -202,6 +258,9 @@ class InformationWorkSpace {
     }
     get resourceFileMap() {
         return this._resourceFileMap;
+    }
+    get defineMacroMap() {
+        return this._defineMacroMap;
     }
 }
 exports.InformationWorkSpace = InformationWorkSpace;

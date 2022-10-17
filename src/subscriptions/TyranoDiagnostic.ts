@@ -5,15 +5,12 @@ import { TextDecoder } from 'util';
 import { InformationProjectData as project } from '../InformationProjectData';
 import { ErrorLevel, TyranoLogger } from '../TyranoLogger';
 
-const acornLoose = require("acorn-loose");
-const estraverse = require("estraverse");
-
 export class TyranoDiagnostic {
 
 	public static diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 
 	//ティラノスクリプトに関する情報
-	private readonly infoPd: project = project.getInstance();;
+	private readonly infoPd: project = project.getInstance();
 
 	//ファイルパス取得用
 	private readonly infoWs: workspace = workspace.getInstance();
@@ -70,11 +67,10 @@ export class TyranoDiagnostic {
 
 		TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
 
-		let tyranoTag: string[] = await this.loadDefinedMacroByScenarios(this.tyranoDefaultTag.slice(), this.infoWs.scenarioFileMap, diagnosticProjectPath);
-		TyranoLogger.print(`[${diagnosticProjectPath}] macro tag definition loaded.`);
-		//プラグインで追加したタグを追加
-		tyranoTag = tyranoTag.concat(await this.SearchJavaScriptForAddedTags(this.infoWs.scriptFileMap, diagnosticProjectPath));
-		TyranoLogger.print(`[${diagnosticProjectPath}] plugin tag definition loaded.`);
+		let tyranoTag: string[] = this.tyranoDefaultTag.slice();
+		tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()));
+
+
 		//未定義のマクロを使用しているか検出
 		await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
 		TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
@@ -83,40 +79,11 @@ export class TyranoDiagnostic {
 		TyranoLogger.print(`[${diagnosticProjectPath}] scenario and label detection finished.`);
 
 
-
 		//診断結果をセット
 		TyranoLogger.print(`diagnostic set`);
 		TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
 		TyranoLogger.print("diagnostic end");
 
-	}
-
-
-
-	/**
-	 * シナリオで定義されているタグを返却します。
-	 * @param tyranoTag 現在のタグです。
-	 * @param absoluteScenarioFilePathMap シナリオファイルのパスを格納したMap
-	 * @returns シナリオで使われているタグ
-	 */
-	private async loadDefinedMacroByScenarios(tyranoTag: string[], absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>, projectPath: string): Promise<string[]> {
-		for (const [filePath, textDocument] of absoluteScenarioFilePathMap) {
-			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(textDocument.fileName);
-			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
-			if (projectPath !== projectPathOfDiagFile) {
-				continue;
-			}
-			const parsedData: object = this.parser.tyranoParser.parseScenario(textDocument.getText()); //構文解析
-			const array_s = parsedData["array_s"];
-			for (let data in array_s) {
-				//タグがマクロなら
-				if (array_s[data]["name"] === "macro") {
-					//マクロの名前をリストかなんかに保存しておく。
-					tyranoTag.push(await array_s[data]["pm"]["name"]);
-				}
-			}
-		}
-		return tyranoTag;
 	}
 
 	/**
@@ -293,45 +260,4 @@ export class TyranoDiagnostic {
 		return false;
 	}
 
-
-	/**
-	 * 引数で渡した配列のファイルパスのjsモジュールを読み込み、タグ追加構文があれば配列にまとめて返却します。
-	 * @param absoluteFilesPaths jsmoduleの絶対パスとテキストのMap
-	 * @returns 
-	 */
-	public async SearchJavaScriptForAddedTags(absoluteScenarioFilePathMap: Map<string, string>, projectPath: string): Promise<string[]> {
-		//戻り値で返却するjsモジュールに定義されているタグ名の配列
-		let returnTags: string[] = [];
-		for (const filePath of absoluteScenarioFilePathMap.keys()) {
-			const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(filePath);
-			//診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
-			if (projectPath !== projectPathOfDiagFile) {
-				continue;
-			}
-
-			const parsedData: object = acornLoose.parse(absoluteScenarioFilePathMap.get(filePath));
-			estraverse.traverse(parsedData, {
-				enter: (node: any) => {
-					try {
-						if (node.type === "AssignmentExpression" && node.operator === "=") {
-							if (node.left.object.object.object.object.name.toUpperCase() === "TYRANO" &&
-								node.left.object.object.object.property.name === "kag" &&
-								node.left.object.object.property.name === "ftag" &&
-								node.left.object.property.name === "master_tag") {
-								returnTags.push(node.left.property.name);
-							}
-						}
-					} catch (error) {
-						//例外が発生した場合は何もしない
-						//読み込み方の都合上どうしても意図せずに例外が発生することがあるため、
-						//例外が発生した場合はスキップするためにcatchを使用する
-					}
-				}
-			});
-		}
-
-		returnTags = [...new Set(returnTags)];// 重複を削除
-		return returnTags;
-
-	}
 }

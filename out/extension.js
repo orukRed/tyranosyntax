@@ -12,10 +12,9 @@ const TyranoDiagnostic_1 = require("./subscriptions/TyranoDiagnostic");
 const TyranoLogger_1 = require("./TyranoLogger");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProvider");
-const TyranoReferenceProvider_1 = require("./subscriptions/TyranoReferenceProvider");
-const TyranoRenameProvider_1 = require("./subscriptions/TyranoRenameProvider");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 async function activate(context) {
+    TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize start.");
     //登録処理
     //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
     context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider_1.TyranoTagHoverProvider()));
@@ -30,32 +29,29 @@ async function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
     context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
     TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
-    //sky-novelのCodingSupporter.tsの１２３行目付近を参考に
-    /**
-     *
-     *
-     */
     //診断機能の登録
     //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
     if (vscode.workspace.workspaceFolders !== undefined) {
+        TyranoLogger_1.TyranoLogger.print("workspace is opening");
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         await infoWs.initializeMaps();
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic)); //手動診断のコマンドON
         context.subscriptions.push(vscode.languages.registerDefinitionProvider(TYRANO_MODE, new TyranoDefinitionProvider_1.TyranoDefinitionProvider())); //定義元への移動
-        context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider_1.TyranoReferenceProvider())); //参照先の表示
-        context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider_1.TyranoRenameProvider())); //シンボルの名前変更
+        // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
+        // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
         context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
             //マクロとかを更新する処理
         }));
         //設定で診断機能の自動実行ONにしてるなら許可
         if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
-            //ファイルに変更を加えたタイミング、もdしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
+            //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
             context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
                 if (path.extname(e.document.fileName) === ".ks" && !tyranoDiagnostic.isDiagnosing) {
                     tyranoDiagnostic.isDiagnosing = true;
-                    infoWs.updateScenarioFileMap(e.document.fileName);
+                    await infoWs.updateScenarioFileMap(e.document.fileName);
+                    await infoWs.updateMacroDataMapByKs(e.document.fileName);
                     try {
                         await tyranoDiagnostic.createDiagnostics(e.document.fileName);
                     }
@@ -77,18 +73,22 @@ async function activate(context) {
         const scriptFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{js}', false, false, false);
         scriptFileSystemWatcher.onDidCreate(async (e) => {
             await infoWs.updateScriptFileMap(e.fsPath);
+            await infoWs.updateMacroDataMapByJs(e.fsPath);
         });
         scriptFileSystemWatcher.onDidChange(async (e) => {
             await infoWs.updateScriptFileMap(e.fsPath);
+            await infoWs.updateMacroDataMapByJs(e.fsPath);
         });
         //resourceFileMapも同様にファイルウォッチャー設定
         const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json,webm,mp4}', false, false, false);
         resourceFileSystemWatcher.onDidCreate(async (e) => {
+            //リソースファイルのインテリジェンスのときに追加
         });
         resourceFileSystemWatcher.onDidChange(async (e) => {
             // infoWs.updateResourceFilePathMap(e.fsPath);
         });
         resourceFileSystemWatcher.onDidDelete(async (e) => {
+            //リソースファイルのインテリジェンスのときに追加
         });
         //すべてのプロジェクトに対して初回診断実行
         for (let i of infoWs.getTyranoScriptProjectRootPaths()) {
@@ -97,6 +97,8 @@ async function activate(context) {
     }
     //ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。
     //context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(TYRANO_MODE, new Hoge()));
+    TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize end");
+    vscode.window.showInformationMessage("TyranoScript syntaxの初期化が完了しました。");
 }
 exports.activate = activate;
 /**
