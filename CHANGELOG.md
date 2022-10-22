@@ -4,15 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.13.0]- 2022-11-xx
-- マクロへの定義ジャンプを実装しました。 [issue#54](https://github.com/orukRed/tyranosyntax/issues/54)
+## [0.13.0]- 2022-10-22
+
+[issue#54](https://github.com/orukRed/tyranosyntax/issues/54)
+
+- マクロへの定義ジャンプを実装しました。
   - 上記変更に伴い、jsやksファイルで定義したタグ、マクロの読み込みタイミングをvscodeの起動してから最初に.ksファイルを開いた時（拡張機能の初期化時）に変更しました。
   - また、マクロ読み込みタイミング変更に伴いパフォーマンスが変更されました。
     - 診断機能の速度が向上しました。
     - 最初にTyranoScript syntax初期化したときに時間がかかるようになりました。（プロジェクトの大きさにもよりますが、0.5～5秒ほどかかります。）
-  - TyranoScript syntaxの初期化完了時にvscodeの右下に通知を出すようにしました。
-
-
+    - TyranoScript syntaxの初期化完了時にvscodeの右下に通知を出すようにしました。
 
 ## [0.12.1]- 2022-08-18
 
