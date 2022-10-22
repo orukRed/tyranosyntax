@@ -12,6 +12,7 @@
 ; 日本語は動作未確認(対象外)
 *start
 *12345
+
 *test1_test
 *test1-test
 *test1_fa-rq22
