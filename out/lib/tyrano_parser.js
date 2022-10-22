@@ -64,6 +64,9 @@ var tyranoParser = {
     //シナリオをオブジェクト化する
     parseScenario: function (text_str) {
         var array_s = [];
+        //TODO:そのうち作る
+        var column = -1; //ラベルやマクロの定義開始位置
+        var lastColumn = 0; //前のタグやラベルの定義開始位置
         var map_label = {}; //ラベル一覧
         var array_row = text_str.split("\n");
         var flag_comment = false; //コメント中なら
@@ -116,6 +119,7 @@ var tyranoParser = {
                     name: "label",
                     pm: {
                         line: i,
+                        column: 0,
                         index: array_s.length,
                         label_name: label_key,
                         val: label_val,
@@ -142,7 +146,7 @@ var tyranoParser = {
             else if (first_char === "@") {
                 //コマンド行確定なので、その残りの部分を、ごそっと回す
                 var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
-                var tmpobj = this.makeTag(tag_str, i);
+                var tmpobj = this.makeTag(tag_str, i, 0); //@から始まるところはcolumnは0で確定
                 array_s.push(tmpobj);
             }
             else {
@@ -163,7 +167,7 @@ var tyranoParser = {
                             num_kakko--;
                             if (num_kakko == 0) {
                                 flag_tag = false;
-                                array_s.push(this.makeTag(tag_str, i));
+                                array_s.push(this.makeTag(tag_str, i, column));
                                 //tag_str をビルドして、命令配列に格納
                                 tag_str = "";
                             }
@@ -183,10 +187,12 @@ var tyranoParser = {
                         c === "[" &&
                         this.flag_script == false) {
                         num_kakko++;
+                        column = j;
                         //テキストファイルを命令に格納
                         if (text != "") {
                             var text_obj = {
                                 line: i,
+                                column: column - text.length,
                                 name: "text",
                                 pm: { val: text },
                                 val: text,
@@ -203,6 +209,7 @@ var tyranoParser = {
                 if (text != "") {
                     var text_obj = {
                         line: i,
+                        column: column - text.length,
                         name: "text",
                         pm: { val: text },
                         val: text,
@@ -224,9 +231,10 @@ var tyranoParser = {
         return result_obj;
     },
     //タグ情報から、オブジェクトを作成して返却する
-    makeTag: function (str, line) {
+    makeTag: function (str, line, column) {
         var obj = {
             line: line,
+            column: column,
             name: "",
             pm: {},
             val: "",
