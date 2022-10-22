@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.13.1]- 2022-10-23
+
+[issue#HOGE](https://github.com/orukRed/tyranosyntax/issues/HOGE)
+
+- 多くの環境で拡張機能が正常に動作しない問題を修正しました。
+
 ## [0.13.0]- 2022-10-22
 
 [issue#54](https://github.com/orukRed/tyranosyntax/issues/54)
