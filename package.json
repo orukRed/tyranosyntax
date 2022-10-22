@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.13.0",
+  "version": "0.13.1",
   "engines": {
     "vscode": "^1.66.0"
   },
@@ -176,7 +176,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/traverse": "^7.19.4",
+    "@babel/traverse": "^7.19.6",
     "@types/date-utils": "^1.2.2",
     "@types/estraverse": "^5.1.1",
     "@types/glob": "^7.2.0",
@@ -186,6 +186,7 @@
     "@typescript-eslint/eslint-plugin": "^5.19.0",
     "@typescript-eslint/parser": "^5.19.0",
     "@webpack-cli/generators": "^2.4.2",
+    "babel": "^6.23.0",
     "eslint": "^8.13.0",
     "glob": "^8.0.1",
     "mocha": "^9.2.2",
