@@ -6,7 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [0.13.1]- 2022-10-23
 
-[issue#HOGE](https://github.com/orukRed/tyranosyntax/issues/HOGE)
+[issue#59](https://github.com/orukRed/tyranosyntax/issues/59)
 
 - 多くの環境で拡張機能が正常に動作しない問題を修正しました。
 
