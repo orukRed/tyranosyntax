@@ -172,7 +172,7 @@ class InformationWorkSpace {
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
                 if (array_s[data]["name"] === "macro") {
-                    (_a = this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))) === null || _a === void 0 ? void 0 : _a.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], 0))));
+                    (_a = this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))) === null || _a === void 0 ? void 0 : _a.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
                 }
             }
         }
