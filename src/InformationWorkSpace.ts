@@ -88,8 +88,6 @@ export class InformationWorkSpace {
 				await this.updateResourceFileMap(i);
 			}
 
-			//プロジェクトで定義されているマクロを取得
-
 		}
 	}
 

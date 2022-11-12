@@ -72,7 +72,7 @@
       ]
     },
     "iscript2": {
-      "begin": "(@)((?i:iscript))",
+      "begin": "(\\s*@)((?i:iscript))",
       "beginCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
@@ -81,7 +81,7 @@
           "name": "support.class.tyrano"
         }
       },
-      "end": "(@)((?i:endscript))\\s*((\\S*)=(\\S*))*",
+      "end": "(\\s*@)((?i:endscript))\\s*((\\S*)=(\\S*))*",
       "endCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"

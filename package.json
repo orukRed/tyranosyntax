@@ -41,7 +41,8 @@
     "onCommand:tyrano.shiftEnter",
     "onCommand:tyrano.ctrlEnter",
     "onCommand:tyrano.altEnter",
-    "onCommand:tyrano.diagnostic"
+    "onCommand:tyrano.diagnostic",
+    "onCommand:tyrano.jumpToDestination"
   ],
   "contributes": {
     "languages": [
@@ -130,6 +131,21 @@
             "type": "boolean",
             "default": false,
             "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
+          },
+          "TyranoScript syntax.jump.tag": {
+            "type": "object",
+            "default": {
+              "jump": "data/scenario",
+              "link": "data/scenario",
+              "button": "data/scenario",
+              "glink": "data/scenario",
+              "clickable": "data/scenario",
+              "call": "data/scenario",
+              "plugin": "data/others/plugin",
+              "loadjs": "data/others",
+              "loadcss": "data"
+            },
+            "description": "ほかシナリオへとジャンプするタグを設定します。定義したタグがシナリオジャンプ機能(alt + Jもしくはoption + J)で使用できます。\nキーをタグ名、値をファイルを探索するディレクトリ（data/scenario,data/othersなど）としてください。\nマクロなどをここに記載する場合、パラメータはそれぞれラベル名をtarget、シナリオファイル名をstorage(もしくはfile)としてください"
           }
         }
       }
@@ -150,6 +166,10 @@
       {
         "command": "tyrano.diagnostic",
         "title": "tyrano.diagnostic"
+      },
+      {
+        "command": "tyrano.jumpToDestination",
+        "title": "tyrano.jumpToDestination"
       }
     ],
     "keybindings": [
@@ -171,6 +191,18 @@
         "command": "tyrano.altEnter",
         "win": "alt+enter",
         "mac": "option+enter",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.jumpToDestination",
+        "win": "alt+j",
+        "mac": "option+j",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.jumpToDestination",
+        "win": "alt+c",
+        "mac": "option+c",
         "when": "editorLangId == tyrano"
       }
     ]
