@@ -12,6 +12,7 @@ const TyranoDiagnostic_1 = require("./subscriptions/TyranoDiagnostic");
 const TyranoLogger_1 = require("./TyranoLogger");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProvider");
+const TyranoJumpProvider_1 = require("./subscriptions/TyranoJumpProvider");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 async function activate(context) {
     TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize start.");
@@ -37,13 +38,12 @@ async function activate(context) {
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         await infoWs.initializeMaps();
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
+        let tyranoJumpProvider = new TyranoJumpProvider_1.TyranoJumpProvider();
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic)); //手動診断のコマンドON
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.jumpToDestination', tyranoJumpProvider.toDestination)); //ジャンプ先のファイル開くコマンドON
         context.subscriptions.push(vscode.languages.registerDefinitionProvider(TYRANO_MODE, new TyranoDefinitionProvider_1.TyranoDefinitionProvider())); //定義元への移動
         // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
         // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
-        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (e) => {
-            //マクロとかを更新する処理
-        }));
         //設定で診断機能の自動実行ONにしてるなら許可
         if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {
             //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする

@@ -30,7 +30,6 @@ export class TyranoDefinitionProvider {
 		//F12押した付近のタグのデータを取得
 		let tagNumber: string = "";
 		for (let data in array_s) {
-			console.log(data);
 			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
 			if (array_s[data]["column"] > position.character) {
 				break;

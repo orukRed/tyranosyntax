@@ -14,6 +14,7 @@ import { InformationWorkSpace } from './InformationWorkSpace';
 import { TyranoDefinitionProvider } from './subscriptions/TyranoDefinitionProvider';
 import { TyranoReferenceProvider } from './subscriptions/TyranoReferenceProvider';
 import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
+import { TyranoJumpProvider } from './subscriptions/TyranoJumpProvider';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
@@ -46,14 +47,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		await infoWs.initializeMaps();
 
 		TyranoLogger.print("TyranoDiagnostic activate");
+		let tyranoJumpProvider = new TyranoJumpProvider();
 		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));//手動診断のコマンドON
+		context.subscriptions.push(vscode.commands.registerCommand('tyrano.jumpToDestination', tyranoJumpProvider.toDestination));//ジャンプ先のファイル開くコマンドON
 		context.subscriptions.push(vscode.languages.registerDefinitionProvider(TYRANO_MODE, new TyranoDefinitionProvider()));//定義元への移動
 		// context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
 		// context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
-
-		context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async e => {
-			//マクロとかを更新する処理
-		}));
 
 		//設定で診断機能の自動実行ONにしてるなら許可
 		if (vscode.workspace.getConfiguration().get('TyranoScript syntax.autoDiagnostic.isEnabled')) {

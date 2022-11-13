@@ -4,6 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.14.0]- 2022-11-13
+
+[issue#58](https://github.com/orukRed/tyranosyntax/issues/58)
+
+- [jump]などのタグで指定したstorageやtarget先へのジャンプ（ALT + J、もしくはoption + J）を実装しました。
+  - 設定より、ジャンプ可能なタグは追加可能です
+  - 自作マクロを追加する場合は、`storage`（もしくは`file`）パラメータにジャンプ先のファイル、`target`パラメータにラベル名を指定してください。
+- 以下の不具合を修正しました。
+  - @iscript,@endscriptの前に半角スペースやタブがあるとJS用のハイライトがされない問題
+
 ## [0.13.1]- 2022-10-23
 
 [issue#59](https://github.com/orukRed/tyranosyntax/issues/59)
@@ -14,7 +24,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 [issue#54](https://github.com/orukRed/tyranosyntax/issues/54)
 
-- マクロへの定義ジャンプを実装しました。
+- マクロへの定義ジャンプを実装しました。(F12キー)
   - 上記変更に伴い、jsやksファイルで定義したタグ、マクロの読み込みタイミングをvscodeの起動してから最初に.ksファイルを開いた時（拡張機能の初期化時）に変更しました。
   - また、マクロ読み込みタイミング変更に伴いパフォーマンスが変更されました。
     - 診断機能の速度が向上しました。

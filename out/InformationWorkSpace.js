@@ -84,7 +84,6 @@ class InformationWorkSpace {
             for (let i of absoluteResourceFilePaths) {
                 await this.updateResourceFileMap(i);
             }
-            //プロジェクトで定義されているマクロを取得
         }
     }
     /**

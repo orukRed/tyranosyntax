@@ -9,8 +9,32 @@
     "brackets": [
         ["{", "}"],
         ["[", "]"],
-        ["(", ")"],
-    ],
+        ["(", ")"]
+
+		//自動インデントとかやりたいけど勝手にコーディング規約のようなものを決めていいのだろうか……？
+		// ["[nowait]","[endnowait]"],
+		// ["[skipstart]","[skipstop]"],
+		// ["[autostart]","[autostop]"],
+		// ["[nolog]","[endnolog]"],
+		// ["[link]","[endlink]"],
+		// ["[vibrate]","[vibrate_stop]"],
+		// ["[keyframe]","[endkeyframe]"],
+		// ["[kanim]","[stop_kanim]"],
+		// ["[xanim]","[stop_xanim]"],
+		// ["[html]","[endhtml]"],
+		// ["[if]","[endif]"],
+		// ["[elseif]","[]"],
+		// ["[else]","[]"],
+		// ["[macro]","[endmacro]"],
+		// ["[ignore]","[endignore]"],
+		// ["[iscript]","[endscript]"],
+		// ["[vostart]","[vostop]"],
+		// ["[speak_on]","[speak_off]"],
+		// ["[3d_event_start]","[3d_event_stop]"],
+		// ["[3d_anim]","[3d_anim_stop]"],
+		// ["[3d_gyro]","[3d_gyro_stop]"],
+		// ["[bgcamera]","[stop_bgcamera]"],
+	],
     // symbols that are auto closed when typing
     "autoClosingPairs": [
         ["{", "}"],
