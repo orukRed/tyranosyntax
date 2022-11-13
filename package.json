@@ -14,9 +14,9 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.13.1",
+  "version": "0.14.0",
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Programming Languages"
@@ -197,12 +197,6 @@
         "command": "tyrano.jumpToDestination",
         "win": "alt+j",
         "mac": "option+j",
-        "when": "editorLangId == tyrano"
-      },
-      {
-        "command": "tyrano.jumpToDestination",
-        "win": "alt+c",
-        "mac": "option+c",
         "when": "editorLangId == tyrano"
       }
     ]
