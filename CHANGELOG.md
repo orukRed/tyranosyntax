@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.14.1]- 2022-11-14
+
+[issue#66](https://github.com/orukRed/tyranosyntax/issues/66)
+
+- チップツールやインテリセンス、診断機能に用いるタグデータを最新のものにしました。
+
 ## [0.14.0]- 2022-11-13
 
 [issue#58](https://github.com/orukRed/tyranosyntax/issues/58)
