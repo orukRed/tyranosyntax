@@ -35,7 +35,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "表示する画像ファイル名を指定します。"
       },
       {
@@ -167,7 +167,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "キャラクター名を指定します。キャラクターがいないときデザインを設定するにはothersを指定します。"
       },
       {
@@ -266,7 +266,7 @@
     "parameters": [
       {
         "name": "layer",
-        "required": false,
+        "required": true,
         "description": "対象とする前景レイヤを0以上の整数で指定します。"
       },
       {
@@ -281,12 +281,12 @@
       },
       {
         "name": "x",
-        "required": false,
+        "required": true,
         "description": "テキストの左端位置を指定します。（ピクセル）"
       },
       {
         "name": "y",
-        "required": false,
+        "required": true,
         "description": "テキストの上端位置を指定します。（ピクセル）"
       },
       {
@@ -385,12 +385,12 @@
       },
       {
         "name": "x",
-        "required": false,
+        "required": true,
         "description": "テキストの左端位置を指定します。（ピクセル）"
       },
       {
         "name": "y",
-        "required": false,
+        "required": true,
         "description": "テキストの上端位置を指定します。（ピクセル）"
       },
       {
@@ -534,7 +534,7 @@
     "parameters": [
       {
         "name": "text",
-        "required": false,
+        "required": true,
         "description": "ルビとして表示させる文字を指定します。"
       },
       {
@@ -1250,7 +1250,7 @@
     "parameters": [
       {
         "name": "text",
-        "required": false,
+        "required": true,
         "description": "バックログに追加するテキストを指定します。"
       },
       {
@@ -1778,12 +1778,12 @@
     "parameters": [
       {
         "name": "width",
-        "required": false,
+        "required": true,
         "description": "領域の横幅を指定します。"
       },
       {
         "name": "height",
-        "required": false,
+        "required": true,
         "description": "領域の高さを指定します。"
       },
       {
@@ -1950,12 +1950,12 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "キャラクターを管理するための名前を半角英数で指定します。このnameは必ずユニーク（一意、固有）である必要があります。すなわち、他のキャラクターとnameが重複してはいけません。また[ptext][image]などのタグに指定するnameとも重複してはいけません。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "キャラクター画像を指定します。画像ファイルはdata/fgimageフォルダに配置します。"
       },
       {
@@ -1999,7 +1999,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で定義したname属性を指定します。"
       },
       {
@@ -2083,7 +2083,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で定義したname属性を指定します。"
       },
       {
@@ -2151,7 +2151,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で定義したname属性を指定します。"
       },
       {
@@ -2170,7 +2170,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で定義したnameを指定します。"
       },
       {
@@ -2219,7 +2219,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で定義したnameを指定します。"
       },
       {
@@ -2278,17 +2278,17 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "表情を登録するキャラクターの名前。[chara_new]で定義したname属性を指定します。"
       },
       {
         "name": "face",
-        "required": false,
+        "required": true,
         "description": "登録する表情の名前を指定します。happyangryなど、自分がわかりやすいものを自由につけましょう。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "画像ファイルを指定します。画像ファイルはdata/fgimageフォルダに配置します。"
       },
       {
@@ -2307,22 +2307,22 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "パーツを登録するキャラクターの名前。[chara_new]で定義したname属性を指定します。"
       },
       {
         "name": "part",
-        "required": false,
+        "required": true,
         "description": "パーツとして登録する名前を指定します。例えば目というパーツをpartを登録しておき、このpartの中で他の差分をいくつでも登録できます。"
       },
       {
         "name": "id",
-        "required": false,
+        "required": true,
         "description": "パーツの中の差分を識別するための名前を指定します。例えば目というpartの中で笑顔の目泣いてる目のようにidを分けて登録できます。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "差分として登録する画像を指定します。画像はdata/fgimageフォルダの中に配置します。noneを指定すると、デフォルトでそのパーツがない状態を表現できます。"
       },
       {
@@ -2346,12 +2346,12 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "パーツ定義の変更対象となるキャラクターの名前。[chara_new]で定義したname属性を指定します。"
       },
       {
         "name": "part",
-        "required": false,
+        "required": true,
         "description": "変更したいパーツ名を指定します。"
       },
       {
@@ -2375,7 +2375,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で指定したキャラクター名を指定します。"
       },
       {
@@ -2409,7 +2409,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "[chara_new]で指定したキャラクター名を指定します。"
       },
       {
@@ -2537,7 +2537,7 @@
     "parameters": [
       {
         "name": "layer",
-        "required": false,
+        "required": true,
         "description": "対象のレイヤを指定します。"
       },
       {
@@ -2571,12 +2571,12 @@
     "parameters": [
       {
         "name": "layer",
-        "required": false,
+        "required": true,
         "description": "対象のレイヤを指定します。"
       },
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "削除する要素のnameを指定します。レイヤ内のあらゆる要素に適応できます。"
       },
       {
@@ -2638,7 +2638,7 @@
     "parameters": [
       {
         "name": "layer",
-        "required": false,
+        "required": true,
         "description": "対象となる前景レイヤまたはメッセージレイヤを指定します。messageとのみ指定した場合は、[current]タグで指定した現在の操作対象のメッセージレイヤが対象となります。"
       },
       {
@@ -2706,12 +2706,12 @@
     "parameters": [
       {
         "name": "layer",
-        "required": false,
+        "required": true,
         "description": "対象となるレイヤを指定します。baseを指定すると背景レイヤ、0以上の整数を指定すると前景レイヤ、message0やmessage1を指定するとメッセージレイヤを指定できます。messageとのみ指定した場合は、[current]タグで指定した現在の操作対象のメッセージレイヤが対象になります。（通常は背景の変更などに使用されます）"
       },
       {
         "name": "time",
-        "required": false,
+        "required": true,
         "description": "トランジション時間をミリ秒で指定します。"
       },
       {
@@ -2740,7 +2740,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "画像ファイル名を指定します。ファイルはdata/bgimageに配置してください"
       },
       {
@@ -2789,7 +2789,7 @@
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "画像ファイルの名前を指定します。ファイルはdata/bgimage以下に配置します。"
       },
       {
@@ -2877,7 +2877,7 @@
       },
       {
         "name": "time",
-        "required": false,
+        "required": true,
         "description": "１回揺れるのにかかる時間をミリ秒で指定します。"
       },
       {
@@ -3047,7 +3047,7 @@
       },
       {
         "name": "video",
-        "required": false,
+        "required": true,
         "description": "合成する動画ファイルを指定します。ファイルはdata/videoフォルダに配置します。"
       },
       {
@@ -3160,7 +3160,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する動画ファイルを指定します。"
       },
       {
@@ -3194,7 +3194,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する動画ファイルを指定します。"
       },
       {
@@ -3505,7 +3505,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "アニメーションを強制停止する要素のnameを指定します。"
       },
       {
@@ -3524,7 +3524,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "キーブレームアニメーションの名前を指定します。[kanim]タグで使用します。"
       },
       {
@@ -3557,7 +3557,7 @@
     "parameters": [
       {
         "name": "p",
-        "required": false,
+        "required": true,
         "description": "キーフレームの位置をパーセンテージ（0%〜100%）で指定します。たとえば50%と指定すれば、全体の長さが4秒のアニメーションのなかの2秒目、となります。0%のキーフレームを省略することで前回のアニメーション状態を継承できます。"
       },
       {
@@ -3671,7 +3671,7 @@
       },
       {
         "name": "keyframe",
-        "required": false,
+        "required": true,
         "description": "適用するキーフレームアニメーションのnameを指定します。"
       },
       {
@@ -3998,7 +3998,7 @@
     "parameters": [
       {
         "name": "time",
-        "required": false,
+        "required": true,
         "description": "ウェイトをミリ秒で指定します。"
       },
       {
@@ -4050,7 +4050,7 @@
     "parameters": [
       {
         "name": "title",
-        "required": false,
+        "required": true,
         "description": "セーブデータのタイトルを指定します。"
       },
       {
@@ -4203,7 +4203,7 @@
     "parameters": [
       {
         "name": "file",
-        "required": false,
+        "required": true,
         "description": "パッチファイルのパスを指定します。exeファイルの階層を起点として指定します"
       },
       {
@@ -4227,7 +4227,7 @@
     "parameters": [
       {
         "name": "url",
-        "required": false,
+        "required": true,
         "description": "パッチのjsonファイルのURLを指定します。"
       },
       {
@@ -4553,7 +4553,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "表示したいタイトルを指定します"
       },
       {
@@ -4646,12 +4646,12 @@
     "parameters": [
       {
         "name": "type",
-        "required": false,
+        "required": true,
         "description": "saveloadbacklogmenuが指定可能です。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "HTMLファイルのパスを指定します。"
       },
       {
@@ -4694,7 +4694,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。"
       },
       {
@@ -5338,7 +5338,7 @@
     "parameters": [
       {
         "name": "url",
-        "required": false,
+        "required": true,
         "description": "開きたいWebサイトのURLを指定します。ゲーム内の画像ファイルなどを開きたい場合、ファイルの場所をdataから初めて記述します。"
       },
       {
@@ -5419,7 +5419,7 @@
     "parameters": [
       {
         "name": "exp",
-        "required": false,
+        "required": true,
         "description": "評価するJavaScriptの式を指定します。"
       },
       {
@@ -5438,7 +5438,7 @@
     "parameters": [
       {
         "name": "exp",
-        "required": false,
+        "required": true,
         "description": "評価する JS 式を指定します。"
       },
       {
@@ -5523,7 +5523,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "マクロの名前を指定します。以後、この名前をタグのように記述することで、マクロを呼び出せるようになります。\n★重要\nティラノスクリプトにすでに使用されているタグ名は使わないでください。またtextやlabelも使えません。"
       },
       {
@@ -5556,7 +5556,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "削除するマクロ名を指定します。"
       },
       {
@@ -5575,7 +5575,7 @@
     "parameters": [
       {
         "name": "exp",
-        "required": false,
+        "required": true,
         "description": "評価するJavaScriptの式を指定します。"
       },
       {
@@ -5675,7 +5675,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "ロードするJavaScriptファイルを指定します。"
       },
       {
@@ -5694,7 +5694,7 @@
     "parameters": [
       {
         "name": "exp",
-        "required": false,
+        "required": true,
         "description": "実行するJavaScript文を指定します。"
       },
       {
@@ -5798,7 +5798,7 @@
     "parameters": [
       {
         "name": "exp",
-        "required": false,
+        "required": true,
         "description": "評価するJavaScriptの式を指定します。基本的には変数の名前を指定すればよいでしょう。f.namesf.textなど。"
       },
       {
@@ -5817,7 +5817,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "プリロードするファイルをフルパスで指定します。JavaScriptの配列を指定することもできます。"
       },
       {
@@ -5880,7 +5880,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "読み込むプラグインの名前を指定します。プラグインはdata/others/pluginフォルダに配置します。"
       },
       {
@@ -5904,7 +5904,7 @@
     "parameters": [
       {
         "name": "file",
-        "required": false,
+        "required": true,
         "description": "読み込むCSSファイルのパスを指定します。パスはdata/から記述します。"
       },
       {
@@ -5923,7 +5923,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する音楽ファイルを指定します。"
       },
       {
@@ -5981,7 +5981,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する音楽ファイルを指定します。"
       },
       {
@@ -6044,7 +6044,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "次に再生するファイルを指定します。"
       },
       {
@@ -6073,7 +6073,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する音楽ファイルを指定します。"
       },
       {
@@ -6141,7 +6141,7 @@
     "parameters": [
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "再生する音楽ファイルを指定します。"
       },
       {
@@ -6161,7 +6161,7 @@
       },
       {
         "name": "time",
-        "required": false,
+        "required": true,
         "description": "フェードイン時間をミリ秒で指定します。"
       },
       {
@@ -6545,7 +6545,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "プレイヤーの入力テキストを保存する変数名を指定してください。"
       },
       {
@@ -6657,12 +6657,12 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "3Dモデルのファイルを指定します。対応している形式はgltf、objです。ファイルはdataothers/3d/modelフォルダに配置します。"
       },
       {
@@ -6711,7 +6711,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。"
       },
       {
@@ -6775,12 +6775,12 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。"
       },
       {
         "name": "storage",
-        "required": false,
+        "required": true,
         "description": "表示する画像ファイルを指定します。ファイルは「others/3d/sprite」フォルダ以下に配置してください。"
       },
       {
@@ -6824,7 +6824,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定します。"
       },
       {
@@ -6853,7 +6853,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定します。"
       },
       {
@@ -6900,7 +6900,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示を制御します。"
       },
       {
@@ -6964,7 +6964,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。"
       },
       {
@@ -6974,7 +6974,7 @@
       },
       {
         "name": "width",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの横幅を指定します。デフォルトは1です"
       },
       {
@@ -7023,7 +7023,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定します"
       },
       {
@@ -7067,7 +7067,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "退場させるオブジェクトのnameを指定します。"
       },
       {
@@ -7120,7 +7120,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "削除したい3Dオブジェクトのnameを指定します。"
       },
       {
@@ -7200,7 +7200,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "アニメーション対象の3Dオブジェクトのnameを指定します。ただしcameraを指定した場合はカメラをアニメーションさせる動作となります。"
       },
       {
@@ -7254,7 +7254,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "アニメーションを停止する3Dオブジェクトのnameを指定します。"
       },
       {
@@ -7403,12 +7403,12 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "3Dオブジェクトのnameを指定します。"
       },
       {
         "name": "motion",
-        "required": false,
+        "required": true,
         "description": "モーション名を指定します。"
       },
       {
@@ -7427,7 +7427,7 @@
     "parameters": [
       {
         "name": "name",
-        "required": false,
+        "required": true,
         "description": "デバッグする3Dオブジェクトのnameを指定します。"
       },
       {
@@ -7583,7 +7583,7 @@
     "parameters": [
       {
         "name": "url",
-        "required": false,
+        "required": true,
         "description": "カメラを写したときに反応させるURLを定義します。"
       },
       {
