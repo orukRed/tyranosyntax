@@ -4,6 +4,15 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.14.2]- 2022-11-15
+
+[issue#62](https://github.com/orukRed/tyranosyntax/issues/62)
+
+- インテリセンス（ctrl + space）でタグが正常に出力されない場合がある問題を修正しました。詳細は以下です。
+  - bg2タグのパラメータを出力した場合、bgタグのパラメータが交じってしまっていました。
+  - ptextタグのxパラメータが出力されませんでした。
+  - []でタグを囲む書式で、一行に複数タグを配置した場合に最も左のタグのパラメータしか取得されませんでした。
+
 ## [0.14.1]- 2022-11-14
 
 [issue#66](https://github.com/orukRed/tyranosyntax/issues/66)

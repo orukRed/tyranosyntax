@@ -14,7 +14,7 @@ import { InformationWorkSpace } from '../InformationWorkSpace';
  * 実装順は312
  */
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
-
+	private infoWs = InformationWorkSpace.getInstance();
 	private tyranoTagSnippets: Object; //公式タグのスニペット定義
 	private info: InformationWorkSpace = InformationWorkSpace.getInstance();
 	public constructor() {
@@ -34,15 +34,31 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * @returns 
 	 */
 	public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-		const leftBracketPosition: number = document.lineAt(position).text.lastIndexOf("\[");
-		const atSignPosition: number = document.lineAt(position).text.indexOf("@");
-
-		//"["がないならスキップ。処理高速化のため。 
-		if (leftBracketPosition !== -1 || atSignPosition !== -1) {
-			return this.completionParameter(document, position, token, context, leftBracketPosition);
-		} else {
-			return this.completionTag();	//FIXME:同じ行に2つ以上タグを置くとタグ名の候補が正しく表示されない(↑のif文に入っている）
+		//カーソル付近のタグデータを取得
+		const parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
+		const array_s = parsedData["array_s"];
+		let tagNumber: string = "";
+		for (let data in array_s) {
+			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
+			if (array_s[data]["column"] > position.character) {
+				break;
+			}
+			tagNumber = data;
 		}
+
+
+		//空行orテキストならタグの予測変換を出す
+		if (array_s === undefined || array_s[tagNumber] === undefined) {
+			return this.completionTag();
+		} else {//タグの中ならタグのパラメータの予測変換を出す 
+			let isTagSentence = array_s[tagNumber]["name"] === "text" || array_s[tagNumber]["name"] === undefined ? false : true;
+			if (isTagSentence) {
+				return this.completionParameter(array_s[tagNumber]["name"], array_s[tagNumber]["pm"]);
+			} else {
+				return this.completionTag();
+			}
+		}
+
 
 	}
 
@@ -89,19 +105,18 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * 
 	 * 
 	 */
-	private async completionParameter(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext, leftBracketPosition: number): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-		const linePrefix = document.lineAt(position).text.substring(leftBracketPosition, position.character);//最も後ろのタグを取得。//FIXME:パラメータの値に配列使ってる時に引っかからない 
-		let tagName: String = "";//正規表現で検索かけるタグ名。jumpとかpとかimageとか。
+	private async completionParameter(selectedTag: string, parameters: object): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
+
 		let completions: vscode.CompletionItem[] = new Array();
 
 		//item:{}で囲ったタグの番号。0,1,2,3...
 		//name:そのまんま。middle.jsonを見て。
 		//item2:タグのパラメータ。0,1,2,3...って順に。
 		for (const item in this.tyranoTagSnippets) {
-			tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString());
-			if (linePrefix.indexOf("[" + tagName) !== -1 || linePrefix.indexOf("@" + tagName) !== -1) {//タグ名があるならパラメータ検索をする  //FIXME:bgとbg2が区別できていないため、両方に存在するパラメータが重複する。
+			const tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString());//タグ名。jumpとかpとかimageとか。
+			if (selectedTag === tagName) {
 				for (const item2 in this.tyranoTagSnippets[item]["parameters"]) {
-					if (document.lineAt(position).text.lastIndexOf(this.tyranoTagSnippets[item]["parameters"][item2]["name"]) === -1) {	//その行にパラメータの名前が含まれていないなら //FIXME: 一行に複数個タグがある時、一つのタグで使ったパラメータが他のタグで予測候補として表示されない
+					if (!(this.tyranoTagSnippets[item]["parameters"][item2]["name"] in parameters)) {//タグにないparameterのみインテリセンスに出す
 						let comp = new vscode.CompletionItem(this.tyranoTagSnippets[item]["parameters"][item2]["name"]);
 						comp.insertText = new vscode.SnippetString(this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "=\"$0\" ");
 						comp.documentation = new vscode.MarkdownString(this.tyranoTagSnippets[item]["parameters"][item2]["description"]);
