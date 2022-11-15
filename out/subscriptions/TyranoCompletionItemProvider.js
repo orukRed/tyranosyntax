@@ -16,6 +16,7 @@ const InformationWorkSpace_1 = require("../InformationWorkSpace");
  */
 class TyranoCompletionItemProvider {
     constructor() {
+        this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         this.info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         //タグスニペットファイル読み込み
         this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../../snippet/tyrano.snippet.json", "utf8"));
@@ -29,14 +30,29 @@ class TyranoCompletionItemProvider {
      * @returns
      */
     async provideCompletionItems(document, position, token, context) {
-        const leftBracketPosition = document.lineAt(position).text.lastIndexOf("\[");
-        const atSignPosition = document.lineAt(position).text.indexOf("@");
-        //"["がないならスキップ。処理高速化のため。 
-        if (leftBracketPosition !== -1 || atSignPosition !== -1) {
-            return this.completionParameter(document, position, token, context, leftBracketPosition);
+        //カーソル付近のタグデータを取得
+        const parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
+        const array_s = parsedData["array_s"];
+        let tagNumber = "";
+        for (let data in array_s) {
+            //マクロの定義column > カーソル位置なら探索不要なのでbreak;
+            if (array_s[data]["column"] > position.character) {
+                break;
+            }
+            tagNumber = data;
         }
-        else {
-            return this.completionTag(); //FIXME:同じ行に2つ以上タグを置くとタグ名の候補が正しく表示されない(↑のif文に入っている）
+        //空行orテキストならタグの予測変換を出す
+        if (array_s === undefined || array_s[tagNumber] === undefined) {
+            return this.completionTag();
+        }
+        else { //タグの中ならタグのパラメータの予測変換を出す 
+            let isTagSentence = array_s[tagNumber]["name"] === "text" || array_s[tagNumber]["name"] === undefined ? false : true;
+            if (isTagSentence) {
+                return this.completionParameter(array_s[tagNumber]["name"], array_s[tagNumber]["pm"]);
+            }
+            else {
+                return this.completionTag();
+            }
         }
     }
     /**
@@ -72,18 +88,16 @@ class TyranoCompletionItemProvider {
      *
      *
      */
-    async completionParameter(document, position, token, context, leftBracketPosition) {
-        const linePrefix = document.lineAt(position).text.substring(leftBracketPosition, position.character); //最も後ろのタグを取得。//FIXME:パラメータの値に配列使ってる時に引っかからない 
-        let tagName = ""; //正規表現で検索かけるタグ名。jumpとかpとかimageとか。
+    async completionParameter(selectedTag, parameters) {
         let completions = new Array();
         //item:{}で囲ったタグの番号。0,1,2,3...
         //name:そのまんま。middle.jsonを見て。
         //item2:タグのパラメータ。0,1,2,3...って順に。
         for (const item in this.tyranoTagSnippets) {
-            tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString());
-            if (linePrefix.indexOf("[" + tagName) !== -1 || linePrefix.indexOf("@" + tagName) !== -1) { //タグ名があるならパラメータ検索をする  //FIXME:bgとbg2が区別できていないため、両方に存在するパラメータが重複する。
+            const tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString()); //タグ名。jumpとかpとかimageとか。
+            if (selectedTag === tagName) {
                 for (const item2 in this.tyranoTagSnippets[item]["parameters"]) {
-                    if (document.lineAt(position).text.lastIndexOf(this.tyranoTagSnippets[item]["parameters"][item2]["name"]) === -1) { //その行にパラメータの名前が含まれていないなら //FIXME: 一行に複数個タグがある時、一つのタグで使ったパラメータが他のタグで予測候補として表示されない
+                    if (!(this.tyranoTagSnippets[item]["parameters"][item2]["name"] in parameters)) { //タグにないparameterのみインテリセンスに出す
                         let comp = new vscode.CompletionItem(this.tyranoTagSnippets[item]["parameters"][item2]["name"]);
                         comp.insertText = new vscode.SnippetString(this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "=\"$0\" ");
                         comp.documentation = new vscode.MarkdownString(this.tyranoTagSnippets[item]["parameters"][item2]["description"]);
