@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.14.2",
+  "version": "0.15.0",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -129,7 +129,7 @@
           },
           "TyranoScript syntax.autoDiagnostic.isEnabled": {
             "type": "boolean",
-            "default": false,
+            "default": true,
             "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
           },
           "TyranoScript syntax.jump.tag": {
@@ -146,6 +146,354 @@
               "loadcss": "data"
             },
             "description": "ほかシナリオへとジャンプするタグを設定します。定義したタグがシナリオジャンプ機能(alt + Jもしくはoption + J)で使用できます。\nキーをタグ名、値をファイルを探索するディレクトリ（data/scenario,data/othersなど）としてください。\nマクロなどをここに記載する場合、パラメータはそれぞれラベル名をtarget、シナリオファイル名をstorage(もしくはfile)としてください"
+          },
+          "TyranoScript syntax.resource.extension": {
+            "type": "object",
+            "default": {
+              "image": [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".gif",
+                ".bmp",
+                ".svg"
+              ],
+              "3d": [
+                ".gltf",
+                ".obj"
+              ],
+              "sound": [
+                ".mp3",
+                ".wav",
+                ".ogg",
+                ".m4a"
+              ],
+              "text": [
+                ".ks",
+                ".js",
+                ".json",
+                ".txt",
+                ".csv",
+                ".tjs",
+                ".html",
+                ".css"
+              ],
+              "video": [
+                ".mp4",
+                ".webm",
+                ".ogg"
+              ]
+            },
+            "description": "インテリセンスに使うリソースファイルの拡張子を設定します。"
+          },
+          "TyranoScript syntax.tag.parameter": {
+            "type": "object",
+            "default": {
+              "graph": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "jump": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "data/scenario",
+                "jumpParameterName": "storage",
+                "resourceType": "text"
+              },
+              "link": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "data/scenario",
+                "jumpParameterName": "storage",
+                "resourceType": "text"
+              },
+              "button": {
+                "resourceParameterName": "graphic",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "chara_new": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/fgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "chara_show": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/fgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "chara_mod": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/fgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "chara_face": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/fgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "chara_layer": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/fgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "image": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "bg": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "bg2": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "layermode_movie": {
+                "resourceParameterName": "video",
+                "resourceReference": "data/video",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "video"
+              },
+              "movie": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/video",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "video"
+              },
+              "bgmovie": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/video",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "video"
+              },
+              "mask": {
+                "resourceParameterName": "graphic",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "xanim": {
+                "resourceParameterName": "svg",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "dialog": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "storage",
+                "jumpParameterName": "data/scenario",
+                "resourceType": "text"
+              },
+              "glyph": {
+                "resourceParameterName": "line",
+                "resourceReference": "tyrano/images/system",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "body": {
+                "resourceParameterName": "bgimage",
+                "resourceReference": "data/bgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "cursor": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "sysview": {
+                "resourceParameterName": "storage",
+                "resourceReference": "./",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "save_img": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgimage",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "set_resizecall": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "storage",
+                "jumpParameterName": "data/scenario",
+                "resourceType": "text"
+              },
+              "mode_effect": {
+                "resourceParameterName": "skip",
+                "resourceReference": "data/image",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "web": {
+                "resourceParameterName": "url",
+                "resourceReference": "./",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "call": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "storage",
+                "jumpParameterName": "data/scenario",
+                "resourceType": "text"
+              },
+              "sleepgame": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "storage",
+                "jumpParameterName": "data/scenario",
+                "resourceType": "text"
+              },
+              "loadjs": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "storage",
+                "jumpParameterName": "data/others",
+                "resourceType": "text"
+              },
+              "preload": {
+                "resourceParameterName": "storage",
+                "resourceReference": "./",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "media",
+                "commet": "「media」でimageとsoundの両方を指定"
+              },
+              "unload": {
+                "resourceParameterName": "storage",
+                "resourceReference": "./",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "media",
+                "commet": "「media」でimageとsoundの両方を指定"
+              },
+              "plugin": {
+                "resourceParameterName": "",
+                "resourceReference": "",
+                "jumpToReferenceFolder": "name",
+                "jumpParameterName": "data/others/plugin",
+                "resourceType": "text"
+              },
+              "loadcss": {
+                "resourceParameterName": "file",
+                "resourceReference": "data",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "text"
+              },
+              "playbgm": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgm",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "sound"
+              },
+              "fadeinbgm": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgm",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "sound"
+              },
+              "xchgbgm": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/bgm",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "sound"
+              },
+              "playse": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/sound",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "sound"
+              },
+              "fadeinse": {
+                "resourceParameterName": "storage",
+                "resourceReference": "data/sound",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "sound"
+              },
+              "3d_model_new": {
+                "resourceParameterName": "name",
+                "resourceReference": "data/others/3d/model",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "3d_sphere_new": {
+                "resourceParameterName": "texture",
+                "resourceReference": "data/others/3d/texture",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "3d_sprite_new": {
+                "resourceParameterName": "storage",
+                "resourceReference": "others/3d/sprite",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "3d_box_new": {
+                "resourceParameterName": "texture",
+                "resourceReference": "data/others/3d/texture",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              },
+              "3d_image_new": {
+                "resourceParameterName": "texture",
+                "resourceReference": "data/others/3d/texture",
+                "jumpToReferenceFolder": "",
+                "jumpParameterName": "",
+                "resourceType": "image"
+              }
+            },
+            "description": "インテリセンスやファイルジャンプ等に使うタグ情報です。\nresourceParameterName:リソースを参照するパラメータ名\nresourceReference:参照先ディレクトリ\njumpToReferenceFolder:jumpタグなどのジャンプ先の参照フォルダ\njumpParameterName:ジャンプ先のファイルを入れるパラメータ\nresourceType:TyranoScript syntax.resource.extensionで指定したimage,sound等のリソースの種類を選択"
           }
         }
       }

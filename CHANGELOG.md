@@ -4,6 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.15.0]- 2022-12-xx
+
+- リソースへのインテリセンスを追加しました。
+  - 追加できるファイルは、以下の拡張子のものです。（設定から変更可能）
+  - hoge
+  - hoge
+- 上記の追加に伴い、設定の「TyranoScript syntax.jump.tag」プロパティを廃止しました。今後は「TyranoScript syntax.tag.parameter」を使用してください。
+- 自動診断のデフォルト値をON（自動で診断をする）にしました。
+- ハイライトに使用している正規表現を微修正しました。
+
 ## [0.14.2]- 2022-11-15
 
 [issue#62](https://github.com/orukRed/tyranosyntax/issues/62)

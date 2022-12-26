@@ -79,24 +79,25 @@ async function activate(context) {
             await infoWs.updateScriptFileMap(e.fsPath);
             await infoWs.updateMacroDataMapByJs(e.fsPath);
         });
-        //resourceFileMapも同様にファイルウォッチャー設定
-        const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{png,jpeg,jpg,bmp,gif,ogg,mp3,m4a,ks,js,json,webm,mp4}', false, false, false);
-        resourceFileSystemWatcher.onDidCreate(async (e) => {
-            //リソースファイルのインテリジェンスのときに追加
+        // シナリオやスクリプトを削除したとき、マクロデータが削除されずに残っている
+        scriptFileSystemWatcher.onDidDelete(async (e) => {
+            //違うところでksファイルに対しても同様の処理が必要
+            // await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
+            // await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
         });
-        resourceFileSystemWatcher.onDidChange(async (e) => {
-            // infoWs.updateResourceFilePathMap(e.fsPath);
+        const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
+        const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher(resourceGlob, false, false, false);
+        resourceFileSystemWatcher.onDidCreate(async (e) => {
+            infoWs.addResourceFileMap(e.fsPath);
         });
         resourceFileSystemWatcher.onDidDelete(async (e) => {
-            //リソースファイルのインテリジェンスのときに追加
+            infoWs.spliceResourceFileMapByFilePath(e.fsPath);
         });
         //すべてのプロジェクトに対して初回診断実行
         for (let i of infoWs.getTyranoScriptProjectRootPaths()) {
             tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
         }
     }
-    //ワークスペースに変更がかかった時。CompletionItemの実装に使えそう。
-    //context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(TYRANO_MODE, new Hoge()));
     TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize end");
     vscode.window.showInformationMessage("TyranoScript syntaxの初期化が完了しました。");
 }

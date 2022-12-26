@@ -41,13 +41,13 @@ export class TyranoJumpProvider {
 		let jumpStorage = array_s[tagNumber]["pm"]["storage"];
 		let jumpTarget = array_s[tagNumber]["pm"]["target"];
 
+		//BUG:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
 		if (jumpStorage === undefined) {
 			if (array_s[tagNumber]["pm"]["file"] !== undefined) {
 				jumpStorage = array_s[tagNumber]["pm"]["file"];
 			} else {
 				jumpStorage = document.fileName.substring(document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,);
 			}
-
 		}
 		//ラベルから*の除去しておく
 		if (jumpTarget) {

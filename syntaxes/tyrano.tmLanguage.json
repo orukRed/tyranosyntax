@@ -28,9 +28,6 @@
     },
     {
       "include": "#tyrano_tag[]"
-    },
-    {
-      "include": "#tyrano_tag@"
     }
   ],
   "repository": {
@@ -228,8 +225,7 @@
 
     "tyrano_tag[]": {
       "comment": "[]で囲んだタグのハイライト",
-      "comment": "FIXME:[hoge param=val[tmp[0]] ] みたいな書き方には未対応 ",
-      "match": "(\\[)(.*?)(?<!\\[[0-9\\w\\_\\.]*)(\\])",
+      "match": "(\\[|^[\\s]*@)(.*?)(?<!\\[[0-9\\w\\_\\.]*)(\\]|$)",
       "captures": {
         "1": {
           "name": "keyword.operator.tyrano"
@@ -245,27 +241,6 @@
           "name": "keyword.operator.tyrano"
         }
       }
-    },
-
-    "tyrano_tag@": {
-      "comment": "@が行頭のタグのハイライト",
-      "begin": "^[\\s]*@",
-      "end": "$",
-      "beginCaptures": {
-        "0": {
-          "name": "keyword.operator.tyrano"
-        }
-      },
-      "endCaptures": {
-        "0": {
-          "name": "keyword.operator.tyrano"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#tyrano_tag"
-        }
-      ]
     }
   },
   "scopeName": "source.ks"
