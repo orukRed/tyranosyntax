@@ -9,6 +9,7 @@
 		],
 		"sourceMap": true,
 		"rootDir": "src",
+		"ignoreDeprecations":"5.0",
 		"suppressImplicitAnyIndexErrors": true,/*str[1]など、添字にマジックナンバーを許可する*/
 		"strict": true,   /* enable all strict type-checking options */
 		/* Additional Checks */

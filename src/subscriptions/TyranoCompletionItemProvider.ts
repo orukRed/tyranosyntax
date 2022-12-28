@@ -47,62 +47,27 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 			tagNumber = data;
 		}
 
-
-
-		//BUG:buttonタグのような無限にparamがある場合への対応が不可
-		/**
-		 * 以下のような書き方で対応可能
-		 * 
-							"default": {
-							"graph": {
-								param1:{
-									resourceType:"image",
-									folderPath:"/data/image"
-								}
-							},
-		 */
-		//BUGTODO:mediaの場合に対応できていない（package.jsonのやつとか取得仕方を変えて対応）
-		//例として、mediaとimageの両方に.pngがあると、等価演算子が使えない。array.includeを使って、どちらかに定義されてるなら、みたいな書き方へと変更
-		//BUG:本来はいらない場合にもisSurroundedJumpParamがtrueになってしまうので注意
-		//上記でパラメータを変更したので、ここのアルゴリズムもまるごと変更になる。
-
-
 		let resourceExtensions: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
-		let resourceExtensionsTagArrays = Object.keys(resourceExtensions);//resourceExtensionsをオブジェクトからstring型の一次配列にする
-
-
-
-		const tagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;
-		const resourceParameterName = tagName !== undefined && array_s[tagNumber]["name"] !== undefined && resourceExtensions[array_s[tagNumber]["name"]] !== undefined ? resourceExtensions[array_s[tagNumber]["name"]].resourceParameterName : undefined;
-		const jumpParameterName = tagName !== undefined && resourceExtensions[array_s[tagNumber]["name"]] !== undefined ? resourceExtensions[array_s[tagNumber]["name"]].jumpParameterName : undefined;
+		let resourceExtensionsTagArrays = Object.keys(resourceExtensions);//resourceExtensionsをオブジェクトからstring型の一次配列にする タグ名の配列を取得
 		const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
-		const regSurroundedResourceParam = new RegExp(resourceParameterName + '="\\w*(?![\\s\\S]*")', "g");//リソース参照タグが「param="」の形で終わっているかどうか
-		const regSurroundedJumpParam = new RegExp(jumpParameterName + '="\\w*(?![\\s\\S]*")', "g");//ジャンプ系タグが「param="」の形で終わっているかどうか
-		const isSurroundedResourceParam = leftSideText ? regSurroundedResourceParam.test(leftSideText) : undefined;
-		const isSurroundedJumpParam = leftSideText ? regSurroundedJumpParam.test(leftSideText) : undefined;
-
-		//package.jsonのコンフィグで設定したタグ一覧に、今見ているタグがあるなら && カーソルより左側に「./」があるなら
-		//さらに、resourceExtensions[array_s[tagNumber]["name"]].resourceParameterNameの中にいるならとか、ジャンプ系タグ(jumpParameterName)の中にいるなら、とかの分岐をしたい
-		//resourceParameterNameで検索かけて、ないなら、jumpParameterNameで検索かけて、ないなら、そのタグはリソースのインテリセンス対象外
-		if (array_s[tagNumber] !== undefined && resourceExtensionsTagArrays.includes(tagName) && (isSurroundedResourceParam || isSurroundedJumpParam)) {
-			if (isSurroundedResourceParam) {
-				const resourceType = await resourceExtensions[tagName].resourceType;
-				const referencePath = projectPath + this.infoWs.pathDelimiter + await resourceExtensions[tagName].resourceReference;
-				return await this.completionResource(projectPath, resourceType, referencePath);
-			} else {
-				const resourceType = "text";
-				const referencePath = projectPath + this.infoWs.pathDelimiter + await resourceExtensions[tagName].jumpToReferenceFolder;
-				return await this.completionResource(projectPath, resourceType, referencePath);
-			}
-
+		const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;//今見てるタグの名前
+		const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");//今見てるタグの値を取得
+		let regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
+		let lineParamName = undefined;
+		if (regExpResult) {
+			lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
+		}
+		const paramInfo = lineTagName !== undefined && resourceExtensions[lineTagName] !== undefined ? resourceExtensions[lineTagName][lineParamName] : undefined;//今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
+		if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
+			return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
 		}
 
 		else if (array_s === undefined || array_s[tagNumber] === undefined) {		//空行orテキストならタグの予測変換を出す
 			return this.completionTag();
 		} else {//タグの中ならタグのパラメータの予測変換を出す 
-			let isTagSentence = tagName === "text" || tagName === undefined ? false : true;
+			let isTagSentence = lineTagName === "text" || lineTagName === undefined ? false : true;
 			if (isTagSentence) {
-				return this.completionParameter(tagName, array_s[tagNumber]["pm"]);
+				return this.completionParameter(lineTagName, array_s[tagNumber]["pm"]);
 			} else {
 				return this.completionTag();
 			}
@@ -143,13 +108,14 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * @param referencePath そのタグの参照するディレクトリのパス。例えば、bgタグならbgimageフォルダのパス
 	 * @returns 
 	 */
-	private async completionResource(projectPath: string, requireResourceType: string, referencePath: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
+	private async completionResource(projectPath: string, requireResourceType: string[], referencePath: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 		let completions: vscode.CompletionItem[] = new Array();
 
 		this.infoWs.resourceFileMap.forEach((resourcesMap, key) => {
 			if (projectPath === key) {
 				resourcesMap.forEach((resource, key2) => {
-					if (resource.resourceType === requireResourceType) {
+					// if (resource.resourceType === requireResourceType) {
+					if (requireResourceType.includes(resource.resourceType)) {
 						let insertLabel = resource.filePath.replace(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.pathDelimiter, "");
 						insertLabel = insertLabel.replace(/\\/g, "/");//パス区切り文字を/に統一
 						let comp = new vscode.CompletionItem({
@@ -198,6 +164,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 						comp.insertText = new vscode.SnippetString(this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "=\"$0\" ");
 						comp.documentation = new vscode.MarkdownString(this.tyranoTagSnippets[item]["parameters"][item2]["description"]);
 						comp.kind = vscode.CompletionItemKind.Function;
+						comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
 						completions.push(comp);
 					}
 				}
