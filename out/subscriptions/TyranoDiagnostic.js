@@ -7,29 +7,30 @@ const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const InformationProjectData_1 = require("../InformationProjectData");
 const TyranoLogger_1 = require("../TyranoLogger");
 class TyranoDiagnostic {
-    constructor() {
-        //ティラノスクリプトに関する情報
-        this.infoPd = InformationProjectData_1.InformationProjectData.getInstance();
-        //ファイルパス取得用
-        this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        //ティラノスクリプトのプロジェクトのルートパス
-        this.tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
-        //パーサー
-        this.loadModule = require('./../lib/module-loader.js').loadModule;
-        this.parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
-        this.JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
-        //基本タグを取得
-        this.tyranoDefaultTag = this.infoPd.getDefaultTag();
-        this._isDiagnosing = false;
-        this.tyranoProjectPaths.forEach(element => {
-            TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
-        });
-    }
+    static diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
+    //ティラノスクリプトに関する情報
+    infoPd = InformationProjectData_1.InformationProjectData.getInstance();
+    //ファイルパス取得用
+    infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+    //ティラノスクリプトのプロジェクトのルートパス
+    tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
+    //パーサー
+    loadModule = require('./../lib/module-loader.js').loadModule;
+    parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
+    JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
+    //基本タグを取得
+    tyranoDefaultTag = this.infoPd.getDefaultTag();
+    _isDiagnosing = false;
     get isDiagnosing() {
         return this._isDiagnosing;
     }
     set isDiagnosing(value) {
         this._isDiagnosing = value;
+    }
+    constructor() {
+        this.tyranoProjectPaths.forEach(element => {
+            TyranoLogger_1.TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
+        });
     }
     /**
      *
@@ -219,5 +220,4 @@ class TyranoDiagnostic {
     }
 }
 exports.TyranoDiagnostic = TyranoDiagnostic;
-TyranoDiagnostic.diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
 //# sourceMappingURL=TyranoDiagnostic.js.map

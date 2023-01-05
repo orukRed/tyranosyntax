@@ -3,8 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoOutlineProvider = void 0;
 const vscode = require("vscode");
 class TyranoOutlineProvider {
+    MATCH_TEXTS;
+    REGEX_VARIABLE = /\b(f\.|sf\.|tf\.|mp\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚ]*))\b/; //変数検出用のアウトライン
     constructor() {
-        this.REGEX_VARIABLE = /\b(f\.|sf\.|tf\.|mp\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚ]*))\b/; //変数検出用のアウトライン
     }
     provideDocumentSymbols(document, token) {
         let symbols = [];

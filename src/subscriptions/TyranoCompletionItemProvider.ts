@@ -47,8 +47,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 			tagNumber = data;
 		}
 
-		let resourceExtensions: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
-		let resourceExtensionsTagArrays = Object.keys(resourceExtensions);//resourceExtensionsをオブジェクトからstring型の一次配列にする タグ名の配列を取得
+		let tagParams: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
 		const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
 		const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;//今見てるタグの名前
 		const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");//今見てるタグの値を取得
@@ -57,7 +56,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		if (regExpResult) {
 			lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
 		}
-		const paramInfo = lineTagName !== undefined && resourceExtensions[lineTagName] !== undefined ? resourceExtensions[lineTagName][lineParamName] : undefined;//今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
+		const paramInfo = lineTagName !== undefined && tagParams[lineTagName] !== undefined ? tagParams[lineTagName][lineParamName] : undefined;//今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
 		if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
 			return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
 		}

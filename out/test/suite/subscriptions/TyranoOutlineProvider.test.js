@@ -7,13 +7,19 @@ const vscode = require("vscode");
 const TyranoOutlineProvider_1 = require("../../../subscriptions/TyranoOutlineProvider");
 // import * as myExtension from '../../extension';
 class MockTextDocument {
-    constructor() {
-        this.mockTextLine = new MockTextLine();
-        this.lineCount = 1;
-    }
+    mockTextLine = new MockTextLine();
+    uri; //!で限定代入アサーション null,undefinedでないことをアサート
+    fileName;
+    isUntitled;
+    languageId;
+    version;
+    isDirty;
+    isClosed;
     save() {
         throw new Error('Method not implemented.');
     }
+    eol;
+    lineCount = 1;
     lineAt(position) {
         return this.mockTextLine;
     }
@@ -38,12 +44,16 @@ class MockTextDocument {
     }
 }
 class MockCancellationToken {
+    isCancellationRequested;
+    onCancellationRequested;
 }
 class MockTextLine {
-    constructor() {
-        this.text = "1";
-        this.range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(this.text.length, this.text.length));
-    }
+    lineNumber;
+    text = "1";
+    range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(this.text.length, this.text.length));
+    rangeIncludingLineBreak;
+    firstNonWhitespaceCharacterIndex;
+    isEmptyOrWhitespace;
 }
 suite('TyranoOutlineProvider.provideDocumentSymbols関数', () => {
     vscode.window.showInformationMessage('Start all tests.');

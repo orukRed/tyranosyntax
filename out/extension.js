@@ -110,10 +110,9 @@ async function tmpDiagnostic() {
     //おそらくクラス内で定義した変数がコマンドからの呼び出しに対応していない？
     //のでここに専用の関数
     //実行速度が改善され次第削除予定
-    var _a;
     TyranoLogger_1.TyranoLogger.print("manual diagnostic start");
     let tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
-    await tyranoDiagnostic.createDiagnostics((_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document.fileName);
+    await tyranoDiagnostic.createDiagnostics(vscode.window.activeTextEditor?.document.fileName);
     TyranoLogger_1.TyranoLogger.print("manual diagnostic end");
 }
 exports.tmpDiagnostic = tmpDiagnostic;

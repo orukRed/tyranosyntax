@@ -3,18 +3,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoLogger = exports.ErrorLevel = void 0;
 const vscode = require("vscode");
 class ErrorLevel {
+    static DEBUG = "DEBUG";
+    static INFO = "INFO";
+    static WARN = "WARN";
+    static ERROR = "ERROR";
+    static FATAL = "FATAL";
 }
 exports.ErrorLevel = ErrorLevel;
-ErrorLevel.DEBUG = "DEBUG";
-ErrorLevel.INFO = "INFO";
-ErrorLevel.WARN = "WARN";
-ErrorLevel.ERROR = "ERROR";
-ErrorLevel.FATAL = "FATAL";
 /**
  * staticクラス。
  * ログ出力用のクラス。
  */
 class TyranoLogger {
+    static channel = vscode.window.createOutputChannel("TyranoScript syntax");
     constructor() { }
     static print(text, errorLevel = ErrorLevel.DEBUG) {
         const currentTime = new Date();
@@ -22,5 +23,4 @@ class TyranoLogger {
     }
 }
 exports.TyranoLogger = TyranoLogger;
-TyranoLogger.channel = vscode.window.createOutputChannel("TyranoScript syntax");
 //# sourceMappingURL=TyranoLogger.js.map

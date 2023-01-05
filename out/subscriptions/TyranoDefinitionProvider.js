@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDefinitionProvider = void 0;
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 class TyranoDefinitionProvider {
+    infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     constructor() {
-        this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     }
     /**
      * Provide the definition of the symbol at the given position and document.
@@ -16,7 +16,6 @@ class TyranoDefinitionProvider {
      * signaled by returning `undefined` or `null`.
      */
     async provideDefinition(document, position, token) {
-        var _a;
         const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
         let parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
         const array_s = parsedData["array_s"];
@@ -30,8 +29,8 @@ class TyranoDefinitionProvider {
             tagNumber = data;
         }
         //カーソル位置のマクロのMapデータ取得
-        const retMacroData = (_a = this.infoWs.defineMacroMap.get(projectPath)) === null || _a === void 0 ? void 0 : _a.get(array_s[tagNumber]["name"]);
-        return retMacroData === null || retMacroData === void 0 ? void 0 : retMacroData.location;
+        const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(array_s[tagNumber]["name"]);
+        return retMacroData?.location;
     }
 }
 exports.TyranoDefinitionProvider = TyranoDefinitionProvider;

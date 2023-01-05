@@ -33,7 +33,7 @@ export class InformationWorkSpace {
 	private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<string, ResourceFileData[]>();
 
 
-	private readonly resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
+	private readonly _resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
 	private readonly _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat();//resourceExtensionsをオブジェクトからstring型の一次配列にする
 
 
@@ -293,6 +293,9 @@ export class InformationWorkSpace {
 	}
 	public get defineMacroMap(): Map<string, Map<string, DefineMacroData>> {
 		return this._defineMacroMap;
+	}
+	public get resourceExtensions(): Object {
+		return this._resourceExtensions;
 	}
 	public get resourceExtensionsArrays() {
 		return this._resourceExtensionsArrays;

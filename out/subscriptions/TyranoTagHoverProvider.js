@@ -4,6 +4,8 @@ exports.TyranoTagHoverProvider = void 0;
 const vscode = require("vscode");
 const fs = require("fs");
 class TyranoTagHoverProvider {
+    jsonTyranoSnippet;
+    regExp;
     constructor() {
         this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "/./../../Tooltip/tyrano.Tooltip.json", "utf8"));
         // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版

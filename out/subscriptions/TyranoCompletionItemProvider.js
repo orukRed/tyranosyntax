@@ -16,9 +16,10 @@ const path = require("path");
  * 実装順は312
  */
 class TyranoCompletionItemProvider {
+    infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+    tyranoTagSnippets; //公式タグのスニペット定義
+    info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     constructor() {
-        this.infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        this.info = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         //タグスニペットファイル読み込み
         this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../../snippet/tyrano.snippet.json", "utf8"));
     }
@@ -31,9 +32,8 @@ class TyranoCompletionItemProvider {
      * @returns
      */
     async provideCompletionItems(document, position, token, context) {
-        var _a;
         let projectPath = await this.infoWs.getProjectPathByFilePath(document.fileName);
-        let cursor = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.selection.active.character;
+        let cursor = vscode.window.activeTextEditor?.selection.active.character;
         //カーソル付近のタグデータを取得
         const lineText = document.lineAt(position.line).text;
         const parsedData = this.infoWs.parser.tyranoParser.parseScenario(lineText);
@@ -46,17 +46,16 @@ class TyranoCompletionItemProvider {
             }
             tagNumber = data;
         }
-        let resourceExtensions = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
-        let resourceExtensionsTagArrays = Object.keys(resourceExtensions); //resourceExtensionsをオブジェクトからstring型の一次配列にする タグ名の配列を取得
+        let tagParams = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
         const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
         const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined; //今見てるタグの名前
         const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g"); //今見てるタグの値を取得
-        let regExpResult = leftSideText === null || leftSideText === void 0 ? void 0 : leftSideText.match(regExp2); //「hoge="」を取得できる
+        let regExpResult = leftSideText?.match(regExp2); //「hoge="」を取得できる
         let lineParamName = undefined;
         if (regExpResult) {
             lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim(); //今見てるパラメータの名前
         }
-        const paramInfo = lineTagName !== undefined && resourceExtensions[lineTagName] !== undefined ? resourceExtensions[lineTagName][lineParamName] : undefined; //今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
+        const paramInfo = lineTagName !== undefined && tagParams[lineTagName] !== undefined ? tagParams[lineTagName][lineParamName] : undefined; //今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
         if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
             return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
         }

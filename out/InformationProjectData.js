@@ -7,10 +7,11 @@ const fs = require("fs");
  * シングルトン。
  */
 class InformationProjectData {
-    constructor() {
-    }
+    static instance = new InformationProjectData();
     static getInstance() {
         return this.instance;
+    }
+    constructor() {
     }
     /**
      * ティラノスクリプトにデフォルトで提供されているを返却します。
@@ -32,5 +33,4 @@ class InformationProjectData {
     }
 }
 exports.InformationProjectData = InformationProjectData;
-InformationProjectData.instance = new InformationProjectData();
 //# sourceMappingURL=InformationProjectData.js.map
