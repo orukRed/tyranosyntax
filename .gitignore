@@ -1,4 +1,4 @@
 *.vscode/
 *.vscodeignore
 .gitignore
-node_modules
+node_modules/
