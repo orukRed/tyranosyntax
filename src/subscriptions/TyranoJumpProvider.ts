@@ -15,7 +15,7 @@ export class TyranoJumpProvider {
 	public async toDestination() {
 
 		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
-		const jumpTagObject: object | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.jump.tag');
+		let jumpTagObject: object = {};
 		const document: vscode.TextDocument | undefined = vscode.window.activeTextEditor?.document;
 		const position: vscode.Position | undefined = vscode.window.activeTextEditor?.selection.active
 		if (document === undefined || position === undefined || jumpTagObject === undefined) {
@@ -24,6 +24,21 @@ export class TyranoJumpProvider {
 		const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
 		let parsedData = infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
 		const array_s = parsedData["array_s"];
+
+
+		// TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
+		const tags: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
+		const enableJumpTags = ["scenario", "script", "html", "css", "text"];
+		for (let tagName in tags) {
+			for (let paramName in tags[tagName]) {
+				console.log(tags[tagName][paramName])
+				for (let type of tags[tagName][paramName].type) {
+					if (enableJumpTags.includes(type)) {
+						jumpTagObject[tagName] = tags[tagName][paramName].path;
+					}
+				}
+			}
+		}
 
 
 		//F12押した付近のタグのデータを取得
@@ -41,13 +56,14 @@ export class TyranoJumpProvider {
 		let jumpStorage = array_s[tagNumber]["pm"]["storage"];
 		let jumpTarget = array_s[tagNumber]["pm"]["target"];
 
+		//TODO:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
+		//リファクタリングに時間がかかりそうなことや、バグの懸念、今後も設計が変わるおそれがあるので今はこのままで
 		if (jumpStorage === undefined) {
 			if (array_s[tagNumber]["pm"]["file"] !== undefined) {
 				jumpStorage = array_s[tagNumber]["pm"]["file"];
 			} else {
 				jumpStorage = document.fileName.substring(document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,);
 			}
-
 		}
 		//ラベルから*の除去しておく
 		if (jumpTarget) {

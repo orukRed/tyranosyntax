@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.14.2",
+  "version": "0.15.0",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -129,23 +129,727 @@
           },
           "TyranoScript syntax.autoDiagnostic.isEnabled": {
             "type": "boolean",
-            "default": false,
+            "default": true,
             "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
           },
-          "TyranoScript syntax.jump.tag": {
+          "TyranoScript syntax.resource.extension": {
             "type": "object",
             "default": {
-              "jump": "data/scenario",
-              "link": "data/scenario",
-              "button": "data/scenario",
-              "glink": "data/scenario",
-              "clickable": "data/scenario",
-              "call": "data/scenario",
-              "plugin": "data/others/plugin",
-              "loadjs": "data/others",
-              "loadcss": "data"
+              "image": [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".gif",
+                ".bmp",
+                ".svg"
+              ],
+              "svg": [
+                ".svg"
+              ],
+              "3d": [
+                ".gltf",
+                ".obj"
+              ],
+              "sound": [
+                ".mp3",
+                ".wav",
+                ".ogg",
+                ".m4a"
+              ],
+              "scenario": [
+                ".ks"
+              ],
+              "script": [
+                ".js",
+                ".tjs"
+              ],
+              "html": [
+                ".html"
+              ],
+              "css": [
+                ".css"
+              ],
+              "text": [
+                ".json",
+                ".txt",
+                ".csv"
+              ],
+              "video": [
+                ".mp4",
+                ".webm",
+                ".ogg"
+              ]
             },
-            "description": "ほかシナリオへとジャンプするタグを設定します。定義したタグがシナリオジャンプ機能(alt + Jもしくはoption + J)で使用できます。\nキーをタグ名、値をファイルを探索するディレクトリ（data/scenario,data/othersなど）としてください。\nマクロなどをここに記載する場合、パラメータはそれぞれラベル名をtarget、シナリオファイル名をstorage(もしくはfile)としてください"
+            "description": "インテリセンスに使うリソースファイルの拡張子を設定します。"
+          },
+          "TyranoScript syntax.tag.parameter": {
+            "type": "object",
+            "default": {
+              "position": {
+                "frame": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "jump": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "link": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "button": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "storage": {
+                  "type": [
+                    "text"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "autoimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "skipimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "glink": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                },
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "clickable": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "chara_new": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_show": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_mod": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_face": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_layer": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "image": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "bg": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "bg2": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "layermode": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "layermode_movie": {
+                "video": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "movie": {
+                "storage": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "bgmovie": {
+                "storage": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "mask": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "xanim": {
+                "svg": {
+                  "type": [
+                    "svg"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "dialog": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "glyph": {
+                "line": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "tyrano/images/system"
+                }
+              },
+              "body": {
+                "bgimage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "cursor": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "sysview": {
+                "storage": {
+                  "type": [
+                    "html"
+                  ],
+                  "path": "./"
+                }
+              },
+              "save_img": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "set_resizecall": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "label": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "dialog_config": {
+                "boximg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "dialog_config_ok": {
+                "img": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "dialog_config_ng": {
+                "img": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "mode_effect": {
+                "skip": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "auto": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "stop": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "holdskip": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "holdstop": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "all": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "web": {
+                "url": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "call": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "sleepgame": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "loadjs": {
+                "storage": {
+                  "type": [
+                    "script"
+                  ],
+                  "path": "data/others"
+                }
+              },
+              "preload": {
+                "storage": {
+                  "type": [
+                    "image",
+                    "3d",
+                    "sound",
+                    "video"
+                  ],
+                  "path": ""
+                }
+              },
+              "unload": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "plugin": {
+                "name": {
+                  "type": [
+                    "macro"
+                  ],
+                  "path": "data/others/plugin"
+                }
+              },
+              "loadcss": {
+                "file": {
+                  "type": [
+                    "css"
+                  ],
+                  "path": "data"
+                }
+              },
+              "playbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "fadeinbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "xchgbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "playse": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "fadeinse": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "3d_model_new": {
+                "storage": {
+                  "type": [
+                    "3d"
+                  ],
+                  "path": "data/others/3d/model"
+                }
+              },
+              "3d_sphere_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "3d_sprite_new": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/sprite"
+                }
+              },
+              "3d_event": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "3d_box_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "3d_image_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "qr_define": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              }
+            },
+            "description": "インテリセンスやファイルジャンプ等に使うタグ情報です。"
           }
         }
       }

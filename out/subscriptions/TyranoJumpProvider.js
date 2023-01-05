@@ -11,17 +11,29 @@ class TyranoJumpProvider {
      * alt(option) + J でシナリオジャンプした時の挙動
      */
     async toDestination() {
-        var _a, _b;
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        const jumpTagObject = vscode.workspace.getConfiguration().get('TyranoScript syntax.jump.tag');
-        const document = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document;
-        const position = (_b = vscode.window.activeTextEditor) === null || _b === void 0 ? void 0 : _b.selection.active;
+        let jumpTagObject = {};
+        const document = vscode.window.activeTextEditor?.document;
+        const position = vscode.window.activeTextEditor?.selection.active;
         if (document === undefined || position === undefined || jumpTagObject === undefined) {
             return;
         }
         const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
         let parsedData = infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
         const array_s = parsedData["array_s"];
+        // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
+        const tags = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
+        const enableJumpTags = ["scenario", "script", "html", "css", "text"];
+        for (let tagName in tags) {
+            for (let paramName in tags[tagName]) {
+                console.log(tags[tagName][paramName]);
+                for (let type of tags[tagName][paramName].type) {
+                    if (enableJumpTags.includes(type)) {
+                        jumpTagObject[tagName] = tags[tagName][paramName].path;
+                    }
+                }
+            }
+        }
         //F12押した付近のタグのデータを取得
         let tagNumber = "";
         for (let data in array_s) {
@@ -35,6 +47,8 @@ class TyranoJumpProvider {
         const tagName = array_s[tagNumber]["name"];
         let jumpStorage = array_s[tagNumber]["pm"]["storage"];
         let jumpTarget = array_s[tagNumber]["pm"]["target"];
+        //TODO:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
+        //リファクタリングに時間がかかりそうなことや、バグの懸念、今後も設計が変わるおそれがあるので今はこのままで
         if (jumpStorage === undefined) {
             if (array_s[tagNumber]["pm"]["file"] !== undefined) {
                 jumpStorage = array_s[tagNumber]["pm"]["file"];

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InformationWorkSpace = exports.TyranoResourceType = void 0;
+exports.InformationWorkSpace = void 0;
 const fs = require("fs");
 const vscode = require("vscode");
 const path = require("path");
@@ -10,46 +10,33 @@ const TyranoLogger_1 = require("./TyranoLogger");
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
 /**
- * bgimageなどのリソースタイプ。
- */
-class TyranoResourceType {
-}
-exports.TyranoResourceType = TyranoResourceType;
-TyranoResourceType.BGIMAGE = "bgimage";
-TyranoResourceType.BGM = "bgm";
-TyranoResourceType.FGIMAGE = "fgimage";
-TyranoResourceType.IMAGE = "image";
-TyranoResourceType.OTHERS = "others";
-TyranoResourceType.SCENARIO = "scenario";
-TyranoResourceType.SOUND = "sound";
-TyranoResourceType.SYSTEM = "system";
-TyranoResourceType.VIDEO = "video";
-/**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
  * シングルトン。
  */
 class InformationWorkSpace {
-    constructor() {
-        this.pathDelimiter = (process.platform === "win32") ? "\\" : "/";
-        this.DATA_DIRECTORY = this.pathDelimiter + "data"; //projectRootPath/data
-        this.TYRANO_DIRECTORY = this.pathDelimiter + "tyrano"; //projectRootPath/tyrano
-        this.DATA_BGIMAGE = this.pathDelimiter + "bgimage";
-        this.DATA_BGM = this.pathDelimiter + "bgm";
-        this.DATA_FGIMAGE = this.pathDelimiter + "fgimage";
-        this.DATA_IMAGE = this.pathDelimiter + "image";
-        this.DATA_OTHERS = this.pathDelimiter + "others";
-        this.DATA_SCENARIO = this.pathDelimiter + "scenario";
-        this.DATA_SOUND = this.pathDelimiter + "sound";
-        this.DATA_SYSTEM = this.pathDelimiter + "system";
-        this.DATA_VIDEO = this.pathDelimiter + "video";
-        this._scriptFileMap = new Map(); //ファイルパスと、中身(全文)
-        this._scenarioFileMap = new Map(); //ファイルパスと、中身(全文)
-        this._resourceFileMap = new Map();
-        this._defineMacroMap = new Map(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
-        //パーサー
-        this.loadModule = require('./lib/module-loader.js').loadModule;
-        this.parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
-    }
+    static instance = new InformationWorkSpace();
+    pathDelimiter = (process.platform === "win32") ? "\\" : "/";
+    DATA_DIRECTORY = this.pathDelimiter + "data"; //projectRootPath/data
+    TYRANO_DIRECTORY = this.pathDelimiter + "tyrano"; //projectRootPath/tyrano
+    DATA_BGIMAGE = this.pathDelimiter + "bgimage";
+    DATA_BGM = this.pathDelimiter + "bgm";
+    DATA_FGIMAGE = this.pathDelimiter + "fgimage";
+    DATA_IMAGE = this.pathDelimiter + "image";
+    DATA_OTHERS = this.pathDelimiter + "others";
+    DATA_SCENARIO = this.pathDelimiter + "scenario";
+    DATA_SOUND = this.pathDelimiter + "sound";
+    DATA_SYSTEM = this.pathDelimiter + "system";
+    DATA_VIDEO = this.pathDelimiter + "video";
+    _scriptFileMap = new Map(); //ファイルパスと、中身(全文)
+    _scenarioFileMap = new Map(); //ファイルパスと、中身(全文)
+    _defineMacroMap = new Map(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
+    _resourceFileMap = new Map();
+    _resourceExtensions = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension');
+    _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
+    //パーサー
+    loadModule = require('./lib/module-loader.js').loadModule;
+    parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
+    constructor() { }
     static getInstance() {
         return this.instance;
     }
@@ -59,9 +46,10 @@ class InformationWorkSpace {
      */
     async initializeMaps() {
         TyranoLogger_1.TyranoLogger.print(`InformationWorkSpace.initializeMaps()`);
-        //macroMapbyMacroNameの最初のキーをプロジェクト名で初期化
+        //最初のキーをプロジェクト名で初期化
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
             this.defineMacroMap.set(projectPath, new Map());
+            this._resourceFileMap.set(projectPath, []);
         }
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
             TyranoLogger_1.TyranoLogger.print(`${projectPath} is loading...`);
@@ -80,9 +68,10 @@ class InformationWorkSpace {
                 await this.updateMacroDataMapByKs(i);
             }
             //リソースファイルを取得
-            let absoluteResourceFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"], true); //dataディレクトリ内の.ksファイルを取得
+            TyranoLogger_1.TyranoLogger.print(`${projectPath}'s resource file is loading...`);
+            let absoluteResourceFilePaths = this.getProjectFiles(projectPath + this.DATA_DIRECTORY, this.resourceExtensionsArrays, true); //dataディレクトリのファイル取得
             for (let i of absoluteResourceFilePaths) {
-                await this.updateResourceFileMap(i);
+                await this.addResourceFileMap(i);
             }
         }
     }
@@ -145,13 +134,12 @@ class InformationWorkSpace {
         const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
         babelTraverse(parsedData, {
             enter: (path) => {
-                var _a;
                 try {
                     //path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
                     if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
                         let str = path.toString().split(".")[4]; //MacroNameの部分を抽出
                         if (str != undefined && str != null) {
-                            (_a = this.defineMacroMap.get(projectPath)) === null || _a === void 0 ? void 0 : _a.set(str, new DefineMacroData_1.DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column))));
+                            this.defineMacroMap.get(projectPath)?.set(str, new DefineMacroData_1.DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column))));
                         }
                     }
                 }
@@ -163,7 +151,6 @@ class InformationWorkSpace {
         });
     }
     async updateMacroDataMapByKs(absoluteScenarioFilePath) {
-        var _a;
         //ここに構文解析してマクロ名とURI.file,positionを取得する
         const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
         if (scenarioData != undefined) {
@@ -171,18 +158,28 @@ class InformationWorkSpace {
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
                 if (array_s[data]["name"] === "macro") {
-                    (_a = this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))) === null || _a === void 0 ? void 0 : _a.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+                    this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
                 }
             }
         }
     }
-    async updateResourceFileMap(filePath) {
-        //以下の拡張子以外ならリソースではないのでreturn
-        if (![".png", ".jpeg", ".jpg", ".bmp", ".gif", ".ogg", ".mp3", ".m4a", ".ks", ".js", ".json", ".mp4", ".webm"].includes(path.extname(filePath))) {
-            return;
-        }
-        //ファイル名とFilePathをなんとかして取得
-        this._resourceFileMap.set(TyranoResourceType.BGIMAGE, new ResourceFileData_1.ResourceFileData("fileName", "filePath"));
+    /**
+     * リソースファイルのマップに値を追加
+     * @param filePath ファイルパス
+     */
+    async addResourceFileMap(filePath) {
+        const absoluteProjectPath = await this.getProjectPathByFilePath(filePath);
+        let resourceType = Object.keys(this.resourceExtensions).filter(key => this.resourceExtensions[key].includes(path.extname(filePath))).toString(); //プロジェクトパスの拡張子からどのリソースタイプなのかを取得
+        this._resourceFileMap.get(absoluteProjectPath)?.push(new ResourceFileData_1.ResourceFileData(filePath, resourceType));
+    }
+    /**
+     * 引数で指定したファイルパスを、リソースファイルのマップから削除
+     * @param absoluteProjectPath
+     * @param filePath
+     */
+    async spliceResourceFileMapByFilePath(filePath) {
+        const absoluteProjectPath = await this.getProjectPathByFilePath(filePath);
+        this._resourceFileMap.get(absoluteProjectPath)?.filter(obj => obj.filePath !== filePath);
     }
     /**
      * プロジェクトに存在するファイルパスを取得します。
@@ -261,7 +258,12 @@ class InformationWorkSpace {
     get defineMacroMap() {
         return this._defineMacroMap;
     }
+    get resourceExtensions() {
+        return this._resourceExtensions;
+    }
+    get resourceExtensionsArrays() {
+        return this._resourceExtensionsArrays;
+    }
 }
 exports.InformationWorkSpace = InformationWorkSpace;
-InformationWorkSpace.instance = new InformationWorkSpace();
 //# sourceMappingURL=InformationWorkSpace.js.map

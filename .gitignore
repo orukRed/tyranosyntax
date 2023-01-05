@@ -1,6 +1,4 @@
-#.vscodeは無視する
 *.vscode/
 *.vscodeignore
 .gitignore
-
-#TODO:いまはgithubにあげちゃってるのでいつか直す
+node_modules

@@ -82,7 +82,6 @@ var tyranoParser = {
 	parseScenario: function (text_str) {
 		var array_s = [];
 
-		//TODO:そのうち作る
 		var column = -1;//ラベルやマクロの定義開始位置
 		var lastColumn = 0;//前のタグやラベルの定義開始位置
 
@@ -176,6 +175,8 @@ var tyranoParser = {
 				var tmpobj = this.makeTag(tag_str, i, 0);//@から始まるところはcolumnは0で確定
 				array_s.push(tmpobj);
 			} else {
+				//テキストか[]記法のタグ
+				//テキストは[iscript]内のJavaScriptや[html]内のHTMLである可能性がある
 				//半角アンダーバーで始まっている場合は空白ではじめる
 				if (first_char === "_") {
 					line_str = line_str.substring(1, line_str.length);
@@ -220,6 +221,7 @@ var tyranoParser = {
 					) {
 						num_kakko++;
 						column = j;
+            column += Math.abs($.trim(array_row[i]).length - array_row[i].length);//先頭にスペースがある場合に空白を追加する処理
 						//テキストファイルを命令に格納
 						if (text != "") {
 							var text_obj = {
@@ -272,6 +274,8 @@ var tyranoParser = {
 	},
 
 	//タグ情報から、オブジェクトを作成して返却する
+  //str:タグの文字列
+  //column:タグの開始位置
 	makeTag: function (str, line, column) {
 		var obj = {
 			line: line,

@@ -4,6 +4,17 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.15.0]- 2023-1-xx
+
+- リソースへのインテリセンスを追加しました。
+  - 今までと同様にパラメータのダブルクォーテーション(`"`)で囲まれている中で`ctrl + space`を押すと、リソースへのインテリセンスが使用できます。
+    - 例：`@button graphic=""`の`@button graphic="`と`"`の間にカーソルがある状態で`ctrl + space`を押す
+  - タグのパラメータごとに指定された拡張子のファイルのインテリセンスが表示されます。（buttonタグのgraphicパラメータなら".jpg",jpeg"".png",".gif","bmp",".svg"拡張子のファイルが表示されます。）
+  - 設定の`TyranoScript syntax.resource.extension`から変更可能出来ます。
+- 上記の追加に伴い、設定の`TyranoScript syntax.jump.tag`プロパティを廃止しました。今後alt + Jによるタグの指定ファイル先の設定を行う場合、`TyranoScript syntax.tag.parameter`を編集してください。
+- 自動診断のデフォルト値をON（自動で診断をする）にしました。
+- ハイライトに使用している正規表現を微リファクタリングしました。
+
 ## [0.14.2]- 2022-11-15
 
 [issue#62](https://github.com/orukRed/tyranosyntax/issues/62)
