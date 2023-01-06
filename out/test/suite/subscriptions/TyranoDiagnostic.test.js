@@ -6,64 +6,6 @@ const assert = require("assert");
 const vscode = require("vscode");
 const TyranoDiagnostic_1 = require("../../../subscriptions/TyranoDiagnostic");
 // import * as myExtension from '../../extension';
-suite('TyranoDiagnostic.isValueIsVariable', () => {
-    vscode.window.showInformationMessage('Start all tests.');
-    test('f.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("f.hoge"), true);
-    });
-    test('sf.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("sf.hoge"), true);
-    });
-    test('tf.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("tf.hoge"), true);
-    });
-    test('mp.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("mp.hoge"), true);
-    });
-    test('&f.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("&f.hoge"), true);
-    });
-    test('&sf.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("&sf.hoge"), true);
-    });
-    test('&tf.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("&tf.hoge"), true);
-    });
-    test('&tf.hoge true返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("&mp.hoge"), true);
-    });
-    test('hoge false返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("hoge"), false);
-    });
-    test('*hoge false返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("*hoge"), false);
-    });
-    test('a&hoge false返却', () => {
-        //値定義
-        const diag = new TyranoDiagnostic_1.TyranoDiagnostic();
-        assert.strictEqual(diag.isValueIsVariable("a&hoge"), false);
-    });
-});
 suite('TyranoDiagnostic.isExistAmpersandAtBeginning', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('&f.hoge true返却', () => {
