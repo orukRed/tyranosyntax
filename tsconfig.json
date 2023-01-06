@@ -9,8 +9,8 @@
 		],
 		"sourceMap": true,
 		"rootDir": "src",
-		"ignoreDeprecations":"5.0",
 		"suppressImplicitAnyIndexErrors": true,/*str[1]など、添字にマジックナンバーを許可する*/
+		"ignoreDeprecations": "5.0",
 		"strict": true,   /* enable all strict type-checking options */
 		/* Additional Checks */
 		// "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
