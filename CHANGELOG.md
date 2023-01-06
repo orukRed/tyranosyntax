@@ -4,7 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.15.0]- 2023-1-xx
+## [0.15.0]- 2023-1-07
+
+[issue#70](https://github.com/orukRed/tyranosyntax/issues/70)
+[issue#79](https://github.com/orukRed/tyranosyntax/issues/79)
+[issue#81](https://github.com/orukRed/tyranosyntax/issues/81)
 
 - リソースへのインテリセンスを追加しました。
   - 今までと同様にパラメータのダブルクォーテーション(`"`)で囲まれている中で`ctrl + space`を押すと、リソースへのインテリセンスが使用できます。
@@ -14,6 +18,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - 上記の追加に伴い、設定の`TyranoScript syntax.jump.tag`プロパティを廃止しました。今後alt + Jによるタグの指定ファイル先の設定を行う場合、`TyranoScript syntax.tag.parameter`を編集してください。
 - 自動診断のデフォルト値をON（自動で診断をする）にしました。
 - ハイライトに使用している正規表現を微リファクタリングしました。
+- その他githubリポジトリの整理を行いました。
 
 ## [0.14.2]- 2022-11-15
 
