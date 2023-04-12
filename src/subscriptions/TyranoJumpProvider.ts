@@ -31,7 +31,6 @@ export class TyranoJumpProvider {
 		const enableJumpTags = ["scenario", "script", "html", "css", "text"];
 		for (let tagName in tags) {
 			for (let paramName in tags[tagName]) {
-				console.log(tags[tagName][paramName])
 				for (let type of tags[tagName][paramName].type) {
 					if (enableJumpTags.includes(type)) {
 						jumpTagObject[tagName] = tags[tagName][paramName].path;

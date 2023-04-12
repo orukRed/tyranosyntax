@@ -5,10 +5,10 @@ import { ResourceFileData } from '../defineData/ResourceFileData';
 import path = require('path');
 
 /**
- * [1]プロジェクト中に存在する素材（画像、音声、シナリオ、外部JSを読み込みスニペット登録
+ * OK.[1]プロジェクト中に存在する素材（画像、音声、シナリオ、外部JSを読み込みスニペット登録
  * →おそらくワークスペースに変更が加わるたびにワークスペースに更新掛ける必要がある。
  * →理想はタグごとのパラメータによってscenarioディレクトリだけのスニペットが出るとかbgディレクトリだけのスニペットが出るとか。
- * [2]シナリオ中で定義した変数とマクロを読み込んでスニペット登録
+ * [2]シナリオ中で定義した変数とマクロとラベルを読み込んでスニペット登録
  * →テキストエディタに変更加わるたびにワークスペースに更新掛ける必要がある。
  * OK.[3]公式で提供されているタグの予測変換登録
  * 
@@ -86,7 +86,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
 	/**
 	 * //TODO:変数の予測変換
-	 * [\s*(f.|sf.|tf.|mp.)]のいずれかから始まった時予測変換を出す。
+	 * [\s*(f.|sf.|tf.|mp.)]のいずれかから始まった時予測変換を出す。&から始まっても変数のインテリセンス出してもいいかも
 	 * InformationWorkSpaceに登録済みの変数リストを取得すれば良い
 	 */
 	private completionVariable() {
@@ -97,11 +97,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
 	/**
 	 * ファイルの予測変換
-	 * InformationWorkSpaceに登録済みの素材Mapを取得すれば良い
-	 */
-
-	/**
-	 * 
 	 * @param projectPath 
 	 * @param requireResourceType 
 	 * @param referencePath そのタグの参照するディレクトリのパス。例えば、bgタグならbgimageフォルダのパス
@@ -128,11 +123,8 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 					}
 				});
 			}
-
 		});
-
 		return completions;
-
 	}
 
 

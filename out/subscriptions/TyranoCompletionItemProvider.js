@@ -1,15 +1,38 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoCompletionItemProvider = void 0;
-const fs = require("fs");
-const vscode = require("vscode");
+const fs = __importStar(require("fs"));
+const vscode = __importStar(require("vscode"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const path = require("path");
 /**
- * [1]プロジェクト中に存在する素材（画像、音声、シナリオ、外部JSを読み込みスニペット登録
+ * OK.[1]プロジェクト中に存在する素材（画像、音声、シナリオ、外部JSを読み込みスニペット登録
  * →おそらくワークスペースに変更が加わるたびにワークスペースに更新掛ける必要がある。
  * →理想はタグごとのパラメータによってscenarioディレクトリだけのスニペットが出るとかbgディレクトリだけのスニペットが出るとか。
- * [2]シナリオ中で定義した変数とマクロを読み込んでスニペット登録
+ * [2]シナリオ中で定義した変数とマクロとラベルを読み込んでスニペット登録
  * →テキストエディタに変更加わるたびにワークスペースに更新掛ける必要がある。
  * OK.[3]公式で提供されているタグの予測変換登録
  *
@@ -83,7 +106,7 @@ class TyranoCompletionItemProvider {
     }
     /**
      * //TODO:変数の予測変換
-     * [\s*(f.|sf.|tf.|mp.)]のいずれかから始まった時予測変換を出す。
+     * [\s*(f.|sf.|tf.|mp.)]のいずれかから始まった時予測変換を出す。&から始まっても変数のインテリセンス出してもいいかも
      * InformationWorkSpaceに登録済みの変数リストを取得すれば良い
      */
     completionVariable() {
@@ -91,10 +114,6 @@ class TyranoCompletionItemProvider {
     }
     /**
      * ファイルの予測変換
-     * InformationWorkSpaceに登録済みの素材Mapを取得すれば良い
-     */
-    /**
-     *
      * @param projectPath
      * @param requireResourceType
      * @param referencePath そのタグの参照するディレクトリのパス。例えば、bgタグならbgimageフォルダのパス

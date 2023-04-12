@@ -78,6 +78,17 @@ export async function activate(context: vscode.ExtensionContext) {
 			TyranoLogger.print("Auto diagnostic is not activate");
 		}
 
+		//scenarioFileの値
+		const scenarioFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
+		scenarioFileSystemWatcher.onDidCreate(async e => {
+			await infoWs.updateScenarioFileMap(e.fsPath);
+			await infoWs.updateMacroDataMapByKs(e.fsPath);
+		});
+		scenarioFileSystemWatcher.onDidDelete(async e => {
+			await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
+			await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+		});
+
 		//scriptFileの値
 		const scriptFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{js}', false, false, false);
 		scriptFileSystemWatcher.onDidCreate(async e => {
@@ -88,13 +99,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			await infoWs.updateScriptFileMap(e.fsPath);
 			await infoWs.updateMacroDataMapByJs(e.fsPath);
 		});
-		// シナリオやスクリプトを削除したとき、マクロデータが削除されずに残っている
 		scriptFileSystemWatcher.onDidDelete(async e => {
-			//違うところでksファイルに対しても同様の処理が必要
-			// await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
-			// await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+			await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
+			await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
 		});
-
 
 		const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`;//TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
 		const resourceFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(resourceGlob, false, false, false);

@@ -160,7 +160,7 @@ export class InformationWorkSpace {
 						let str = path.toString().split(".")[4];//MacroNameの部分を抽出
 						if (str != undefined && str != null) {
 							this.defineMacroMap.get(projectPath)?.set(
-								str, new DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column))));
+								str, new DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath));
 						}
 					}
 				} catch (error) {
@@ -180,7 +180,7 @@ export class InformationWorkSpace {
 			const array_s = parsedData["array_s"];
 			for (let data in array_s) {
 				if (array_s[data]["name"] === "macro") {
-					this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+					this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
 				}
 			}
 		}
@@ -204,7 +204,37 @@ export class InformationWorkSpace {
 	 */
 	public async spliceResourceFileMapByFilePath(filePath: string) {
 		const absoluteProjectPath = await this.getProjectPathByFilePath(filePath);
-		this._resourceFileMap.get(absoluteProjectPath)?.filter(obj => obj.filePath !== filePath);
+		const insertValue: ResourceFileData[] | undefined = this.resourceFileMap.get(absoluteProjectPath)?.filter(obj => obj.filePath !== filePath);
+		this.resourceFileMap.set(absoluteProjectPath, insertValue!);
+	}
+
+	/**
+	 *  引数で指定したファイルパスを、シナリオファイルのマップから削除
+	 * @param filePath 
+	 */
+	public async spliceScenarioFileMapByFilePath(filePath: string) {
+		this.scenarioFileMap.delete(filePath);
+	}
+
+	/**
+	 *  引数で指定したファイルパスを、スクリプトファイルのマップから削除
+	 * @param filePath 
+	 */
+	public async spliceScriptFileMapByFilePath(filePath: string) {
+		this.scriptFileMap.delete(filePath);
+	}
+
+	/**
+	 *  引数で指定したファイルパスを、マクロデータのマップから削除
+	 * @param filePath 
+	 */
+	public async spliceMacroDataMapByFilePath(filePath: string) {
+		const projectPath = await this.getProjectPathByFilePath(filePath);
+		for (let tmp of this.defineMacroMap.get(projectPath)?.values()!) {
+			if (tmp.filePath == filePath) {
+				this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
+			}
+		}
 	}
 
 	/**

@@ -4,6 +4,15 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.15.1]- 2023-04-12
+
+[issue#74](https://github.com/orukRed/tyranosyntax/issues/74)
+
+- .ksファイルを追加/削除した場合にインテリセンスが正しく表示できない場合がある不具合を修正しました。
+- .ks,.jsファイルを削除してもmacroタグで定義したタグが診断機能上では存在してしまう不具合を修正しました。
+- htmlタグとendhtmlタグで囲った箇所にもハイライトするようにしました。
+  - 現在ハイライトに関してはjsと同じものとなっています。divタグなどもハイライトされてたのでこちらで実装していますが、不具合ありましたら報告お願いします。
+
 ## [0.15.0]- 2023-1-07
 
 [issue#70](https://github.com/orukRed/tyranosyntax/issues/70)
