@@ -1,9 +1,32 @@
 "use strict";
 //拡張機能のエントリポイント
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
-const vscode = require("vscode");
-const path = require("path");
+const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
 const TyranoTagHoverProvider_1 = require("./subscriptions/TyranoTagHoverProvider");
 const TyranoOutlineProvider_1 = require("./subscriptions/TyranoOutlineProvider");
@@ -69,6 +92,16 @@ async function activate(context) {
         else {
             TyranoLogger_1.TyranoLogger.print("Auto diagnostic is not activate");
         }
+        //scenarioFileの値
+        const scenarioFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
+        scenarioFileSystemWatcher.onDidCreate(async (e) => {
+            await infoWs.updateScenarioFileMap(e.fsPath);
+            await infoWs.updateMacroDataMapByKs(e.fsPath);
+        });
+        scenarioFileSystemWatcher.onDidDelete(async (e) => {
+            await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
+            await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+        });
         //scriptFileの値
         const scriptFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{js}', false, false, false);
         scriptFileSystemWatcher.onDidCreate(async (e) => {
@@ -79,11 +112,9 @@ async function activate(context) {
             await infoWs.updateScriptFileMap(e.fsPath);
             await infoWs.updateMacroDataMapByJs(e.fsPath);
         });
-        // シナリオやスクリプトを削除したとき、マクロデータが削除されずに残っている
         scriptFileSystemWatcher.onDidDelete(async (e) => {
-            //違うところでksファイルに対しても同様の処理が必要
-            // await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
-            // await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+            await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
+            await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
         });
         const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
         const resourceFileSystemWatcher = vscode.workspace.createFileSystemWatcher(resourceGlob, false, false, false);

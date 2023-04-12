@@ -1,9 +1,32 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InformationWorkSpace = void 0;
-const fs = require("fs");
-const vscode = require("vscode");
-const path = require("path");
+const fs = __importStar(require("fs"));
+const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
 const ResourceFileData_1 = require("./defineData/ResourceFileData");
 const DefineMacroData_1 = require("./defineData/DefineMacroData");
 const TyranoLogger_1 = require("./TyranoLogger");
@@ -139,7 +162,7 @@ class InformationWorkSpace {
                     if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
                         let str = path.toString().split(".")[4]; //MacroNameの部分を抽出
                         if (str != undefined && str != null) {
-                            this.defineMacroMap.get(projectPath)?.set(str, new DefineMacroData_1.DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column))));
+                            this.defineMacroMap.get(projectPath)?.set(str, new DefineMacroData_1.DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath));
                         }
                     }
                 }
@@ -158,7 +181,7 @@ class InformationWorkSpace {
             const array_s = parsedData["array_s"];
             for (let data in array_s) {
                 if (array_s[data]["name"] === "macro") {
-                    this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+                    this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
                 }
             }
         }
@@ -179,7 +202,34 @@ class InformationWorkSpace {
      */
     async spliceResourceFileMapByFilePath(filePath) {
         const absoluteProjectPath = await this.getProjectPathByFilePath(filePath);
-        this._resourceFileMap.get(absoluteProjectPath)?.filter(obj => obj.filePath !== filePath);
+        const insertValue = this.resourceFileMap.get(absoluteProjectPath)?.filter(obj => obj.filePath !== filePath);
+        this.resourceFileMap.set(absoluteProjectPath, insertValue);
+    }
+    /**
+     *  引数で指定したファイルパスを、シナリオファイルのマップから削除
+     * @param filePath
+     */
+    async spliceScenarioFileMapByFilePath(filePath) {
+        this.scenarioFileMap.delete(filePath);
+    }
+    /**
+     *  引数で指定したファイルパスを、スクリプトファイルのマップから削除
+     * @param filePath
+     */
+    async spliceScriptFileMapByFilePath(filePath) {
+        this.scriptFileMap.delete(filePath);
+    }
+    /**
+     *  引数で指定したファイルパスを、マクロデータのマップから削除
+     * @param filePath
+     */
+    async spliceMacroDataMapByFilePath(filePath) {
+        const projectPath = await this.getProjectPathByFilePath(filePath);
+        for (let tmp of this.defineMacroMap.get(projectPath)?.values()) {
+            if (tmp.filePath == filePath) {
+                this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
+            }
+        }
     }
     /**
      * プロジェクトに存在するファイルパスを取得します。

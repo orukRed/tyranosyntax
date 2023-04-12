@@ -9,6 +9,12 @@
       "include": "#iscript2"
     },
     {
+      "include": "#html1"
+    },
+    {
+      "include": "#html2"
+    },
+    {
       "include": "#comment_line"
     },
     {
@@ -32,7 +38,7 @@
   ],
   "repository": {
     "iscript1": {
-      "begin": "\\s*(\\[)((?i:iscript))(\\])",
+      "begin": "\\s*(\\[)((?i:iscript))[\\s\\S]*(\\])",
       "beginCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
@@ -69,7 +75,7 @@
       ]
     },
     "iscript2": {
-      "begin": "(\\s*@)((?i:iscript))",
+      "begin": "(\\s*@)((?i:iscript))[\\s\\S]*",
       "beginCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
@@ -79,6 +85,74 @@
         }
       },
       "end": "(\\s*@)((?i:endscript))\\s*((\\S*)=(\\S*))*",
+      "endCaptures": {
+        "1": {
+          "name": "keyword.operator.tyrano"
+        },
+        "2": {
+          "name": "support.class.tyrano"
+        },
+        "4": {
+          "name": "support.function.tyrano"
+        },
+        "5": {
+          "name": "string.quoted.double.tyrano"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "html1": {
+      "begin": "\\s*(\\[)((?i:html))[\\s\\S]*(\\])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.operator.tyrano"
+        },
+        "2": {
+          "name": "support.class.tyrano"
+        },
+        "3": {
+          "name": "keyword.operator.tyrano"
+        }
+      },
+      "end": "\\s*(\\[)((?i:endhtml))\\s*((\\S*)=(\\S*))*(\\])",
+      "endCaptures": {
+        "1": {
+          "name": "keyword.operator.tyrano"
+        },
+        "2": {
+          "name": "support.class.tyrano"
+        },
+        "4": {
+          "name": "support.function.tyrano"
+        },
+        "5": {
+          "name": "string.quoted.double.tyrano"
+        },
+        "6": {
+          "name": "keyword.operator.tyrano"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "html2": {
+      "begin": "(\\s*@)((?i:html))[\\s\\S]*",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.operator.tyrano"
+        },
+        "2": {
+          "name": "support.class.tyrano"
+        }
+      },
+      "end": "(\\s*@)((?i:endhtml))\\s*((\\S*)=(\\S*))*",
       "endCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
