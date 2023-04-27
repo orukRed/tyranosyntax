@@ -40,6 +40,11 @@ exports.ErrorLevel = ErrorLevel;
 class TyranoLogger {
     static channel = vscode.window.createOutputChannel("TyranoScript syntax");
     constructor() { }
+    /**
+     *  ログ出力
+     * @param text  出力する文字列
+     * @param errorLevel  出力するエラーレベル ErrorLevelを使用
+     */
     static print(text, errorLevel = ErrorLevel.DEBUG) {
         const currentTime = new Date();
         TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);

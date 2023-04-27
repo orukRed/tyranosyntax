@@ -30,6 +30,8 @@ const path = __importStar(require("path"));
 const ResourceFileData_1 = require("./defineData/ResourceFileData");
 const DefineMacroData_1 = require("./defineData/DefineMacroData");
 const TyranoLogger_1 = require("./TyranoLogger");
+const VariableData_1 = require("./defineData/VariableData");
+const LabelData_1 = require("./defineData/LabelData");
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
 /**
@@ -53,7 +55,9 @@ class InformationWorkSpace {
     _scriptFileMap = new Map(); //ファイルパスと、中身(全文)
     _scenarioFileMap = new Map(); //ファイルパスと、中身(全文)
     _defineMacroMap = new Map(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
-    _resourceFileMap = new Map();
+    _resourceFileMap = new Map(); //pngとかmp3とかのプロジェクトにあるリソースファイル
+    _variableMap = new Map(); //projectpath,変数名と、定義情報
+    _labelMap = new Map(); //ファイルパス、LabelDataの配列
     _resourceExtensions = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension');
     _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
     //パーサー
@@ -73,6 +77,7 @@ class InformationWorkSpace {
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
             this.defineMacroMap.set(projectPath, new Map());
             this._resourceFileMap.set(projectPath, []);
+            this.variableMap.set(projectPath, new Map());
         }
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
             TyranoLogger_1.TyranoLogger.print(`${projectPath} is loading...`);
@@ -88,7 +93,7 @@ class InformationWorkSpace {
             let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true); //dataディレクトリ内の.ksファイルを取得
             for (let i of absoluteScenarioFilePaths) {
                 await this.updateScenarioFileMap(i);
-                await this.updateMacroDataMapByKs(i);
+                await this.updateMacroLabelVariableDataMapByKs(i);
             }
             //リソースファイルを取得
             TyranoLogger_1.TyranoLogger.print(`${projectPath}'s resource file is loading...`);
@@ -173,15 +178,66 @@ class InformationWorkSpace {
             },
         });
     }
-    async updateMacroDataMapByKs(absoluteScenarioFilePath) {
+    /**
+     * jsやiscript-endscript間で定義した変数を取得する
+     * sentenceがundefined出ない場合、指定した値の範囲内で定義されている変数を取得する
+     * @param absoluteScenarioFilePath
+     * @param sentence
+     */
+    async updateVariableMapByJS(absoluteScenarioFilePath, sentence = undefined) {
+        const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
+        if (sentence === undefined) {
+            sentence = this.scriptFileMap.get(absoluteScenarioFilePath);
+        }
+        const reg = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
+        const variableList = sentence.match(reg) ?? [];
+        for (let variableBase of variableList) {
+            //.で区切る
+            const [variableType, variableName] = variableBase.split(".");
+            this._variableMap.get(projectPath)?.set(variableName, new VariableData_1.VariableData(variableName, undefined, variableType));
+        }
+    }
+    async updateMacroLabelVariableDataMapByKs(absoluteScenarioFilePath) {
         //ここに構文解析してマクロ名とURI.file,positionを取得する
         const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
+        const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
         if (scenarioData != undefined) {
             const parsedData = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
+            this.labelMap.set(absoluteScenarioFilePath, new Array());
             const array_s = parsedData["array_s"];
+            let isIscript = false;
+            let iscriptSentence = "";
             for (let data in array_s) {
-                if (array_s[data]["name"] === "macro") {
-                    this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
+                try {
+                    if (isIscript && array_s[data]["name"] === "text") {
+                        iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(array_s[data]["line"]).text;
+                    }
+                    if (array_s[data]["name"] === "macro") {
+                        this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
+                    }
+                    else if (array_s[data]["name"] === "label") {
+                        this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData_1.LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+                    }
+                    else if (array_s[data]["name"] === "eval") {
+                        const [variableBase, variableValue] = array_s[data]["pm"]["exp"].split("=").map((str) => str.trim()); //vriableBaseにf.hogeの形
+                        const [variableType, variableName] = variableBase.split(".");
+                        //mapに未登録の場合のみ追加
+                        if (!this.variableMap.get(projectPath)?.get(variableName)) {
+                            this.variableMap.get(projectPath)?.set(variableName, new VariableData_1.VariableData(variableName, variableValue, variableType));
+                        }
+                        this.variableMap.get(projectPath)?.get(variableName)?.addFilePathList(absoluteScenarioFilePath); //変数の定義箇所を追加
+                    }
+                    else if (array_s[data]["name"] === "iscript") {
+                        isIscript = true; //endscriptが見つかるまで行を保存するモードに入る
+                    }
+                    else if (array_s[data]["name"] === "endscript") {
+                        isIscript = false; //行を保存するモード終わり
+                        this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
+                    }
+                }
+                catch (error) {
+                    TyranoLogger_1.TyranoLogger.print(".ksファイルの構文解析中にエラーが発生しました。\n" + error, TyranoLogger_1.ErrorLevel.ERROR);
+                    return;
                 }
             }
         }
@@ -228,6 +284,31 @@ class InformationWorkSpace {
         for (let tmp of this.defineMacroMap.get(projectPath)?.values()) {
             if (tmp.filePath == filePath) {
                 this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
+            }
+        }
+    }
+    /**
+     * 引数で指定したファイルパスを、ラベルデータのマップから削除
+     * @param fsPath
+     */
+    async spliceLabelMapByFilePath(fsPath) {
+        this.labelMap.delete(fsPath);
+    }
+    /**
+     * 引数で指定したファイルパスを、変数データのマップから削除
+     * @param fsPath
+     */
+    async spliceVariableMapByFilePath(fsPath) {
+        const projectPath = await this.getProjectPathByFilePath(fsPath);
+        //末尾が.jsならscriptFileMapから取得
+        //末尾が.ksならscenarioFileMapから取得
+        const sentence = path.extname(fsPath) === ".js" ? this.scriptFileMap.get(fsPath) : this.scenarioFileMap.get(fsPath).getText();
+        const reg = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
+        const variableList = sentence.match(reg) ?? [];
+        for (let variable of variableList) {
+            this._variableMap.get(projectPath)?.get(variable)?.deleteFilePathList(fsPath);
+            if (this._variableMap.get(projectPath)?.get(variable)?.filePathList.size === 0) {
+                this._variableMap.get(projectPath)?.delete(variable);
             }
         }
     }
@@ -313,6 +394,12 @@ class InformationWorkSpace {
     }
     get resourceExtensionsArrays() {
         return this._resourceExtensionsArrays;
+    }
+    get variableMap() {
+        return this._variableMap;
+    }
+    get labelMap() {
+        return this._labelMap;
     }
 }
 exports.InformationWorkSpace = InformationWorkSpace;
