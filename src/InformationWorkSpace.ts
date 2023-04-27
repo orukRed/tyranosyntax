@@ -3,7 +3,10 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ResourceFileData } from './defineData/ResourceFileData';
 import { DefineMacroData } from './defineData/DefineMacroData';
-import { TyranoLogger } from './TyranoLogger';
+import { ErrorLevel, TyranoLogger } from './TyranoLogger';
+import { VariableData } from './defineData/VariableData';
+import { LabelData } from './defineData/LabelData';
+
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
 
@@ -13,6 +16,8 @@ const babelTraverse = require("@babel/traverse").default;
  * シングルトン。
  */
 export class InformationWorkSpace {
+
+
 	private static instance: InformationWorkSpace = new InformationWorkSpace();
 	public pathDelimiter = (process.platform === "win32") ? "\\" : "/";
 	public readonly DATA_DIRECTORY: string = this.pathDelimiter + "data";				//projectRootPath/data
@@ -30,7 +35,9 @@ export class InformationWorkSpace {
 	private _scriptFileMap: Map<string, string> = new Map<string, string>();//ファイルパスと、中身(全文)
 	private _scenarioFileMap: Map<string, vscode.TextDocument> = new Map<string, vscode.TextDocument>();//ファイルパスと、中身(全文)
 	private _defineMacroMap: Map<string, Map<string, DefineMacroData>> = new Map<string, Map<string, DefineMacroData>>();//マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
-	private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<string, ResourceFileData[]>();
+	private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<string, ResourceFileData[]>();//pngとかmp3とかのプロジェクトにあるリソースファイル
+	private _variableMap: Map<string, Map<string, VariableData>> = new Map<string, Map<string, VariableData>>();//projectpath,変数名と、定義情報
+	private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>();//ファイルパス、LabelDataの配列
 
 
 	private readonly _resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
@@ -55,6 +62,7 @@ export class InformationWorkSpace {
 		for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
 			this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
 			this._resourceFileMap.set(projectPath, []);
+			this.variableMap.set(projectPath, new Map<string, VariableData>());
 		}
 
 		for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
@@ -71,7 +79,7 @@ export class InformationWorkSpace {
 			let absoluteScenarioFilePaths = await this.getProjectFiles(projectPath + this.DATA_DIRECTORY, [".ks"], true);//dataディレクトリ内の.ksファイルを取得
 			for (let i of absoluteScenarioFilePaths) {
 				await this.updateScenarioFileMap(i);
-				await this.updateMacroDataMapByKs(i);
+				await this.updateMacroLabelVariableDataMapByKs(i);
 			}
 			//リソースファイルを取得
 			TyranoLogger.print(`${projectPath}'s resource file is loading...`);
@@ -172,19 +180,73 @@ export class InformationWorkSpace {
 		});
 	}
 
-	public async updateMacroDataMapByKs(absoluteScenarioFilePath: string) {
-		//ここに構文解析してマクロ名とURI.file,positionを取得する
-		const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
-		if (scenarioData != undefined) {
-			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
-			const array_s = parsedData["array_s"];
-			for (let data in array_s) {
-				if (array_s[data]["name"] === "macro") {
-					this.defineMacroMap.get(await this.getProjectPathByFilePath(absoluteScenarioFilePath))?.set(await array_s[data]["pm"]["name"], new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
-				}
-			}
+	/**
+	 * jsやiscript-endscript間で定義した変数を取得する
+	 * sentenceがundefined出ない場合、指定した値の範囲内で定義されている変数を取得する
+	 * @param absoluteScenarioFilePath 
+	 * @param sentence
+	 */
+	public async updateVariableMapByJS(absoluteScenarioFilePath: string, sentence: string | undefined = undefined) {
+
+		const projectPath: string = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
+		if (sentence === undefined) {
+			sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
 		}
 
+		const reg: RegExp = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
+		const variableList: string[] = sentence.match(reg) ?? [];
+
+		for (let variableBase of variableList) {
+			//.で区切る
+			const [variableType, variableName] = variableBase.split(".");
+			this._variableMap.get(projectPath)?.set(variableName, new VariableData(variableName, undefined, variableType));
+		}
+	}
+
+	public async updateMacroLabelVariableDataMapByKs(absoluteScenarioFilePath: string) {
+		//ここに構文解析してマクロ名とURI.file,positionを取得する
+		const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
+		const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
+
+		if (scenarioData != undefined) {
+			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
+			this.labelMap.set(absoluteScenarioFilePath, new Array<LabelData>());
+			const array_s = parsedData["array_s"];
+			let isIscript = false;
+			let iscriptSentence: string = "";
+			for (let data in array_s) {
+				try {
+					if (isIscript && array_s[data]["name"] === "text") {
+						iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(array_s[data]["line"]).text;
+					}
+
+					if (array_s[data]["name"] === "macro") {
+						this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
+					} else if (array_s[data]["name"] === "label") {
+						this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+					} else if (array_s[data]["name"] === "eval") {
+						const [variableBase, variableValue] = array_s[data]["pm"]["exp"].split("=").map((str: string) => str.trim());//vriableBaseにf.hogeの形
+						const [variableType, variableName] = variableBase.split(".");
+						//mapに未登録の場合のみ追加
+						if (!this.variableMap.get(projectPath)?.get(variableName)) {
+							this.variableMap.get(projectPath)?.set(variableName, new VariableData(variableName, variableValue, variableType));
+						}
+						this.variableMap.get(projectPath)?.get(variableName)?.addFilePathList(absoluteScenarioFilePath);//変数の定義箇所を追加
+					} else if (array_s[data]["name"] === "iscript") {
+						isIscript = true;//endscriptが見つかるまで行を保存するモードに入る
+					} else if (array_s[data]["name"] === "endscript") {
+						isIscript = false;//行を保存するモード終わり
+						this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
+					}
+
+				} catch (error) {
+					TyranoLogger.print(".ksファイルの構文解析中にエラーが発生しました。\n" + error, ErrorLevel.ERROR);
+					return;
+				}
+
+
+			}
+		}
 	}
 
 	/**
@@ -237,6 +299,35 @@ export class InformationWorkSpace {
 		}
 	}
 
+	/**
+	 * 引数で指定したファイルパスを、ラベルデータのマップから削除
+	 * @param fsPath 
+	 */
+	public async spliceLabelMapByFilePath(fsPath: string) {
+		this.labelMap.delete(fsPath);
+	}
+
+	/**
+	 * 引数で指定したファイルパスを、変数データのマップから削除
+	 * @param fsPath 
+	 */
+	public async spliceVariableMapByFilePath(fsPath: string) {
+		const projectPath: string = await this.getProjectPathByFilePath(fsPath);
+
+		//末尾が.jsならscriptFileMapから取得
+		//末尾が.ksならscenarioFileMapから取得
+		const sentence: string = path.extname(fsPath) === ".js" ? this.scriptFileMap.get(fsPath)! : this.scenarioFileMap.get(fsPath)!.getText();
+
+		const reg: RegExp = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
+		const variableList: string[] = sentence.match(reg) ?? [];
+
+		for (let variable of variableList) {
+			this._variableMap.get(projectPath)?.get(variable)?.deleteFilePathList(fsPath);
+			if (this._variableMap.get(projectPath)?.get(variable)?.filePathList.size === 0) {
+				this._variableMap.get(projectPath)?.delete(variable);
+			}
+		}
+	}
 	/**
 	 * プロジェクトに存在するファイルパスを取得します。
 	 * 使用例:
@@ -330,5 +421,12 @@ export class InformationWorkSpace {
 	public get resourceExtensionsArrays() {
 		return this._resourceExtensionsArrays;
 	}
+	public get variableMap(): Map<string, Map<string, VariableData>> {
+		return this._variableMap;
+	}
+	public get labelMap(): Map<string, LabelData[]> {
+		return this._labelMap;
+	}
+
 
 }

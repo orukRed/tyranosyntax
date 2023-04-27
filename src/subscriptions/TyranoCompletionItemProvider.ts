@@ -17,7 +17,6 @@ import path = require('path');
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
 	private infoWs = InformationWorkSpace.getInstance();
 	private tyranoTagSnippets: Object; //公式タグのスニペット定義
-	private info: InformationWorkSpace = InformationWorkSpace.getInstance();
 	public constructor() {
 		//タグスニペットファイル読み込み
 		this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../../snippet/tyrano.snippet.json", "utf8"));
@@ -51,16 +50,27 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
 		const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;//今見てるタグの名前
 		const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");//今見てるタグの値を取得
+		const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.).*/;//変数の正規表現
 		let regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
 		let lineParamName = undefined;
 		if (regExpResult) {
 			lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
 		}
 		const paramInfo = lineTagName !== undefined && tagParams[lineTagName] !== undefined ? tagParams[lineTagName][lineParamName] : undefined;//今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
-		if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
+		const variableValue: string[] | null = variableRegExp.exec(leftSideText!);
+
+		//leftSideTextの最後の文字がf.sf.tf.mp.のいずれかなら変数の予測変換を出す
+		if (variableValue) {
+			const variableType: string = variableValue[0].split(".")[0].replace("&", "");
+			return this.completionVariable(projectPath, variableType);
+		}
+		else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName === "target") {	//leftSideTextの最後の文字が*ならラベルの予測変換を出す　//FIXME:「参照paramがtargetなら」の方がよさそう
+			return this.completionLabel(projectPath, array_s[tagNumber]["pm"]["storage"]);
+		}
+		//リソースの予測変換
+		else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
 			return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
 		}
-
 		else if (array_s === undefined || array_s[tagNumber] === undefined) {		//空行orテキストならタグの予測変換を出す
 			return this.completionTag();
 		} else {//タグの中ならタグのパラメータの予測変換を出す 
@@ -75,23 +85,55 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
 
 	/**
-	 * //TODO:ラベルの予測変換
-	 * *から始まる単語なら予測変換をだす
+	 * ラベルへのインテリセンス
+	 * @param projectPath
+	 * @param storage storageパラメータで指定した値
 	 */
-	private completionLabel() {
-		// comp.kind = vscode.CompletionItemKind.Variable;
-		// vscode.CompletionItemKind.Module
-		//「target="」「target_cancel="」が直前にあるならラベルの一覧を候補表示
+	private async completionLabel(projectPath: string, storage: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
+		//タグ内のstorage先参照して、そのstorage先にのみ存在するラベルを出力するようにする
+		let completions: vscode.CompletionItem[] = new Array();
+		this.infoWs.labelMap.forEach(async (label, key) => {
+			const labelProjectPath = await this.infoWs.getProjectPathByFilePath(key);
+			if (projectPath === labelProjectPath) {
+				label.forEach((value, key2) => {
+					// storageで指定したファイルに存在するラベルのみ候補に出す
+					// storageがundefinedなら今開いているファイルを指定
+					const storagePath = (storage === undefined) ?
+						vscode.window.activeTextEditor?.document.uri.fsPath :
+						projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + storage;
+					if (value.location.uri.fsPath === storagePath) {
+						let comp = new vscode.CompletionItem(value.name);
+						comp.kind = vscode.CompletionItemKind.Interface;
+						comp.insertText = "*" + value.name;
+						completions.push(comp);
+					}
+				});
+			}
+		});
+		return completions;
 	}
 
 	/**
-	 * //TODO:変数の予測変換
-	 * [\s*(f.|sf.|tf.|mp.)]のいずれかから始まった時予測変換を出す。&から始まっても変数のインテリセンス出してもいいかも
-	 * InformationWorkSpaceに登録済みの変数リストを取得すれば良い
+	 * 変数の予測変換
 	 */
-	private completionVariable() {
+	private async completionVariable(projectPath: string, variableType: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 
-		// comp.kind = vscode.CompletionItemKind.Variable;
+		let completions: vscode.CompletionItem[] = new Array();
+		this.infoWs.variableMap.forEach((variable, key) => {
+			if (key === projectPath) {
+				this.infoWs.variableMap.get(key)?.forEach((value, key2) => {
+					if (value.type == variableType) {
+						let comp = new vscode.CompletionItem(value.type + "." + value.name);
+						comp.kind = vscode.CompletionItemKind.Variable;
+						comp.insertText = new vscode.SnippetString(value.name);
+						completions.push(comp);
+					}
+				});
+			}
+		});
+
+		return completions;
+
 	}
 
 

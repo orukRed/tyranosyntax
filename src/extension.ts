@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	TyranoLogger.print("TyranoTagHoverProvider activate");
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new TyranoOutlineProvider()));
 	TyranoLogger.print("TyranoOutlineProvider activate");
-	context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider()));
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider(), '.'));
 	TyranoLogger.print("TyranoCompletionItemProvider activate");
 
 	//ショートカットコマンドの登録
@@ -62,7 +62,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (path.extname(e.document.fileName) === ".ks" && !tyranoDiagnostic.isDiagnosing) {
 					tyranoDiagnostic.isDiagnosing = true;
 					await infoWs.updateScenarioFileMap(e.document.fileName);
-					await infoWs.updateMacroDataMapByKs(e.document.fileName);
+					await infoWs.updateMacroLabelVariableDataMapByKs(e.document.fileName);
 					try {
 						await tyranoDiagnostic.createDiagnostics(e.document.fileName);
 					} catch (error) {
@@ -82,11 +82,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		const scenarioFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
 		scenarioFileSystemWatcher.onDidCreate(async e => {
 			await infoWs.updateScenarioFileMap(e.fsPath);
-			await infoWs.updateMacroDataMapByKs(e.fsPath);
+			await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
 		});
 		scenarioFileSystemWatcher.onDidDelete(async e => {
 			await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
 			await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+			await infoWs.spliceLabelMapByFilePath(e.fsPath);
+			await infoWs.spliceVariableMapByFilePath(e.fsPath);
 		});
 
 		//scriptFileの値
@@ -94,14 +96,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		scriptFileSystemWatcher.onDidCreate(async e => {
 			await infoWs.updateScriptFileMap(e.fsPath);
 			await infoWs.updateMacroDataMapByJs(e.fsPath);
+			await infoWs.updateVariableMapByJS(e.fsPath);
 		});
 		scriptFileSystemWatcher.onDidChange(async e => {
 			await infoWs.updateScriptFileMap(e.fsPath);
 			await infoWs.updateMacroDataMapByJs(e.fsPath);
+			await infoWs.updateVariableMapByJS(e.fsPath);
 		});
 		scriptFileSystemWatcher.onDidDelete(async e => {
 			await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
 			await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
+			await infoWs.spliceVariableMapByFilePath(e.fsPath);
 		});
 
 		const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`;//TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得

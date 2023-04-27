@@ -4,6 +4,17 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.16.0]- 2023-04-27
+
+- ラベルへのインテリセンスを追加しました。各.ksで定義した「*」から始まるラベル一覧が表示されます。
+  - targetパラメータでのみ使用できます。
+  - storageタグでシナリオが指定されている場合、そのファイルに存在するラベルがインテリセンスに表示されます。
+  - storageタグでシナリオが指定されていない場合、現在開いているファイルに存在するラベルがインテリセンスに表示されます。
+  - storageタグで指定したシナリオが存在しない場合、インテリセンスは表示されません。
+- 変数へのインテリセンスを追加しました。f. sf. tf. mp. から始まる値（頭に&ありも含む）が対象です。
+  - .ksで一度でもevalタグで定義した値、もしくは.jsファイルで一度でも使用した値がインテリセンスに表示されます。
+  - そのため、未定義の変数も表示されてしまいます。ご了承ください。
+
 ## [0.15.1]- 2023-04-12
 
 [issue#74](https://github.com/orukRed/tyranosyntax/issues/74)
