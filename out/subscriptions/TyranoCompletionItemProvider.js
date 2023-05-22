@@ -182,7 +182,6 @@ class TyranoCompletionItemProvider {
         });
         return completions;
     }
-    //TODO:CompletionItemListを編集して必須のパラメータがわかるようにする
     /**
      * タグ内のパラメータの予測変換
      *
