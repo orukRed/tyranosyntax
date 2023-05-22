@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.16.1]- 2023-05-22
+
+- ファイルパスの入力補完を行おうとしたとき、「/」が入力された状態だと正しく補完が行われない不具合を修正しました。
+
 ## [0.16.0]- 2023-04-27
 
 - ラベルへのインテリセンスを追加しました。各.ksで定義した「*」から始まるラベル一覧が表示されます。

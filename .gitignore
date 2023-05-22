@@ -2,4 +2,3 @@
 *.vscodeignore
 .gitignore
 node_modules/
-out/
