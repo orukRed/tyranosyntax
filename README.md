@@ -21,7 +21,7 @@ vscodeの`ファイル`→`ファイルを開く`から、
 
 ### タグ補完（Completion）
 
-![](src/readme_img/completion.png)
+![](src/readme_img/completion.gif)
 
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
@@ -52,7 +52,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### 診断機能(Diagnostics)
 
-![](src/readme_img/diagnostics.gif)
+![](src/readme_img/diagnostics.png)
 
 設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。
 現在検出できるエラーは以下です。
