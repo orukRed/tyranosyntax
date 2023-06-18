@@ -14,7 +14,7 @@ vscodeの`ファイル`→`ファイルを開く`から、
 
 ### 構文の強調表示（Syntax Highlighting）
 
-![](readme_img/hogehoge.png)
+![](src/readme_img/highlight.png)
 タグやラベルなどの構文が強調表示されます。
 画像はMonokai Dimmedの場合です。
 
