@@ -52,7 +52,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### 診断機能(Diagnostics)
 
-![](src/readme_img/diagnostics.png)
+![](src/readme_img/diagnostics.gif)
 
 設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。
 現在検出できるエラーは以下です。
