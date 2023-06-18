@@ -20,14 +20,14 @@ vscodeの`ファイル`→`ファイルを開く`から、
 
 ### タグ補完（Completion）
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/completion.png)
 
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
 
 ### アウトライン表示(Outline)
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/outline.png)
 ラベルや変数、一部のタグがアウトラインビューに表示されます。
 現在アウトラインタグで表示されるタグは以下です。（設定の`TyranoScript syntax.outline.tag`から変更可能）
 
@@ -50,7 +50,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### 診断機能(Diagnostics)
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/diagnostics.png)
 設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。
 現在検出できるエラーは以下です。
 
@@ -60,12 +60,12 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### ドキュメントツールチップ表示（Hover）
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/hover.gif)
 タグをマウスを乗せるとドキュメントが表示されます。
 
 ### タグのショートカット入力（Snippets）
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/snippet.gif)
 一部のタグ、記号はショートカットキーで入力できます。
 
 - \[l][r] shift + enter
@@ -76,12 +76,12 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### ジャンプ先へ移動（Go To Jump）
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/jump.gif)
 `alt + J(option + J)`でjumpなどのタグで指定したstorage,target先へとジャンプできます。
 
 ### 定義へ移動（Go To Definition）
 
-![alt](readme_img/hogehoge.png)
+![](src/readme_img/definition.gif)
 `F12`を押したとき、マクロタグで定義した箇所へジャンプできます。
 
 ## 設定ファイルについて
