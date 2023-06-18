@@ -75,6 +75,7 @@ class TyranoDiagnostic {
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
         let tyranoTag = this.tyranoDefaultTag.slice();
         tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath).keys()));
+        tyranoTag.push("comment");
         //未定義のマクロを使用しているか検出
         await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);

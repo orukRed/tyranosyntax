@@ -14,11 +14,7 @@ class DefineMacroData {
         this._description = description;
     }
     parseParametersToJsonObject() {
-        let obj = {};
-        this._parameter.forEach((parameter) => {
-            Object.assign(this._parameter, { name: parameter.name, required: parameter.required, description: parameter.description });
-        });
-        return obj;
+        // Object.assign(this._parameter, { name: name, required: required, description: description });
     }
     /**
      * 入力補完に使うjsonオブジェクトへと変換します。
@@ -47,4 +43,4 @@ class DefineMacroData {
     }
 }
 exports.DefineMacroData = DefineMacroData;
-//# sourceMappingURL=DefineMacroData.js.map
+//# sourceMappingURL=DefineMacroData%20copy.js.map

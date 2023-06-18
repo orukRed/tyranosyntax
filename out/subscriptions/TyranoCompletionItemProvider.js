@@ -24,26 +24,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoCompletionItemProvider = void 0;
-const fs = __importStar(require("fs"));
 const vscode = __importStar(require("vscode"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const path = require("path");
-/**
- * OK.[1]プロジェクト中に存在する素材（画像、音声、シナリオ、外部JSを読み込みスニペット登録
- * →おそらくワークスペースに変更が加わるたびにワークスペースに更新掛ける必要がある。
- * →理想はタグごとのパラメータによってscenarioディレクトリだけのスニペットが出るとかbgディレクトリだけのスニペットが出るとか。
- * [2]シナリオ中で定義した変数とマクロとラベルを読み込んでスニペット登録
- * →テキストエディタに変更加わるたびにワークスペースに更新掛ける必要がある。
- * OK.[3]公式で提供されているタグの予測変換登録
- *
- * 実装順は312
- */
 class TyranoCompletionItemProvider {
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-    tyranoTagSnippets; //公式タグのスニペット定義
     constructor() {
-        //タグスニペットファイル読み込み
-        this.tyranoTagSnippets = JSON.parse(fs.readFileSync(__dirname + "/./../../snippet/tyrano.snippet.json", "utf8"));
     }
     /**
      *
@@ -80,30 +66,72 @@ class TyranoCompletionItemProvider {
         }
         const paramInfo = lineTagName !== undefined && tagParams[lineTagName] !== undefined ? tagParams[lineTagName][lineParamName] : undefined; //今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
         const variableValue = variableRegExp.exec(leftSideText);
+        const nameType = ["name", "face", "part", "id", "jname"];
+        //カーソルの左隣の文字取得
+        if (leftSideText?.charAt(leftSideText.length - 1) === "#") {
+            return await this.completionJName(projectPath);
+        }
         //leftSideTextの最後の文字がf.sf.tf.mp.のいずれかなら変数の予測変換を出す
-        if (variableValue) {
+        else if (variableValue) {
             const variableType = variableValue[0].split(".")[0].replace("&", "");
             return this.completionVariable(projectPath, variableType);
         }
+        //targetへのインテリセンス
         else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName === "target") { //leftSideTextの最後の文字が*ならラベルの予測変換を出す　//FIXME:「参照paramがtargetなら」の方がよさそう
             return this.completionLabel(projectPath, array_s[tagNumber]["pm"]["storage"]);
+        }
+        //nameやfaceへのインテリセンス
+        else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && nameType.includes(lineParamName)) {
+            return this.completionNameParameter(projectPath, lineParamName);
         }
         //リソースの予測変換
         else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
             return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
         }
         else if (array_s === undefined || array_s[tagNumber] === undefined) { //空行orテキストならタグの予測変換を出す
-            return this.completionTag();
+            return this.completionTag(projectPath);
         }
         else { //タグの中ならタグのパラメータの予測変換を出す 
             let isTagSentence = lineTagName === "text" || lineTagName === undefined ? false : true;
             if (isTagSentence) {
-                return this.completionParameter(lineTagName, array_s[tagNumber]["pm"]);
+                return this.completionParameter(lineTagName, array_s[tagNumber]["pm"], projectPath);
             }
             else {
-                return this.completionTag();
+                return this.completionTag(projectPath);
             }
         }
+    }
+    async completionJName(projectPath) {
+        let completions = new Array();
+        this.infoWs.nameMap.forEach(async (nameParamData, key) => {
+            if (projectPath === key) {
+                nameParamData.forEach((value, key) => {
+                    if ("jname" === value.type) {
+                        let comp = new vscode.CompletionItem(value.name);
+                        comp.kind = vscode.CompletionItemKind.Variable;
+                        comp.insertText = value.name;
+                        completions.push(comp);
+                    }
+                });
+            }
+        });
+        return completions;
+    }
+    async completionNameParameter(projectPath, lineParamName) {
+        let completions = new Array();
+        this.infoWs.nameMap.forEach(async (nameParamData, key) => {
+            if (projectPath === key) {
+                nameParamData.forEach((value, key) => {
+                    if (lineParamName === value.type) {
+                        let comp = new vscode.CompletionItem(value.name);
+                        comp.kind = vscode.CompletionItemKind.Variable;
+                        comp.insertText = value.name;
+                        completions.push(comp);
+                    }
+                });
+            }
+        });
+        return completions;
     }
     /**
      * ラベルへのインテリセンス
@@ -144,7 +172,7 @@ class TyranoCompletionItemProvider {
                     if (value.type == variableType) {
                         let comp = new vscode.CompletionItem(value.type + "." + value.name);
                         comp.kind = vscode.CompletionItemKind.Variable;
-                        comp.insertText = new vscode.SnippetString(value.name);
+                        comp.insertText = new vscode.SnippetString(value.type + "." + value.name);
                         completions.push(comp);
                     }
                 });
@@ -187,24 +215,25 @@ class TyranoCompletionItemProvider {
      *
      *
      */
-    async completionParameter(selectedTag, parameters) {
+    async completionParameter(selectedTag, parameters, projectPath) {
         let completions = new Array();
+        const suggestions = this.infoWs.suggestions.get(projectPath);
         //item:{}で囲ったタグの番号。0,1,2,3...
         //name:そのまんま。middle.jsonを見て。
         //item2:タグのパラメータ。0,1,2,3...って順に。
-        for (const item in this.tyranoTagSnippets) {
-            const tagName = this.removeBracket(this.tyranoTagSnippets[item]["name"].toString()); //タグ名。jumpとかpとかimageとか。
+        for (const item in suggestions) {
+            const tagName = suggestions[item]["name"].toString(); //タグ名。jumpとかpとかimageとか。
             if (selectedTag === tagName) {
-                for (const item2 in this.tyranoTagSnippets[item]["parameters"]) {
-                    if (!(this.tyranoTagSnippets[item]["parameters"][item2]["name"] in parameters)) { //タグにないparameterのみインテリセンスに出す
-                        const detailText = this.tyranoTagSnippets[item]["parameters"][item2]["required"] ? "（必須）" : "";
+                for (const item2 in suggestions[item]["parameters"]) {
+                    if (!(suggestions[item]["parameters"][item2]["name"] in parameters)) { //タグにないparameterのみインテリセンスに出す
+                        const detailText = suggestions[item]["parameters"][item2]["required"] ? "（必須）" : "";
                         const comp = new vscode.CompletionItem({
-                            label: this.tyranoTagSnippets[item]["parameters"][item2]["name"],
+                            label: suggestions[item]["parameters"][item2]["name"],
                             description: "",
                             detail: detailText
                         });
-                        comp.insertText = new vscode.SnippetString(this.tyranoTagSnippets[item]["parameters"][item2]["name"] + "=\"$0\" ");
-                        comp.documentation = new vscode.MarkdownString(this.tyranoTagSnippets[item]["parameters"][item2]["description"]);
+                        comp.insertText = new vscode.SnippetString(suggestions[item]["parameters"][item2]["name"] + "=\"$0\" ");
+                        comp.documentation = new vscode.MarkdownString(suggestions[item]["parameters"][item2]["description"]);
                         comp.kind = vscode.CompletionItemKind.Function;
                         comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
                         completions.push(comp);
@@ -214,35 +243,26 @@ class TyranoCompletionItemProvider {
         }
         return completions;
     }
-    //TODO:自分で追加したマクロを予測変換表示できるように
     /**
      * タグの予測変換
      *
      */
-    async completionTag() {
+    async completionTag(projectPath) {
         let completions = new Array();
-        for (let item in this.tyranoTagSnippets) {
-            let tmpJsonData = this.tyranoTagSnippets[item];
-            let textLabel = this.removeBracket(tmpJsonData["name"].toString());
+        const suggestions = this.infoWs.suggestions.get(projectPath);
+        for (const item in suggestions) {
+            let tmpJsonData = suggestions[item];
+            let textLabel = tmpJsonData["name"].toString();
             let comp = new vscode.CompletionItem(textLabel);
             const inputType = vscode.workspace.getConfiguration().get('TyranoScript syntax.completionTag.inputType');
             inputType === "@" ? comp.insertText = new vscode.SnippetString("@" + textLabel + " $0") : comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
-            comp.documentation = new vscode.MarkdownString(tmpJsonData["description"]);
+            comp.documentation = tmpJsonData["description"];
             comp.kind = vscode.CompletionItemKind.Class;
             comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' }; //ここに、サンプル2のような予測候補を出すコマンド
             completions.push(comp);
         }
         ;
         return completions;
-    }
-    /**
-     * 引数に入れた文字列からbracket[]を取り除きます。
-     * @param str []を取り除く文字列
-     * @returns []を取り除いた文字列
-     */
-    removeBracket(str) {
-        return str.replace(/\[*/g, "").replace(/\]*/g, "");
-        ;
     }
 }
 exports.TyranoCompletionItemProvider = TyranoCompletionItemProvider;

@@ -68,7 +68,7 @@ var tyranoParser = {
         var lastColumn = 0; //前のタグやラベルの定義開始位置
         var map_label = {}; //ラベル一覧
         var array_row = text_str.split("\n");
-        var flag_comment = false; //コメント中なら
+        var flag_comment = false; //コメント中なら パーサー配列に入れるか入れないかを判断する値？
         for (var i = 0; i < array_row.length; i++) {
             var line_str = $.trim(array_row[i]);
             var first_char = line_str.substr(0, 1);
@@ -81,8 +81,7 @@ var tyranoParser = {
             }
             else if (line_str === "/*") {
                 flag_comment = true;
-            }
-            else if (flag_comment == true || first_char === ";") {
+                // } else if (flag_comment == true || first_char === ";") {
             }
             else if (first_char === "#") {
                 var tmp_line = $.trim(line_str.replace("#", ""));
@@ -209,10 +208,15 @@ var tyranoParser = {
                     }
                 }
                 if (text != "") {
+                    var nameParam = "text";
+                    if (flag_comment == true || first_char === ";") {
+                        nameParam = "comment";
+                        text = text.replaceAll(";", "");
+                    }
                     var text_obj = {
                         line: i,
                         column: column - text.length,
-                        name: "text",
+                        name: nameParam,
                         pm: { val: text },
                         val: text,
                     };

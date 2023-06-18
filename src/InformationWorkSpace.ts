@@ -6,6 +6,8 @@ import { DefineMacroData } from './defineData/DefineMacroData';
 import { ErrorLevel, TyranoLogger } from './TyranoLogger';
 import { VariableData } from './defineData/VariableData';
 import { LabelData } from './defineData/LabelData';
+import { MacroParameterData } from './defineData/MacroParameterData';
+import { NameParamData } from './defineData/NameParamData';
 
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
@@ -38,10 +40,12 @@ export class InformationWorkSpace {
 	private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<string, ResourceFileData[]>();//pngとかmp3とかのプロジェクトにあるリソースファイル
 	private _variableMap: Map<string, Map<string, VariableData>> = new Map<string, Map<string, VariableData>>();//projectpath,変数名と、定義情報
 	private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>();//ファイルパス、LabelDataの配列
-
+	private _suggestions: Map<string, object> = new Map<string, object>();//projectPath,入力候補のオブジェクト
+	private _nameMap: Map<string, NameParamData[]> = new Map<string, NameParamData[]>();//プロジェクトパスと、nameやidの定義
 
 	private readonly _resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
 	private readonly _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat();//resourceExtensionsをオブジェクトからstring型の一次配列にする
+	private readonly _tagNameParams: String[] = vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.name.parameters')!;
 
 
 	//パーサー
@@ -63,6 +67,8 @@ export class InformationWorkSpace {
 			this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
 			this._resourceFileMap.set(projectPath, []);
 			this.variableMap.set(projectPath, new Map<string, VariableData>());
+			this.suggestions.set(projectPath, JSON.parse(fs.readFileSync(__dirname + "/./../snippet/tyrano.snippet.json", "utf8")));
+			this.nameMap.set(projectPath, []);
 		}
 
 		for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
@@ -165,10 +171,16 @@ export class InformationWorkSpace {
 				try {
 					//path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
 					if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
-						let str = path.toString().split(".")[4];//MacroNameの部分を抽出
-						if (str != undefined && str != null) {
-							this.defineMacroMap.get(projectPath)?.set(
-								str, new DefineMacroData(str, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath));
+						let macroName = path.toString().split(".")[4];//MacroNameの部分を抽出
+						if (macroName != undefined && macroName != null) {
+
+							let description = path.parentPath.parentPath.toString().replace(";", "").replace(path.parentPath.toString(), "");
+							description = description.replaceAll("/", "").replaceAll("*", "").replaceAll(" ", "").replaceAll("\t", "");
+
+							const macroData = new DefineMacroData(macroName, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath, description);
+							macroData.parameter.push(new MacroParameterData("parameter", false, "description"));//TODO:パーサーでパラメータの情報読み込んで追加する
+							this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
+							this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
 						}
 					}
 				} catch (error) {
@@ -214,14 +226,62 @@ export class InformationWorkSpace {
 			const array_s = parsedData["array_s"];
 			let isIscript = false;
 			let iscriptSentence: string = "";
+			let description = "";
 			for (let data in array_s) {
 				try {
+					//iscript-endscript間のテキストを取得。
 					if (isIscript && array_s[data]["name"] === "text") {
 						iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(array_s[data]["line"]).text;
 					}
 
+
+					//name系のパラメータ取得
+					if (this._tagNameParams.includes(array_s[data]["name"])) {
+
+						//一度登録したら重複しないような処理が必要
+						let storage: string = "";
+						if (array_s[data]["pm"]["storage"]) {
+							storage = array_s[data]["pm"]["storage"]
+						}
+						if (array_s[data]["pm"]["name"]) {
+							const tmpData = new NameParamData(array_s[data]["pm"]["name"], "name", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+							if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+								this.nameMap.get(projectPath)?.push(tmpData);
+							}
+						}
+						if (array_s[data]["pm"]["face"]) {
+							const tmpData = new NameParamData(array_s[data]["pm"]["face"], "face", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+							if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+								this.nameMap.get(projectPath)?.push(tmpData);
+							}
+						}
+						if (array_s[data]["pm"]["part"]) {
+							const tmpData = new NameParamData(array_s[data]["pm"]["part"], "part", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+							if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+								this.nameMap.get(projectPath)?.push(tmpData);
+							}
+
+							// this.nameMap.get(projectPath)?.push(tmpData);
+						}
+						if (array_s[data]["pm"]["id"]) {
+							const tmpData = new NameParamData(array_s[data]["pm"]["id"], "id", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+							if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+								this.nameMap.get(projectPath)?.push(tmpData);
+							}
+						}
+						if (array_s[data]["pm"]["jname"]) {
+							const tmpData = new NameParamData(array_s[data]["pm"]["jname"], "jname", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+							if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+								this.nameMap.get(projectPath)?.push(tmpData);
+							}
+						}
+					}
+
+					//各種タグの場合
 					if (array_s[data]["name"] === "macro") {
-						this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath));
+						const macroData = new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
+						this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
+						this._suggestions.get(projectPath)![await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
 					} else if (array_s[data]["name"] === "label") {
 						this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
 					} else if (array_s[data]["name"] === "eval") {
@@ -238,6 +298,16 @@ export class InformationWorkSpace {
 						isIscript = false;//行を保存するモード終わり
 						this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
 					}
+
+					//マクロ定義のdescription挿入
+					if (array_s[data]["name"] === "comment") {
+						if (array_s[data]["val"]) {
+							description += array_s[data]["val"] + "\n";
+						}
+					} else {
+						description = "";
+					}
+
 
 				} catch (error) {
 					TyranoLogger.print(".ksファイルの構文解析中にエラーが発生しました。\n" + error, ErrorLevel.ERROR);
@@ -427,6 +497,16 @@ export class InformationWorkSpace {
 	public get labelMap(): Map<string, LabelData[]> {
 		return this._labelMap;
 	}
-
-
+	public get suggestions(): Map<string, object> {
+		return this._suggestions;
+	}
+	public set suggestions(value: Map<string, object>) {
+		this._suggestions = value;
+	}
+	public get nameMap(): Map<string, NameParamData[]> {
+		return this._nameMap;
+	}
+	public get tagNameParams() {
+		return this._tagNameParams;
+	}
 }
