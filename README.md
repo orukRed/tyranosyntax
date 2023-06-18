@@ -15,6 +15,7 @@ vscodeの`ファイル`→`ファイルを開く`から、
 ### 構文の強調表示（Syntax Highlighting）
 
 ![](src/readme_img/highlight.png)
+
 タグやラベルなどの構文が強調表示されます。
 画像はMonokai Dimmedの場合です。
 
@@ -28,6 +29,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ### アウトライン表示(Outline)
 
 ![](src/readme_img/outline.png)
+
 ラベルや変数、一部のタグがアウトラインビューに表示されます。
 現在アウトラインタグで表示されるタグは以下です。（設定の`TyranoScript syntax.outline.tag`から変更可能）
 
@@ -51,6 +53,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ### 診断機能(Diagnostics)
 
 ![](src/readme_img/diagnostics.png)
+
 設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。
 現在検出できるエラーは以下です。
 
@@ -61,11 +64,13 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ### ドキュメントツールチップ表示（Hover）
 
 ![](src/readme_img/hover.gif)
+
 タグをマウスを乗せるとドキュメントが表示されます。
 
 ### タグのショートカット入力（Snippets）
 
 ![](src/readme_img/snippet.gif)
+
 一部のタグ、記号はショートカットキーで入力できます。
 
 - \[l][r] shift + enter
@@ -77,11 +82,13 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ### ジャンプ先へ移動（Go To Jump）
 
 ![](src/readme_img/jump.gif)
+
 `alt + J(option + J)`でjumpなどのタグで指定したstorage,target先へとジャンプできます。
 
 ### 定義へ移動（Go To Definition）
 
 ![](src/readme_img/definition.gif)
+
 `F12`を押したとき、マクロタグで定義した箇所へジャンプできます。
 
 ## 設定ファイルについて
