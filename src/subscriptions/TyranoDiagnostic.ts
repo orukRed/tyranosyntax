@@ -69,6 +69,7 @@ export class TyranoDiagnostic {
 
 		let tyranoTag: string[] = this.tyranoDefaultTag.slice();
 		tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()));
+		tyranoTag.push("comment");
 
 
 		//未定義のマクロを使用しているか検出

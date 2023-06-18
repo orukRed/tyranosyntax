@@ -1,18 +1,35 @@
 import * as vscode from 'vscode';
+import { MacroParameterData } from './MacroParameterData';
 
 export class DefineMacroData {
 	private _macroName: string = "";//マクロ名。[hoge]などのhoge部分。
 	private _filePath: string = "";
 	private _location: vscode.Location | null = null;//定義ジャンプに使う位置情報
-	private _parameterMap: Map<string, string> = new Map<string, string>();//パラメータ名と値のマップ 最終的に何らかのクラスに入れるべき？
+	private _parameter: MacroParameterData[] = [];
+	private _description: string = "";//マクロの説明
 
-	public constructor(macroName: string, location: vscode.Location, filePath: string) {
+
+	public constructor(macroName: string, location: vscode.Location, filePath: string, description: string) {
 		this._macroName = macroName;
 		this._location = location;
 		this._filePath = filePath;
+		this._description = description;
 	}
-	public addParameter(parameterName: string, parameterValue: string) {
-		this._parameterMap.set(parameterName, parameterValue);
+
+	private parseParametersToJsonObject(): object {
+		let obj = {};
+		this._parameter.forEach((parameter) => {
+			Object.assign(this._parameter, { name: parameter.name, required: parameter.required, description: parameter.description });
+		});
+		return obj;
+	}
+
+	/**
+	 * 入力補完に使うjsonオブジェクトへと変換します。
+	 * @returns 
+	 */
+	public parseToJsonObject(): object {
+		return { "name": this.macroName, "description": this.description, "parameters": this.parseParametersToJsonObject() };
 	}
 
 	public get macroName(): string {
@@ -24,11 +41,14 @@ export class DefineMacroData {
 	public get location(): vscode.Location | null {
 		return this._location;
 	}
-	public get parameterMap(): Map<string, string> {
-		return this._parameterMap;
+	public get description(): string {
+		return this._description;
 	}
-	public set parameterMap(value: Map<string, string>) {
-		this._parameterMap = value;
+	public set description(value: string) {
+		this._description = value;
+	}
+	public get parameter(): MacroParameterData[] {
+		return this._parameter;
 	}
 
 }

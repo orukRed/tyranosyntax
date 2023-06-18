@@ -7,6 +7,7 @@ exports.VariableData = void 0;
 class VariableData {
     _name; //変数名
     _value; //変数の値 現在未使用だけど今後使うかもなので一応定義だけしておく
+    _description; //変数の説明
     //宣言したファイルパスのSet
     _filePathList = new Set(); //TODO:そのうち独自クラス作って、filePathとLocationを持たせるようにした方がよい。Locationを使った機能がまだないのでこのままで。
     _type; //変数の種類 f sf tf mpのいずれか
@@ -28,10 +29,14 @@ class VariableData {
     get type() {
         return this._type;
     }
-    constructor(_name, _value, type) {
+    get description() {
+        return this._description;
+    }
+    constructor(_name, _value, type, description = "") {
         this._name = _name;
         this._value = _value;
         this._type = type;
+        this._description = description;
     }
 }
 exports.VariableData = VariableData;

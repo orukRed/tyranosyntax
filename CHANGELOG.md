@@ -4,6 +4,21 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.0]- 2023-06-19
+
+- READMEを見やすくしました。
+- .jsや.ksファイルで定義したタグの補完（パラメータを除く）、マクロの入力補完を実装しました。
+  - jsで定義したタグのパラメータの補完に関しては今後の実装予定となります。
+- chara_newタグなどの、nameで定義した値の入力補完を実装しました。
+  - 現在補完されるパラメータの値は以下です。
+  - name
+  - id
+  - face
+  - part
+- \#を入力した時、jnameで定義した値の入力補完を実装しました。
+- `;region`と`;endregion`で囲った行を折りたためるようにしました。
+- 変数の入力補完時に`f.`などの接頭辞が入力されない不具合を修正しました。
+
 ## [0.16.1]- 2023-05-22
 
 - ファイルパスの入力補完を行おうとしたとき、「/」が入力された状態だと正しく補完が行われない不具合を修正しました。

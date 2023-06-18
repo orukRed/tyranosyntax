@@ -39,7 +39,7 @@ ${textCopy.join('  \n')}
 		let matcher: RegExpMatchArray | null = document.getText(wordRange).match(this.regExp);
 		let markdownText = null;
 		if (matcher != null) {
-			markdownText = this.createMarkdownText(this.jsonTyranoSnippet["[" + matcher[2] + "]"]);
+			markdownText = this.createMarkdownText(this.jsonTyranoSnippet[matcher[2]]);
 		}
 		if (!markdownText) {
 			return Promise.reject("unmatched."); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却

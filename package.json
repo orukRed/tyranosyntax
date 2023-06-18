@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.16.1",
+  "version": "0.17.0",
   "engines": {
     "vscode": "^1.76.0"
   },
@@ -181,6 +181,26 @@
               ]
             },
             "description": "インテリセンスに使うリソースファイルの拡張子を設定します。"
+          },
+          "TyranoScript syntax.tag.name.parameters":  {
+			"type": "array",
+			"default": [
+				"chara_new",
+				"chara_face",
+				"ptext",
+				"image",
+				"anim",
+				"chara_layer",
+				"layermode",
+				"keyframe",
+				"html",
+				"3d_model_new", 
+				"3d_sphere_new",
+				"3d_sprite_new",
+				"3d_box_new",
+				"3d_image_new"
+			],
+            "description": "インテリセンスに使うname,face,id,partを定義しているタグの設定をします。"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",
