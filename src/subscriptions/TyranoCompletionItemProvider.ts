@@ -37,7 +37,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
 		const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;//今見てるタグの名前
 		const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");//今見てるタグの値を取得
-		const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.).*/;//変数の正規表現
+		const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;//変数の正規表現
 		let regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
 		let lineParamName = undefined;
 		if (regExpResult) {

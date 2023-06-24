@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.1]- 2023-06-24
+
+- タグ補完時、パラメータに変数を使うとその行で常に変数の補完が表示されてしまう不具合を修正しました。
+
 ## [0.17.0]- 2023-06-19
 
 - READMEを見やすくしました。
