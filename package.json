@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.17.1",
+  "version": "0.17.2",
   "engines": {
     "vscode": "^1.76.0"
   },
@@ -36,8 +36,7 @@
     "watch-web": "webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map"
   },
-  "activationEvents": [
-  ],
+  "activationEvents": [],
   "contributes": {
     "languages": [
       {

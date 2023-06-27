@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.2]- 2023-06-28
+
+- 動作に影響はありませんが、内部処理を一部変更しました。
+  - 不要なログ出力処理を削除しました。
+
 ## [0.17.1]- 2023-06-24
 
 - タグ補完時、パラメータに変数を使うとその行で常に変数の補完が表示されてしまう不具合を修正しました。
