@@ -12,6 +12,7 @@ export class ErrorLevel {
 /**
  * staticクラス。
  * ログ出力用のクラス。
+ * ログは出力ウィンドウのウィンドウで出力されるため、try-catchでこれを出力するのはNG
  */
 export class TyranoLogger {
 

@@ -36,6 +36,7 @@ exports.ErrorLevel = ErrorLevel;
 /**
  * staticクラス。
  * ログ出力用のクラス。
+ * ログは出力ウィンドウのウィンドウで出力されるため、try-catchでこれを出力するのはNG
  */
 class TyranoLogger {
     static channel = vscode.window.createOutputChannel("TyranoScript syntax");

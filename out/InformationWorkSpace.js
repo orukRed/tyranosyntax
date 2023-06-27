@@ -221,88 +221,82 @@ class InformationWorkSpace {
             let iscriptSentence = "";
             let description = "";
             for (let data in array_s) {
-                try {
-                    //iscript-endscript間のテキストを取得。
-                    if (isIscript && array_s[data]["name"] === "text") {
-                        iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(array_s[data]["line"]).text;
+                //iscript-endscript間のテキストを取得。
+                if (isIscript && array_s[data]["name"] === "text") {
+                    iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(array_s[data]["line"]).text;
+                }
+                //name系のパラメータ取得
+                if (this._tagNameParams.includes(array_s[data]["name"])) {
+                    //一度登録したら重複しないような処理が必要
+                    let storage = "";
+                    if (array_s[data]["pm"]["storage"]) {
+                        storage = array_s[data]["pm"]["storage"];
                     }
-                    //name系のパラメータ取得
-                    if (this._tagNameParams.includes(array_s[data]["name"])) {
-                        //一度登録したら重複しないような処理が必要
-                        let storage = "";
-                        if (array_s[data]["pm"]["storage"]) {
-                            storage = array_s[data]["pm"]["storage"];
-                        }
-                        if (array_s[data]["pm"]["name"]) {
-                            const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["name"], "name", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
-                            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-                                this.nameMap.get(projectPath)?.push(tmpData);
-                            }
-                        }
-                        if (array_s[data]["pm"]["face"]) {
-                            const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["face"], "face", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
-                            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-                                this.nameMap.get(projectPath)?.push(tmpData);
-                            }
-                        }
-                        if (array_s[data]["pm"]["part"]) {
-                            const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["part"], "part", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
-                            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-                                this.nameMap.get(projectPath)?.push(tmpData);
-                            }
-                            // this.nameMap.get(projectPath)?.push(tmpData);
-                        }
-                        if (array_s[data]["pm"]["id"]) {
-                            const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["id"], "id", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
-                            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-                                this.nameMap.get(projectPath)?.push(tmpData);
-                            }
-                        }
-                        if (array_s[data]["pm"]["jname"]) {
-                            const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["jname"], "jname", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
-                            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-                                this.nameMap.get(projectPath)?.push(tmpData);
-                            }
+                    if (array_s[data]["pm"]["name"]) {
+                        const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["name"], "name", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+                        if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+                            this.nameMap.get(projectPath)?.push(tmpData);
                         }
                     }
-                    //各種タグの場合
-                    if (array_s[data]["name"] === "macro") {
-                        const macroData = new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
-                        this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
-                        this._suggestions.get(projectPath)[await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
-                    }
-                    else if (array_s[data]["name"] === "label") {
-                        this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData_1.LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
-                    }
-                    else if (array_s[data]["name"] === "eval") {
-                        const [variableBase, variableValue] = array_s[data]["pm"]["exp"].split("=").map((str) => str.trim()); //vriableBaseにf.hogeの形
-                        const [variableType, variableName] = variableBase.split(".");
-                        //mapに未登録の場合のみ追加
-                        if (!this.variableMap.get(projectPath)?.get(variableName)) {
-                            this.variableMap.get(projectPath)?.set(variableName, new VariableData_1.VariableData(variableName, variableValue, variableType));
-                        }
-                        this.variableMap.get(projectPath)?.get(variableName)?.addFilePathList(absoluteScenarioFilePath); //変数の定義箇所を追加
-                    }
-                    else if (array_s[data]["name"] === "iscript") {
-                        isIscript = true; //endscriptが見つかるまで行を保存するモードに入る
-                    }
-                    else if (array_s[data]["name"] === "endscript") {
-                        isIscript = false; //行を保存するモード終わり
-                        this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
-                    }
-                    //マクロ定義のdescription挿入
-                    if (array_s[data]["name"] === "comment") {
-                        if (array_s[data]["val"]) {
-                            description += array_s[data]["val"] + "\n";
+                    if (array_s[data]["pm"]["face"]) {
+                        const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["face"], "face", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+                        if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+                            this.nameMap.get(projectPath)?.push(tmpData);
                         }
                     }
-                    else {
-                        description = "";
+                    if (array_s[data]["pm"]["part"]) {
+                        const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["part"], "part", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+                        if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+                            this.nameMap.get(projectPath)?.push(tmpData);
+                        }
+                        // this.nameMap.get(projectPath)?.push(tmpData);
+                    }
+                    if (array_s[data]["pm"]["id"]) {
+                        const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["id"], "id", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+                        if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+                            this.nameMap.get(projectPath)?.push(tmpData);
+                        }
+                    }
+                    if (array_s[data]["pm"]["jname"]) {
+                        const tmpData = new NameParamData_1.NameParamData(array_s[data]["pm"]["jname"], "jname", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
+                        if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
+                            this.nameMap.get(projectPath)?.push(tmpData);
+                        }
                     }
                 }
-                catch (error) {
-                    TyranoLogger_1.TyranoLogger.print(".ksファイルの構文解析中にエラーが発生しました。\n" + error, TyranoLogger_1.ErrorLevel.ERROR);
-                    return;
+                //各種タグの場合
+                if (array_s[data]["name"] === "macro") {
+                    const macroData = new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
+                    this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
+                    this._suggestions.get(projectPath)[await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
+                }
+                else if (array_s[data]["name"] === "label") {
+                    this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData_1.LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
+                }
+                else if (array_s[data]["name"] === "eval") {
+                    const [variableBase, variableValue] = array_s[data]["pm"]["exp"].split("=").map((str) => str.trim()); //vriableBaseにf.hogeの形
+                    const [variableType, variableName] = variableBase.split(".");
+                    //mapに未登録の場合のみ追加
+                    if (!this.variableMap.get(projectPath)?.get(variableName)) {
+                        this.variableMap.get(projectPath)?.set(variableName, new VariableData_1.VariableData(variableName, variableValue, variableType));
+                    }
+                    this.variableMap.get(projectPath)?.get(variableName)?.addFilePathList(absoluteScenarioFilePath); //変数の定義箇所を追加
+                }
+                else if (array_s[data]["name"] === "iscript") {
+                    isIscript = true; //endscriptが見つかるまで行を保存するモードに入る
+                }
+                else if (array_s[data]["name"] === "endscript") {
+                    isIscript = false; //行を保存するモード終わり
+                    this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
+                }
+                //マクロ定義のdescription挿入
+                if (array_s[data]["name"] === "comment") {
+                    if (array_s[data]["val"]) {
+                        description += array_s[data]["val"] + "\n";
+                    }
+                }
+                else {
+                    description = "";
                 }
             }
         }
@@ -400,20 +394,14 @@ class InformationWorkSpace {
                 return permissionExtension.includes(path.extname(file));
             }) :
             listFiles(`${dir}${this.pathDelimiter}${dirent.name}`));
-        try {
-            let ret = listFiles(projectRootPath); //絶対パスで取得
-            //相対パスに変換
-            if (!isAbsolute) {
-                ret = ret.map(e => {
-                    return e.replace(projectRootPath + this.pathDelimiter, '');
-                });
-            }
-            return ret;
+        let ret = listFiles(projectRootPath); //絶対パスで取得
+        //相対パスに変換
+        if (!isAbsolute) {
+            ret = ret.map(e => {
+                return e.replace(projectRootPath + this.pathDelimiter, '');
+            });
         }
-        catch (error) {
-            console.log(error);
-            return [];
-        }
+        return ret;
     }
     /**
      * 引数で指定したファイルパスからプロジェクトパス（index.htmlのあるフォルダパス）を取得します。
