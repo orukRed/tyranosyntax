@@ -4,7 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.17.2]- 2023-06-28
+## [0.17.3]- 2023-06-28
+
+- ライブラリを更新しました。
+
+## [0.17.2]- 2023-06-27
 
 - 動作に影響はありませんが、内部処理を一部変更しました。
   - 不要なログ出力処理を削除しました。
