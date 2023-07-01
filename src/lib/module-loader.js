@@ -19,6 +19,7 @@ exports.loadModule = function (filePath, mocks) {
   // this is necessary to allow relative path modules within loaded file
   // i.e. requiring ./some inside file /a/b.js needs to be resolved to /a/some
   var resolveModule = function (module) {
+    console.log(module)
     if (module.charAt(0) !== ".") return module;
     return path.resolve(path.dirname(filePath), module);
   };
@@ -26,15 +27,16 @@ exports.loadModule = function (filePath, mocks) {
   var exports = {};
   var context = {
     require: function (name) {
-      return mocks[name] || require(resolveModule(name));
+      return require(resolveModule(name));
     },
-    console: console,
+    consol: console,
     exports: exports,
     module: {
       exports: exports,
     },
   };
-
+  //runInNewContextがうまく動いていない？
+  console.log(filePath)
   vm.runInNewContext(fs.readFileSync(filePath), context);
   return context;
 };

@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDiagnostic = void 0;
 const vscode = __importStar(require("vscode"));
 const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const InformationProjectData_1 = require("../InformationProjectData");
 const TyranoLogger_1 = require("../TyranoLogger");
@@ -39,7 +40,7 @@ class TyranoDiagnostic {
     tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
     //パーサー
     loadModule = require('./../lib/module-loader.js').loadModule;
-    parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
+    parser = this.loadModule(path.join(__dirname, './../lib/tyrano_parser.js'));
     JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
     //基本タグを取得
     tyranoDefaultTag = this.infoPd.getDefaultTag();

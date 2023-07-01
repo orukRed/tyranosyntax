@@ -67,7 +67,7 @@ class InformationWorkSpace {
     _tagNameParams = vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.name.parameters');
     //パーサー
     loadModule = require('./lib/module-loader.js').loadModule;
-    parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
+    parser = this.loadModule(path.join(__dirname, 'lib/tyrano_parser.js'));
     constructor() { }
     static getInstance() {
         return this.instance;

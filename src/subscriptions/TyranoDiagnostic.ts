@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 import { InformationWorkSpace as workspace } from '../InformationWorkSpace';
 import { TextDecoder } from 'util';
 import { InformationProjectData as project } from '../InformationProjectData';
@@ -20,7 +21,7 @@ export class TyranoDiagnostic {
 
 	//パーサー
 	private loadModule = require('./../lib/module-loader.js').loadModule;
-	private parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
+	private parser = this.loadModule(path.join(__dirname, './../lib/tyrano_parser.js'));
 	private readonly JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
 
 	//基本タグを取得

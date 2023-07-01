@@ -50,7 +50,7 @@ export class InformationWorkSpace {
 
 	//パーサー
 	private loadModule = require('./lib/module-loader.js').loadModule;
-	public parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
+	public parser = this.loadModule(path.join(__dirname, 'lib/tyrano_parser.js'));
 	private constructor() { }
 	public static getInstance(): InformationWorkSpace {
 		return this.instance;
