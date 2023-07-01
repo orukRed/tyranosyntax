@@ -66,8 +66,7 @@ class InformationWorkSpace {
     _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
     _tagNameParams = vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.name.parameters');
     //パーサー
-    loadModule = require('./lib/module-loader.js').loadModule;
-    parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
+    parser = require("./lib/tyrano_parser.js");
     constructor() { }
     static getInstance() {
         return this.instance;
@@ -214,7 +213,7 @@ class InformationWorkSpace {
         const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
         const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
         if (scenarioData != undefined) {
-            const parsedData = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
+            const parsedData = this.parser.parseScenario(scenarioData.getText()); //構文解析
             this.labelMap.set(absoluteScenarioFilePath, new Array());
             const array_s = parsedData["array_s"];
             let isIscript = false;

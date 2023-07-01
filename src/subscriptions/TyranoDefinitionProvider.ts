@@ -1,7 +1,6 @@
 
 import * as vscode from 'vscode';
 import { ConstantVariables } from '../ConstantVariables';
-import { InformationProjectData } from '../InformationProjectData';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 
 export class TyranoDefinitionProvider {
@@ -24,7 +23,7 @@ export class TyranoDefinitionProvider {
 	async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
 
 		const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-		let parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
+		let parsedData = this.infoWs.parser.parseScenario(document.lineAt(position.line).text);
 		const array_s = parsedData["array_s"];
 
 		//F12押した付近のタグのデータを取得

@@ -17,7 +17,7 @@ class TyranoDefinitionProvider {
      */
     async provideDefinition(document, position, token) {
         const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-        let parsedData = this.infoWs.parser.tyranoParser.parseScenario(document.lineAt(position.line).text);
+        let parsedData = this.infoWs.parser.parseScenario(document.lineAt(position.line).text);
         const array_s = parsedData["array_s"];
         //F12押した付近のタグのデータを取得
         let tagNumber = "";

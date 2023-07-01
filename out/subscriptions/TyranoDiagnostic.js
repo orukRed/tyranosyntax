@@ -27,22 +27,17 @@ exports.TyranoDiagnostic = void 0;
 const vscode = __importStar(require("vscode"));
 const fs = __importStar(require("fs"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
-const InformationProjectData_1 = require("../InformationProjectData");
 const TyranoLogger_1 = require("../TyranoLogger");
 class TyranoDiagnostic {
     static diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
-    //ティラノスクリプトに関する情報
-    infoPd = InformationProjectData_1.InformationProjectData.getInstance();
     //ファイルパス取得用
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     //ティラノスクリプトのプロジェクトのルートパス
     tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
     //パーサー
-    loadModule = require('./../lib/module-loader.js').loadModule;
-    parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
+    parser = require("./../lib/tyrano_parser.js");
     JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
     //基本タグを取得
-    tyranoDefaultTag = this.infoPd.getDefaultTag();
     _isDiagnosing = false;
     get isDiagnosing() {
         return this._isDiagnosing;
@@ -73,9 +68,12 @@ class TyranoDiagnostic {
         TyranoLogger_1.TyranoLogger.print(`diagnostic start.`);
         let diagnosticArray = []; //診断結果を一時的に保存する配列
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
-        let tyranoTag = this.tyranoDefaultTag.slice();
+        let tyranoTag = Object.keys(this.infoWs.suggestions.get(diagnosticProjectPath));
         tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath).keys()));
+        //commetはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
         tyranoTag.push("comment");
+        tyranoTag.push("label");
+        tyranoTag.push("text");
         //未定義のマクロを使用しているか検出
         await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
         TyranoLogger_1.TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
@@ -99,7 +97,7 @@ class TyranoDiagnostic {
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
@@ -128,7 +126,7 @@ class TyranoDiagnostic {
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
@@ -184,7 +182,7 @@ class TyranoDiagnostic {
                                 diagnostics.push(diag);
                                 continue;
                             }
-                            const storageParsedData = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
+                            const storageParsedData = this.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
                             const storageArray_s = storageParsedData["array_s"];
                             let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか
                             for (let storageData in storageArray_s) {

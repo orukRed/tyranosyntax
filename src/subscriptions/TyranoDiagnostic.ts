@@ -1,16 +1,13 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 import { InformationWorkSpace as workspace } from '../InformationWorkSpace';
 import { TextDecoder } from 'util';
-import { InformationProjectData as project } from '../InformationProjectData';
 import { ErrorLevel, TyranoLogger } from '../TyranoLogger';
 
 export class TyranoDiagnostic {
 
 	public static diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
-
-	//ティラノスクリプトに関する情報
-	private readonly infoPd: project = project.getInstance();
 
 	//ファイルパス取得用
 	private readonly infoWs: workspace = workspace.getInstance();
@@ -19,12 +16,10 @@ export class TyranoDiagnostic {
 	private readonly tyranoProjectPaths: string[] = this.infoWs.getTyranoScriptProjectRootPaths();
 
 	//パーサー
-	private loadModule = require('./../lib/module-loader.js').loadModule;
-	private parser = this.loadModule(__dirname + '/../lib/tyrano_parser.js');
+	public parser = require("./../lib/tyrano_parser.js");
 	private readonly JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
 
 	//基本タグを取得
-	private tyranoDefaultTag: string[] = this.infoPd.getDefaultTag();
 
 	private _isDiagnosing: boolean = false;
 	public get isDiagnosing(): boolean {
@@ -61,15 +56,17 @@ export class TyranoDiagnostic {
 
 		const diagnosticProjectPath = await this.infoWs.getProjectPathByFilePath(changedTextDocumentPath);
 
-
 		TyranoLogger.print(`diagnostic start.`);
 		let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
 
 		TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
 
-		let tyranoTag: string[] = this.tyranoDefaultTag.slice();
+		let tyranoTag: string[] = Object.keys(this.infoWs.suggestions.get(diagnosticProjectPath)!);
 		tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()));
+		//commetはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
 		tyranoTag.push("comment");
+		tyranoTag.push("label");
+		tyranoTag.push("text");
 
 
 		//未定義のマクロを使用しているか検出
@@ -100,7 +97,7 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+			const parsedData: object = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
 			for (let data in array_s) {
@@ -134,7 +131,7 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioDocument.getText()); //構文解析
+			const parsedData: object = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
 			for (let data in array_s) {
@@ -197,7 +194,7 @@ export class TyranoDiagnostic {
 								diagnostics.push(diag);
 								continue;
 							}
-							const storageParsedData: object = this.parser.tyranoParser.parseScenario(storageScenarioDocument.getText()); //構文解析
+							const storageParsedData: object = this.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
 							const storageArray_s = storageParsedData["array_s"];
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
 							for (let storageData in storageArray_s) {

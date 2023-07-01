@@ -49,8 +49,7 @@ export class InformationWorkSpace {
 
 
 	//パーサー
-	private loadModule = require('./lib/module-loader.js').loadModule;
-	public parser = this.loadModule(__dirname + '/lib/tyrano_parser.js');
+	public parser = require("./lib/tyrano_parser.js");
 	private constructor() { }
 	public static getInstance(): InformationWorkSpace {
 		return this.instance;
@@ -221,7 +220,7 @@ export class InformationWorkSpace {
 		const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
 
 		if (scenarioData != undefined) {
-			const parsedData: object = this.parser.tyranoParser.parseScenario(scenarioData.getText()); //構文解析
+			const parsedData: object = this.parser.parseScenario(scenarioData.getText()); //構文解析
 			this.labelMap.set(absoluteScenarioFilePath, new Array<LabelData>());
 			const array_s = parsedData["array_s"];
 			let isIscript = false;

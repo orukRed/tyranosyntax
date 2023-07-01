@@ -22,15 +22,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoTagHoverProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const fs = __importStar(require("fs"));
+const path_1 = __importDefault(require("path"));
 class TyranoTagHoverProvider {
     jsonTyranoSnippet;
     regExp;
     constructor() {
-        this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(__dirname + "/./../../Tooltip/tyrano.Tooltip.json", "utf8"));
+        this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path_1.default.join(__dirname, "./../../Tooltip/tyrano.Tooltip.json"), "utf8"));
         // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
         this.regExp = /(\[||\@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
     }
