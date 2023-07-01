@@ -44,7 +44,7 @@ class TyranoCompletionItemProvider {
         let cursor = vscode.window.activeTextEditor?.selection.active.character;
         //カーソル付近のタグデータを取得
         const lineText = document.lineAt(position.line).text;
-        const parsedData = this.infoWs.parser.tyranoParser.parseScenario(lineText);
+        const parsedData = this.infoWs.parser.parseScenario(lineText);
         const array_s = parsedData["array_s"];
         let tagNumber = "";
         for (let data in array_s) {
