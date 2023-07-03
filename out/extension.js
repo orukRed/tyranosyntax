@@ -103,6 +103,7 @@ async function activate(context) {
             await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
             await infoWs.spliceLabelMapByFilePath(e.fsPath);
             await infoWs.spliceVariableMapByFilePath(e.fsPath);
+            await infoWs.spliceNameMapByFilePath(e.fsPath);
         });
         //scriptFileの値
         const scriptFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{js}', false, false, false);

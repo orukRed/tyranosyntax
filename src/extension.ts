@@ -89,6 +89,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
 			await infoWs.spliceLabelMapByFilePath(e.fsPath);
 			await infoWs.spliceVariableMapByFilePath(e.fsPath);
+			await infoWs.spliceNameMapByFilePath(e.fsPath);
 		});
 
 		//scriptFileの値

@@ -5,7 +5,7 @@ class DefineMacroData {
     _macroName = ""; //マクロ名。[hoge]などのhoge部分。
     _filePath = "";
     _location = null; //定義ジャンプに使う位置情報
-    _parameter = [];
+    _parameter = []; //TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
     _description = ""; //マクロの説明
     constructor(macroName, location, filePath, description) {
         this._macroName = macroName;

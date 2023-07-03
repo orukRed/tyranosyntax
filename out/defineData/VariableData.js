@@ -1,30 +1,32 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VariableData = void 0;
+const InformationWorkSpace_1 = require("../InformationWorkSpace");
 /**
  * evalタグやjsからの変数定義で宣言された変数情報を格納するためのクラス
  */
 class VariableData {
+    infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     _name; //変数名
     _value; //変数の値 現在未使用だけど今後使うかもなので一応定義だけしておく
     _description; //変数の説明
-    //宣言したファイルパスのSet
-    _filePathList = new Set(); //TODO:そのうち独自クラス作って、filePathとLocationを持たせるようにした方がよい。Locationを使った機能がまだないのでこのままで。
+    _locations = []; //定義ジャンプに使う位置情報？ あと今は変数の定義場所取得手段思いつかないので、変数の使用箇所とする。そのため配列で値保持
     _type; //変数の種類 f sf tf mpのいずれか
     get name() {
         return this._name;
     }
-    get filePathList() {
-        return this._filePathList;
+    get locations() {
+        return this._locations;
     }
-    addFilePathList(filePath) {
-        this.filePathList.add(filePath);
+    set locations(value) {
+        this._locations = value;
     }
-    deleteFilePathList(filePath) {
-        this.filePathList.delete(filePath);
+    addLocation(value) {
+        this._locations?.push(value);
     }
-    set filePathList(value) {
-        this._filePathList = value;
+    deleteLocation(deletePath) {
+        const value = this._locations?.filter((location) => { return location.uri.fsPath !== deletePath.fsPath; });
+        this.locations = value;
     }
     get type() {
         return this._type;

@@ -5,7 +5,7 @@ export class DefineMacroData {
 	private _macroName: string = "";//マクロ名。[hoge]などのhoge部分。
 	private _filePath: string = "";
 	private _location: vscode.Location | null = null;//定義ジャンプに使う位置情報
-	private _parameter: MacroParameterData[] = [];
+	private _parameter: MacroParameterData[] = [];//TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
 	private _description: string = "";//マクロの説明
 
 
@@ -50,5 +50,4 @@ export class DefineMacroData {
 	public get parameter(): MacroParameterData[] {
 		return this._parameter;
 	}
-
 }

@@ -19,7 +19,6 @@ const babelTraverse = require("@babel/traverse").default;
  */
 export class InformationWorkSpace {
 
-
 	private static instance: InformationWorkSpace = new InformationWorkSpace();
 	public pathDelimiter = (process.platform === "win32") ? "\\" : "/";
 	public readonly DATA_DIRECTORY: string = this.pathDelimiter + "data";				//projectRootPath/data
@@ -78,6 +77,7 @@ export class InformationWorkSpace {
 			for (let i of absoluteScriptFilePaths) {
 				await this.updateScriptFileMap(i);
 				await this.updateMacroDataMapByJs(i);
+				await this.updateVariableMapByJS(i);
 			}
 			//シナリオファイルを初期化
 			TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
@@ -157,13 +157,13 @@ export class InformationWorkSpace {
 	}
 
 	public async updateMacroDataMapByJs(absoluteScenarioFilePath: string) {
-
 		const reg = /[^a-zA-Z0-9_$]/g;
 		// const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
 		const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
 		const parsedData: object = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
 		const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
-
+		const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
+		await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
 
 		babelTraverse(parsedData, {
 			enter: (path: any) => {
@@ -198,7 +198,7 @@ export class InformationWorkSpace {
 	 * @param sentence
 	 */
 	public async updateVariableMapByJS(absoluteScenarioFilePath: string, sentence: string | undefined = undefined) {
-
+		await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
 		const projectPath: string = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
 		if (sentence === undefined) {
 			sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
@@ -211,6 +211,8 @@ export class InformationWorkSpace {
 			//.で区切る
 			const [variableType, variableName] = variableBase.split(".");
 			this._variableMap.get(projectPath)?.set(variableName, new VariableData(variableName, undefined, variableType));
+			const location = new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(0, 0));
+			this.variableMap.get(projectPath)?.get(variableName)?.addLocation(location);//変数の定義箇所を追加
 		}
 	}
 
@@ -226,6 +228,13 @@ export class InformationWorkSpace {
 			let isIscript = false;
 			let iscriptSentence: string = "";
 			let description = "";
+
+			//該当ファイルに登録されているマクロ、変数、タグ、nameを一度リセット
+			const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
+			await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
+			await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
+			await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
+
 			for (let data in array_s) {
 
 				//iscript-endscript間のテキストを取得。
@@ -259,8 +268,6 @@ export class InformationWorkSpace {
 						if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
 							this.nameMap.get(projectPath)?.push(tmpData);
 						}
-
-						// this.nameMap.get(projectPath)?.push(tmpData);
 					}
 					if (array_s[data]["pm"]["id"]) {
 						const tmpData = new NameParamData(array_s[data]["pm"]["id"], "id", new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), storage);
@@ -290,7 +297,8 @@ export class InformationWorkSpace {
 					if (!this.variableMap.get(projectPath)?.get(variableName)) {
 						this.variableMap.get(projectPath)?.set(variableName, new VariableData(variableName, variableValue, variableType));
 					}
-					this.variableMap.get(projectPath)?.get(variableName)?.addFilePathList(absoluteScenarioFilePath);//変数の定義箇所を追加
+					const location = new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]));
+					this.variableMap.get(projectPath)?.get(variableName)?.addLocation(location);//変数の定義箇所を追加
 				} else if (array_s[data]["name"] === "iscript") {
 					isIscript = true;//endscriptが見つかるまで行を保存するモードに入る
 				} else if (array_s[data]["name"] === "endscript") {
@@ -353,12 +361,15 @@ export class InformationWorkSpace {
 	 * @param filePath 
 	 */
 	public async spliceMacroDataMapByFilePath(filePath: string) {
+		const deleteTagList = [];
 		const projectPath = await this.getProjectPathByFilePath(filePath);
 		for (let tmp of this.defineMacroMap.get(projectPath)?.values()!) {
 			if (tmp.filePath == filePath) {
 				this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
+				deleteTagList.push(tmp.macroName);
 			}
 		}
+		return deleteTagList;
 	}
 
 	/**
@@ -375,19 +386,34 @@ export class InformationWorkSpace {
 	 */
 	public async spliceVariableMapByFilePath(fsPath: string) {
 		const projectPath: string = await this.getProjectPathByFilePath(fsPath);
+		this.variableMap.get(projectPath)?.forEach((value: VariableData, key: string) => {
+			value.locations.forEach((location: vscode.Location) => {
+				if (location.uri.fsPath === fsPath) {
+					this.variableMap.get(projectPath)?.delete(key);
+				}
+			});
+		});
+	}
 
-		//末尾が.jsならscriptFileMapから取得
-		//末尾が.ksならscenarioFileMapから取得
-		const sentence: string = path.extname(fsPath) === ".js" ? this.scriptFileMap.get(fsPath)! : this.scenarioFileMap.get(fsPath)!.getText();
+	/**
+	 * 引数で指定したファイルパスを、パラメータのNameのMapから削除
+	 * @param fsPath 
+	 */
+	public async spliceNameMapByFilePath(fsPath: string) {
+		const projectPath: string = await this.getProjectPathByFilePath(fsPath);
+		const value = this.nameMap.get(projectPath)?.filter(obj => obj.location?.uri.fsPath !== fsPath);
+		this.nameMap.set(projectPath, value!);
+	}
 
-		const reg: RegExp = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
-		const variableList: string[] = sentence.match(reg) ?? [];
-
-		for (let variable of variableList) {
-			this._variableMap.get(projectPath)?.get(variable)?.deleteFilePathList(fsPath);
-			if (this._variableMap.get(projectPath)?.get(variable)?.filePathList.size === 0) {
-				this._variableMap.get(projectPath)?.delete(variable);
-			}
+	/**
+	 * 引数で指定したファイルパスを、タグ補完に使う変数のリストから削除
+	 * @param absoluteScenarioFilePath 
+	 */
+	public async spliceSuggestionsByFilePath(projectPath: string, deleteTagList: string[]) {
+		if (0 < deleteTagList.length) {
+			deleteTagList.forEach(tag => {
+				delete this.suggestions.get(projectPath)![tag];
+			});
 		}
 	}
 	/**
