@@ -16,14 +16,12 @@ export class NameParamData {
 	public get type(): string {
 		return this._type;
 	}
-
 	public get location(): vscode.Location | null {
 		return this._location;
 	}
 	public get resourceFilePath(): string | undefined {
 		return this._resourceFilePath;
 	}
-
 
 	public constructor(name: string, type: string, location: vscode.Location, resourceFilePath: string) {
 		this._name = name;

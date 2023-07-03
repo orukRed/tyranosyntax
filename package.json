@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.17.4",
+  "version": "0.17.5",
   "engines": {
     "vscode": "^1.79.1"
   },
