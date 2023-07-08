@@ -189,7 +189,7 @@ module.exports.parseScenario = function (text_str) {
         var nameParam = "text"
         if (flag_comment == true || first_char === ";") {
           nameParam = "comment";
-          text = text.replaceAll(";", "");
+          // text = text.replaceAll(";", "");
         }
         var text_obj = {
           line: i,
