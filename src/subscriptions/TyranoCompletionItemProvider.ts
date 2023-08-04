@@ -246,14 +246,19 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
 		for (const item in suggestions) {
 			let tmpJsonData = suggestions[item];
-			let textLabel: string = tmpJsonData["name"].toString();
-			let comp = new vscode.CompletionItem(textLabel);
-			const inputType = vscode.workspace.getConfiguration().get('TyranoScript syntax.completionTag.inputType');
-			inputType === "@" ? comp.insertText = new vscode.SnippetString("@" + textLabel + " $0") : comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
-			comp.documentation = tmpJsonData["description"];
-			comp.kind = vscode.CompletionItemKind.Class;
-			comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };//ここに、サンプル2のような予測候補を出すコマンド
-			completions.push(comp);
+			try {
+				let textLabel: string = tmpJsonData["name"].toString();
+				let comp = new vscode.CompletionItem(textLabel);
+				const inputType = vscode.workspace.getConfiguration().get('TyranoScript syntax.completionTag.inputType');
+				inputType === "@" ? comp.insertText = new vscode.SnippetString("@" + textLabel + " $0") : comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
+				comp.documentation = tmpJsonData["description"];
+				comp.kind = vscode.CompletionItemKind.Class;
+				comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };//ここに、サンプル2のような予測候補を出すコマンド
+				completions.push(comp);
+			} catch (error) {
+				console.log(error);
+			}
+
 		};
 		return completions;
 	}

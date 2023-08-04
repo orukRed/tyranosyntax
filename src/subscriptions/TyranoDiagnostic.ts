@@ -16,7 +16,6 @@ export class TyranoDiagnostic {
 	private readonly tyranoProjectPaths: string[] = this.infoWs.getTyranoScriptProjectRootPaths();
 
 	//パーサー
-	public parser = require("./../lib/tyrano_parser.js");
 	private readonly JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
 
 	//基本タグを取得
@@ -97,10 +96,14 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
+			const parsedData: object = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
 			for (let data in array_s) {
+				//early return
+				if (array_s[data]["name"] === "comment") {
+					continue;
+				}
 				//タグが定義されていない場合
 				if (!tyranoTag.includes(array_s[data]["name"])) {
 
@@ -131,11 +134,13 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
+			const parsedData: object = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
 			const array_s = parsedData["array_s"];
 			let diagnostics: vscode.Diagnostic[] = [];
 			for (let data in array_s) {
-
+				if (array_s[data]["name"] === "comment") {
+					continue;
+				}
 
 				//storageに付いての処理(指定したファイルが有るかどうか)
 				if (this.JUMP_TAG.includes(array_s[data]["name"])) {
@@ -194,7 +199,7 @@ export class TyranoDiagnostic {
 								diagnostics.push(diag);
 								continue;
 							}
-							const storageParsedData: object = this.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
+							const storageParsedData: object = this.infoWs.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
 							const storageArray_s = storageParsedData["array_s"];
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
 							for (let storageData in storageArray_s) {

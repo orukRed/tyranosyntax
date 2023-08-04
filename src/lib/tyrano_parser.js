@@ -32,7 +32,7 @@ module.exports.parseScenario = function (text_str) {
   var array_row = text_str.split("\n");
 
   var flag_comment = false; //コメント中なら パーサー配列に入れるか入れないかを判断する値？
-
+  this.flag_script = false;
   for (var i = 0; i < array_row.length; i++) {
     var line_str = $.trim(array_row[i]);
     var first_char = line_str.substr(0, 1);
@@ -114,7 +114,7 @@ module.exports.parseScenario = function (text_str) {
     } else if (first_char === "@") {
       //コマンド行確定なので、その残りの部分を、ごそっと回す
       var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
-      var tmpobj = this.makeTag(tag_str, i, 0);//@から始まるところはcolumnは0で確定
+      var tmpobj = this.makeTag(tag_str, i, 0, flag_comment, first_char);//@から始まるところはcolumnは0で確定
       array_s.push(tmpobj);
     } else {
       //テキストか[]記法のタグ
@@ -144,7 +144,7 @@ module.exports.parseScenario = function (text_str) {
 
             if (num_kakko == 0) {
               flag_tag = false;
-              array_s.push(this.makeTag(tag_str, i, column));
+              array_s.push(this.makeTag(tag_str, i, column, flag_comment, first_char));
               //tag_str をビルドして、命令配列に格納
               tag_str = "";
             } else {
@@ -219,7 +219,7 @@ module.exports.parseScenario = function (text_str) {
 
   return result_obj;
 };
-module.exports.makeTag = function (str, line, column) {
+module.exports.makeTag = function (str, line, column, flag_comment, first_char) {
   var obj = {
     line: line,
     column: column,
@@ -283,7 +283,12 @@ module.exports.makeTag = function (str, line, column) {
   var array = str.split(" ");
 
   //タグの名前 [xxx
-  obj.name = $.trim(array[0]);
+  if (flag_comment == true || first_char === ";") {
+    obj.name = "comment";
+  } else {
+    obj.name = $.trim(array[0]);
+  }
+
 
   //=のみが出てきた場合は前後のをくっつけて、ひとつの変数にしてしまって良い
   for (var k = 1; k < array.length; k++) {

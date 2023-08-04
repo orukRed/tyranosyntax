@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.7]- 2023-08-04
+
+[issue#109](https://github.com/orukRed/tyranosyntax/issues/109)
+
+- コメント中のタグにも診断機能が実施される問題を修正しました。
+- プラグインで定義したタグがエラー扱いになる問題を修正しました。
+
 ## [0.17.6]- 2023-07-08
 
 - 内部の処理を一部修正しました。

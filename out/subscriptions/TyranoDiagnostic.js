@@ -35,7 +35,6 @@ class TyranoDiagnostic {
     //ティラノスクリプトのプロジェクトのルートパス
     tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
     //パーサー
-    parser = require("./../lib/tyrano_parser.js");
     JUMP_TAG = ["jump", "call", "link", "button", "glink", "clickable"];
     //基本タグを取得
     _isDiagnosing = false;
@@ -97,10 +96,14 @@ class TyranoDiagnostic {
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
+                //early return
+                if (array_s[data]["name"] === "comment") {
+                    continue;
+                }
                 //タグが定義されていない場合
                 if (!tyranoTag.includes(array_s[data]["name"])) {
                     let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
@@ -126,10 +129,13 @@ class TyranoDiagnostic {
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.parser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
             for (let data in array_s) {
+                if (array_s[data]["name"] === "comment") {
+                    continue;
+                }
                 //storageに付いての処理(指定したファイルが有るかどうか)
                 if (this.JUMP_TAG.includes(array_s[data]["name"])) {
                     if (array_s[data]["pm"]["storage"] !== undefined) {
@@ -182,7 +188,7 @@ class TyranoDiagnostic {
                                 diagnostics.push(diag);
                                 continue;
                             }
-                            const storageParsedData = this.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
+                            const storageParsedData = this.infoWs.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
                             const storageArray_s = storageParsedData["array_s"];
                             let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか
                             for (let storageData in storageArray_s) {
