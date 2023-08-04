@@ -234,7 +234,6 @@ export class InformationWorkSpace {
 			await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
 			await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
 			await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
-
 			for (let data in array_s) {
 
 				//iscript-endscript間のテキストを取得。
