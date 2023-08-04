@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.17.7]- 2023-08-xx
+## [0.17.7]- 2023-08-04
 
 [issue#109](https://github.com/orukRed/tyranosyntax/issues/109)
 
