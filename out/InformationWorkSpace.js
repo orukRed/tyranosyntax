@@ -276,7 +276,8 @@ class InformationWorkSpace {
                 //各種タグの場合
                 if (array_s[data]["name"] === "macro") {
                     const macroData = new DefineMacroData_1.DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
-                    this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
+                    const macroName = await array_s[data]["pm"]["name"];
+                    this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
                     this._suggestions.get(projectPath)[await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
                 }
                 else if (array_s[data]["name"] === "label") {
@@ -351,12 +352,12 @@ class InformationWorkSpace {
     async spliceMacroDataMapByFilePath(filePath) {
         const deleteTagList = [];
         const projectPath = await this.getProjectPathByFilePath(filePath);
-        for (let tmp of this.defineMacroMap.get(projectPath)?.values()) {
-            if (tmp.filePath == filePath) {
-                this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
-                deleteTagList.push(tmp.macroName);
+        this.defineMacroMap.get(projectPath)?.forEach((value, key) => {
+            if (value.filePath == filePath) {
+                this.defineMacroMap.get(projectPath)?.delete(value.macroName);
+                deleteTagList.push(value.macroName);
             }
-        }
+        });
         return deleteTagList;
     }
     /**
