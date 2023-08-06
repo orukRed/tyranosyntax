@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.8]- 2023-08-06
+
+- 特定の環境で拡張機能が動作しない問題調査のためコード修正を行いました。
+
 ## [0.17.7]- 2023-08-04
 
 [issue#109](https://github.com/orukRed/tyranosyntax/issues/109)

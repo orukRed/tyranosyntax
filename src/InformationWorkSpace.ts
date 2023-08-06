@@ -161,7 +161,7 @@ export class InformationWorkSpace {
 		// const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
 		const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
 		const parsedData: object = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
-		const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
+		const projectPath: string = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
 		const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
 		await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
 
@@ -170,13 +170,13 @@ export class InformationWorkSpace {
 				try {
 					//path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
 					if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
-						let macroName = path.toString().split(".")[4];//MacroNameの部分を抽出
+						let macroName: string = path.toString().split(".")[4];//MacroNameの部分を抽出
 						if (macroName != undefined && macroName != null) {
 
 							let description = path.parentPath.parentPath.toString().replace(";", "").replace(path.parentPath.toString(), "");
 							description = description.replaceAll("/", "").replaceAll("*", "").replaceAll(" ", "").replaceAll("\t", "");
 
-							const macroData = new DefineMacroData(macroName, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath, description);
+							const macroData: DefineMacroData = new DefineMacroData(macroName, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath, description);
 							macroData.parameter.push(new MacroParameterData("parameter", false, "description"));//TODO:パーサーでパラメータの情報読み込んで追加する
 							this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
 							this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
@@ -284,7 +284,7 @@ export class InformationWorkSpace {
 
 				//各種タグの場合
 				if (array_s[data]["name"] === "macro") {
-					const macroData = new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
+					const macroData: DefineMacroData = new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
 					this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
 					this._suggestions.get(projectPath)![await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
 				} else if (array_s[data]["name"] === "label") {
