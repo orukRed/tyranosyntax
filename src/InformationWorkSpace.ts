@@ -361,14 +361,16 @@ export class InformationWorkSpace {
 	 * @param filePath 
 	 */
 	public async spliceMacroDataMapByFilePath(filePath: string) {
-		const deleteTagList = [];
+		const deleteTagList: string[] = [];
 		const projectPath = await this.getProjectPathByFilePath(filePath);
-		for (let tmp of this.defineMacroMap.get(projectPath)?.values()!) {
-			if (tmp.filePath == filePath) {
-				this.defineMacroMap.get(projectPath)?.delete(tmp.macroName);
-				deleteTagList.push(tmp.macroName);
+
+		this.defineMacroMap.get(projectPath)?.forEach((value, key) => {
+			if (value.filePath == filePath) {
+				this.defineMacroMap.get(projectPath)?.delete(value.macroName);
+				deleteTagList.push(value.macroName);
 			}
-		}
+		});
+
 		return deleteTagList;
 	}
 
