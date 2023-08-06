@@ -285,7 +285,8 @@ export class InformationWorkSpace {
 				//各種タグの場合
 				if (array_s[data]["name"] === "macro") {
 					const macroData: DefineMacroData = new DefineMacroData(await array_s[data]["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"])), absoluteScenarioFilePath, description);
-					this.defineMacroMap.get(projectPath)?.set(await array_s[data]["pm"]["name"], macroData);
+					const macroName: string = await array_s[data]["pm"]["name"];
+					this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
 					this._suggestions.get(projectPath)![await array_s[data]["pm"]["name"]] = macroData.parseToJsonObject();
 				} else if (array_s[data]["name"] === "label") {
 					this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData(await array_s[data]["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await array_s[data]["line"], await array_s[data]["column"]))));
