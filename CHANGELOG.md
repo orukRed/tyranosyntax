@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.9]- 2023-08-08
+
+- タグのパラメータに`%`を使った場合、エラー扱いになる問題を修正しました。
+  - 本来はマクロ内で使用した場合のみ許容される処理ですが、暫定的にマクロ外でもOKとしています。
+
 ## [0.17.8]- 2023-08-06
 
 - 特定の環境で拡張機能が動作しない問題調査のためコード修正を行いました。

@@ -150,6 +150,11 @@ export class TyranoDiagnostic {
 						let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length;	// 該当行からタグの定義場所(終了位置)探す
 						let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
 
+						//頭文字が%ならエラーとしては扱わない
+						if (this.isExistPercentAtBeginning(array_s[data]["pm"]["storage"])) {
+							continue;
+						}
+
 						if (this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) {
 							if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["storage"])) {
 								let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
@@ -176,6 +181,12 @@ export class TyranoDiagnostic {
 						let tagFirstIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]);	// 該当行からタグの定義場所(開始位置)探す
 						let tagLastIndex: number = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length;	// 該当行からタグの定義場所(終了位置)探す
 						let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+
+						//頭文字が%ならエラーとしては扱わない
+						if (this.isExistPercentAtBeginning(array_s[data]["pm"]["target"])) {
+							continue;
+						}
+
 						if (this.isValueIsIncludeVariable(array_s[data]["pm"]["target"])) {
 							if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["target"])) {
 								let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
@@ -229,6 +240,15 @@ export class TyranoDiagnostic {
 	private isExistAmpersandAtBeginning(value: string): boolean {
 		return value.indexOf("&") === 0 ? true : false;
 	}
+
+	/**
+ * 引数に入れた値の先頭に%記号があるかを判断します。
+ * @returns trueなら&がある、 falseなら&がない
+ */
+	private isExistPercentAtBeginning(value: string): boolean {
+		return value.indexOf("%") === 0 ? true : false;
+	}
+
 
 	/**
 	 * 引数に入れた値が変数を含むかどうかを判断します。

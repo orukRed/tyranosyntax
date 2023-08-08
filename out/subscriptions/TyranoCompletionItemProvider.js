@@ -257,7 +257,7 @@ class TyranoCompletionItemProvider {
                 let comp = new vscode.CompletionItem(textLabel);
                 const inputType = vscode.workspace.getConfiguration().get('TyranoScript syntax.completionTag.inputType');
                 inputType === "@" ? comp.insertText = new vscode.SnippetString("@" + textLabel + " $0") : comp.insertText = new vscode.SnippetString("[" + textLabel + " $0]");
-                comp.documentation = tmpJsonData["description"];
+                comp.documentation = new vscode.MarkdownString(tmpJsonData["description"]);
                 comp.kind = vscode.CompletionItemKind.Class;
                 comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' }; //ここに、サンプル2のような予測候補を出すコマンド
                 completions.push(comp);
