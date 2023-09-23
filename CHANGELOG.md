@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.17.10]- 2023-09-23
+
+- リファクタリングを行いました。
+  - for inを使用している箇所があったのでfor ofに修正しました。
+
 ## [0.17.9]- 2023-08-08
 
 - タグのパラメータに`%`を使った場合、エラー扱いになる問題を修正しました。

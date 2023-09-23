@@ -25,12 +25,12 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		const parsedData = this.infoWs.parser.parseScenario(lineText);
 		const array_s = parsedData["array_s"];
 		let tagNumber: string = "";
-		for (let data in array_s) {
+		for (const [index, data] of array_s.entries()) {
 			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
-			if (array_s[data]["column"] > position.character) {
+			if (data["column"] > position.character) {
 				break;
 			}
-			tagNumber = data;
+			tagNumber = index;
 		}
 
 		let tagParams: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
@@ -215,16 +215,16 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 		for (const item in suggestions) {
 			const tagName = suggestions[item]["name"].toString();//タグ名。jumpとかpとかimageとか。
 			if (selectedTag === tagName) {
-				for (const item2 in suggestions[item]["parameters"]) {
-					if (!(suggestions[item]["parameters"][item2]["name"] in parameters)) {//タグにないparameterのみインテリセンスに出す
-						const detailText = suggestions[item]["parameters"][item2]["required"] ? "（必須）" : "";
+				for (const item2 of suggestions[item]["parameters"]) {
+					if (!(item2["name"] in parameters)) {//タグにないparameterのみインテリセンスに出す
+						const detailText = item2["required"] ? "（必須）" : "";
 						const comp = new vscode.CompletionItem({
-							label: suggestions[item]["parameters"][item2]["name"],
+							label: item2["name"],
 							description: "",
 							detail: detailText
 						});
-						comp.insertText = new vscode.SnippetString(suggestions[item]["parameters"][item2]["name"] + "=\"$0\" ");
-						comp.documentation = new vscode.MarkdownString(suggestions[item]["parameters"][item2]["description"]);
+						comp.insertText = new vscode.SnippetString(item2["name"] + "=\"$0\" ");
+						comp.documentation = new vscode.MarkdownString(item2["description"]);
 						comp.kind = vscode.CompletionItemKind.Function;
 						comp.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
 						completions.push(comp);
