@@ -28,10 +28,12 @@ const vscode = __importStar(require("vscode"));
 const fs = __importStar(require("fs"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const TyranoLogger_1 = require("../TyranoLogger");
+const Parser_1 = require("../Parser");
 class TyranoDiagnostic {
     static diagnosticCollection = vscode.languages.createDiagnosticCollection('tyranoDiagnostic');
     //ファイルパス取得用
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+    parser = Parser_1.Parser.getInstance();
     //ティラノスクリプトのプロジェクトのルートパス
     tyranoProjectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
     //パーサー
@@ -89,27 +91,26 @@ class TyranoDiagnostic {
      * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
      */
     async detectionNotDefineMacro(tyranoTag, absoluteScenarioFilePathMap, diagnosticArray, projectPath) {
-        // for (const filePath of absoluteScenarioFilePathMap.keys()) {
         for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
             const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
             //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
-            for (let data in array_s) {
+            for (let data of array_s) {
                 //early return
-                if (array_s[data]["name"] === "comment") {
+                if (data["name"] === "comment") {
                     continue;
                 }
                 //タグが定義されていない場合
-                if (!tyranoTag.includes(array_s[data]["name"])) {
-                    let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["name"]); // 該当行からタグの定義場所(開始位置)探す
-                    let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.lastIndexOf(array_s[data]["name"]); // 該当行からタグの定義場所(終了位置)探す
-                    let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
-                    let diag = new vscode.Diagnostic(range, "タグ" + array_s[data]["name"] + "は未定義です。", vscode.DiagnosticSeverity.Error);
+                if (!tyranoTag.includes(data["name"])) {
+                    let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
+                    let tagLastIndex = scenarioDocument.lineAt(data["line"]).text.lastIndexOf(data["name"]); // 該当行からタグの定義場所(終了位置)探す
+                    let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
+                    let diag = new vscode.Diagnostic(range, "タグ" + data["name"] + "は未定義です。", vscode.DiagnosticSeverity.Error);
                     diagnostics.push(diag);
                 }
             }
@@ -129,84 +130,84 @@ class TyranoDiagnostic {
             if (projectPath !== projectPathOfDiagFile) {
                 continue;
             }
-            const parsedData = this.infoWs.parser.parseScenario(scenarioDocument.getText()); //構文解析
+            const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
             const array_s = parsedData["array_s"];
             let diagnostics = [];
-            for (let data in array_s) {
-                if (array_s[data]["name"] === "comment") {
+            for (let data of array_s) {
+                if (data["name"] === "comment") {
                     continue;
                 }
                 //storageに付いての処理(指定したファイルが有るかどうか)
-                if (this.JUMP_TAG.includes(array_s[data]["name"])) {
-                    if (array_s[data]["pm"]["storage"] !== undefined) {
-                        let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]); // 該当行からタグの定義場所(開始位置)探す
-                        let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["storage"]) + array_s[data]["pm"]["storage"].length; // 該当行からタグの定義場所(終了位置)探す
-                        let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+                if (this.JUMP_TAG.includes(data["name"])) {
+                    if (data["pm"]["storage"] !== undefined) {
+                        let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["storage"]); // 該当行からタグの定義場所(開始位置)探す
+                        let tagLastIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["storage"]) + data["pm"]["storage"].length; // 該当行からタグの定義場所(終了位置)探す
+                        let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
                         //頭文字が%ならエラーとしては扱わない
-                        if (this.isExistPercentAtBeginning(array_s[data]["pm"]["storage"])) {
+                        if (this.isExistPercentAtBeginning(data["pm"]["storage"])) {
                             continue;
                         }
-                        if (this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) {
-                            if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["storage"])) {
+                        if (this.isValueIsIncludeVariable(data["pm"]["storage"])) {
+                            if (!this.isExistAmpersandAtBeginning(data["pm"]["storage"])) {
                                 let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }
                         }
                         else {
-                            if (!array_s[data]["pm"]["storage"].endsWith(".ks")) {
+                            if (!data["pm"]["storage"].endsWith(".ks")) {
                                 let diag = new vscode.Diagnostic(range, "storageパラメータは末尾が'.ks'である必要があります。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }
-                            if (!fs.existsSync(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + array_s[data]["pm"]["storage"])) {
-                                let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
+                            if (!fs.existsSync(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + data["pm"]["storage"])) {
+                                let diag = new vscode.Diagnostic(range, data["pm"]["storage"] + "は存在しないファイルです。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }
                         }
                     }
                     // targetについての処理
-                    if (array_s[data]["pm"]["target"] !== undefined) {
-                        let tagFirstIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
-                        let tagLastIndex = scenarioDocument.lineAt(array_s[data]["line"]).text.indexOf(array_s[data]["pm"]["target"]) + array_s[data]["pm"]["target"].length; // 該当行からタグの定義場所(終了位置)探す
-                        let range = new vscode.Range(array_s[data]["line"], tagFirstIndex, array_s[data]["line"], tagLastIndex);
+                    if (data["pm"]["target"] !== undefined) {
+                        let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
+                        let tagLastIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["target"]) + data["pm"]["target"].length; // 該当行からタグの定義場所(終了位置)探す
+                        let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
                         //頭文字が%ならエラーとしては扱わない
-                        if (this.isExistPercentAtBeginning(array_s[data]["pm"]["target"])) {
+                        if (this.isExistPercentAtBeginning(data["pm"]["target"])) {
                             continue;
                         }
-                        if (this.isValueIsIncludeVariable(array_s[data]["pm"]["target"])) {
-                            if (!this.isExistAmpersandAtBeginning(array_s[data]["pm"]["target"])) {
+                        if (this.isValueIsIncludeVariable(data["pm"]["target"])) {
+                            if (!this.isExistAmpersandAtBeginning(data["pm"]["target"])) {
                                 let diag = new vscode.Diagnostic(range, "パラメータに変数を使う場合は先頭に'&'が必要です。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }
                         }
-                        else if (!this.isValueIsIncludeVariable(array_s[data]["pm"]["storage"])) { //targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
+                        else if (!this.isValueIsIncludeVariable(data["pm"]["storage"])) { //targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
                             //targetから*を外して表記ゆれ防ぐ
-                            array_s[data]["pm"]["target"] = array_s[data]["pm"]["target"].replace("*", "");
+                            data["pm"]["target"] = data["pm"]["target"].replace("*", "");
                             //ファイル探索して、該当のラベルがあればisLabelExsitをtrueにして操作打ち切る
                             //storageが指定されてない(undefined)ならscenarioに入ってるパス（自分自身のシナリオファイル）を入れる
                             //storageが指定されてるなら指定先を取得
-                            let storageScenarioDocument = (array_s[data]["pm"]["storage"] === undefined) ?
+                            let storageScenarioDocument = (data["pm"]["storage"] === undefined) ?
                                 scenarioDocument :
-                                this.infoWs.scenarioFileMap.get(this.infoWs.convertToAbsolutePathFromRelativePath(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + array_s[data]["pm"]["storage"]));
+                                this.infoWs.scenarioFileMap.get(this.infoWs.convertToAbsolutePathFromRelativePath(projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + data["pm"]["storage"]));
                             if (storageScenarioDocument === undefined) {
-                                let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["target"] + "ファイル解析中に下線の箇所でエラーが発生しました。開発者への報告をお願いします。", vscode.DiagnosticSeverity.Error);
+                                let diag = new vscode.Diagnostic(range, data["pm"]["target"] + "ファイル解析中に下線の箇所でエラーが発生しました。開発者への報告をお願いします。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }
-                            const storageParsedData = this.infoWs.parser.parseScenario(storageScenarioDocument.getText()); //構文解析
+                            const storageParsedData = this.parser.parseText(storageScenarioDocument.getText()); //構文解析
                             const storageArray_s = storageParsedData["array_s"];
                             let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか
                             for (let storageData in storageArray_s) {
-                                if ((storageArray_s[storageData]["pm"]["label_name"] === array_s[data]["pm"]["target"])) {
+                                if ((storageArray_s[storageData]["pm"]["label_name"] === data["pm"]["target"])) {
                                     isLabelExsit = true;
                                     break;
                                 }
                             }
                             if (!isLabelExsit) {
-                                let diag = new vscode.Diagnostic(range, array_s[data]["pm"]["target"] + "は存在しないラベルです。", vscode.DiagnosticSeverity.Error);
+                                let diag = new vscode.Diagnostic(range, data["pm"]["target"] + "は存在しないラベルです。", vscode.DiagnosticSeverity.Error);
                                 diagnostics.push(diag);
                                 continue;
                             }

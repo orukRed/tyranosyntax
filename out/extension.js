@@ -60,6 +60,7 @@ async function activate(context) {
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         await infoWs.initializeMaps();
+        infoWs.extensionPath = context.extensionPath;
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
         let tyranoJumpProvider = new TyranoJumpProvider_1.TyranoJumpProvider();
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic)); //手動診断のコマンドON

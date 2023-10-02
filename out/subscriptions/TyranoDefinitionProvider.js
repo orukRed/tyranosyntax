@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDefinitionProvider = void 0;
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
+const Parser_1 = require("../Parser");
 class TyranoDefinitionProvider {
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+    parser = Parser_1.Parser.getInstance();
     constructor() {
     }
     /**
@@ -17,7 +19,7 @@ class TyranoDefinitionProvider {
      */
     async provideDefinition(document, position, token) {
         const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-        let parsedData = this.infoWs.parser.parseScenario(document.lineAt(position.line).text);
+        let parsedData = this.parser.parseText(document.lineAt(position.line).text);
         const array_s = parsedData["array_s"];
         //F12押した付近のタグのデータを取得
         let tagNumber = "";

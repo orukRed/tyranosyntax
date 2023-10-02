@@ -27,8 +27,10 @@ exports.TyranoCompletionItemProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const path = require("path");
+const Parser_1 = require("../Parser");
 class TyranoCompletionItemProvider {
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+    parser = Parser_1.Parser.getInstance();
     constructor() {
     }
     /**
@@ -44,7 +46,7 @@ class TyranoCompletionItemProvider {
         let cursor = vscode.window.activeTextEditor?.selection.active.character;
         //カーソル付近のタグデータを取得
         const lineText = document.lineAt(position.line).text;
-        const parsedData = this.infoWs.parser.parseScenario(lineText);
+        const parsedData = this.parser.parseText(lineText);
         const array_s = parsedData["array_s"];
         let tagNumber = "";
         for (const [index, data] of array_s.entries()) {

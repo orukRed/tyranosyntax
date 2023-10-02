@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { ConstantVariables } from '../ConstantVariables';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import * as fs from 'fs';
+import { Parser } from '../Parser';
 
 export class TyranoJumpProvider {
 
@@ -14,6 +15,7 @@ export class TyranoJumpProvider {
 	public async toDestination() {
 
 		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
+		const parser: Parser = Parser.getInstance();
 		let jumpTagObject: object = {};
 		const document: vscode.TextDocument | undefined = vscode.window.activeTextEditor?.document;
 		const position: vscode.Position | undefined = vscode.window.activeTextEditor?.selection.active
@@ -21,7 +23,7 @@ export class TyranoJumpProvider {
 			return;
 		}
 		const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
-		let parsedData = infoWs.parser.parseScenario(document.lineAt(position.line).text);
+		let parsedData = parser.parseText(document.lineAt(position.line).text);
 		const array_s = parsedData["array_s"];
 
 
@@ -91,7 +93,7 @@ export class TyranoJumpProvider {
 				return;
 			}
 
-			const tmpParse = infoWs.parser.parseScenario(jumpDefinitionFile.getText());
+			const tmpParse = parser.parseText(jumpDefinitionFile.getText());
 			const jumpDefinitionArray_s = tmpParse["array_s"];
 
 

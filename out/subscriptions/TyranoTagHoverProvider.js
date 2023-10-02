@@ -30,9 +30,11 @@ exports.TyranoTagHoverProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const fs = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
+const InformationWorkSpace_1 = require("../InformationWorkSpace");
 class TyranoTagHoverProvider {
     jsonTyranoSnippet;
     regExp;
+    infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     constructor() {
         this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path_1.default.join(__dirname, "./../../Tooltip/tyrano.Tooltip.json"), "utf8"));
         // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
@@ -54,8 +56,45 @@ ${textCopy.join('  \n')}
         let markdownText = new vscode.MarkdownString(sentence);
         return markdownText;
     }
+    /**
+     * 引数の情報から、画像を表示するためのMarkdownStringを作成して返却します。
+     * @param paramValue storage="hoge"などの、hogeの部分
+     * @param projectPath
+     * @param defaultPath
+     * @returns
+     */
+    async createImageViewMarkdownText(paramValue, projectPath, defaultPath) {
+        const markdownText = new vscode.MarkdownString(`${paramValue}<br>`);
+        markdownText.appendMarkdown(`<img src="${paramValue}" width=350>`);
+        markdownText.supportHtml = true;
+        markdownText.isTrusted = true;
+        markdownText.supportThemeIcons = true;
+        markdownText.baseUri = vscode.Uri.file(path_1.default.join(projectPath, defaultPath, path_1.default.sep));
+        return markdownText;
+    }
     async provideHover(document, position, token) {
-        let wordRange = document.getWordRangeAtPosition(position, this.regExp);
+        //param="hoge"の部分があるかどうか検索
+        const parameterWordRange = document.getWordRangeAtPosition(position, new RegExp(/[\S]+="[\S]+"/));
+        if (parameterWordRange) {
+            //プロジェクトパス取得
+            const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
+            //タグ名取得
+            const exp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;
+            const wordRange = document.getWordRangeAtPosition(position, exp);
+            const matcher = document.getText(wordRange).match(exp);
+            const tag = matcher[1];
+            //parameter名(storageとかgraphicとか)取得
+            const parameter = document.getText(parameterWordRange).match(/(\w+)="/)[1];
+            //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう
+            const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
+            const match = document.getText(parameterWordRange).match(regExpParameterValue);
+            const parameterValue = match !== null ? match[1] : "";
+            //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
+            let tagParams = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
+            const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
+            return new vscode.Hover(await this.createImageViewMarkdownText(parameterValue, projectPath, defaultPath));
+        }
+        const wordRange = document.getWordRangeAtPosition(position, this.regExp);
         if (!wordRange) {
             return Promise.reject("no word here"); //指定文字がなかった時。引数で与えられた理由でPromiseオブジェクトを返却
         }

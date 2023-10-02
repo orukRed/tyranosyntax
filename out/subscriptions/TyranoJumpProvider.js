@@ -27,6 +27,7 @@ exports.TyranoJumpProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const fs = __importStar(require("fs"));
+const Parser_1 = require("../Parser");
 class TyranoJumpProvider {
     constructor() {
     }
@@ -35,6 +36,7 @@ class TyranoJumpProvider {
      */
     async toDestination() {
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        const parser = Parser_1.Parser.getInstance();
         let jumpTagObject = {};
         const document = vscode.window.activeTextEditor?.document;
         const position = vscode.window.activeTextEditor?.selection.active;
@@ -42,7 +44,7 @@ class TyranoJumpProvider {
             return;
         }
         const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
-        let parsedData = infoWs.parser.parseScenario(document.lineAt(position.line).text);
+        let parsedData = parser.parseText(document.lineAt(position.line).text);
         const array_s = parsedData["array_s"];
         // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
         const tags = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
@@ -104,7 +106,7 @@ class TyranoJumpProvider {
                 vscode.window.showInformationMessage("storageやtargetパラメータに変数を使用しているためジャンプできません。");
                 return;
             }
-            const tmpParse = infoWs.parser.parseScenario(jumpDefinitionFile.getText());
+            const tmpParse = parser.parseText(jumpDefinitionFile.getText());
             const jumpDefinitionArray_s = tmpParse["array_s"];
             //ラベル探索して見つかったらその位置でジャンプしてreturn
             for (let data in jumpDefinitionArray_s) {
