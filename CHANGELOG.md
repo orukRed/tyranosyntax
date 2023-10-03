@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.18.0]- 2023-10-XX
+## [0.18.0]- 2023-10-03
 
 - ツールチップで画像を表示できるようにしました。
   - タグのパラメータに画像のパスを指定すると、マウスホバーで画像が表示されます。
