@@ -4,6 +4,15 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.18.0]- 2023-10-XX
+
+- ツールチップで画像を表示できるようにしました。
+  - タグのパラメータに画像のパスを指定すると、マウスホバーで画像が表示されます。
+  - 自作タグやマクロについて同様の機能を使用する場合、設定から`TyranoScript syntax.tag.parameter`を修正してください。
+  - 上記についてreadmeに追記しました。
+- リファクタリングを行いました。
+  - 構文解析処理を一部変更しました。
+
 ## [0.17.10]- 2023-09-23
 
 - リファクタリングを行いました。

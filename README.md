@@ -65,6 +65,10 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ![](src/readme_img/hover.gif)
 
+### 画像ツールチップ表示（Hover image）
+
+![](src/readme_img/hover_img.gif)
+
 タグをマウスを乗せるとドキュメントが表示されます。
 
 ### タグのショートカット入力（Snippets）

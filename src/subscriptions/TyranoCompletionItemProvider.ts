@@ -3,9 +3,11 @@ import * as vscode from 'vscode';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import { ResourceFileData } from '../defineData/ResourceFileData';
 import path = require('path');
+import { Parser } from '../Parser';
 
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
 	private infoWs = InformationWorkSpace.getInstance();
+	private parser: Parser = Parser.getInstance();
 	public constructor() {
 	}
 
@@ -18,27 +20,19 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	 * @returns 
 	 */
 	public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-		let projectPath: string = await this.infoWs.getProjectPathByFilePath(document.fileName);
-		let cursor: number = vscode.window.activeTextEditor?.selection.active.character!;
+		const projectPath: string = await this.infoWs.getProjectPathByFilePath(document.fileName);
+		const cursor: number = vscode.window.activeTextEditor?.selection.active.character!;
 		//カーソル付近のタグデータを取得
 		const lineText = document.lineAt(position.line).text;
-		const parsedData = this.infoWs.parser.parseScenario(lineText);
-		const array_s = parsedData["array_s"];
-		let tagNumber: string = "";
-		for (const [index, data] of array_s.entries()) {
-			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
-			if (data["column"] > position.character) {
-				break;
-			}
-			tagNumber = index;
-		}
+		const parsedData = this.parser.parseText(lineText);
+		const tagIndex: number = this.parser.getIndex(parsedData, position.character);
 
-		let tagParams: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
-		const leftSideText = array_s[tagNumber] !== undefined ? lineText.substring(array_s[tagNumber]["column"], cursor) : undefined;
-		const lineTagName = array_s[tagNumber] !== undefined ? array_s[tagNumber]["name"] : undefined;//今見てるタグの名前
+		const tagParams: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
+		const leftSideText = parsedData[tagIndex] !== undefined ? lineText.substring(parsedData[tagIndex]["column"], cursor) : undefined;
+		const lineTagName = parsedData[tagIndex] !== undefined ? parsedData[tagIndex]["name"] : undefined;//今見てるタグの名前
 		const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");//今見てるタグの値を取得
 		const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;//変数の正規表現
-		let regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
+		const regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
 		let lineParamName = undefined;
 		if (regExpResult) {
 			lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
@@ -56,23 +50,23 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 			return this.completionVariable(projectPath, variableType);
 		}
 		//targetへのインテリセンス
-		else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName === "target") {	//leftSideTextの最後の文字が*ならラベルの予測変換を出す　//FIXME:「参照paramがtargetなら」の方がよさそう
-			return this.completionLabel(projectPath, array_s[tagNumber]["pm"]["storage"]);
+		else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName === "target") {	//leftSideTextの最後の文字が*ならラベルの予測変換を出す　//FIXME:「参照paramがtargetなら」の方がよさそう
+			return this.completionLabel(projectPath, parsedData[tagIndex]["pm"]["storage"]);
 		}
 		//nameやfaceへのインテリセンス
-		else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && nameType.includes(lineParamName!)) {
+		else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && nameType.includes(lineParamName!)) {
 			return this.completionNameParameter(projectPath, lineParamName!);
 		}
 		//リソースの予測変換
-		else if (array_s[tagNumber] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
+		else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
 			return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
 		}
-		else if (array_s === undefined || array_s[tagNumber] === undefined) {		//空行orテキストならタグの予測変換を出す
+		else if (parsedData === undefined || parsedData[tagIndex] === undefined) {		//空行orテキストならタグの予測変換を出す
 			return this.completionTag(projectPath);
 		} else {//タグの中ならタグのパラメータの予測変換を出す 
 			let isTagSentence = lineTagName === "text" || lineTagName === undefined ? false : true;
 			if (isTagSentence) {
-				return this.completionParameter(lineTagName, array_s[tagNumber]["pm"], projectPath);
+				return this.completionParameter(lineTagName, parsedData[tagIndex]["pm"], projectPath);
 			} else {
 				return this.completionTag(projectPath);
 			}
@@ -242,7 +236,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 	private async completionTag(projectPath: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
 		let completions: vscode.CompletionItem[] = new Array();
 		const suggestions = this.infoWs.suggestions.get(projectPath);
-
 
 		for (const item in suggestions) {
 			let tmpJsonData = suggestions[item];

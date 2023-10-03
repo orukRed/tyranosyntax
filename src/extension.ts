@@ -46,7 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		const tyranoDiagnostic = new TyranoDiagnostic();
 		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
 		await infoWs.initializeMaps();
-
+		infoWs.extensionPath = context.extensionPath;
 		TyranoLogger.print("TyranoDiagnostic activate");
 		let tyranoJumpProvider = new TyranoJumpProvider();
 		context.subscriptions.push(vscode.commands.registerCommand('tyrano.diagnostic', tmpDiagnostic));//手動診断のコマンドON

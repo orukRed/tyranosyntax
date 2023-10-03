@@ -27,6 +27,7 @@ exports.TyranoJumpProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const fs = __importStar(require("fs"));
+const Parser_1 = require("../Parser");
 class TyranoJumpProvider {
     constructor() {
     }
@@ -35,6 +36,7 @@ class TyranoJumpProvider {
      */
     async toDestination() {
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+        const parser = Parser_1.Parser.getInstance();
         let jumpTagObject = {};
         const document = vscode.window.activeTextEditor?.document;
         const position = vscode.window.activeTextEditor?.selection.active;
@@ -42,8 +44,7 @@ class TyranoJumpProvider {
             return;
         }
         const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
-        let parsedData = infoWs.parser.parseScenario(document.lineAt(position.line).text);
-        const array_s = parsedData["array_s"];
+        const parsedData = parser.parseText(document.lineAt(position.line).text);
         // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
         const tags = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter');
         const enableJumpTags = ["scenario", "script", "html", "css", "text"];
@@ -57,23 +58,16 @@ class TyranoJumpProvider {
             }
         }
         //F12押した付近のタグのデータを取得
-        let tagNumber = "";
-        for (let data in array_s) {
-            //マクロの定義column > カーソル位置なら探索不要なのでbreak;
-            if (array_s[data]["column"] > position.character) {
-                break;
-            }
-            tagNumber = data;
-        }
+        const tagIndex = parser.getIndex(parsedData, position.character);
         //カーソル位置のタグ名取得
-        const tagName = array_s[tagNumber]["name"];
-        let jumpStorage = array_s[tagNumber]["pm"]["storage"];
-        let jumpTarget = array_s[tagNumber]["pm"]["target"];
+        const tagName = parsedData[tagIndex]["name"];
+        let jumpStorage = parsedData[tagIndex]["pm"]["storage"];
+        let jumpTarget = parsedData[tagIndex]["pm"]["target"];
         //TODO:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
         //リファクタリングに時間がかかりそうなことや、バグの懸念、今後も設計が変わるおそれがあるので今はこのままで
         if (jumpStorage === undefined) {
-            if (array_s[tagNumber]["pm"]["file"] !== undefined) {
-                jumpStorage = array_s[tagNumber]["pm"]["file"];
+            if (parsedData[tagIndex]["pm"]["file"] !== undefined) {
+                jumpStorage = parsedData[tagIndex]["pm"]["file"];
             }
             else {
                 jumpStorage = document.fileName.substring(document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1);
@@ -88,7 +82,7 @@ class TyranoJumpProvider {
             //変数を使っている場合はジャンプさせない
             const variableStr = /&f\.|&sf\.|&tf\.|&mp\|/;
             if (!fs.existsSync(vscode.Uri.file(`${projectPath}${infoWs.pathDelimiter}${jumpTagObject[tagName]}${infoWs.pathDelimiter}${jumpStorage}`).fsPath)) {
-                vscode.window.showWarningMessage(`${array_s[tagNumber]["pm"]["storage"]}は存在しないファイルです。`);
+                vscode.window.showWarningMessage(`${parsedData[tagIndex]["pm"]["storage"]}は存在しないファイルです。`);
                 return;
             }
             const jumpDefinitionFile = await vscode.workspace.openTextDocument(vscode.Uri.file(`${projectPath}${infoWs.pathDelimiter}${jumpTagObject[tagName]}${infoWs.pathDelimiter}${jumpStorage}`));
@@ -104,8 +98,7 @@ class TyranoJumpProvider {
                 vscode.window.showInformationMessage("storageやtargetパラメータに変数を使用しているためジャンプできません。");
                 return;
             }
-            const tmpParse = infoWs.parser.parseScenario(jumpDefinitionFile.getText());
-            const jumpDefinitionArray_s = tmpParse["array_s"];
+            const jumpDefinitionArray_s = parser.parseText(jumpDefinitionFile.getText());
             //ラベル探索して見つかったらその位置でジャンプしてreturn
             for (let data in jumpDefinitionArray_s) {
                 if (jumpDefinitionArray_s[data]["name"] === "label") {
