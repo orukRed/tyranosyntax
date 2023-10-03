@@ -222,7 +222,6 @@ class InformationWorkSpace {
         if (scenarioData != undefined) {
             const parsedData = this.parser.parseText(scenarioData.getText()); //構文解析
             this.labelMap.set(absoluteScenarioFilePath, new Array());
-            const array_s = parsedData["array_s"];
             let isIscript = false;
             let iscriptSentence = "";
             let description = "";
@@ -231,7 +230,7 @@ class InformationWorkSpace {
             await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
             await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
             await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
-            for (let data of array_s) {
+            for (let data of parsedData) {
                 //iscript-endscript間のテキストを取得。
                 if (isIscript && data["name"] === "text") {
                     iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(data["line"]).text;

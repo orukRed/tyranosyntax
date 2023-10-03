@@ -1,4 +1,3 @@
-import { InformationWorkSpace } from "./InformationWorkSpace";
 import * as path from 'path';
 
 /**
@@ -12,36 +11,34 @@ export class Parser {
 	public static getInstance(): Parser {
 		return this.instance;
 	}
+
 	/**
-	 * 与えられた行とカーソルを引数として、カーソルより左側のタグを返却する
-	 * @param line 
+	 * 引数から、カーソルより左側のタグを返却する
+	 * @param parsedData getParseTextで取得したパース済みのデータ
+	 * @param character カーソル位置(position.character)
 	 * @returns 
 	 */
-	public getTagName(line: string, cursor: string): string {
-		return ""
+	public getIndex(parsedData: any, character: number): number {
+		let ret: number = -1;
+		for (const [index, data] of parsedData.entries()) {
+			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
+			if (data["column"] > character) {
+				return ret;
+			}
+			ret = index;
+		}
+		return ret;
 	}
 
-	/**
-	 * 与えられた行とカーソルを引数として、カーソルより左側のタグのパラメータ名を返却する
-	 */
-	public getParameterName(line: string, cursor: string){
 
-	}
-
-	/**
-	 * 与えられた行とカーソルを引数として、カーソルより左側のタグのパラメータ値を返却する
-	 */
-	public getParameterValue(line: string, cursor: string){
-
-	}
 
 	/**
 	 * 引数で与えたテキストをパースして、パースしたデータを返却します。
 	 * @param text 
 	 * @returns 
 	 */
-	public parseText(text: string): Object {
-		return this.parser.parseScenario(text);
+	public parseText(text: string): any {
+		return this.parser.parseScenario(text)["array_s"];
 	}
 
 }

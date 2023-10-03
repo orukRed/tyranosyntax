@@ -1,9 +1,11 @@
 
 import * as vscode from 'vscode';
-import { ConstantVariables } from '../ConstantVariables';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import { Parser } from '../Parser';
 
+/**
+ * F12押したタグの定義元へジャンプするクラスです。
+ */
 export class TyranoDefinitionProvider {
 
 	private infoWs = InformationWorkSpace.getInstance();
@@ -25,20 +27,10 @@ export class TyranoDefinitionProvider {
 	async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
 
 		const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-		let parsedData = this.parser.parseText(document.lineAt(position.line).text);
-		const array_s = parsedData["array_s"];
-
-		//F12押した付近のタグのデータを取得
-		let tagNumber: string = "";
-		for (let data in array_s) {
-			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
-			if (array_s[data]["column"] > position.character) {
-				break;
-			}
-			tagNumber = data;
-		}
+		const parsedData = this.parser.parseText(document.lineAt(position.line).text);
+		const tagIndex: number = this.parser.getIndex(parsedData, position.character);
 		//カーソル位置のマクロのMapデータ取得
-		const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(array_s[tagNumber]["name"]);
+		const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(parsedData[tagIndex]["name"]);
 
 		return retMacroData?.location;
 	}

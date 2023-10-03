@@ -1,6 +1,5 @@
 
 import * as vscode from 'vscode';
-import { ConstantVariables } from '../ConstantVariables';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import * as fs from 'fs';
 import { Parser } from '../Parser';
@@ -23,9 +22,7 @@ export class TyranoJumpProvider {
 			return;
 		}
 		const projectPath = await infoWs.getProjectPathByFilePath(document.uri.fsPath);
-		let parsedData = parser.parseText(document.lineAt(position.line).text);
-		const array_s = parsedData["array_s"];
-
+		const parsedData = parser.parseText(document.lineAt(position.line).text);
 
 		// TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
 		const tags: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
@@ -42,25 +39,18 @@ export class TyranoJumpProvider {
 
 
 		//F12押した付近のタグのデータを取得
-		let tagNumber: string = "";
-		for (let data in array_s) {
-			//マクロの定義column > カーソル位置なら探索不要なのでbreak;
-			if (array_s[data]["column"] > position.character) {
-				break;
-			}
-			tagNumber = data;
-		}
+		const tagIndex: number = parser.getIndex(parsedData, position.character);
 
 		//カーソル位置のタグ名取得
-		const tagName = array_s[tagNumber]["name"];
-		let jumpStorage = array_s[tagNumber]["pm"]["storage"];
-		let jumpTarget = array_s[tagNumber]["pm"]["target"];
+		const tagName = parsedData[tagIndex]["name"];
+		let jumpStorage = parsedData[tagIndex]["pm"]["storage"];
+		let jumpTarget = parsedData[tagIndex]["pm"]["target"];
 
 		//TODO:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
 		//リファクタリングに時間がかかりそうなことや、バグの懸念、今後も設計が変わるおそれがあるので今はこのままで
 		if (jumpStorage === undefined) {
-			if (array_s[tagNumber]["pm"]["file"] !== undefined) {
-				jumpStorage = array_s[tagNumber]["pm"]["file"];
+			if (parsedData[tagIndex]["pm"]["file"] !== undefined) {
+				jumpStorage = parsedData[tagIndex]["pm"]["file"];
 			} else {
 				jumpStorage = document.fileName.substring(document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,);
 			}
@@ -74,7 +64,7 @@ export class TyranoJumpProvider {
 			//変数を使っている場合はジャンプさせない
 			const variableStr = /&f\.|&sf\.|&tf\.|&mp\|/
 			if (!fs.existsSync(vscode.Uri.file(`${projectPath}${infoWs.pathDelimiter}${jumpTagObject[tagName]}${infoWs.pathDelimiter}${jumpStorage}`).fsPath)) {
-				vscode.window.showWarningMessage(`${array_s[tagNumber]["pm"]["storage"]}は存在しないファイルです。`);
+				vscode.window.showWarningMessage(`${parsedData[tagIndex]["pm"]["storage"]}は存在しないファイルです。`);
 				return;
 			}
 
@@ -93,9 +83,7 @@ export class TyranoJumpProvider {
 				return;
 			}
 
-			const tmpParse = parser.parseText(jumpDefinitionFile.getText());
-			const jumpDefinitionArray_s = tmpParse["array_s"];
-
+			const jumpDefinitionArray_s = parser.parseText(jumpDefinitionFile.getText());
 
 			//ラベル探索して見つかったらその位置でジャンプしてreturn
 			for (let data in jumpDefinitionArray_s) {

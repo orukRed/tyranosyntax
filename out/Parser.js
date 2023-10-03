@@ -37,22 +37,21 @@ class Parser {
         return this.instance;
     }
     /**
-     * 与えられた行とカーソルを引数として、カーソルより左側のタグを返却する
-     * @param line
+     * 引数から、カーソルより左側のタグを返却する
+     * @param parsedData getParseTextで取得したパース済みのデータ
+     * @param character カーソル位置(position.character)
      * @returns
      */
-    getTagName(line, cursor) {
-        return "";
-    }
-    /**
-     * 与えられた行とカーソルを引数として、カーソルより左側のタグのパラメータ名を返却する
-     */
-    getParameterName(line, cursor) {
-    }
-    /**
-     * 与えられた行とカーソルを引数として、カーソルより左側のタグのパラメータ値を返却する
-     */
-    getParameterValue(line, cursor) {
+    getIndex(parsedData, character) {
+        let ret = -1;
+        for (const [index, data] of parsedData.entries()) {
+            //マクロの定義column > カーソル位置なら探索不要なのでbreak;
+            if (data["column"] > character) {
+                return ret;
+            }
+            ret = index;
+        }
+        return ret;
     }
     /**
      * 引数で与えたテキストをパースして、パースしたデータを返却します。
@@ -60,7 +59,7 @@ class Parser {
      * @returns
      */
     parseText(text) {
-        return this.parser.parseScenario(text);
+        return this.parser.parseScenario(text)["array_s"];
     }
 }
 exports.Parser = Parser;

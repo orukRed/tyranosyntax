@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TyranoDefinitionProvider = void 0;
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const Parser_1 = require("../Parser");
+/**
+ * F12押したタグの定義元へジャンプするクラスです。
+ */
 class TyranoDefinitionProvider {
     infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
     parser = Parser_1.Parser.getInstance();
@@ -19,19 +22,10 @@ class TyranoDefinitionProvider {
      */
     async provideDefinition(document, position, token) {
         const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-        let parsedData = this.parser.parseText(document.lineAt(position.line).text);
-        const array_s = parsedData["array_s"];
-        //F12押した付近のタグのデータを取得
-        let tagNumber = "";
-        for (let data in array_s) {
-            //マクロの定義column > カーソル位置なら探索不要なのでbreak;
-            if (array_s[data]["column"] > position.character) {
-                break;
-            }
-            tagNumber = data;
-        }
+        const parsedData = this.parser.parseText(document.lineAt(position.line).text);
+        const tagIndex = this.parser.getIndex(parsedData, position.character);
         //カーソル位置のマクロのMapデータ取得
-        const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(array_s[tagNumber]["name"]);
+        const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(parsedData[tagIndex]["name"]);
         return retMacroData?.location;
     }
 }

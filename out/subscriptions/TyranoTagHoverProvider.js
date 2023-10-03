@@ -85,7 +85,7 @@ ${textCopy.join('  \n')}
             const tag = matcher[1];
             //parameter名(storageとかgraphicとか)取得
             const parameter = document.getText(parameterWordRange).match(/(\w+)="/)[1];
-            //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう
+            //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう？ 要検討
             const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
             const match = document.getText(parameterWordRange).match(regExpParameterValue);
             const parameterValue = match !== null ? match[1] : "";

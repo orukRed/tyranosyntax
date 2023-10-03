@@ -97,10 +97,9 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.parseText(scenarioDocument.getText()); //構文解析
-			const array_s = parsedData["array_s"];
+			const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
 			let diagnostics: vscode.Diagnostic[] = [];
-			for (let data of array_s) {
+			for (let data of parsedData) {
 				//early return
 				if (data["name"] === "comment") {
 					continue;
@@ -135,10 +134,9 @@ export class TyranoDiagnostic {
 				continue;
 			}
 
-			const parsedData: object = this.parser.parseText(scenarioDocument.getText()); //構文解析
-			const array_s = parsedData["array_s"];
+			const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
 			let diagnostics: vscode.Diagnostic[] = [];
-			for (let data of array_s) {
+			for (let data of parsedData) {
 				if (data["name"] === "comment") {
 					continue;
 				}
@@ -211,11 +209,10 @@ export class TyranoDiagnostic {
 								diagnostics.push(diag);
 								continue;
 							}
-							const storageParsedData: object = this.parser.parseText(storageScenarioDocument.getText()); //構文解析
-							const storageArray_s = storageParsedData["array_s"];
+							const storageParsedData = this.parser.parseText(storageScenarioDocument.getText()); //構文解析
 							let isLabelExsit: boolean = false;//targetで指定したラベルが存在しているかどうか
-							for (let storageData in storageArray_s) {
-								if ((storageArray_s[storageData]["pm"]["label_name"] === data["pm"]["target"])) {
+							for (let storageData in storageParsedData) {
+								if ((storageParsedData[storageData]["pm"]["label_name"] === data["pm"]["target"])) {
 									isLabelExsit = true;
 									break;
 								}

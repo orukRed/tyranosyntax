@@ -98,9 +98,8 @@ class TyranoDiagnostic {
                 continue;
             }
             const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
-            const array_s = parsedData["array_s"];
             let diagnostics = [];
-            for (let data of array_s) {
+            for (let data of parsedData) {
                 //early return
                 if (data["name"] === "comment") {
                     continue;
@@ -131,9 +130,8 @@ class TyranoDiagnostic {
                 continue;
             }
             const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
-            const array_s = parsedData["array_s"];
             let diagnostics = [];
-            for (let data of array_s) {
+            for (let data of parsedData) {
                 if (data["name"] === "comment") {
                     continue;
                 }
@@ -198,10 +196,9 @@ class TyranoDiagnostic {
                                 continue;
                             }
                             const storageParsedData = this.parser.parseText(storageScenarioDocument.getText()); //構文解析
-                            const storageArray_s = storageParsedData["array_s"];
                             let isLabelExsit = false; //targetで指定したラベルが存在しているかどうか
-                            for (let storageData in storageArray_s) {
-                                if ((storageArray_s[storageData]["pm"]["label_name"] === data["pm"]["target"])) {
+                            for (let storageData in storageParsedData) {
+                                if ((storageParsedData[storageData]["pm"]["label_name"] === data["pm"]["target"])) {
                                     isLabelExsit = true;
                                     break;
                                 }
