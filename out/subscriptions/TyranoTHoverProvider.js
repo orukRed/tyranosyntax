@@ -110,4 +110,4 @@ ${textCopy.join('  \n')}
     }
 }
 exports.TyranoHoverProvider = TyranoHoverProvider;
-//# sourceMappingURL=TyranoTagHoverProvider.js.map
+//# sourceMappingURL=TyranoTHoverProvider.js.map

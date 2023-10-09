@@ -186,7 +186,7 @@ module.exports.parseScenario = function (text_str) {
       }
 
       if (text != "") {
-        var nameParam = "text"
+        var nameParam = "text";
         if (flag_comment == true || first_char === ";") {
           nameParam = "comment";
           // text = text.replaceAll(";", "");
@@ -597,7 +597,7 @@ var tyranoParser = {
         }
 
         if (text != "") {
-          var nameParam = "text"
+          var nameParam = "text";
           if (flag_comment == true || first_char === ";") {
             nameParam = "comment";
             // text = text.replaceAll(";", "");

@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as glob from 'glob';
 
 import { TyranoCreateTagByShortcutKey } from './subscriptions/TyranoCreateTagByShortcutKey';
-import { TyranoTagHoverProvider } from './subscriptions/TyranoTagHoverProvider';
+import { TyranoHoverProvider } from './subscriptions/TyranoHoverProvider';
 import { TyranoOutlineProvider } from './subscriptions/TyranoOutlineProvider';
 import { TyranoCompletionItemProvider } from './subscriptions/TyranoCompletionItemProvider';
 import { TyranoDiagnostic } from './subscriptions/TyranoDiagnostic';
@@ -23,8 +23,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	TyranoLogger.print("TyranoScript syntax initialize start.");
 	//登録処理
 	//サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
-	context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider()));
-	TyranoLogger.print("TyranoTagHoverProvider activate");
+	context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoHoverProvider()));
+	TyranoLogger.print("TyranoHoverProvider activate");
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new TyranoOutlineProvider()));
 	TyranoLogger.print("TyranoOutlineProvider activate");
 	context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider(), '.'));

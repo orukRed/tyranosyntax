@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.19.0]- 2023-10-09
+
+- タグ補完で画像ファイルの候補を出した時、プレビュー表示されるようにしました。
+- 内部の処理を微修正しました。
+
 ## [0.18.0]- 2023-10-03
 
 - ツールチップで画像を表示できるようにしました。

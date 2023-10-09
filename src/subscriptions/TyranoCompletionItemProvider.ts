@@ -184,7 +184,14 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 							detail: ""
 						});
 						comp.kind = vscode.CompletionItemKind.File;
-						comp.insertText = new vscode.SnippetString(path.relative(referencePath, resource.filePath).replace(/\\/g, "/"));//基準パスからの相対パス
+						const referenceFilePath = path.relative(referencePath, resource.filePath).replace(/\\/g, "/");//基準パスからの相対パス
+						comp.documentation = new vscode.MarkdownString(`${referenceFilePath}<br>`);
+						comp.documentation.appendMarkdown(`<img src="${referenceFilePath}" width=350>`);
+						comp.documentation.supportHtml = true;
+						comp.documentation.isTrusted = true;
+						comp.documentation.supportThemeIcons = true;
+						comp.documentation.baseUri = vscode.Uri.file(path.join(referencePath, path.sep));
+						comp.insertText = new vscode.SnippetString(referenceFilePath);//基準パスからの相対パス
 						completions.push(comp);
 					}
 				});
