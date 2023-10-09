@@ -23,6 +23,8 @@ vscodeの`ファイル`→`ファイルを開く`から、
 
 ![](src/readme_img/completion.gif)
 
+![](src/readme_img/completion_img.gif)
+
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
 

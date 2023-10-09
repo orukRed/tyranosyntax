@@ -64,11 +64,14 @@ ${textCopy.join('  \n')}
      * @returns
      */
     async createImageViewMarkdownText(paramValue, projectPath, defaultPath) {
+        //chara/akane/angry.png
         const markdownText = new vscode.MarkdownString(`${paramValue}<br>`);
         markdownText.appendMarkdown(`<img src="${paramValue}" width=350>`);
         markdownText.supportHtml = true;
         markdownText.isTrusted = true;
         markdownText.supportThemeIcons = true;
+        // c:\\Users\\kuro\\Desktop\\Programming\\tyrano_test_project
+        //data/fgimage
         markdownText.baseUri = vscode.Uri.file(path_1.default.join(projectPath, defaultPath, path_1.default.sep));
         return markdownText;
     }
@@ -110,4 +113,4 @@ ${textCopy.join('  \n')}
     }
 }
 exports.TyranoHoverProvider = TyranoHoverProvider;
-//# sourceMappingURL=TyranoTagHoverProvider.js.map
+//# sourceMappingURL=TyranoHoverProvider.js.map

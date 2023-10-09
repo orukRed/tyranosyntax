@@ -28,7 +28,7 @@ exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
-const TyranoTagHoverProvider_1 = require("./subscriptions/TyranoTagHoverProvider");
+const TyranoHoverProvider_1 = require("./subscriptions/TyranoHoverProvider");
 const TyranoOutlineProvider_1 = require("./subscriptions/TyranoOutlineProvider");
 const TyranoCompletionItemProvider_1 = require("./subscriptions/TyranoCompletionItemProvider");
 const TyranoDiagnostic_1 = require("./subscriptions/TyranoDiagnostic");
@@ -41,8 +41,8 @@ async function activate(context) {
     TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize start.");
     //登録処理
     //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
-    context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoTagHoverProvider_1.TyranoTagHoverProvider()));
-    TyranoLogger_1.TyranoLogger.print("TyranoTagHoverProvider activate");
+    context.subscriptions.push(vscode.languages.registerHoverProvider(TYRANO_MODE, new TyranoHoverProvider_1.TyranoHoverProvider()));
+    TyranoLogger_1.TyranoLogger.print("TyranoHoverProvider activate");
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(TYRANO_MODE, new TyranoOutlineProvider_1.TyranoOutlineProvider()));
     TyranoLogger_1.TyranoLogger.print("TyranoOutlineProvider activate");
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(TYRANO_MODE, new TyranoCompletionItemProvider_1.TyranoCompletionItemProvider(), '.'));

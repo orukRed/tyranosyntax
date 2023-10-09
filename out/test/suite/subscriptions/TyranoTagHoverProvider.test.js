@@ -26,13 +26,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 const vscode = __importStar(require("vscode"));
-const TyranoTagHoverProvider_1 = require("../../../subscriptions/TyranoTagHoverProvider");
+const TyranoHoverProvider_1 = require("../../../subscriptions/TyranoHoverProvider");
 // import * as myExtension from '../../extension';
 suite('TyranoTagHoverProvider.provideHover関数', () => {
     vscode.window.showInformationMessage('Start all tests.');
     test('正常系', () => {
         //値定義
-        const thp = new TyranoTagHoverProvider_1.TyranoTagHoverProvider();
+        const thp = new TyranoHoverProvider_1.TyranoHoverProvider();
         // const excepted = Object.defineProperty(document.lineAt(0), 'text',{
         // 	value:"@elsif exp=\"true\"",
         // 	writable:false,

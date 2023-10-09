@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import path from 'path';
 import { InformationWorkSpace } from '../InformationWorkSpace';
 
-export class TyranoTagHoverProvider {
+export class TyranoHoverProvider {
 	private jsonTyranoSnippet: string
 	private regExp: RegExp
 	private infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
@@ -42,12 +42,14 @@ ${textCopy.join('  \n')}
 	 */
 	private async createImageViewMarkdownText(paramValue: string, projectPath: string, defaultPath: string): Promise<vscode.MarkdownString> {
 
-
+		//chara/akane/angry.png
 		const markdownText = new vscode.MarkdownString(`${paramValue}<br>`);
 		markdownText.appendMarkdown(`<img src="${paramValue}" width=350>`);
 		markdownText.supportHtml = true;
 		markdownText.isTrusted = true;
 		markdownText.supportThemeIcons = true;
+		// c:\\Users\\kuro\\Desktop\\Programming\\tyrano_test_project
+		//data/fgimage
 		markdownText.baseUri = vscode.Uri.file(path.join(projectPath, defaultPath, path.sep));
 		return markdownText;
 	}
