@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.19.1]- 2023-10-09
+
+- 内部の処理を微修正しました。
+  - パーサー処理を外部から呼び出すのでなく、内部で処理するようにしました。
+  - 動作の変更は意図していませんが、何かしらのバグが起きる可能性があります。
+
 ## [0.19.0]- 2023-10-09
 
 - タグ補完で画像ファイルの候補を出した時、プレビュー表示されるようにしました。
