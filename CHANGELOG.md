@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.19.1]- 2023-10-09
+## [0.19.1]- 2023-10-10
 
 - 内部の処理を微修正しました。
   - パーサー処理を外部から呼び出すのでなく、内部で処理するようにしました。
