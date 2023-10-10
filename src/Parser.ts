@@ -46,8 +46,8 @@ export class Parser {
 	//----------------------------------------------
 	// 以下、移植したパーサー処理
 	//----------------------------------------------
+	// private parser = require(`.${path.sep}lib${path.sep}tyrano_parser.js`);
 	private flag_script = false;
-	private parser = require(`.${path.sep}lib${path.sep}tyrano_parser.js`);
 	/**
 	 * ティラノスクリプトのkag.parser.jsに存在するparseScenario関数を移植したものです。
 	 * @param text 
