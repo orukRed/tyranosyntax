@@ -50,6 +50,16 @@ class TyranoLogger {
         const currentTime = new Date();
         TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);
     }
+    /**
+     * Exceptionで受け取った値を入れます。引数で与えられた型がError型の場合、スタックトレースを出力します。
+     * @param e Exceptionで受け取った値
+     */
+    static printStackTrace(e) {
+        if (e instanceof Error) {
+            const currentTime = new Date();
+            TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] ${e.stack}`);
+        }
+    }
 }
 exports.TyranoLogger = TyranoLogger;
 //# sourceMappingURL=TyranoLogger.js.map

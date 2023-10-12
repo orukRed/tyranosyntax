@@ -35,6 +35,7 @@ const LabelData_1 = require("./defineData/LabelData");
 const MacroParameterData_1 = require("./defineData/MacroParameterData");
 const NameParamData_1 = require("./defineData/NameParamData");
 const Parser_1 = require("./Parser");
+const InformationExtension_1 = require("./InformationExtension");
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
 /**
@@ -83,7 +84,17 @@ class InformationWorkSpace {
             this.defineMacroMap.set(projectPath, new Map());
             this._resourceFileMap.set(projectPath, []);
             this.variableMap.set(projectPath, new Map());
-            this.suggestions.set(projectPath, JSON.parse(fs.readFileSync(__dirname + `${this.pathDelimiter}.${this.pathDelimiter}..${this.pathDelimiter}snippet${this.pathDelimiter}tyrano.snippet.json`, "utf8")));
+            try {
+                const passJoined = path.join(InformationExtension_1.InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
+                const jsonData = fs.readFileSync(passJoined, "utf8");
+                const parsedJson = JSON.parse(jsonData);
+                this.suggestions.set(projectPath, parsedJson);
+            }
+            catch (error) {
+                TyranoLogger_1.TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", TyranoLogger_1.ErrorLevel.ERROR);
+                TyranoLogger_1.TyranoLogger.printStackTrace(error);
+                this.suggestions.set(projectPath, InformationExtension_1.InformationExtension.snippetObject); //念のための代替処理。最終的にはこの処理をなくしたい。
+            }
             this.nameMap.set(projectPath, []);
         }
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {

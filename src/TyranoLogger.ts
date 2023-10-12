@@ -29,5 +29,17 @@ export class TyranoLogger {
 		TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);
 	}
 
+	/**
+	 * Exceptionで受け取った値を入れます。引数で与えられた型がError型の場合、スタックトレースを出力します。
+	 * @param e Exceptionで受け取った値
+	 */
+	public static printStackTrace(e: Error | unknown) {
+		if (e instanceof Error) {
+			const currentTime = new Date();
+			TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] ${e.stack}`);
+		}
+
+	}
+
 }
 

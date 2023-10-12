@@ -36,8 +36,10 @@ const TyranoLogger_1 = require("./TyranoLogger");
 const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProvider");
 const TyranoJumpProvider_1 = require("./subscriptions/TyranoJumpProvider");
+const InformationExtension_1 = require("./InformationExtension");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 async function activate(context) {
+    InformationExtension_1.InformationExtension.path = context.extensionPath;
     TyranoLogger_1.TyranoLogger.print("TyranoScript syntax initialize start.");
     //登録処理
     //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
@@ -59,7 +61,13 @@ async function activate(context) {
         TyranoLogger_1.TyranoLogger.print("workspace is opening");
         const tyranoDiagnostic = new TyranoDiagnostic_1.TyranoDiagnostic();
         const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-        await infoWs.initializeMaps();
+        try {
+            await infoWs.initializeMaps();
+        }
+        catch (error) {
+            TyranoLogger_1.TyranoLogger.print("infoWs.initializeMaps() failed", TyranoLogger_1.ErrorLevel.ERROR);
+            TyranoLogger_1.TyranoLogger.printStackTrace(error);
+        }
         infoWs.extensionPath = context.extensionPath;
         TyranoLogger_1.TyranoLogger.print("TyranoDiagnostic activate");
         let tyranoJumpProvider = new TyranoJumpProvider_1.TyranoJumpProvider();
@@ -80,7 +88,6 @@ async function activate(context) {
                         await tyranoDiagnostic.createDiagnostics(e.document.fileName);
                     }
                     catch (error) {
-                        console.log(error);
                         TyranoLogger_1.TyranoLogger.print(`診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`, TyranoLogger_1.ErrorLevel.ERROR);
                     }
                     finally {

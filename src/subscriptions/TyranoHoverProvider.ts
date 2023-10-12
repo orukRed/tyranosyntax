@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import path from 'path';
 import { InformationWorkSpace } from '../InformationWorkSpace';
+import { InformationExtension } from '../InformationExtension';
 
 export class TyranoHoverProvider {
 	private jsonTyranoSnippet: string
@@ -9,7 +10,7 @@ export class TyranoHoverProvider {
 	private infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
 
 	constructor() {
-		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path.join(__dirname, "./../../Tooltip/tyrano.Tooltip.json"), "utf8"));
+		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path.join(InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`), "utf8"));
 		// this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
 		this.regExp = /(\[||\@)(\w+)(\s*)/;//取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
 	}
