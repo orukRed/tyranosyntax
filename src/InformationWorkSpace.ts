@@ -73,6 +73,9 @@ export class InformationWorkSpace {
 				const jsonData = fs.readFileSync(passJoined, "utf8");
 				const parsedJson = JSON.parse(jsonData);
 				this.suggestions.set(projectPath, parsedJson);
+				if (this.suggestions.size === 0) {
+					throw new Error("suggestions is empty");
+				}
 			} catch (error) {
 				TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", ErrorLevel.ERROR);
 				TyranoLogger.printStackTrace(error);
