@@ -4,7 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.19.2]- 2023-10-14
+## [0.19.3]- 2023-10-13
+
+- ver0.19.3で発生したマウスホバーによるツールチップが表示されない不具合を修正しました。
+
+## [0.19.2]- 2023-10-13
 
 - 内部の処理を微修正しました。この変更による動作の変更はありません。
 
