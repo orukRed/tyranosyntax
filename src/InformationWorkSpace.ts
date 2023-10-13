@@ -9,6 +9,8 @@ import { LabelData } from './defineData/LabelData';
 import { MacroParameterData } from './defineData/MacroParameterData';
 import { NameParamData } from './defineData/NameParamData';
 import { Parser } from './Parser';
+import { InformationExtension } from './InformationExtension';
+import { json } from 'stream/consumers';
 
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
@@ -66,7 +68,19 @@ export class InformationWorkSpace {
 			this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
 			this._resourceFileMap.set(projectPath, []);
 			this.variableMap.set(projectPath, new Map<string, VariableData>());
-			this.suggestions.set(projectPath, JSON.parse(fs.readFileSync(__dirname + `${this.pathDelimiter}.${this.pathDelimiter}..${this.pathDelimiter}snippet${this.pathDelimiter}tyrano.snippet.json`, "utf8")));
+			try {
+				const passJoined = path.join(InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
+				const jsonData = fs.readFileSync(passJoined, "utf8");
+				const parsedJson = JSON.parse(jsonData);
+				this.suggestions.set(projectPath, parsedJson);
+				if (this.suggestions.size === 0) {
+					throw new Error("suggestions is empty");
+				}
+			} catch (error) {
+				TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", ErrorLevel.ERROR);
+				TyranoLogger.printStackTrace(error);
+				this.suggestions.set(projectPath, InformationExtension.snippetObject);//念のための代替処理。最終的にはこの処理をなくしたい。
+			}
 			this.nameMap.set(projectPath, []);
 		}
 

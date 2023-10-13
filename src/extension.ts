@@ -16,10 +16,12 @@ import { TyranoDefinitionProvider } from './subscriptions/TyranoDefinitionProvid
 import { TyranoReferenceProvider } from './subscriptions/TyranoReferenceProvider';
 import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
 import { TyranoJumpProvider } from './subscriptions/TyranoJumpProvider';
+import { InformationExtension } from './InformationExtension';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
 export async function activate(context: vscode.ExtensionContext) {
+	InformationExtension.path = context.extensionPath;
 	TyranoLogger.print("TyranoScript syntax initialize start.");
 	//登録処理
 	//サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
@@ -45,7 +47,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		const tyranoDiagnostic = new TyranoDiagnostic();
 		const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
-		await infoWs.initializeMaps();
+		try {
+			await infoWs.initializeMaps();
+		} catch (error) {
+			TyranoLogger.print("infoWs.initializeMaps() failed", ErrorLevel.ERROR);
+			TyranoLogger.printStackTrace(error);
+		}
 		infoWs.extensionPath = context.extensionPath;
 		TyranoLogger.print("TyranoDiagnostic activate");
 		let tyranoJumpProvider = new TyranoJumpProvider();
@@ -66,7 +73,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					try {
 						await tyranoDiagnostic.createDiagnostics(e.document.fileName);
 					} catch (error) {
-						console.log(error);
 						TyranoLogger.print(`診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`, ErrorLevel.ERROR);
 					} finally {
 						tyranoDiagnostic.isDiagnosing = false;
