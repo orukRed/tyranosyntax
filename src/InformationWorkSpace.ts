@@ -62,9 +62,13 @@ export class InformationWorkSpace {
 	 */
 	public async initializeMaps() {
 		TyranoLogger.print(`InformationWorkSpace.initializeMaps()`);
+		vscode.workspace.workspaceFolders?.forEach((value) => {
+			TyranoLogger.print(`Opening workspace is ${value.uri.fsPath}`);
+		});
 
 		//最初のキーをプロジェクト名で初期化
 		for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
+			TyranoLogger.print(`${projectPath} variable initialzie start`);
 			this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
 			this._resourceFileMap.set(projectPath, []);
 			this.variableMap.set(projectPath, new Map<string, VariableData>());
@@ -73,7 +77,7 @@ export class InformationWorkSpace {
 				const jsonData = fs.readFileSync(passJoined, "utf8");
 				const parsedJson = JSON.parse(jsonData);
 				this.suggestions.set(projectPath, parsedJson);
-				if (this.suggestions.size === 0) {
+				if (Object.keys(this.suggestions.get(projectPath)!).length === 0) {
 					throw new Error("suggestions is empty");
 				}
 			} catch (error) {
@@ -82,6 +86,7 @@ export class InformationWorkSpace {
 				this.suggestions.set(projectPath, InformationExtension.snippetObject);//念のための代替処理。最終的にはこの処理をなくしたい。
 			}
 			this.nameMap.set(projectPath, []);
+			TyranoLogger.print(`${projectPath} variable initialzie end`);
 		}
 
 		for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
