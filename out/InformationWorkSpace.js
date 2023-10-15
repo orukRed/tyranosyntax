@@ -100,7 +100,6 @@ class InformationWorkSpace {
             catch (error) {
                 TyranoLogger_1.TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", TyranoLogger_1.ErrorLevel.ERROR);
                 TyranoLogger_1.TyranoLogger.printStackTrace(error);
-                this.suggestions.set(projectPath, InformationExtension_1.InformationExtension.snippetObject); //念のための代替処理。最終的にはこの処理をなくしたい。
             }
             this.nameMap.set(projectPath, []);
             TyranoLogger_1.TyranoLogger.print(`${projectPath} variable initialzie end`);
@@ -185,6 +184,7 @@ class InformationWorkSpace {
         const reg = /[^a-zA-Z0-9_$]/g;
         // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
         const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
+        const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
         const parsedData = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
         const projectPath = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
         const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
@@ -193,7 +193,7 @@ class InformationWorkSpace {
             enter: (path) => {
                 try {
                     //path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
-                    if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
+                    if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && (reg2.test(path.parentPath.toString()) || reg3.test(path.parentPath.toString()))) {
                         let macroName = path.toString().split(".")[4]; //MacroNameの部分を抽出
                         if (macroName != undefined && macroName != null) {
                             let description = path.parentPath.parentPath.toString().replace(";", "").replace(path.parentPath.toString(), "");

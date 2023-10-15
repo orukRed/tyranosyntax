@@ -83,7 +83,6 @@ export class InformationWorkSpace {
 			} catch (error) {
 				TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", ErrorLevel.ERROR);
 				TyranoLogger.printStackTrace(error);
-				this.suggestions.set(projectPath, InformationExtension.snippetObject);//念のための代替処理。最終的にはこの処理をなくしたい。
 			}
 			this.nameMap.set(projectPath, []);
 			TyranoLogger.print(`${projectPath} variable initialzie end`);
@@ -180,6 +179,7 @@ export class InformationWorkSpace {
 		const reg = /[^a-zA-Z0-9_$]/g;
 		// const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
 		const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
+		const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
 		const parsedData: object = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
 		const projectPath: string = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
 		const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
@@ -189,7 +189,7 @@ export class InformationWorkSpace {
 			enter: (path: any) => {
 				try {
 					//path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
-					if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && reg2.test(path.parentPath.toString())) {
+					if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && (reg2.test(path.parentPath.toString()) || reg3.test(path.parentPath.toString()))) {
 						let macroName: string = path.toString().split(".")[4];//MacroNameの部分を抽出
 						if (macroName != undefined && macroName != null) {
 
