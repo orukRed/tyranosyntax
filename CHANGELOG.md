@@ -4,6 +4,15 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.19.6]- 2023-10-15
+
+- プロジェクト読み込み失敗したときに、エラー通知を出すようにしました。  
+本拡張機能はティラノスクリプト内のindex.htmlがあるフォルダを、vscodeのフォルダーを開く機能で開くこと前提のつくりとなっているためです。  
+通知が出るのは以下の場合です。  
+  - index.htmlがあるフォルダをvscodeで開き、初期設定完了したとき
+  - index.htmlがあるフォルダをvscodeで開き、初期設定失敗した際
+  - 初期設定完了後、index.htmlがあるフォルダを開いていないとき
+
 ## [0.19.5]- 2023-10-15
 
 - .js拡張子内の、`tyrano.plugin.kag.tag.{タグ名}`で定義されたタグを利用した場合、プロジェクト内にプラグインが存在するにもかかわらず未定義扱いになる問題を修正しました。
