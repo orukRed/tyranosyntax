@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.19.5]- 2023-10-15
+
+- .js拡張子内の、`tyrano.plugin.kag.tag.{タグ名}`で定義されたタグを利用した場合、プロジェクト内にプラグインが存在するにもかかわらず未定義扱いになる問題を修正しました。
+- ver0.19.2で修正した、json読み込み失敗時の処理が不要になったので修正しました。
+- ログを追加しました。
+
 ## [0.19.4]- 2023-10-15
 
 - 内部の処理を微修正しました。この変更による動作の変更はありません。

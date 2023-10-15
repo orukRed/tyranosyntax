@@ -11,7 +11,6 @@ export class TyranoHoverProvider {
 
 	constructor() {
 		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path.join(InformationExtension.path + `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`), "utf8"));
-		console.log(InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`)
 		// this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
 		this.regExp = /(\[||\@)(\w+)(\s*)/;//取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
 	}
