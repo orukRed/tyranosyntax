@@ -10,7 +10,9 @@ export class TyranoHoverProvider {
 	private infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
 
 	constructor() {
-		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path.join(InformationExtension.path + `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`), "utf8"));
+		const infoE: InformationExtension = InformationExtension.getInstance();
+
+		this.jsonTyranoSnippet = JSON.parse(fs.readFileSync(path.join(infoE.path + `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`), "utf8"));
 		// this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
 		this.regExp = /(\[||\@)(\w+)(\s*)/;//取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
 	}

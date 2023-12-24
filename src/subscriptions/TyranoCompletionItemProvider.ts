@@ -196,7 +196,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 						comp.documentation.supportHtml = true;
 						comp.documentation.isTrusted = true;
 						comp.documentation.supportThemeIcons = true;
-						comp.documentation.baseUri = vscode.Uri.file(path.join(referencePath, path.sep));
+						comp.documentation.baseUri = vscode.Uri.joinPath(vscode.Uri.file(referencePath), path.sep);
 						comp.insertText = new vscode.SnippetString(referenceFilePath);//基準パスからの相対パス
 						completions.push(comp);
 					}

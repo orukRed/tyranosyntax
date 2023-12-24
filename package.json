@@ -887,6 +887,10 @@
       {
         "command": "tyrano.jumpToDestination",
         "title": "tyrano.jumpToDestination"
+      },
+      {
+        "command": "tyrano.preview",
+        "title": "tyrano.preview"
       }
     ],
     "keybindings": [
@@ -915,9 +919,40 @@
         "win": "alt+j",
         "mac": "option+j",
         "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.preview",
+        "win": "ctrl+alt+p",
+        "mac": "command+option+p",
+        "when": "editorLangId == tyrano"
+      }
+    ],
+    "debuggers":[
+      {
+        "type": "html",
+        "label": "HTML Debugger",
+        "languages": ["html"],
+        "configurationAttributes": {
+          "launch": {
+            "required": ["request"],
+            "properties": {
+              "request": {
+                "type": "string",
+                "enum": ["launch"],
+                "description": "Request type of 'launch'"
+              },
+              "program": {
+                "type": "string",
+                "description": "Path to HTML file",
+                "default": "${file}"
+              }
+            }
+          }
+        }
       }
     ]
   },
+
   "devDependencies": {
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",

@@ -82,6 +82,7 @@ class InformationWorkSpace {
         vscode.workspace.workspaceFolders?.forEach((value) => {
             TyranoLogger_1.TyranoLogger.print(`Opening workspace is ${value.uri.fsPath}`);
         });
+        const infoE = InformationExtension_1.InformationExtension.getInstance();
         //最初のキーをプロジェクト名で初期化
         for (let projectPath of this.getTyranoScriptProjectRootPaths()) {
             TyranoLogger_1.TyranoLogger.print(`${projectPath} variable initialzie start`);
@@ -89,7 +90,7 @@ class InformationWorkSpace {
             this._resourceFileMap.set(projectPath, []);
             this.variableMap.set(projectPath, new Map());
             try {
-                const passJoined = path.join(InformationExtension_1.InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
+                const passJoined = path.join(infoE.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
                 const jsonData = fs.readFileSync(passJoined, "utf8");
                 const parsedJson = JSON.parse(jsonData);
                 this.suggestions.set(projectPath, parsedJson);

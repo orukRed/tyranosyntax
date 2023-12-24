@@ -7,7 +7,13 @@ class InformationExtension {
     static getInstance() {
         return this.instance;
     }
-    static path = undefined;
+    _path = undefined;
+    get path() {
+        return this._path;
+    }
+    set path(value) {
+        this._path = value;
+    }
 }
 exports.InformationExtension = InformationExtension;
 //# sourceMappingURL=InformationExtension.js.map
