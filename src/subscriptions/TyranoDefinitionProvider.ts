@@ -8,32 +8,32 @@ import { Parser } from '../Parser';
  */
 export class TyranoDefinitionProvider {
 
-	private infoWs = InformationWorkSpace.getInstance();
-	private parser: Parser = Parser.getInstance();
-	constructor() {
+  private infoWs = InformationWorkSpace.getInstance();
+  private parser: Parser = Parser.getInstance();
+  constructor() {
 
-	}
+  }
 
 
-	/**
-	 * Provide the definition of the symbol at the given position and document.
-	 *
-	 * @param document The document in which the command was invoked.
-	 * @param position The position at which the command was invoked.
-	 * @param token A cancellation token.
-	 * @return A definition or a thenable that resolves to such. The lack of a result can be
-	 * signaled by returning `undefined` or `null`.
-	 */
-	async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
+  /**
+   * Provide the definition of the symbol at the given position and document.
+   *
+   * @param document The document in which the command was invoked.
+   * @param position The position at which the command was invoked.
+   * @param token A cancellation token.
+   * @return A definition or a thenable that resolves to such. The lack of a result can be
+   * signaled by returning `undefined` or `null`.
+   */
+  async provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
 
-		const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
-		const parsedData = this.parser.parseText(document.lineAt(position.line).text);
-		const tagIndex: number = this.parser.getIndex(parsedData, position.character);
-		//カーソル位置のマクロのMapデータ取得
-		const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(parsedData[tagIndex]["name"]);
+    const projectPath = await this.infoWs.getProjectPathByFilePath(document.uri.fsPath);
+    const parsedData = this.parser.parseText(document.lineAt(position.line).text);
+    const tagIndex: number = this.parser.getIndex(parsedData, position.character);
+    //カーソル位置のマクロのMapデータ取得
+    const retMacroData = this.infoWs.defineMacroMap.get(projectPath)?.get(parsedData[tagIndex]["name"]);
 
-		return retMacroData?.location;
-	}
+    return retMacroData?.location;
+  }
 
 
 }
