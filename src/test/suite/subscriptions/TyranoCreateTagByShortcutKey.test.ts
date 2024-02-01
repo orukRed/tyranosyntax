@@ -8,52 +8,52 @@ import { TyranoCreateTagByShortcutKey } from '../../../subscriptions/TyranoCreat
 
 
 suite('TyranoCreateTagByShortcutKey.KeyPushShiftEnter関数', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+  vscode.window.showInformationMessage('Start all tests.');
 
-	test('正常系', () => {
-		//値定義
-		let ctby = new TyranoCreateTagByShortcutKey();
-		let excepted = true;
+  test('正常系', () => {
+    //値定義
+    let ctby = new TyranoCreateTagByShortcutKey();
+    let excepted = true;
 
-		//実行
-		let actual = ctby.KeyPushShiftEnter();
+    //実行
+    let actual = ctby.KeyPushShiftEnter();
 
-		//アサート
-		assert.strictEqual(actual, excepted);
-	});
+    //アサート
+    assert.strictEqual(actual, excepted);
+  });
 
 });
 
 
 suite('TyranoCreateTagByShortcutKey.KeyPushCtrlEnter関数', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+  vscode.window.showInformationMessage('Start all tests.');
 
-	test('正常系', () => {
-		//値定義
-		let ctby = new TyranoCreateTagByShortcutKey();
-		let excepted = true;
+  test('正常系', () => {
+    //値定義
+    let ctby = new TyranoCreateTagByShortcutKey();
+    let excepted = true;
 
-		//実行
-		let actual = ctby.KeyPushCtrlEnter();
+    //実行
+    let actual = ctby.KeyPushCtrlEnter();
 
-		//アサート
-		assert.strictEqual(actual, excepted);
-	});
+    //アサート
+    assert.strictEqual(actual, excepted);
+  });
 });
 
 
 suite('TyranoCreateTagByShortcutKey.KeyPushAltEnter関数', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+  vscode.window.showInformationMessage('Start all tests.');
 
-	test('正常系', () => {
-		//値定義
-		let ctby = new TyranoCreateTagByShortcutKey();
-		let excepted = true;
+  test('正常系', () => {
+    //値定義
+    let ctby = new TyranoCreateTagByShortcutKey();
+    let excepted = true;
 
-		//実行
-		let actual = ctby.KeyPushAltEnter();
+    //実行
+    let actual = ctby.KeyPushAltEnter();
 
-		//アサート
-		assert.strictEqual(actual, excepted);
-	});
+    //アサート
+    assert.strictEqual(actual, excepted);
+  });
 });
