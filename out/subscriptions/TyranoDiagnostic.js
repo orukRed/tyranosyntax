@@ -223,9 +223,9 @@ class TyranoDiagnostic {
         return value.indexOf("&") === 0 ? true : false;
     }
     /**
- * 引数に入れた値の先頭に%記号があるかを判断します。
- * @returns trueなら&がある、 falseなら&がない
- */
+   * 引数に入れた値の先頭に%記号があるかを判断します。
+   * @returns trueなら&がある、 falseなら&がない
+   */
     isExistPercentAtBeginning(value) {
         return value.indexOf("%") === 0 ? true : false;
     }
