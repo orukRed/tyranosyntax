@@ -9,93 +9,93 @@ import { TyranoCompletionItemProvider } from '../../../subscriptions/TyranoCompl
 
 
 suite('TyranoCompletionItemProvider.provideCompletionItems', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
-    //値定義
-    const thp = new TyranoCompletionItemProvider();
+	test('正常系', () => {
+		//値定義
+		const thp = new TyranoCompletionItemProvider();
 
-    // const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-    // 	value:"@elsif exp=\"true\"",
-    // 	writable:false,
-    // });	
+		// const excepted = Object.defineProperty(document.lineAt(0), 'text',{
+		// 	value:"@elsif exp=\"true\"",
+		// 	writable:false,
+		// });	
 
-    //実行・期待値
-    // let actual = yjp.provideDocumentSymbols(document,token)!;
+		//実行・期待値
+		// let actual = yjp.provideDocumentSymbols(document,token)!;
 
-    //アサート
-    // assert.strictEqual(actual[0].name, excepted.text);
-  });
+		//アサート
+		// assert.strictEqual(actual[0].name, excepted.text);
+	});
 
 });
 
 suite('TyranoCompletionItemProvider.conpletionLabel', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
+	test('正常系', () => {
 
-  });
+	});
 
 });
 
 suite('TyranoCompletionItemProvider.completionVariable', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
+	test('正常系', () => {
 
-  });
+	});
 
 });
 
 
 suite('TyranoCompletionItemProvider.completionFile', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
+	test('正常系', () => {
 
-  });
+	});
 
 });
 
 
 suite('TyranoCompletionItemProvider.completionParameter', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
+	test('正常系', () => {
 
-  });
+	});
 
 });
 
 
 suite('TyranoCompletionItemProvider.completionTag', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    (tcip as any).completionTag();
+	test('正常系', () => {
+		const tcip = new TyranoCompletionItemProvider();
+		(tcip as any).completionTag();
 
-  });
+	});
 
 });
 
 
 suite('TyranoCompletionItemProvider.removeBracket', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('[bg storage="hoge.png]"'), 'bg storage="hoge.png"');
+	test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
+		const tcip = new TyranoCompletionItemProvider();
+		assert.strictEqual((tcip as any).removeBracket('[bg storage="hoge.png]"'), 'bg storage="hoge.png"');
 
-  });
-  test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('[][][][[][][][[[[][]]]]'), '');
-  });
-  test('異常系 [ ]のない文字列をそのまま返す', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('bg storage="hoge.png"'), 'bg storage="hoge.png"');
-  });
+	});
+	test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
+		const tcip = new TyranoCompletionItemProvider();
+		assert.strictEqual((tcip as any).removeBracket('[][][][[][][][[[[][]]]]'), '');
+	});
+	test('異常系 [ ]のない文字列をそのまま返す', () => {
+		const tcip = new TyranoCompletionItemProvider();
+		assert.strictEqual((tcip as any).removeBracket('bg storage="hoge.png"'), 'bg storage="hoge.png"');
+	});
 
 
 });

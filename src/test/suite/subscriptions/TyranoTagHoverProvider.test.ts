@@ -8,31 +8,31 @@ import { TyranoHoverProvider } from '../../../subscriptions/TyranoHoverProvider'
 
 
 suite('TyranoTagHoverProvider.provideHover関数', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
-    //値定義
-    const thp = new TyranoHoverProvider();
+	test('正常系', () => {
+		//値定義
+		const thp = new TyranoHoverProvider();
 
-    // const excepted = Object.defineProperty(document.lineAt(0), 'text',{
-    // 	value:"@elsif exp=\"true\"",
-    // 	writable:false,
-    // });	
+		// const excepted = Object.defineProperty(document.lineAt(0), 'text',{
+		// 	value:"@elsif exp=\"true\"",
+		// 	writable:false,
+		// });	
 
-    //実行・期待値
-    // let actual = yjp.provideDocumentSymbols(document,token)!;
+		//実行・期待値
+		// let actual = yjp.provideDocumentSymbols(document,token)!;
 
-    //アサート
-    // assert.strictEqual(actual[0].name, excepted.text);
-  });
+		//アサート
+		// assert.strictEqual(actual[0].name, excepted.text);
+	});
 
 });
 
 suite('TyranoTagHoverProvider.createMarkdownText関数', () => {
-  vscode.window.showInformationMessage('Start all tests.');
+	vscode.window.showInformationMessage('Start all tests.');
 
-  test('正常系', () => {
+	test('正常系', () => {
 
-  });
+	});
 
 });

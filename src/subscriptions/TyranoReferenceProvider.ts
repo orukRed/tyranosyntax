@@ -3,15 +3,15 @@ import * as vscode from 'vscode';
 
 export class TyranoReferenceProvider {
 
-  constructor() {
+	constructor() {
 
-  }
+	}
 
 
-  provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): vscode.Location[] | null | undefined {
-    console.log("provideReference");
-    console.log(`document:${document.fileName}\nposition:${position.line}\ncontext:${context}\ntoken:${token}\n`);
+	provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): vscode.Location[] | null | undefined {
+		console.log("provideReference");
+		console.log(`document:${document.fileName}\nposition:${position.line}\ncontext:${context}\ntoken:${token}\n`);
 
-    return null;//未定義の場合null
-  }
+		return null;//未定義の場合null
+	}
 }
