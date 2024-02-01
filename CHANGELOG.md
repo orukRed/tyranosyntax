@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.20.0]- 2024-xx-xx
+
+- 拡張機能の初期化時、ウィンドウ右下にローディング通知が出るようになりました。
+
+
 ## [0.19.6]- 2023-10-15
 
 - プロジェクト読み込み失敗したときに、エラー通知を出すようにしました。  
