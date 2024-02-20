@@ -17,6 +17,7 @@ import { TyranoReferenceProvider } from './subscriptions/TyranoReferenceProvider
 import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
 import { TyranoJumpProvider } from './subscriptions/TyranoJumpProvider';
 import { InformationExtension } from './InformationExtension';
+import { TyranoPreview } from './subscriptions/TyranoPreview';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
@@ -45,8 +46,10 @@ export async function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
-
         TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview.createWindow));
+        TyranoLogger.print("TyranoPreview activate");
+
         const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
         //診断機能の登録
         //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK

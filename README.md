@@ -115,3 +115,8 @@ TyranoScript_syntaxの一部機能は設定ファイルから変更を行うこ�
 - [Googleフォームから報告](https://orukred.github.io/Contact.html)
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
+
+## 免責事項
+
+本ツールを利用したことによって損害・不利益・事故等が
+発生した場合でも、一切の責任を負いません。
