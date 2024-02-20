@@ -4,6 +4,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as glob from 'glob';
+const express = require('express');
+const app = express();
+
 
 import { TyranoCreateTagByShortcutKey } from './subscriptions/TyranoCreateTagByShortcutKey';
 import { TyranoHoverProvider } from './subscriptions/TyranoHoverProvider';
@@ -153,6 +156,21 @@ export async function activate(context: vscode.ExtensionContext) {
         TyranoLogger.printStackTrace(error);
         vscode.window.showErrorMessage(`TyranoScript_syntax初期化中にエラーが発生しました。`);
       }
+      app.get('/', (req: any, res: any) => {
+        res.send('Hello, World!');
+      });
+      const infoWs = InformationWorkSpace.getInstance();
+      const filePath = `C:/Users/kuro/Desktop/Programming/TyranoStudio_win_std_v110d/myprojects/test_project`
+      // const filePath = `C:\Users\kuro\Desktop\Programming\TyranoStudio_win_std_v110d\myprojects\test_project\`
+      // app.use(express.static(path.join(__dirname, filePath)));
+      app.use(express.static((filePath)));
+
+
+      app.listen(3000, () => {
+        console.log('Server is running on port 3000');
+      });
+
+
     });
   }
   run();

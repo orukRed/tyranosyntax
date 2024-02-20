@@ -63,7 +63,9 @@ class TyranoPreview {
             // });
             // vscode API版もあるので要検討
             vscode.workspace.fs.readFile(vscode.Uri.file(`${projectPath}/index.html`)).then((data) => {
-                panel.webview.html = data.toString();
+                panel.webview.html = `
+        <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+        `;
             });
         });
         const run = async () => {

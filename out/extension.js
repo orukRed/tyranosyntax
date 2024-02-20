@@ -27,6 +27,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
+const express = require('express');
+const app = express();
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
 const TyranoHoverProvider_1 = require("./subscriptions/TyranoHoverProvider");
 const TyranoOutlineProvider_1 = require("./subscriptions/TyranoOutlineProvider");
@@ -162,6 +164,17 @@ async function activate(context) {
                 TyranoLogger_1.TyranoLogger.printStackTrace(error);
                 vscode.window.showErrorMessage(`TyranoScript_syntax初期化中にエラーが発生しました。`);
             }
+            app.get('/', (req, res) => {
+                res.send('Hello, World!');
+            });
+            const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+            const filePath = `C:/Users/kuro/Desktop/Programming/TyranoStudio_win_std_v110d/myprojects/test_project`;
+            // const filePath = `C:\Users\kuro\Desktop\Programming\TyranoStudio_win_std_v110d\myprojects\test_project\`
+            // app.use(express.static(path.join(__dirname, filePath)));
+            app.use(express.static((filePath)));
+            app.listen(3000, () => {
+                console.log('Server is running on port 3000');
+            });
         });
     };
     run();
