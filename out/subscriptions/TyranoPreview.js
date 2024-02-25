@@ -27,28 +27,36 @@ exports.TyranoPreview = void 0;
 const vscode = __importStar(require("vscode"));
 const express = require('express');
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
+const extension_1 = require("../extension");
+const TyranoLogger_1 = require("../TyranoLogger");
 class TyranoPreview {
     static async createWindow() {
         if (!vscode.window.activeTextEditor) {
             return;
         }
         const createServer = async () => {
-            const app = express();
-            console.log("preview");
-            const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-            const filePath = await infoWs.getProjectPathByFilePath(vscode.window.activeTextEditor.document.fileName);
-            app.use(express.static((filePath)));
-            app.listen(3000, () => { });
+            try {
+                TyranoLogger_1.TyranoLogger.print("preview server start");
+                const app = express();
+                console.log("preview");
+                const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+                const filePath = await infoWs.getProjectPathByFilePath(vscode.window.activeTextEditor.document.fileName);
+                app.use(express.static((filePath)));
+                app.listen(3000, () => { });
+            }
+            catch (error) {
+                TyranoLogger_1.TyranoLogger.printStackTrace(error);
+            }
         };
-        const createPreview = async () => {
-            const create = (() => {
-                const panel = vscode.window.createWebviewPanel('tyranoPreview', 'TyranoPreview', vscode.ViewColumn.Two, {
+        const createPreview = async (previewPanel) => {
+            const create = ((previewPanel) => {
+                previewPanel = vscode.window.createWebviewPanel('tyranoPreview', 'TyranoPreview', vscode.ViewColumn.Two, {
                     enableScripts: true,
                     retainContextWhenHidden: true,
                     enableCommandUris: true,
                     portMapping: [{ webviewPort: 3000, extensionHostPort: 3000 }]
                 });
-                panel.webview.html = `
+                previewPanel.webview.html = `
         <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
         `;
             });
@@ -58,13 +66,13 @@ class TyranoPreview {
                     title: "プレビューの作成中...",
                     cancellable: true
                 }, async (progress, token) => {
-                    create();
+                    create(previewPanel);
                 });
             };
             await run();
         };
         createServer();
-        createPreview();
+        createPreview(extension_1.previewPanel);
     }
 }
 exports.TyranoPreview = TyranoPreview;

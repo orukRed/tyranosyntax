@@ -5,6 +5,8 @@ const express = require('express');
 
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import { InformationExtension } from '../InformationExtension';
+import { previewPanel } from '../extension';
+import { TyranoLogger } from '../TyranoLogger';
 
 export class TyranoPreview {
 
@@ -13,16 +15,23 @@ export class TyranoPreview {
       return;
     }
     const createServer = async () => {
-      const app = express();
-      console.log("preview");
-      const infoWs = InformationWorkSpace.getInstance();
-      const filePath = await infoWs.getProjectPathByFilePath(vscode.window.activeTextEditor!.document.fileName);
-      app.use(express.static((filePath)));
-      app.listen(3000, () => { });
+      try {
+        TyranoLogger.print("preview server start");
+        const app = express();
+        console.log("preview");
+        const infoWs = InformationWorkSpace.getInstance();
+        const filePath = await infoWs.getProjectPathByFilePath(vscode.window.activeTextEditor!.document.fileName);
+        app.use(express.static((filePath)));
+        app.listen(3000, () => { });
+      } catch (error) {
+        TyranoLogger.printStackTrace(error);
+      }
+
+
     }
-    const createPreview = async () => {
-      const create = (() => {
-        const panel = vscode.window.createWebviewPanel(
+    const createPreview = async (previewPanel: vscode.WebviewPanel | undefined) => {
+      const create = ((previewPanel: vscode.WebviewPanel | undefined) => {
+        previewPanel = vscode.window.createWebviewPanel(
           'tyranoPreview',
           'TyranoPreview',
           vscode.ViewColumn.Two, {
@@ -31,8 +40,7 @@ export class TyranoPreview {
           enableCommandUris: true,
           portMapping: [{ webviewPort: 3000, extensionHostPort: 3000 }]
         });
-
-        panel.webview.html = `
+        previewPanel.webview.html = `
         <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
         `
       });
@@ -42,16 +50,13 @@ export class TyranoPreview {
           title: "プレビューの作成中...",
           cancellable: true
         }, async (progress, token) => {
-          create();
+          create(previewPanel);
         });
       }
       await run();
     }
 
-
     createServer();
-    createPreview();
-
-
+    createPreview(previewPanel);
   }
 }

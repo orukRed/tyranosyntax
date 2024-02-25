@@ -21,6 +21,7 @@ import { TyranoPreview } from './subscriptions/TyranoPreview';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
+export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export async function activate(context: vscode.ExtensionContext) {
   const run = async () => {
     await vscode.window.withProgress({
@@ -90,6 +91,15 @@ export async function activate(context: vscode.ExtensionContext) {
             TyranoLogger.print("Auto diagnostic is not activate");
           }
 
+          //FIXME:ファイル保存時にも診断実行 autosaveONにしてると正しく働かないので様子見
+          // vscode.workspace.onDidSaveTextDocument(document => {
+          //   if (previewPanel) {
+          //     console.log("onDidSaveTextDocument");
+          //     previewPanel.webview.html = `
+          //     <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+          //     `
+          //   }
+          // });
           //scenarioFileの値
           const scenarioFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
           scenarioFileSystemWatcher.onDidCreate(async e => {

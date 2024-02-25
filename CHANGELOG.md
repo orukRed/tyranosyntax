@@ -7,7 +7,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.20.0]- 2024-xx-xx
 
 - 拡張機能の初期化時、ウィンドウ右下にローディング通知が出るようになりました。
-- `ctrl+alt+p` でゲーム本体の起動（将来的にその場プレビューへと変更予定）
+- `ctrl+alt+p` でゲーム本体の起動（将来的にその場プレビューへと変更予定）ができるようになりました。
 
 
 ## [0.19.6]- 2023-10-15

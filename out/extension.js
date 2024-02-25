@@ -24,7 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
+exports.deactivate = exports.tmpDiagnostic = exports.activate = exports.previewPanel = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
@@ -39,6 +39,7 @@ const TyranoJumpProvider_1 = require("./subscriptions/TyranoJumpProvider");
 const InformationExtension_1 = require("./InformationExtension");
 const TyranoPreview_1 = require("./subscriptions/TyranoPreview");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
+exports.previewPanel = undefined;
 async function activate(context) {
     const run = async () => {
         await vscode.window.withProgress({
@@ -104,6 +105,15 @@ async function activate(context) {
                     else {
                         TyranoLogger_1.TyranoLogger.print("Auto diagnostic is not activate");
                     }
+                    //FIXME:ファイル保存時にも診断実行 autosaveONにしてると正しく働かないので様子見
+                    // vscode.workspace.onDidSaveTextDocument(document => {
+                    //   if (previewPanel) {
+                    //     console.log("onDidSaveTextDocument");
+                    //     previewPanel.webview.html = `
+                    //     <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+                    //     `
+                    //   }
+                    // });
                     //scenarioFileの値
                     const scenarioFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
                     scenarioFileSystemWatcher.onDidCreate(async (e) => {
