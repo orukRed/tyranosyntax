@@ -38,6 +38,7 @@ const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProv
 const TyranoJumpProvider_1 = require("./subscriptions/TyranoJumpProvider");
 const InformationExtension_1 = require("./InformationExtension");
 const TyranoPreview_1 = require("./subscriptions/TyranoPreview");
+const TyranoFlowchart_1 = require("./subscriptions/TyranoFlowchart");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 exports.previewPanel = undefined;
 async function activate(context) {
@@ -66,6 +67,8 @@ async function activate(context) {
                 TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
                 context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview_1.TyranoPreview.createWindow));
                 TyranoLogger_1.TyranoLogger.print("TyranoPreview activate");
+                context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart_1.TyranoFlowchart.createWindow));
+                TyranoLogger_1.TyranoLogger.print("TyranoFlowchart activate");
                 const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
                 //診断機能の登録
                 //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK

@@ -18,6 +18,7 @@ import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
 import { TyranoJumpProvider } from './subscriptions/TyranoJumpProvider';
 import { InformationExtension } from './InformationExtension';
 import { TyranoPreview } from './subscriptions/TyranoPreview';
+import { TyranoFlowchart } from './subscriptions/TyranoFlowchart';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
@@ -50,6 +51,8 @@ export async function activate(context: vscode.ExtensionContext) {
         TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview.createWindow));
         TyranoLogger.print("TyranoPreview activate");
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart.createWindow));
+        TyranoLogger.print("TyranoFlowchart activate");
 
         const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
         //診断機能の登録

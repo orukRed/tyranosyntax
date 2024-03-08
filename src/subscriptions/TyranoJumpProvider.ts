@@ -26,7 +26,7 @@ export class TyranoJumpProvider {
 
     // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
     const tags: Object = await vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.parameter')!;
-    const enableJumpTags = ["scenario", "script", "html", "css", "text"];
+    const enableJumpTags = ["scenario", "script", "html", "css", "text", "button", "glink"];//TODO:ジャンプ系タグとしてどこかで定義すべき？
     for (let tagName in tags) {
       for (let paramName in tags[tagName]) {
         for (let type of tags[tagName][paramName].type) {

@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/orukRed/tyranosyntax"
   },
-  "version": "0.19.6",
+  "version": "0.20.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -243,7 +243,7 @@
                 },
                 "storage": {
                   "type": [
-                    "text"
+                    "scenario"
                   ],
                   "path": "data/scenario"
                 },
@@ -891,6 +891,10 @@
       {
         "command": "tyrano.preview",
         "title": "tyrano.preview"
+      },
+      {
+        "command": "tyrano.flowchart",
+        "title": "tyrano.flowchart"
       }
     ],
     "keybindings": [
@@ -924,6 +928,12 @@
         "command": "tyrano.preview",
         "win": "ctrl+alt+p",
         "mac": "command+option+p",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.flowchart",
+        "win": "ctrl+alt+f",
+        "mac": "command+option+f",
         "when": "editorLangId == tyrano"
       }
     ]

@@ -8,7 +8,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - 拡張機能の初期化時、ウィンドウ右下にローディング通知が出るようになりました。
 - `ctrl+alt+p` でゲーム本体の起動（将来的にその場プレビューへと変更予定）ができるようになりました。
-
+- `alt + J`でのジャンプ先への移動に、buttonタグとglinkタグを追加しました。
+- buttonタグでstorageパラメータが指定されている場合、インテリセンスが正しく行われなかった問題を修正しました。
+- [if文の中でjump,callタグを使用したと時に警告を出すようにしました。](https://github.com/orukRed/tyranosyntax/issues/130)
+- 診断機能での波線の引き方を修正しました。
+- `ctrl+alt+f`コマンドで現在開いているシナリオファイルのフローチャートを出力するようにしました。
 
 ## [0.19.6]- 2023-10-15
 
