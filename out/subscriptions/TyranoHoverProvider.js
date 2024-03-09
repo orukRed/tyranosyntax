@@ -71,7 +71,6 @@ ${textCopy.join('  \n')}
         markdownText.supportHtml = true;
         markdownText.isTrusted = true;
         markdownText.supportThemeIcons = true;
-        // c:\\Users\\kuro\\Desktop\\Programming\\tyrano_test_project
         //data/fgimage
         markdownText.baseUri = vscode.Uri.file(path_1.default.join(projectPath, defaultPath, path_1.default.sep));
         return markdownText;

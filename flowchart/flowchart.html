@@ -1,0 +1,135 @@
+<!-- フローチャート表示ファイル -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+<style>
+  body {
+    background-color: white;
+  }
+</style>
+<script>
+  function generateFlowchart(obj) {
+    // フローチャートの定義を開始
+    console.log(obj);
+    let graphDefinition = 'graph LR\n';
+    graphDefinition += 'classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n';
+    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
+    if (!obj) {
+      graphDefinition += `a-->b\n`;
+    }
+    for (key in obj) {
+      const condition = obj[key].condition ? `${obj[key].condition}` : '';
+      console.log('s');
+      //storageもtargetもある場合
+      if (obj[key].storage && obj[key].target) {
+        const fileName = `${obj[key].storage}_${obj[key].target}`;
+        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}[[${fileName}]]:::green\n`;
+      }
+      //storageのみある場合
+      else if (obj[key].storage) {
+        const fileName = `${obj[key].storage}_NONE`;
+        // if()
+        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}[[${fileName}]]:::green\n`;
+      }
+      //targetのみある場合
+      else if (obj[key].target) {
+        const fileName = `${obj[key].target}`;
+        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}\n`;
+      }
+
+      //storageもtargetも指定しない場合はなにも追加しない
+      else if (!obj[key].storage && !obj[key].target) {
+      }
+    }
+    graphDefinition += `end\n`;
+    console.log(graphDefinition);
+    // HTMLに描画するためのmermaidの定義を返す
+    return `<pre class="mermaid">${graphDefinition}</pre>`;
+  }
+
+  //ローカルで動作確認する用。リリース時にはコメントアウトしておく
+  // window.onload = function () {
+  //   const obj = [
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: 'NONE',
+  //       storage: 'cg.ks',
+  //       tag: 'jump',
+  //       target: '*backpage',
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*start',
+  //       storage: undefined,
+  //       tag: 'button',
+  //       target: 'gamestart',
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*start',
+  //       storage: undefined,
+  //       tag: 'button',
+  //       target: undefined,
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*start',
+  //       storage: 'cg.ks',
+  //       tag: 'button',
+  //       target: undefined,
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*start',
+  //       storage: 'replay.ks',
+  //       tag: 'button',
+  //       target: undefined,
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*start',
+  //       storage: 'config.ks',
+  //       tag: 'button',
+  //       target: undefined,
+  //     },
+  //     {
+  //       condition: undefined,
+  //       currentFile: 'title.ks',
+  //       currentLabel: '*gamestart',
+  //       storage: 'scene1.ks',
+  //       tag: 'jump',
+  //       target: undefined,
+  //     },
+  //   ];
+  //   console.log(obj);
+  //   // 使用例
+  //   let htmlContent = generateFlowchart(obj);
+  //   // HTMLに追加するためのコード
+  //   const element = document.getElementById('flowchart');
+  //   element.innerHTML += htmlContent;
+  //   // mermaidを初期化
+  //   mermaid.run();
+  // };
+  // メッセージを受け取ったときの処理
+  window.addEventListener('message', (event) => {
+    const obj = event.data; // The JSON data our extension sent
+    console.log(obj);
+    // 使用例
+    let htmlContent = generateFlowchart(obj);
+
+    // HTMLに追加するためのコード
+    const element = document.getElementById('flowchart');
+    element.innerHTML += htmlContent;
+
+    // mermaidを初期化
+    mermaid.run();
+  });
+</script>
+
+<body>
+  <div id="flowchart"></div>
+</body>

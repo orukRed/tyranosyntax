@@ -24,7 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.tmpDiagnostic = exports.activate = void 0;
+exports.deactivate = exports.tmpDiagnostic = exports.activate = exports.flowchartPanel = exports.previewPanel = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
@@ -37,7 +37,11 @@ const InformationWorkSpace_1 = require("./InformationWorkSpace");
 const TyranoDefinitionProvider_1 = require("./subscriptions/TyranoDefinitionProvider");
 const TyranoJumpProvider_1 = require("./subscriptions/TyranoJumpProvider");
 const InformationExtension_1 = require("./InformationExtension");
+const TyranoPreview_1 = require("./subscriptions/TyranoPreview");
+const TyranoFlowchart_1 = require("./subscriptions/TyranoFlowchart");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
+exports.previewPanel = undefined;
+exports.flowchartPanel = undefined;
 async function activate(context) {
     const run = async () => {
         await vscode.window.withProgress({
@@ -62,6 +66,10 @@ async function activate(context) {
                 context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
                 context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
                 TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
+                context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview_1.TyranoPreview.createWindow));
+                TyranoLogger_1.TyranoLogger.print("TyranoPreview activate");
+                context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart_1.TyranoFlowchart.createWindow));
+                TyranoLogger_1.TyranoLogger.print("TyranoFlowchart activate");
                 const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
                 //診断機能の登録
                 //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
@@ -101,6 +109,15 @@ async function activate(context) {
                     else {
                         TyranoLogger_1.TyranoLogger.print("Auto diagnostic is not activate");
                     }
+                    //FIXME:ファイル保存時にも診断実行 autosaveONにしてると正しく働かないので様子見
+                    // vscode.workspace.onDidSaveTextDocument(document => {
+                    //   if (previewPanel) {
+                    //     console.log("onDidSaveTextDocument");
+                    //     previewPanel.webview.html = `
+                    //     <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+                    //     `
+                    //   }
+                    // });
                     //scenarioFileの値
                     const scenarioFileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
                     scenarioFileSystemWatcher.onDidCreate(async (e) => {

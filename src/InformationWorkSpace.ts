@@ -11,6 +11,7 @@ import { NameParamData } from './defineData/NameParamData';
 import { Parser } from './Parser';
 import { InformationExtension } from './InformationExtension';
 import { json } from 'stream/consumers';
+import { TransitionData } from './defineData/TransitionData';
 
 const babel = require("@babel/parser");
 const babelTraverse = require("@babel/traverse").default;
@@ -45,6 +46,8 @@ export class InformationWorkSpace {
   private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>();//ファイルパス、LabelDataの配列
   private _suggestions: Map<string, object> = new Map<string, object>();//projectPath,入力候補のオブジェクト
   private _nameMap: Map<string, NameParamData[]> = new Map<string, NameParamData[]>();//プロジェクトパスと、nameやidの定義
+  private _transitionMap: Map<string, TransitionData[]> = new Map<string, TransitionData[]>();//ファイル名、TransitionDataの配列
+
 
   private readonly _resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
   private readonly _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat();//resourceExtensionsをオブジェクトからstring型の一次配列にする
@@ -245,6 +248,7 @@ export class InformationWorkSpace {
 
       const parsedData = this.parser.parseText(scenarioData.getText()); //構文解析
       this.labelMap.set(absoluteScenarioFilePath, new Array<LabelData>());
+      this.transitionMap.set(absoluteScenarioFilePath, new Array<TransitionData>());
       let isIscript = false;
       let iscriptSentence: string = "";
       let description = "";
@@ -254,6 +258,7 @@ export class InformationWorkSpace {
       await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
       await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
       await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
+      let currentLabel = "NONE";
       for (let data of parsedData) {
 
         //iscript-endscript間のテキストを取得。
@@ -303,14 +308,21 @@ export class InformationWorkSpace {
         }
 
         //各種タグの場合
-        if (data["name"] === "macro") {
+        if (await data["name"] === "macro") {
           const macroData: DefineMacroData = new DefineMacroData(await data["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), absoluteScenarioFilePath, description);
           const macroName: string = await data["pm"]["name"];
           this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
           this._suggestions.get(projectPath)![await data["pm"]["name"]] = macroData.parseToJsonObject();
-        } else if (data["name"] === "label") {
+        } else if (await data["name"] === "label") {
+          //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
+          if (await data["pm"]["label_name"] !== "/") {
+            currentLabel = await data["pm"]["label_name"];
+            if (!currentLabel.startsWith("*")) {
+              currentLabel = "*" + currentLabel
+            }
+          }
           this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData(await data["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]))));
-        } else if (data["name"] === "eval") {
+        } else if (await data["name"] === "eval") {
           const [variableBase, variableValue] = data["pm"]["exp"].split("=").map((str: string) => str.trim());//vriableBaseにf.hogeの形
           const [variableType, variableName] = variableBase.split(".");
           //mapに未登録の場合のみ追加
@@ -319,22 +331,39 @@ export class InformationWorkSpace {
           }
           const location = new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]));
           this.variableMap.get(projectPath)?.get(variableName)?.addLocation(location);//変数の定義箇所を追加
-        } else if (data["name"] === "iscript") {
+        } else if (await data["name"] === "iscript") {
           isIscript = true;//endscriptが見つかるまで行を保存するモードに入る
-        } else if (data["name"] === "endscript") {
+        } else if (await data["name"] === "endscript") {
           isIscript = false;//行を保存するモード終わり
           this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
         }
 
         //マクロ定義のdescription挿入
-        if (data["name"] === "comment") {
-          if (data["val"]) {
-            description += data["val"] + "\n";
+        if (await data["name"] === "comment") {
+          if (await data["val"]) {
+            description += await data["val"] + "\n";
           }
         } else {
           description = "";
         }
 
+        //transitionデータの登録処理
+        //複数行コメントの場合
+        if (TransitionData.jumpTags.includes(await data["name"]) && currentLabel !== "/") {
+          //_transitionMapへの登録処理
+          const range = new vscode.Range(new vscode.Position(await data["line"], 0), new vscode.Position(await data["line"], 0));
+          const uri = vscode.Uri.file(absoluteScenarioFilePath);
+          const tagName = await data["name"]
+          const storage = await data["pm"]["storage"] ? await data["pm"]["storage"] : undefined;
+          let target = await data["pm"]["target"] ? await data["pm"]["target"] : undefined;
+          if (target && !target.startsWith("*")) {
+            target = "*" + target
+          }
+          const condition = await data["pm"]["cond"] ? await data["pm"]["cond"] : undefined;
+          const location = new vscode.Location(uri, range);
+          const transition: TransitionData = new TransitionData(tagName, storage, target, currentLabel, condition, location);
+          this.transitionMap.get(absoluteScenarioFilePath)?.push(transition);
+        }
       }
     }
   }
@@ -550,5 +579,11 @@ export class InformationWorkSpace {
   }
   public set extensionPath(value) {
     this._extensionPath = value;
+  }
+  public get transitionMap(): Map<string, TransitionData[]> {
+    return this._transitionMap;
+  }
+  public set transitionMap(value: Map<string, TransitionData[]>) {
+    this._transitionMap = value;
   }
 }

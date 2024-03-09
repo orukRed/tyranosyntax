@@ -17,9 +17,13 @@ import { TyranoReferenceProvider } from './subscriptions/TyranoReferenceProvider
 import { TyranoRenameProvider } from './subscriptions/TyranoRenameProvider';
 import { TyranoJumpProvider } from './subscriptions/TyranoJumpProvider';
 import { InformationExtension } from './InformationExtension';
+import { TyranoPreview } from './subscriptions/TyranoPreview';
+import { TyranoFlowchart } from './subscriptions/TyranoFlowchart';
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
+export const previewPanel: undefined | vscode.WebviewPanel = undefined;
+export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
 export async function activate(context: vscode.ExtensionContext) {
   const run = async () => {
     await vscode.window.withProgress({
@@ -45,8 +49,12 @@ export async function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.shiftEnter', ctbs.KeyPushShiftEnter));
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.ctrlEnter', ctbs.KeyPushCtrlEnter));
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.altEnter', ctbs.KeyPushAltEnter));
-
         TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview.createWindow));
+        TyranoLogger.print("TyranoPreview activate");
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart.createWindow));
+        TyranoLogger.print("TyranoFlowchart activate");
+
         const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
         //診断機能の登録
         //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
@@ -87,6 +95,15 @@ export async function activate(context: vscode.ExtensionContext) {
             TyranoLogger.print("Auto diagnostic is not activate");
           }
 
+          //FIXME:ファイル保存時にも診断実行 autosaveONにしてると正しく働かないので様子見
+          // vscode.workspace.onDidSaveTextDocument(document => {
+          //   if (previewPanel) {
+          //     console.log("onDidSaveTextDocument");
+          //     previewPanel.webview.html = `
+          //     <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+          //     `
+          //   }
+          // });
           //scenarioFileの値
           const scenarioFileSystemWatcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ks}', false, false, false);
           scenarioFileSystemWatcher.onDidCreate(async e => {

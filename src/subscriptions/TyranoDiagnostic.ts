@@ -58,25 +58,28 @@ export class TyranoDiagnostic {
     const diagnosticProjectPath = await this.infoWs.getProjectPathByFilePath(changedTextDocumentPath);
 
     TyranoLogger.print(`diagnostic start.`);
-    let diagnosticArray: any[] = [];//診断結果を一時的に保存する配列
+    const diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][] = []
 
     TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
 
     let tyranoTag: string[] = Object.keys(this.infoWs.suggestions.get(diagnosticProjectPath)!);
     tyranoTag = tyranoTag.concat(Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()));
-    //commetはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
+    //commentはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
     tyranoTag.push("comment");
     tyranoTag.push("label");
     tyranoTag.push("text");
 
 
+    //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
     //未定義のマクロを使用しているか検出
     await this.detectionNotDefineMacro(tyranoTag, this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
     TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
     //存在しないシナリオファイル、未定義のラベルを検出
     await this.detectionNotExistScenarioAndLabels(this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath);
     TyranoLogger.print(`[${diagnosticProjectPath}] scenario and label detection finished.`);
-
+    //if文の中でjump,callタグを使用しているか検出
+    await this.detectJumpAndCallInIfStatement(this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath)
+    TyranoLogger.print(`[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`);
 
     //診断結果をセット
     TyranoLogger.print(`diagnostic set`);
@@ -108,7 +111,7 @@ export class TyranoDiagnostic {
         if (!tyranoTag.includes(data["name"])) {
 
           let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["name"]);	// 該当行からタグの定義場所(開始位置)探す
-          let tagLastIndex = scenarioDocument.lineAt(data["line"]).text.lastIndexOf(data["name"]);	// 該当行からタグの定義場所(終了位置)探す
+          let tagLastIndex = tagFirstIndex + this.sumStringLengthsInObject(data["pm"]);	// 該当行からタグの定義場所(終了位置)探す
 
           let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
           let diag = new vscode.Diagnostic(range, "タグ" + data["name"] + "は未定義です。", vscode.DiagnosticSeverity.Error);
@@ -146,7 +149,7 @@ export class TyranoDiagnostic {
 
           if (data["pm"]["storage"] !== undefined) {
             let tagFirstIndex: number = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["storage"]);	// 該当行からタグの定義場所(開始位置)探す
-            let tagLastIndex: number = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["storage"]) + data["pm"]["storage"].length;	// 該当行からタグの定義場所(終了位置)探す
+            let tagLastIndex = tagFirstIndex + this.sumStringLengthsInObject(data["pm"]);	// 該当行からタグの定義場所(終了位置)探す
             let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
 
             //頭文字が%ならエラーとしては扱わない
@@ -178,7 +181,7 @@ export class TyranoDiagnostic {
           // targetについての処理
           if (data["pm"]["target"] !== undefined) {
             let tagFirstIndex: number = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["target"]);	// 該当行からタグの定義場所(開始位置)探す
-            let tagLastIndex: number = scenarioDocument.lineAt(data["line"]).text.indexOf(data["pm"]["target"]) + data["pm"]["target"].length;	// 該当行からタグの定義場所(終了位置)探す
+            let tagLastIndex = tagFirstIndex + this.sumStringLengthsInObject(data["pm"]);	// 該当行からタグの定義場所(終了位置)探す
             let range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
 
             //頭文字が%ならエラーとしては扱わない
@@ -281,4 +284,62 @@ export class TyranoDiagnostic {
     return false;
   }
 
+  /**
+   * if,ifelse,else文の中でjump,callタグを使用しているか検出します。
+   */
+  private async detectJumpAndCallInIfStatement(absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>, diagnosticArray: any[], projectPath: string) {
+    for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
+      const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(scenarioDocument.fileName);
+      //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+      if (projectPath !== projectPathOfDiagFile) {
+        continue;
+      }
+
+      let isInIf: boolean = false;//if文の中にいるかどうか
+      const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
+      let diagnostics: vscode.Diagnostic[] = [];
+      for (let data of parsedData) {
+        //early return
+        if (data["name"] === "comment") {
+          continue;
+        }
+
+        if (data["name"] === "if") {
+          isInIf = true;
+        }
+        if (data["name"] === "endif") {
+          isInIf = false;
+        }
+
+        //条件式
+        if (isInIf && (data["name"] === "jump" || isInIf && data["name"] === "call")) {
+          let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["name"]);	// 該当行からタグの定義場所(開始位置)探す
+          let tagLastIndex = tagFirstIndex + this.sumStringLengthsInObject(data["pm"]);	// 該当行からタグの定義場所(終了位置)探す
+          const range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
+          const diag = new vscode.Diagnostic(range, `ifの中での${data["name"]}は正常に動作しない可能性があります。[${data["name"]} cond="条件式"]に置き換えることを推奨します。`, vscode.DiagnosticSeverity.Warning);
+
+          diagnostics.push(diag);
+
+        }
+      }
+      diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+    }
+  }
+
+  private sumStringLengthsInObject(obj: any): number {
+    let totalLength = 0;
+    const value = 4;//ダブルクォート*2とイコールと半角スペースの分
+    const firstValue = 2;//アットマークor[]と、最初の半角スペース分
+    totalLength += firstValue;
+    for (let key in obj) {
+      if (typeof key === 'string') {
+        totalLength += key.length;
+      }
+      if (typeof obj[key] === 'string') {
+        totalLength += obj[key].length;
+      }
+      totalLength += value;
+    }
+    return totalLength;
+  }
 }

@@ -4,10 +4,22 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.20.0]- 2024-xx-xx
+## [0.20.0]- 2024-03-09
 
+- プレビュー機能（β版）を実装しました。
+  - `ctrl+alt+p` でゲーム本体の起動（将来的にその場プレビューへと変更予定）ができるようになりました。
+  - 将来的に現在開いているアクティブエディタのその場プレビュー機能に置き換える予定です
+  - 本機能は今後のバージョンで変更される可能性があります。
+- フローチャート機能（β版）を実装しました。
+  - `ctrl+alt+f`コマンドで現在開いているシナリオファイルのフローチャートを出力するようにしました。
+  - ラベルを指定していない箇所は`NONE`と表示されます
+  - cond属性を指定している場合のみ、条件式が表示されます
+  - 本機能は今後のバージョンで変更される可能性があります。
 - 拡張機能の初期化時、ウィンドウ右下にローディング通知が出るようになりました。
-
+- `alt + J`でのジャンプ先への移動に、buttonタグとglinkタグを追加しました。
+- buttonタグでstorageパラメータが指定されている場合、インテリセンスが正しく行われなかった問題を修正しました。
+- [if文の中でjump,callタグを使用したと時に警告を出すようにしました。](https://github.com/orukRed/tyranosyntax/issues/130)
+- 診断機能での波線の引き方を修正しました。
 
 ## [0.19.6]- 2023-10-15
 
