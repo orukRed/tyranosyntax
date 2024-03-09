@@ -5,9 +5,9 @@ const express = require('express');
 
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import { InformationExtension } from '../InformationExtension';
-import { previewPanel } from '../extension';
+import { flowchartPanel } from '../extension';
 import { TyranoLogger } from '../TyranoLogger';
-import { TransitionData } from '../defineData/TransitionData';
+
 
 export class TyranoFlowchart {
 
@@ -15,116 +15,64 @@ export class TyranoFlowchart {
     if (!vscode.window.activeTextEditor) {
       return;
     }
+    const createServer = async () => {
+      try {
+        TyranoLogger.print("preview server start");
+        const app = express();
+        console.log("flowchart");
+        const filePath = InformationExtension.path + path.sep + "flowchart";
+        app.use(express.static((filePath)));
+        app.listen(3200, () => { });
+      } catch (error) {
+        TyranoLogger.printStackTrace(error);
+      }
 
-    const activeEditor = vscode.window.activeTextEditor;
-    const filePath = activeEditor?.document.fileName;
-    const create = (() => {
-      const flowchartPanel = vscode.window.createWebviewPanel(
-        'tyranoFlowchart',
-        'TyranoFlowchart',
-        vscode.ViewColumn.Two, {
-        enableScripts: true,//コンテンツスクリプトを有効化
-        retainContextWhenHidden: true,//非表示時にコンテンツスクリプトを維持
-        enableCommandUris: true,
+
+    }
+    const createPreview = async (flowchartPanel: vscode.WebviewPanel | undefined) => {
+      const create = ((flowchartPanel: vscode.WebviewPanel | undefined) => {
+        flowchartPanel = vscode.window.createWebviewPanel(
+          'tyranoFlowchart',
+          'TyranoFlowchart',
+          vscode.ViewColumn.Two, {
+          enableScripts: true,//コンテンツスクリプトを有効化
+          retainContextWhenHidden: true,//非表示時にコンテンツスクリプトを維持
+          enableCommandUris: true,
+          portMapping: [{ webviewPort: 3200, extensionHostPort: 3200 }]
+        });
+        const activeEditor = vscode.window.activeTextEditor;
+        const filePath = activeEditor?.document.fileName;
+        const infoWs = InformationWorkSpace.getInstance();
+        if (!filePath) {
+          return;
+        }
+        flowchartPanel.webview.postMessage(infoWs.transitionMap.get(filePath));
+        flowchartPanel.webview.html = `
+          <iframe src="http://localhost:3200/flowchart.html" frameborder="0" style="width:300%; height:100vh;"></iframe>
+          <script>
+          // Webview内のHTMLでmessageイベントのリスナーを設定
+          window.addEventListener('message', event => {
+              const message = event.data; // The JSON data our extension sent
+          
+              // iframeに対してpostMessageを使用してデータを送信
+              const iframe = document.querySelector('iframe');
+              iframe.contentWindow.postMessage(message, '*');
+          });
+          </script>
+          `
       });
-      const infoWs = InformationWorkSpace.getInstance();
-      console.log(infoWs.transitionMap.get(filePath));
-      flowchartPanel.webview.postMessage(infoWs.transitionMap.get(filePath));
-      flowchartPanel.webview.html = `
-Flowchartだよ
-<div id="output"></div>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
-<style>
-  body{
-    background-color: white;
-  }
-</style>
-<script>
-window.addEventListener('message', event => {
-  const obj = event.data; // The JSON data our extension sent
-  let output = '';
-  for (let key in obj) {
-      output += key + ': ' + obj[key]["storage"] + '<br>';
-  }
-  document.getElementById('output').innerHTML = output;
-});
-</script>
-
-<body>
-  <div id="flowchart"></div>
-  =======================================<br>
-  状態遷移図版
-  <pre class="mermaid">
-    stateDiagram-v2
-    # 最初にここで全ラベルの定義が必要そう
-    # #でコメントアウト
-    state "start" as first.ks/start
-    state if_first.ks/l1c1 <<choice>> #ここのif文にも、ifやcondごとにそれぞれ作る必要がありそう. l1c1は行と列
-    state "start" as scene1.ks/start
-    state "end" as scene1.ks/end
-    state "start" as scene2.ks/start
-    state "end" as scene2.ks/end
-
-
-    [*] --> first.ks
-    state first.ks{ 
-      [*]--> first.ks/start
-      first.ks/start --> if_first.ks/l1c1
+      const run = async () => {
+        await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: "フローチャート作成中...",
+          cancellable: true
+        }, async (progress, token) => {
+          create(flowchartPanel);
+        });
+      }
+      await run();
     }
-    state scene1.ks{ 
-      if_first.ks/l1c1 --> scene1.ks/start: f.hoge=1 
-      scene1.ks/start --> scene1.ks/end
-    }
-    state scene2.ks{ 
-      if_first.ks/l1c1 --> scene2.ks/start: f.hoge=2
-      scene2.ks/start --> scene2.ks/end      
-    }
-
-
-  </pre>
-=======================================<br>
-  フローチャート（プロジェクト単位）版
-  <pre class="mermaid">
-    flowchart TB
-      subgraph "first.ks"
-        first.ks/start[start] --text--> if_first.ks/l1c1{if}
-      end
-      subgraph "scene1.ks"
-        if_first.ks/l1c1{if} --f.hoge=1--> scene1.ks/start[start]
-        scene1.ks/start[start] --> scene1.ks/end[end] 
-      end
-      subgraph "scene2.ks"
-        if_first.ks/l1c1{if} --f.hoge=2--> scene2.ks/start[start]
-        scene2.ks/start[start] --> scene2.ks/end[end] 
-      end
-    </pre>
-=======================================<br>
-  フローチャート（ファイル単位）版
-    <pre class="mermaid">
-      flowchart TB
-        subgraph "first.ks"
-          first.ks/start[start] --text--> if_first.ks/l1c1{if}
-          if_first.ks/l1c1{if} --f.hoge=1--> scene1.ks/start[[scene1.ks/start]]
-          if_first.ks/l1c1{if} --f.hoge=2--> scene2.ks/start[[scene2.ks/start]]
-        end
-      </pre>
-
-</body>
-
-
-
-`
-    });
-
-    const run = async () => {
-      await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "フローチャートの作成中...",
-        cancellable: true
-      }, async (progress, token) => {
-        create();
-      });
-    }
-    await run();
+    createServer();
+    createPreview(flowchartPanel);
   }
 }

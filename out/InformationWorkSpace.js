@@ -252,7 +252,7 @@ class InformationWorkSpace {
             await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
             await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
             await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
-            let currentLabel = "　";
+            let currentLabel = "NONE";
             for (let data of parsedData) {
                 //iscript-endscript間のテキストを取得。
                 if (isIscript && data["name"] === "text") {
@@ -307,6 +307,9 @@ class InformationWorkSpace {
                     //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
                     if (await data["pm"]["label_name"] !== "/") {
                         currentLabel = await data["pm"]["label_name"];
+                        if (!currentLabel.startsWith("*")) {
+                            currentLabel = "*" + currentLabel;
+                        }
                     }
                     this.labelMap.get(absoluteScenarioFilePath)?.push(new LabelData_1.LabelData(await data["pm"]["label_name"], new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]))));
                 }
@@ -343,8 +346,11 @@ class InformationWorkSpace {
                     const range = new vscode.Range(new vscode.Position(await data["line"], 0), new vscode.Position(await data["line"], 0));
                     const uri = vscode.Uri.file(absoluteScenarioFilePath);
                     const tagName = await data["name"];
-                    const storage = await data["pm"]["storage"];
-                    const target = await data["pm"]["target"];
+                    const storage = await data["pm"]["storage"] ? await data["pm"]["storage"] : undefined;
+                    let target = await data["pm"]["target"] ? await data["pm"]["target"] : undefined;
+                    if (target && !target.startsWith("*")) {
+                        target = "*" + target;
+                    }
                     const condition = await data["pm"]["cond"] ? await data["pm"]["cond"] : undefined;
                     const location = new vscode.Location(uri, range);
                     const transition = new TransitionData_1.TransitionData(tagName, storage, target, currentLabel, condition, location);

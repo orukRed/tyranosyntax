@@ -24,7 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deactivate = exports.tmpDiagnostic = exports.activate = exports.previewPanel = void 0;
+exports.deactivate = exports.tmpDiagnostic = exports.activate = exports.flowchartPanel = exports.previewPanel = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const TyranoCreateTagByShortcutKey_1 = require("./subscriptions/TyranoCreateTagByShortcutKey");
@@ -41,6 +41,7 @@ const TyranoPreview_1 = require("./subscriptions/TyranoPreview");
 const TyranoFlowchart_1 = require("./subscriptions/TyranoFlowchart");
 const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 exports.previewPanel = undefined;
+exports.flowchartPanel = undefined;
 async function activate(context) {
     const run = async () => {
         await vscode.window.withProgress({

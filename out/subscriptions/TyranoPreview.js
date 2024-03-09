@@ -42,7 +42,7 @@ class TyranoPreview {
                 const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
                 const filePath = await infoWs.getProjectPathByFilePath(vscode.window.activeTextEditor.document.fileName);
                 app.use(express.static((filePath)));
-                app.listen(3000, () => { });
+                app.listen(3100, () => { });
             }
             catch (error) {
                 TyranoLogger_1.TyranoLogger.printStackTrace(error);
@@ -54,10 +54,10 @@ class TyranoPreview {
                     enableScripts: true,
                     retainContextWhenHidden: true,
                     enableCommandUris: true,
-                    portMapping: [{ webviewPort: 3000, extensionHostPort: 3000 }]
+                    portMapping: [{ webviewPort: 3100, extensionHostPort: 3100 }]
                 });
                 previewPanel.webview.html = `
-        <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
+        <iframe src="http://localhost:3100/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
         `;
             });
             const run = async () => {

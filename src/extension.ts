@@ -23,6 +23,7 @@ const TYRANO_MODE = { scheme: 'file', language: 'tyrano' };
 
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
+export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
 export async function activate(context: vscode.ExtensionContext) {
   const run = async () => {
     await vscode.window.withProgress({

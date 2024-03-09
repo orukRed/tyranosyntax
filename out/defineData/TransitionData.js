@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransitionData = void 0;
+const InformationWorkSpace_1 = require("../InformationWorkSpace");
 /**
  * jump系のタグで指定したファイル名やラベル名を保持するクラス
  */
@@ -21,8 +22,25 @@ class TransitionData {
         this.currentLabel = currentLabel;
         this.condition = condition;
         this.fileUri = fileUri;
+        const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
         if (fileUri) {
-            this.currentFile = fileUri.uri.fsPath;
+            //data / scenario以降のパスを取得
+            this.currentFile = this.extractAfter(fileUri.uri.path, "data/scenario/");
+        }
+    }
+    /**
+     *
+     * @param str 特定文字列より後ろを抽出します。
+     * @param target
+     * @returns
+     */
+    extractAfter(str, target) {
+        const index = str.indexOf(target);
+        if (index >= 0) {
+            return str.substring(index + target.length);
+        }
+        else {
+            return '';
         }
     }
 }

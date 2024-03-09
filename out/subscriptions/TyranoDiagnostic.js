@@ -292,7 +292,7 @@ class TyranoDiagnostic {
                     let tagFirstIndex = scenarioDocument.lineAt(data["line"]).text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
                     let tagLastIndex = tagFirstIndex + this.sumStringLengthsInObject(data["pm"]); // 該当行からタグの定義場所(終了位置)探す
                     const range = new vscode.Range(data["line"], tagFirstIndex, data["line"], tagLastIndex);
-                    const diag = new vscode.Diagnostic(range, `ifの中でのjump/callは正常に動作しない可能性があります。[jump cond="条件式"]に置き換えることを推奨します。`, vscode.DiagnosticSeverity.Warning);
+                    const diag = new vscode.Diagnostic(range, `ifの中での${data["name"]}は正常に動作しない可能性があります。[${data["name"]} cond="条件式"]に置き換えることを推奨します。`, vscode.DiagnosticSeverity.Warning);
                     diagnostics.push(diag);
                 }
             }
