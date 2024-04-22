@@ -500,6 +500,12 @@ class InformationWorkSpace {
         } while (searchDir.filter(e => e === "index.html").length <= 0);
         return filePath;
     }
+    isSamePath(path1, path2) {
+        if (path1 === undefined || path2 === undefined) {
+            return false;
+        }
+        return path.resolve(path1) === path.resolve(path2);
+    }
     /**
      * 引数で与えたファイルの相対パスから、絶対パスを返します。
      * @param relativePath

@@ -530,6 +530,14 @@ export class InformationWorkSpace {
     return filePath;
   }
 
+  public isSamePath(path1: string, path2: string) {
+    if (path1 === undefined || path2 === undefined) {
+      return false;
+    }
+
+    return path.resolve(path1) === path.resolve(path2);
+  }
+
   /**
    * 引数で与えたファイルの相対パスから、絶対パスを返します。
    * @param relativePath 

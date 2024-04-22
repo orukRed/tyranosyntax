@@ -131,7 +131,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
           const storagePath = (storage === undefined) ?
             vscode.window.activeTextEditor?.document.uri.fsPath :
             projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.DATA_SCENARIO + this.infoWs.pathDelimiter + storage;
-          if (value.location.uri.fsPath === storagePath) {
+          if (this.infoWs.isSamePath(value.location.uri.fsPath, storagePath!)) {
             let comp = new vscode.CompletionItem(value.name);
             comp.kind = vscode.CompletionItemKind.Interface;
             comp.insertText = "*" + value.name;
