@@ -106,7 +106,7 @@
       ]
     },
     "html1": {
-      "begin": "\\s*(\\[)((?i:html))[\\s\\S]*(\\])",
+      "begin": "\\s*(\\[)((?i:html))[\\s]*(\\])",
       "beginCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
@@ -143,7 +143,7 @@
       ]
     },
     "html2": {
-      "begin": "(\\s*@)((?i:html))[\\s\\S]*",
+      "begin": "(\\s*@)((?i:html))[\\s]*\\b",
       "beginCaptures": {
         "1": {
           "name": "keyword.operator.tyrano"
