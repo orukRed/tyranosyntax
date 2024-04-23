@@ -4,7 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.20.0]- 2024-04-22
+## [0.20.2]- 2024-04-23
+
+- ハイライトの挙動を修正しました。
+  - [html_hoge]等のマクロやプラグインを使用したときにハイライトが崩れる問題を修正しました。
+
+## [0.20.1]- 2024-04-22
 
 - `@jump storage="hoge/file1.ks" target="*start"`のように、scenario直下以外のシナリオに対してstorageパラメータでパスを指定した場合にtargetのインテリセンスが効かない問題を修正しました。
 - readmeの誤字を修正しました
