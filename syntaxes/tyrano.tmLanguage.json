@@ -138,7 +138,14 @@
       },
       "patterns": [
         {
-          "include": "source.js"
+          "patterns": [
+            {
+              "include": "$self"
+            }
+          ]
+        },
+        {
+          "include": "text.html.basic"
         }
       ]
     },
