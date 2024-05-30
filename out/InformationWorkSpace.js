@@ -183,6 +183,7 @@ class InformationWorkSpace {
         this._scenarioFileMap.set(textDocument.fileName, textDocument);
     }
     async updateMacroDataMapByJs(absoluteScenarioFilePath) {
+        TyranoLogger_1.TyranoLogger.print(`InformationWorkSpace.updateMacroDataMapByJs(${absoluteScenarioFilePath})`);
         const reg = /[^a-zA-Z0-9_$]/g;
         // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
         const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;

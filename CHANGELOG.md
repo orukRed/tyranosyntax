@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.20.3]- 2024-05-30
+
+- ハイライトの挙動を修正しました。
+  - [html]～[html_end]の中でティラノスクリプトのタグを使用したときに正しくハイライトされない問題を修正しました。
+  - この修正により、本来存在しないタグ（imageなど）がエラー用の色でハイライトされます。
+- 特定の環境でJSファイルの構文解析がうまくいっていないみたいなので内部で用いているライブラリを更新しました。
+
 ## [0.20.2]- 2024-04-23
 
 - ハイライトの挙動を修正しました。
