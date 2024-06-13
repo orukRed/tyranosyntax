@@ -52,12 +52,12 @@ export class TyranoFlowchart {
           <script>
           // Webview内のHTMLでmessageイベントのリスナーを設定
           window.addEventListener('message', event => {
-              const message = event.data; // The JSON data our extension sent
-          
+              const message = event.data; // The JSON data our extension sent          
+
               // iframeに対してpostMessageを使用してデータを送信
               const iframe = document.querySelector('iframe');
-              iframe.contentWindow.postMessage(message, '*');
-          });
+              iframe.contentWindow.postMessage(message, '*');    
+            });
           </script>
           `
       });

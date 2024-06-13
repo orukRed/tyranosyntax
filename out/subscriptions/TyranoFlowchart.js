@@ -52,8 +52,8 @@ class TyranoFlowchart {
         const createPreview = async (flowchartPanel) => {
             const create = ((flowchartPanel) => {
                 flowchartPanel = vscode.window.createWebviewPanel('tyranoFlowchart', 'TyranoFlowchart', vscode.ViewColumn.Two, {
-                    enableScripts: true,
-                    retainContextWhenHidden: true,
+                    enableScripts: true, //コンテンツスクリプトを有効化
+                    retainContextWhenHidden: true, //非表示時にコンテンツスクリプトを維持
                     enableCommandUris: true,
                     portMapping: [{ webviewPort: 3200, extensionHostPort: 3200 }]
                 });
@@ -69,12 +69,12 @@ class TyranoFlowchart {
           <script>
           // Webview内のHTMLでmessageイベントのリスナーを設定
           window.addEventListener('message', event => {
-              const message = event.data; // The JSON data our extension sent
-          
+              const message = event.data; // The JSON data our extension sent          
+
               // iframeに対してpostMessageを使用してデータを送信
               const iframe = document.querySelector('iframe');
-              iframe.contentWindow.postMessage(message, '*');
-          });
+              iframe.contentWindow.postMessage(message, '*');    
+            });
           </script>
           `;
             });

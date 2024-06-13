@@ -67,6 +67,7 @@ class InformationWorkSpace {
     _suggestions = new Map(); //projectPath,入力候補のオブジェクト
     _nameMap = new Map(); //プロジェクトパスと、nameやidの定義
     _transitionMap = new Map(); //ファイル名、TransitionDataの配列
+    defaultTagList = [];
     _resourceExtensions = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension');
     _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
     _tagNameParams = vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.name.parameters');
@@ -94,6 +95,7 @@ class InformationWorkSpace {
                 const passJoined = path.join(InformationExtension_1.InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
                 const jsonData = fs.readFileSync(passJoined, "utf8");
                 const parsedJson = JSON.parse(jsonData);
+                this.defaultTagList = Object.keys(parsedJson);
                 this.suggestions.set(projectPath, parsedJson);
                 if (Object.keys(this.suggestions.get(projectPath)).length === 0) {
                     throw new Error("suggestions is empty");
@@ -443,8 +445,10 @@ class InformationWorkSpace {
      * @param absoluteScenarioFilePath
      */
     async spliceSuggestionsByFilePath(projectPath, deleteTagList) {
-        if (0 < deleteTagList.length) {
-            deleteTagList.forEach(tag => {
+        // デフォのタグに存在しないタグだけを取得
+        const filteredDeleteTagList = deleteTagList.filter(tag => !this.defaultTagList.includes(tag));
+        if (0 < filteredDeleteTagList.length) {
+            filteredDeleteTagList.forEach(tag => {
                 delete this.suggestions.get(projectPath)[tag];
             });
         }
