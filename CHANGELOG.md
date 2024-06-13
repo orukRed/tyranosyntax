@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.20.4]- 2024-06-13
+
+[issue#141](https://github.com/orukRed/tyranosyntax/issues/141)
+
 ## [0.20.3]- 2024-05-30
 
 - ハイライトの挙動を修正しました。

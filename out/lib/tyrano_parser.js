@@ -323,7 +323,7 @@ module.exports.makeTag = function (str, line, column, flag_comment, first_char) 
 var tyranoParser = {
     tyrano: null,
     kag: null,
-    flag_script: false,
+    flag_script: false, //スクリプト解析中なら
     deep_if: 0,
     init: function () {
         //alert("kag.parser 初期化");

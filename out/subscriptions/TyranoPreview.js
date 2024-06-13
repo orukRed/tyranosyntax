@@ -51,8 +51,8 @@ class TyranoPreview {
         const createPreview = async (previewPanel) => {
             const create = ((previewPanel) => {
                 previewPanel = vscode.window.createWebviewPanel('tyranoPreview', 'TyranoPreview', vscode.ViewColumn.Two, {
-                    enableScripts: true,
-                    retainContextWhenHidden: true,
+                    enableScripts: true, //コンテンツスクリプトを有効化
+                    retainContextWhenHidden: true, //非表示時にコンテンツスクリプトを維持
                     enableCommandUris: true,
                     portMapping: [{ webviewPort: 3100, extensionHostPort: 3100 }]
                 });
