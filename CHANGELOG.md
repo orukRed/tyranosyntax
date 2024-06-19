@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.20.5]- 2024-06-20
+
+[issue#143](https://github.com/orukRed/tyranosyntax/issues/143)
+
 ## [0.20.4]- 2024-06-13
 
 [issue#141](https://github.com/orukRed/tyranosyntax/issues/141)
