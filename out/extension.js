@@ -68,7 +68,7 @@ async function activate(context) {
                 TyranoLogger_1.TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
                 context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview_1.TyranoPreview.createWindow));
                 TyranoLogger_1.TyranoLogger.print("TyranoPreview activate");
-                context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart_1.TyranoFlowchart.createWindow));
+                context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart_1.TyranoFlowchart.openFlowchart));
                 TyranoLogger_1.TyranoLogger.print("TyranoFlowchart activate");
                 const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
                 //診断機能の登録

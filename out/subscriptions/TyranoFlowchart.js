@@ -27,70 +27,100 @@ exports.TyranoFlowchart = void 0;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const express = require('express');
+const open = require('open');
 const InformationWorkSpace_1 = require("../InformationWorkSpace");
 const InformationExtension_1 = require("../InformationExtension");
-const extension_1 = require("../extension");
 const TyranoLogger_1 = require("../TyranoLogger");
 class TyranoFlowchart {
-    static async createWindow() {
-        if (!vscode.window.activeTextEditor) {
-            return;
-        }
+    static serverInstance = undefined;
+    static async openFlowchart() {
         const createServer = async () => {
             try {
-                TyranoLogger_1.TyranoLogger.print("preview server start");
+                TyranoLogger_1.TyranoLogger.print("port 3200 server start");
                 const app = express();
                 console.log("flowchart");
                 const filePath = InformationExtension_1.InformationExtension.path + path.sep + "flowchart";
                 app.use(express.static((filePath)));
-                app.listen(3200, () => { });
+                //ルートの設定
+                //特定のルートに対するGETリクエストを処理するためのメソッド
+                app.get('/get-transition-data', (req, res) => {
+                    TyranoLogger_1.TyranoLogger.print("get-transition-data start");
+                    const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+                    //scenario=FILE_PATHの形で指定したファイルのデータを取得
+                    const scenarioFilePath = req.query["scenario"]; // GETパラメータからキーを取得
+                    if (!scenarioFilePath) {
+                        return;
+                    }
+                    const normalizedFilePath = scenarioFilePath.replace(/\\\\/g, '\\');
+                    const TransitionData = infoWs.transitionMap.get(normalizedFilePath);
+                    infoWs.getProjectPathByFilePath(normalizedFilePath).then(projectPath => {
+                        // Promise が解決された後、このブロック内で projectPath を使用
+                        const projectName = projectPath.split("\\").pop(); // プロジェクトパスからプロジェクト名を取得
+                        if (TransitionData) {
+                            console.log(TransitionData);
+                            res.json({ TransitionData: TransitionData, projectName: projectName }); // 値が見つかった場合、JSONとして返す
+                        }
+                        else {
+                            console.log('Key not found');
+                            res.status(404).send('Key not found'); // 値が見つからない場合、404エラーを返す
+                        }
+                    }).catch(error => {
+                        // エラー処理
+                        console.error("プロジェクトパスの取得に失敗しました:", error);
+                        TyranoLogger_1.TyranoLogger.printStackTrace(error);
+                    });
+                    TyranoLogger_1.TyranoLogger.print("get-transition-data end");
+                });
+                app.get('/get-scenario-list', (req, res) => {
+                    //シナリオファイルのリストと、プロジェクトパスのリストから、{PROJECT_NAME: [SCENARIO_FILE_PATH, ...]}の形式のオブジェクトを作成する
+                    const organizeData = (scenarioList, rootPathList) => {
+                        const data = {};
+                        // rootPathList をループして、プロジェクト名をキーとした空の配列を data に追加
+                        rootPathList.forEach((rootPath) => {
+                            const projectName = rootPath.split("\\").pop(); // パスからプロジェクト名を取得
+                            if (projectName) {
+                                data[projectName] = [];
+                            }
+                        });
+                        // scenarioList をループして、各シナリオファイルがどのプロジェクトに属するかを判断し、data に追加
+                        scenarioList.forEach((scenarioPath) => {
+                            rootPathList.forEach((rootPath) => {
+                                const projectName = rootPath.split("\\").pop();
+                                if (scenarioPath.includes(rootPath) && projectName) {
+                                    const relativePath = scenarioPath.replace(rootPath + path.sep, '');
+                                    data[projectName].push({ fullPath: scenarioPath, scenarioName: relativePath });
+                                }
+                            });
+                        });
+                        return data;
+                    };
+                    const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
+                    const scenarioList = Array.from(infoWs.transitionMap.keys());
+                    const rootPathList = infoWs.getTyranoScriptProjectRootPaths();
+                    const organizedData = organizeData(scenarioList, rootPathList);
+                    res.json({ scenarioList: organizedData });
+                });
+                TyranoFlowchart.serverInstance = app.listen(3200, () => {
+                    open(`http://localhost:3200/flowchart-list.html`);
+                });
+                TyranoLogger_1.TyranoLogger.print("port 3200 server initialized");
             }
             catch (error) {
                 TyranoLogger_1.TyranoLogger.printStackTrace(error);
             }
         };
-        const createPreview = async (flowchartPanel) => {
-            const create = ((flowchartPanel) => {
-                flowchartPanel = vscode.window.createWebviewPanel('tyranoFlowchart', 'TyranoFlowchart', vscode.ViewColumn.Two, {
-                    enableScripts: true, //コンテンツスクリプトを有効化
-                    retainContextWhenHidden: true, //非表示時にコンテンツスクリプトを維持
-                    enableCommandUris: true,
-                    portMapping: [{ webviewPort: 3200, extensionHostPort: 3200 }]
-                });
-                const activeEditor = vscode.window.activeTextEditor;
-                const filePath = activeEditor?.document.fileName;
-                const infoWs = InformationWorkSpace_1.InformationWorkSpace.getInstance();
-                if (!filePath) {
-                    return;
-                }
-                flowchartPanel.webview.postMessage(infoWs.transitionMap.get(filePath));
-                flowchartPanel.webview.html = `
-          <iframe src="http://localhost:3200/flowchart.html" frameborder="0" style="width:300%; height:100vh;"></iframe>
-          <script>
-          // Webview内のHTMLでmessageイベントのリスナーを設定
-          window.addEventListener('message', event => {
-              const message = event.data; // The JSON data our extension sent          
-
-              // iframeに対してpostMessageを使用してデータを送信
-              const iframe = document.querySelector('iframe');
-              iframe.contentWindow.postMessage(message, '*');    
+        if (TyranoFlowchart.serverInstance) {
+            TyranoFlowchart.serverInstance.close(() => {
+                console.log('port 3200 server closed');
             });
-          </script>
-          `;
-            });
-            const run = async () => {
-                await vscode.window.withProgress({
-                    location: vscode.ProgressLocation.Notification,
-                    title: "フローチャート作成中...",
-                    cancellable: true
-                }, async (progress, token) => {
-                    create(flowchartPanel);
-                });
-            };
-            await run();
-        };
-        createServer();
-        createPreview(extension_1.flowchartPanel);
+        }
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "フローチャート作成中...",
+            cancellable: true
+        }, async (progress, token) => {
+            createServer();
+        });
     }
 }
 exports.TyranoFlowchart = TyranoFlowchart;

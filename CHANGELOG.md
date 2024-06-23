@@ -4,8 +4,14 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.21.0]- 2024-06-23
+
+- flowchart機能での挙動を変更しました。[issue#132](https://github.com/orukRed/tyranosyntax/issues/132)
+  - vscodeのプレビュー機能からのフローチャート表示を廃止して、htmlファイルから任意のファイルのフローチャートを出力するように変更しています。
+
 ## [0.20.5]- 2024-06-20
 
+playbgmのstorageパラメータのインテリセンスを出したとき、soundフォルダをデフォルトとして参照してしまっていたのを修正
 [issue#143](https://github.com/orukRed/tyranosyntax/issues/143)
 
 ## [0.20.4]- 2024-06-13

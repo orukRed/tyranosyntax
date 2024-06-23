@@ -52,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
         TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
         context.subscriptions.push(vscode.commands.registerCommand('tyrano.preview', TyranoPreview.createWindow));
         TyranoLogger.print("TyranoPreview activate");
-        context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart.createWindow));
+        context.subscriptions.push(vscode.commands.registerCommand('tyrano.flowchart', TyranoFlowchart.openFlowchart));
         TyranoLogger.print("TyranoFlowchart activate");
 
         const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
