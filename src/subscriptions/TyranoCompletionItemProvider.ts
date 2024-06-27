@@ -5,6 +5,7 @@ import { ResourceFileData } from '../defineData/ResourceFileData';
 import path = require('path');
 import { Parser } from '../Parser';
 import { ErrorLevel, TyranoLogger } from '../TyranoLogger';
+import { CharacterData } from '../defineData/CharacterData';
 
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
   private infoWs = InformationWorkSpace.getInstance();
@@ -22,6 +23,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
    */
   public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
     try {
+      console.log("this.infoWs.characterMap", this.infoWs.characterMap)
       const projectPath: string = await this.infoWs.getProjectPathByFilePath(document.fileName);
       const cursor: number = vscode.window.activeTextEditor?.selection.active.character!;
       //カーソル付近のタグデータを取得
@@ -36,6 +38,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;//変数の正規表現
       const regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
       let lineParamName: string | undefined = undefined;
+      console.log("tagParams", tagParams);
       if (regExpResult) {
         lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
       }
@@ -56,6 +59,9 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
         return this.completionLabel(projectPath, parsedData[tagIndex]["pm"]["storage"]);
       }
       //nameやfaceへのインテリセンス
+      // else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName !== undefined && nameType.includes(lineParamName!)) {
+      //   return this.completionNameParameter(projectPath, lineParamName!);
+      // }
       else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName !== undefined && nameType.includes(lineParamName!)) {
         return this.completionNameParameter(projectPath, lineParamName!);
       }
@@ -68,6 +74,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       } else {//タグの中ならタグのパラメータの予測変換を出す 
         let isTagSentence = lineTagName === "text" || lineTagName === undefined ? false : true;
         if (isTagSentence) {
+
           return this.completionParameter(lineTagName, parsedData[tagIndex]["pm"], projectPath);
         } else {
           return this.completionTag(projectPath);
@@ -79,38 +86,47 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     }
   }
   private async completionJName(projectPath: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-    let completions: vscode.CompletionItem[] = new Array();
-    this.infoWs.nameMap.forEach(async (nameParamData, key) => {
-      if (projectPath === key) {
-        nameParamData.forEach((value, key) => {
-          if ("jname" === value.type) {
-            let comp = new vscode.CompletionItem(value.name);
-            comp.kind = vscode.CompletionItemKind.Variable;
-            comp.insertText = value.name;
-            completions.push(comp);
-          }
-        });
-      }
+    const characterDataList: CharacterData[] | undefined = this.infoWs.characterMap.get(projectPath);
+    if (!characterDataList) {
+      return null;
+    }
+    const completions: vscode.CompletionItem[] = new Array();
+    characterDataList.forEach((characterData) => {
+      let comp = new vscode.CompletionItem(characterData.jname);
+      comp.kind = vscode.CompletionItemKind.Variable;
+      comp.insertText = characterData.jname;
+      completions.push(comp);
     });
     return completions;
   }
 
 
   private async completionNameParameter(projectPath: string, lineParamName: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-    let completions: vscode.CompletionItem[] = new Array();
-    this.infoWs.nameMap.forEach(async (nameParamData, key) => {
-      if (projectPath === key) {
-        nameParamData.forEach((value, key) => {
-          if (lineParamName === value.type) {
-            let comp = new vscode.CompletionItem(value.name);
-            comp.kind = vscode.CompletionItemKind.Variable;
-            comp.insertText = value.name;
-            completions.push(comp);
-          }
-        });
-      }
-    });
-    return completions;
+    const characterDataList: CharacterData[] | undefined = this.infoWs.characterMap.get(projectPath);
+    if (!characterDataList) {
+      return null;
+    }
+
+    const completions: vscode.CompletionItem[] = new Array();
+
+
+
+    // let completions: vscode.CompletionItem[] = new Array();
+    // //XXX:characterDataをfilterかけて、name関連のリストを取得する なんなら新規に関数定義すべきかも
+    // this.infoWs.nameMap.forEach(async (nameParamData, key) => {
+    //   if (projectPath === key) {
+    //     nameParamData.forEach((value, key) => {
+    //       if (lineParamName === value.type) {
+    //         let comp = new vscode.CompletionItem(value.name);
+    //         comp.kind = vscode.CompletionItemKind.Variable;
+    //         comp.insertText = value.name;
+    //         completions.push(comp);
+    //       }
+    //     });
+    //   }
+    // });
+    // return completions;
+    return null;
   }
 
 
@@ -147,7 +163,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
    * 変数の予測変換
    */
   private async completionVariable(projectPath: string, variableType: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-
     let completions: vscode.CompletionItem[] = new Array();
     this.infoWs.variableMap.forEach((variable, key) => {
       if (key === projectPath) {
@@ -219,6 +234,9 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     //item:{}で囲ったタグの番号。0,1,2,3...
     //name:そのまんま。middle.jsonを見て。
     //item2:タグのパラメータ。0,1,2,3...って順に。
+
+    //ここにchara_part用の処理を入れる？
+
     for (const item in suggestions) {
       const tagName = suggestions[item]["name"].toString();//タグ名。jumpとかpとかimageとか。
       if (selectedTag === tagName) {
@@ -264,7 +282,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       } catch (error) {
         console.log(error);
       }
-
     };
     return completions;
   }

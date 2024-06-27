@@ -4,6 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.22.0]- 2024-xx-xx
+
+- タグ補完機能を更新しました。[issue#147](https://github.com/orukRed/tyranosyntax/issues/147)
+  - chara_layerタグで定義した差分パーツをchara_partタグで補完できるようにしました。
+  - faceパラメータの補完や、#の後ろのjnameの補完機能をリファクタリングしました。（動作に変更はありません）
+- 診断機能を更新しました
+  - キャラクター操作カテゴリのタグについての診断を追加しました。
+    - 定義していないname,face,part,idパラメータを使用したときにエラーを出すようにしました。
+    - 既に定義済みのname,face,idパラメータを再定義したときにエラーを出すようにしました。
+
 ## [0.21.0]- 2024-06-23
 
 - flowchart機能での挙動を変更しました。[issue#132](https://github.com/orukRed/tyranosyntax/issues/132)

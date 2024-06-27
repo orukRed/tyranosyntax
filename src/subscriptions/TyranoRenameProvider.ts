@@ -19,8 +19,8 @@ export class TyranoRenameProvider {
    * signaled by returning `undefined` or `null`.
    */
   provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): vscode.WorkspaceEdit | null | undefined {
-    console.log("provideRenameEdits");
-    console.log(`document:${document.fileName}\nposition:${position.line}\nnewName:${newName}\ntoken:${token}\n`);
+    // console.log("provideRenameEdits");
+    // console.log(`document:${document.fileName}\nposition:${position.line}\nnewName:${newName}\ntoken:${token}\n`);
 
     return null;
   }

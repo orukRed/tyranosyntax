@@ -7,15 +7,17 @@ import { ErrorLevel, TyranoLogger } from './TyranoLogger';
 import { VariableData } from './defineData/VariableData';
 import { LabelData } from './defineData/LabelData';
 import { MacroParameterData } from './defineData/MacroParameterData';
-import { NameParamData } from './defineData/NameParamData';
 import { Parser } from './Parser';
 import { InformationExtension } from './InformationExtension';
 import { json } from 'stream/consumers';
 import { TransitionData } from './defineData/TransitionData';
 
-const babel = require("@babel/parser");
-const babelTraverse = require("@babel/traverse").default;
-
+import * as babel from '@babel/parser';
+import traverse from '@babel/traverse';
+import { File } from '@babel/types'; // File型をインポート
+import { CharacterData } from './defineData/CharacterData';
+import { CharacterFaceData } from './defineData/CharacterFaceData';
+import { CharacterLayerData } from './defineData/CharacterLayerData';
 
 /**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
@@ -45,7 +47,7 @@ export class InformationWorkSpace {
   private _variableMap: Map<string, Map<string, VariableData>> = new Map<string, Map<string, VariableData>>();//projectpath,変数名と、定義情報
   private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>();//ファイルパス、LabelDataの配列
   private _suggestions: Map<string, object> = new Map<string, object>();//projectPath,入力候補のオブジェクト
-  private _nameMap: Map<string, NameParamData[]> = new Map<string, NameParamData[]>();//プロジェクトパスと、nameやidの定義
+  private _characterMap: Map<string, CharacterData[]> = new Map<string, CharacterData[]>();//プロジェクトパスと、キャラクターデータ
   private _transitionMap: Map<string, TransitionData[]> = new Map<string, TransitionData[]>();//ファイル名、TransitionDataの配列
   private defaultTagList: string[] = [];
 
@@ -88,7 +90,7 @@ export class InformationWorkSpace {
         TyranoLogger.print("passJoin or JSON.parse or readFile Sync failed", ErrorLevel.ERROR);
         TyranoLogger.printStackTrace(error);
       }
-      this.nameMap.set(projectPath, []);
+      this.characterMap.set(projectPath, []);
       TyranoLogger.print(`${projectPath} variable initialzie end`);
     }
 
@@ -185,15 +187,15 @@ export class InformationWorkSpace {
     // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
     const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
     const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
-    const parsedData: object = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath));
+    const parsedData = babel.parse(this.scriptFileMap.get(absoluteScenarioFilePath)!);
     const projectPath: string = await this.getProjectPathByFilePath(absoluteScenarioFilePath);
     const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
     await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
 
-    babelTraverse(parsedData, {
+    traverse(parsedData, {
       enter: (path: any) => {
         try {
-          //path.parentPathの値がTYRANO.kag.ftag.master_tag_MacroNameの形なら
+          //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
           if (path != null && path.parentPath != null && path.parentPath.type === "AssignmentExpression" && (reg2.test(path.parentPath.toString()) || reg3.test(path.parentPath.toString()))) {
             let macroName: string = path.toString().split(".")[4];//MacroNameの部分を抽出
             if (macroName != undefined && macroName != null) {
@@ -229,6 +231,8 @@ export class InformationWorkSpace {
       sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
     }
 
+    //TODO:ネストしたオブジェクトの取得のため、↓の処理をパーサー使った処理に置き換える
+    //TODO:↓将来的に消す------------------
     const reg: RegExp = /\b(f\.|sf\.|tf\.|mp\.)([^0-9０-９])([\.\w]*)/mg;
     const variableList: string[] = sentence.match(reg) ?? [];
 
@@ -258,7 +262,7 @@ export class InformationWorkSpace {
       //該当ファイルに登録されているマクロ、変数、タグ、nameを一度リセット
       const deleteTagList = await this.spliceMacroDataMapByFilePath(absoluteScenarioFilePath);
       await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
-      await this.spliceNameMapByFilePath(absoluteScenarioFilePath);
+      await this.spliceCharacterMapByFilePath(absoluteScenarioFilePath);
       await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
       let currentLabel = "NONE";
       for (let data of parsedData) {
@@ -268,46 +272,6 @@ export class InformationWorkSpace {
           iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(data["line"]).text;
         }
 
-
-        //name系のパラメータ取得
-        if (this._tagNameParams.includes(data["name"])) {
-
-          //一度登録したら重複しないような処理が必要
-          let storage: string = "";
-          if (data["pm"]["storage"]) {
-            storage = data["pm"]["storage"]
-          }
-          if (data["pm"]["name"]) {
-            const tmpData = new NameParamData(data["pm"]["name"], "name", new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), storage);
-            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-              this.nameMap.get(projectPath)?.push(tmpData);
-            }
-          }
-          if (data["pm"]["face"]) {
-            const tmpData = new NameParamData(data["pm"]["face"], "face", new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), storage);
-            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-              this.nameMap.get(projectPath)?.push(tmpData);
-            }
-          }
-          if (data["pm"]["part"]) {
-            const tmpData = new NameParamData(data["pm"]["part"], "part", new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), storage);
-            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-              this.nameMap.get(projectPath)?.push(tmpData);
-            }
-          }
-          if (data["pm"]["id"]) {
-            const tmpData = new NameParamData(data["pm"]["id"], "id", new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), storage);
-            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-              this.nameMap.get(projectPath)?.push(tmpData);
-            }
-          }
-          if (data["pm"]["jname"]) {
-            const tmpData = new NameParamData(data["pm"]["jname"], "jname", new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), storage);
-            if (!this.nameMap.get(projectPath)?.some(item => item.name === tmpData.name && item.type === tmpData.type)) {
-              this.nameMap.get(projectPath)?.push(tmpData);
-            }
-          }
-        }
 
         //各種タグの場合
         if (await data["name"] === "macro") {
@@ -333,6 +297,42 @@ export class InformationWorkSpace {
           }
           const location = new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]));
           this.variableMap.get(projectPath)?.get(variableName)?.addLocation(location);//変数の定義箇所を追加
+        }
+        else if (data["name"] === "chara_new") {
+          const location = new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]))
+          const characterData = new CharacterData(data["pm"]["name"], data["pm"]["jname"], location);
+          this.characterMap.get(projectPath)?.push(characterData);
+        } else if (data["name"] === "chara_face") {
+          const characterData = this.characterMap.get(projectPath)?.find((value) => value.name === data["pm"]["name"]);
+          const faceName: string | undefined = data["pm"]["name"];
+          const face: string | undefined = data["pm"]["face"];
+          //nameパラメータで指定したnameのキャラクターが存在する場合
+          if (characterData && faceName && face) {
+            const updateCharacterFaceData: CharacterFaceData = new CharacterFaceData(faceName, face, new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])));
+            characterData.addFace(updateCharacterFaceData);
+            // characterMapを更新する
+            const index = this.characterMap.get(projectPath)?.findIndex((value) => value.name === data["pm"]["name"]);
+            if (index !== undefined) {
+              this.characterMap.get(projectPath)?.splice(index, 1, characterData);
+            }
+          }
+        } else if (data["name"] === "chara_layer") {
+          const updateCharacterData = this.characterMap.get(projectPath)?.find((value) => value.name === data["pm"]["name"]);
+          const layerName = data["pm"]["name"];
+          const part = data["pm"]["part"];
+          const id = data["pm"]["id"];
+
+          //nameパラメータで指定したnameのキャラクターが存在する場合
+          if (updateCharacterData && layerName && part && id) {
+            const characterLayerData: CharacterLayerData = new CharacterLayerData(layerName, part, id, new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])));
+            updateCharacterData.addLayer(part, characterLayerData);
+
+            // characterMapを更新する
+            const index = this.characterMap.get(projectPath)?.findIndex((value) => value.name === data["pm"]["name"]);
+            if (index !== undefined) {
+              this.characterMap.get(projectPath)?.splice(index, 1, updateCharacterData);
+            }
+          }
         } else if (await data["name"] === "iscript") {
           isIscript = true;//endscriptが見つかるまで行を保存するモードに入る
         } else if (await data["name"] === "endscript") {
@@ -426,7 +426,7 @@ export class InformationWorkSpace {
   }
 
   /**
-   * 引数で指定したファイルパスを、ラベルデータのマップから削除
+   * 引数で指定したファイルパス（キー）のラベルデータマップを削除
    * @param fsPath 
    */
   public async spliceLabelMapByFilePath(fsPath: string) {
@@ -434,7 +434,7 @@ export class InformationWorkSpace {
   }
 
   /**
-   * 引数で指定したファイルパスを、変数データのマップから削除
+   * 引数で指定したファイルパス（キー)の変数データマップを削除
    * @param fsPath 
    */
   public async spliceVariableMapByFilePath(fsPath: string) {
@@ -449,13 +449,30 @@ export class InformationWorkSpace {
   }
 
   /**
-   * 引数で指定したファイルパスを、パラメータのNameのMapから削除
+   *  引数で指定したファイルパス（Mapのキー）のCharacterDataをマップから削除
    * @param fsPath 
    */
-  public async spliceNameMapByFilePath(fsPath: string) {
+  public async spliceCharacterMapByFilePath(fsPath: string) {
     const projectPath: string = await this.getProjectPathByFilePath(fsPath);
-    const value = this.nameMap.get(projectPath)?.filter(obj => obj.location?.uri.fsPath !== fsPath);
-    this.nameMap.set(projectPath, value!);
+
+    // chara_faceの定義削除
+    this.characterMap.get(projectPath)?.forEach((value: CharacterData) => {
+      value.deleteFaceByFilePath(fsPath);
+    });
+
+    // chara_layerの定義削除
+    this.characterMap.get(projectPath)?.forEach((value: CharacterData) => {
+      value.deleteLayerByFilePath(fsPath);
+    });
+
+    // chara_newの定義削除
+    const updatedCharacterData = this.characterMap.get(projectPath)?.filter((value: CharacterData) => {
+      return value.location.uri.fsPath !== fsPath;
+    });
+
+    if (updatedCharacterData) {
+      this.characterMap.set(projectPath, updatedCharacterData);
+    }
   }
 
   /**
@@ -581,9 +598,6 @@ export class InformationWorkSpace {
   public set suggestions(value: Map<string, object>) {
     this._suggestions = value;
   }
-  public get nameMap(): Map<string, NameParamData[]> {
-    return this._nameMap;
-  }
   public get tagNameParams() {
     return this._tagNameParams;
   }
@@ -598,5 +612,11 @@ export class InformationWorkSpace {
   }
   public set transitionMap(value: Map<string, TransitionData[]>) {
     this._transitionMap = value;
+  }
+  public get characterMap(): Map<string, CharacterData[]> {
+    return this._characterMap;
+  }
+  public set characterMap(value: Map<string, CharacterData[]>) {
+    this._characterMap = value;
   }
 }
