@@ -45,7 +45,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       }
       const paramInfo = lineTagName !== undefined && tagParams[lineTagName] !== undefined ? tagParams[lineTagName][lineParamName] : undefined;//今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
       const variableValue: string[] | null = variableRegExp.exec(leftSideText!);
-      // const nameType: string[] = ["name", "face", "part", "id", "jname"];
       const characterOperationTagList: string[] = [
         "chara_ptext",
         "chara_config",
