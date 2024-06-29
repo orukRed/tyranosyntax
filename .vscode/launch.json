@@ -10,7 +10,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				// "--disable-extensions",//他の拡張機能の無効
+				"--disable-extensions",//他の拡張機能の無効
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
