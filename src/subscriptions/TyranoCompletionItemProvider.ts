@@ -24,7 +24,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
    */
   public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
     try {
-      console.log("this.infoWs.characterMap", this.infoWs.characterMap)
       const projectPath: string = await this.infoWs.getProjectPathByFilePath(document.fileName);
       const cursor: number = vscode.window.activeTextEditor?.selection.active.character!;
       //カーソル付近のタグデータを取得
@@ -39,7 +38,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;//変数の正規表現
       const regExpResult = leftSideText?.match(regExp2);//「hoge="」を取得できる
       let lineParamName: string | undefined = undefined;
-      console.log("tagParams", tagParams);
       if (regExpResult) {
         lineParamName = regExpResult[0].replace("\"", "").replace("=", "").trim();//今見てるパラメータの名前
       }
