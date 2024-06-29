@@ -81,6 +81,11 @@ export class TyranoDiagnostic {
     await this.detectJumpAndCallInIfStatement(this.infoWs.scenarioFileMap, diagnosticArray, diagnosticProjectPath)
     TyranoLogger.print(`[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`);
 
+    //これから診断機能はここのfor文に追加していく
+    // for(){
+
+    // }
+
     //診断結果をセット
     TyranoLogger.print(`diagnostic set`);
     TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);

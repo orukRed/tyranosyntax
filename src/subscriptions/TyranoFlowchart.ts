@@ -38,7 +38,7 @@ export class TyranoFlowchart {
             // Promise が解決された後、このブロック内で projectPath を使用
             const projectName = projectPath.split("\\").pop(); // プロジェクトパスからプロジェクト名を取得
             if (TransitionData) {
-              // console.log(TransitionData);
+              console.log(TransitionData);
               res.json({ TransitionData: TransitionData, projectName: projectName }); // 値が見つかった場合、JSONとして返す
             } else {
               console.log('Key not found')
