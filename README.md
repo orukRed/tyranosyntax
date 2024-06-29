@@ -25,6 +25,8 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 
 ![](src/readme_img/completion_img.gif)
 
+![](src/readme_img/completion_layer.gif)
+
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス、chara_newタグで指定したnameやface、chara_layerタグで指定したpartやid等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
 
