@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.22.1]- 2024-07-01
+
+- 正常にタグ補完ができない問題を修正しました[issue#150](https://github.com/orukRed/tyranosyntax/issues/150)
+
 ## [0.22.0]- 2024-06-29
 
 - タグ補完機能を更新しました。[issue#147](https://github.com/orukRed/tyranosyntax/issues/147)
