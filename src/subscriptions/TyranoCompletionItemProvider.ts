@@ -58,10 +58,9 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
         "chara_part_reset"]//chara_newで定義したname,face,part,idを使うタグのリスト 
       const nameParameterList: string[] = ["name", "ptext"];//chara_newで定義したnameを呼び出すparameter一覧
 
-      //nameパラメータで指定した名前のCharacterDataが存在するかを取得
-      const characterData = this.infoWs.characterMap.get(projectPath)?.find(characterData => characterData.name === parsedData[tagIndex]["pm"]["name"]);
-      //characterDataのlayerのキー（part）の配列を取得
-      const layerParts = characterData?.layer ? [...characterData.layer.keys()] : [];
+      // //nameパラメータで指定した名前のCharacterDataが存在するかを取得
+      // //characterDataのlayerのキー（part）の配列を取得
+      const layerParts = this.findLayerParts(projectPath, tagIndex, parsedData);
 
       //カーソルの左隣の文字取得
       if ((typeof leftSideText === "string") && leftSideText?.charAt(leftSideText.length - 1) === "#") {
@@ -429,5 +428,15 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     };
     return completions;
   }
-
+  private findLayerParts(projectPath: string, tagIndex: number, parsedData: any): string[] {
+    try {
+      // //nameパラメータで指定した名前のCharacterDataが存在するかを取得
+      const characterData = this.infoWs.characterMap.get(projectPath)?.find(characterData => characterData.name === parsedData[tagIndex]["pm"]["name"]);
+      // //characterDataのlayerのキー（part）の配列を取得
+      const layerParts = characterData?.layer ? [...characterData.layer.keys()] : [];
+      return layerParts;
+    } catch (error) {
+      return []
+    }
+  }
 }

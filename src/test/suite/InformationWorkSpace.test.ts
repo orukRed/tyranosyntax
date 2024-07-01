@@ -6,14 +6,38 @@ import * as vscode from 'vscode';
 import { InformationWorkSpace } from '../../InformationWorkSpace';
 // import * as myExtension from '../../extension';
 
+suite('InformationWorkSpace.getProjectRootPath', () => {
+  test('正常系', () => {
 
+
+    //値定義
+    const filePath = "hoge/foo/bar/sample.ks";
+    const javaScriptSentence =
+      `
+  f.tmp_index = "message";
+  f.cg_index = 12;
+  f.top = 100;
+  f.left = 60;
+  f.hoge = {
+  foo:{
+      bar:1
+  },
+  piyo:[1,2,3],
+  fufa:["a","b","c"]
+};`
+
+    const info = InformationWorkSpace.getInstance();
+    // assert.strictEqual((info as any).getWorkspaceRootPath(), "");//絶対パス取得するのでgithubにあげられない。
+  });
+
+
+});
 suite('InformationWorkSpace.getProjectRootPath', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
   test('正常系', () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-
     // assert.strictEqual((info as any).getWorkspaceRootPath(), "");//絶対パス取得するのでgithubにあげられない。
   });
 

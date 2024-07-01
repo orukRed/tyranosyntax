@@ -15,6 +15,10 @@ import { TransitionData } from './defineData/TransitionData';
 import * as babel from '@babel/parser';
 import traverse from '@babel/traverse';
 import { File } from '@babel/types'; // File型をインポート
+import { Expression } from '@babel/types';
+import { ObjectMethod } from '@babel/types';
+import { ObjectProperty } from '@babel/types';
+import { SpreadElement } from '@babel/types';
 import { CharacterData } from './defineData/CharacterData';
 import { CharacterFaceData } from './defineData/CharacterFaceData';
 import { CharacterLayerData } from './defineData/CharacterLayerData';
@@ -218,6 +222,25 @@ export class InformationWorkSpace {
     });
   }
 
+  private getNestedObject(property: any, parentName: string = ''): VariableData[] {
+    let nestedObjects: VariableData[] = [];
+    if (property.type === 'ObjectExpression') {
+      property.properties.forEach((prop: any) => {
+        if (prop.key && prop.key.type === 'Identifier') {
+          const name = parentName ? `${parentName}.${prop.key.name}` : prop.key.name;
+          const value = prop.value.type === 'ObjectExpression' ? undefined : prop.value.value;
+          const variableData = new VariableData(name, value, undefined);
+          if (prop.value.type === 'ObjectExpression') {
+            variableData.nestVariableData = this.getNestedObject(prop.value, name);
+          }
+          nestedObjects.push(variableData);
+        }
+      });
+    }
+    return nestedObjects;
+  }
+
+
   /**
    * jsやiscript-endscript間で定義した変数を取得する
    * sentenceがundefined出ない場合、指定した値の範囲内で定義されている変数を取得する
@@ -230,6 +253,61 @@ export class InformationWorkSpace {
     if (sentence === undefined) {
       sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
     }
+
+    // TODO:パーサー使った処理に置き換えたい ほぼ完成しているので0.23.0でこっちに差し替える
+    // const variablePrefixList = ["f", "sf", "tf", "mp"];
+
+    // const ast = babel.parse(sentence, {
+    //   allowAwaitOutsideFunction: true,
+    //   allowUndeclaredExports: true,
+    //   errorRecovery: true,
+    //   allowSuperOutsideMethod: true,
+    // });
+
+    // console.log("ast ", ast)
+    // const that = this; // この行を追加
+    // let keyName = "";
+    // traverse(ast, {
+    //   enter: (path) => {
+    //   },
+    //   Identifier(path) {
+    //   },
+    //   MemberExpression(path) {
+    //     const left = path.node;
+    //     if (left.object.type === 'Identifier' && variablePrefixList.includes(left.object.name)) {
+    //       if (left.property.type === 'Identifier') {
+    //         // 'f.' をキー名の先頭に追加してプロパティ名を取得
+    //         const variableName = left.property.name
+    //         const variableData = new VariableData(variableName, undefined, left.object.name);
+    //         const location = new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(0, 0));
+    //         variableData.addLocation(location);
+    //         keyName = variableName;
+    //         that.variableMap.get(projectPath)?.set(variableName, variableData);
+    //       }
+    //     }
+    //   },
+    //   ObjectExpression: (path) => {
+    //     // const lastIndex = objects.length - 1;
+    //     // const lastObject = objects[lastIndex];
+    //     const nowObject: VariableData | undefined = that.variableMap.get(projectPath)?.get(keyName);
+    //     if (nowObject) {
+    //       path.node.properties.forEach(property => {
+    //         if (property.type === 'ObjectMethod' || property.type === 'ObjectProperty') {
+    //           if (property.key.type === 'Identifier') {
+    //             const nestedObjects: VariableData[] = this.getNestedObject(path.node);
+    //             if (nowObject.nestVariableData.length <= 0) {
+    //               nowObject.nestVariableData = nestedObjects;
+    //               that.variableMap.get(projectPath)?.set(keyName, nowObject);
+    //             }
+    //           }
+    //         } else {
+    //           // SpreadElementの場合の処理
+    //           console.log('SpreadElementはkeyプロパティを持ちません。');
+    //         }
+    //       });
+    //     }
+    //   },
+    // });
 
     //TODO:ネストしたオブジェクトの取得のため、↓の処理をパーサー使った処理に置き換える
     //TODO:↓将来的に消す------------------
