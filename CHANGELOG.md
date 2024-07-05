@@ -7,6 +7,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.23.0]- 2024-07-06
 
 - 以下のようなネストしたオブジェクトについても補完できるようにしました。[issue#146](https://github.com/orukRed/tyranosyntax/issues/146)
+- `f.hoge.`と打つと、`foo`、`piyo`、`fuga`が補完されます。
 
 ```javascript
 f.hoge = {
