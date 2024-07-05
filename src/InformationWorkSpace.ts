@@ -240,7 +240,6 @@ export class InformationWorkSpace {
     }
   }
 
-  //FIXME:読んでわかるようにコメントつけ足しておく 可能なら引数もanyから適切な型に変更しておく
   private getNestedObject(property: any, absoluteScenarioFilePath: string, parentName: string = ''): VariableData[] {
     let nestedObjects: VariableData[] = [];
     if (property.type === 'ObjectExpression') {
@@ -251,6 +250,7 @@ export class InformationWorkSpace {
           const type = this.typeConverter(prop.value.type);
           const variableData = new VariableData(name, value, undefined, type);
           const location = new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(property.loc.start.column!, property.loc.start.column!));
+          variableData.addLocation(location)
           if (prop.value.type === 'ObjectExpression') {
             variableData.nestVariableData = this.getNestedObject(prop.value, absoluteScenarioFilePath, name);
           }

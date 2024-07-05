@@ -317,8 +317,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
   /**
    * variableDataのnestObjectの予測変換
-   * //FIXME:３重以上のネストにも耐えうるように再帰処理を使う？
-   * @param variableObject 
+   * @param variableObject 変数のオブジェクト 
    * @param splitVariable split関数でばらした変数の配列 e.g. f.hoge.fooをsplitした値
    * @returns 
    */
@@ -326,6 +325,9 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     //splitVariableから末尾を削除
     splitVariable.pop();
     const completions: vscode.CompletionItem[] = new Array();
+    if (splitVariable[0].startsWith("&")) {
+      splitVariable[0] = splitVariable[0].substring(1);
+    }
     let sentence = `${splitVariable[0]}.${splitVariable[1]}`;
 
 
