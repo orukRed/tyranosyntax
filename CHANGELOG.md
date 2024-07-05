@@ -4,6 +4,25 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.23.0]- 2024-07-06
+
+- 以下のようなネストしたオブジェクトについても補完できるようにしました。[issue#146](https://github.com/orukRed/tyranosyntax/issues/146)
+
+```javascript
+f.hoge = {
+  foo:{
+      bar:1,
+      aaa:{
+        bbb:{
+          ccc:10
+        }
+      }
+  },
+  piyo:[1,2,3],
+  fuga:["a","b","c"]
+};  
+```
+
 ## [0.22.1]- 2024-07-01
 
 - 正常にタグ補完ができない問題を修正しました[issue#150](https://github.com/orukRed/tyranosyntax/issues/150)

@@ -7,12 +7,46 @@ import { Parser } from '../Parser';
 import { ErrorLevel, TyranoLogger } from '../TyranoLogger';
 import { CharacterData } from '../defineData/CharacterData';
 import { CharacterLayerData } from '../defineData/CharacterLayerData';
+import { VariableData } from '../defineData/VariableData';
+import { info } from 'console';
 
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
   private infoWs = InformationWorkSpace.getInstance();
   private parser: Parser = Parser.getInstance();
   public constructor() {
   }
+
+
+  private getVariableName(variableValue0: string): string {
+    let variableName = "";
+    try {
+      const variablePrefixList = ["f", "sf", "tf", "mp"];
+      const variableNameBase = variableValue0.startsWith("&") ? variableValue0.substring(1) : variableValue0;
+      variablePrefixList.forEach(prefix => {
+        if (variableNameBase.startsWith(prefix)) {
+          const variableNameBaseToWithoutPrefix = variableNameBase.substring(prefix.length);
+          variableName = variableNameBaseToWithoutPrefix.split(".")[1];
+          return
+        }
+      });
+    } catch (error) {
+      return "";
+    }
+    return variableName;
+  }
+
+  private async findVariableObject(projectPath: string, variableName: string): Promise<VariableData | undefined> {
+    const variableDataMap = this.infoWs.variableMap.get(projectPath);
+    if (variableDataMap) {
+      for (const [key, value] of variableDataMap) {
+        if (value.name === variableName) {
+          return value; // マッチするオブジェクトを見つけたら返却
+        }
+      }
+    }
+    return undefined; // マッチするオブジェクトが見つからなかった場合
+  }
+
 
   /**
    * 
@@ -66,10 +100,18 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       if ((typeof leftSideText === "string") && leftSideText?.charAt(leftSideText.length - 1) === "#") {
         return await this.completionJName(projectPath);
       }
-      //leftSideTextの最後の文字がf.sf.tf.mp.のいずれかなら変数の予測変換を出す
       else if (variableValue) {
-        const variableType: string = variableValue[0].split(".")[0].replace("&", "");
-        return this.completionVariable(projectPath, variableType);
+
+        const variableKind: string = variableValue[0].split(".")[0].replace("&", "");
+        const variableName = this.getVariableName(variableValue[0]);
+        if (variableName) {
+          const variableObject = await this.findVariableObject(projectPath, variableName);
+          if (variableObject) {
+            const splitVariable = variableValue[0].split(".");
+            return this.completionNestVariable(variableObject, splitVariable);
+          }
+        }
+        return await this.completionVariable(projectPath, variableKind);
       }
       //targetへのインテリセンス
       else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName === "target") {	//leftSideTextの最後の文字が*ならラベルの予測変換を出す　//FIXME:「参照paramがtargetなら」の方がよさそう
@@ -96,7 +138,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
         const partName = lineParamName;
         return this.completionIdParameter(projectPath, nameParamValue, partName);
       }
-
       //リソースの予測変換
       else if (parsedData[tagIndex] !== undefined && lineTagName !== undefined && lineParamName !== undefined && paramInfo !== undefined) {
         return await this.completionResource(projectPath, paramInfo.type, projectPath + this.infoWs.pathDelimiter + paramInfo.path);
@@ -275,25 +316,77 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
   }
 
   /**
+   * variableDataのnestObjectの予測変換
+   * //FIXME:３重以上のネストにも耐えうるように再帰処理を使う？
+   * @param variableObject 
+   * @param splitVariable split関数でばらした変数の配列 e.g. f.hoge.fooをsplitした値
+   * @returns 
+   */
+  private async completionNestVariable(variableObject: VariableData, splitVariable: string[]): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
+    //splitVariableから末尾を削除
+    splitVariable.pop();
+    const completions: vscode.CompletionItem[] = new Array();
+    let sentence = `${splitVariable[0]}.${splitVariable[1]}`;
+
+
+    //f.hogeのようなパターンの場合
+    if (splitVariable.length === 2) {
+      variableObject.nestVariableData.forEach((value) => {
+        let comp = new vscode.CompletionItem(`${value.name}`);
+        comp.filterText = `${sentence}.${value.name}`;
+        comp.kind = vscode.CompletionItemKind.Variable;
+        comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
+        comp.detail = `${sentence}.${value.name}`;
+        completions.push(comp);
+      });
+      return completions
+    }
+
+    //f.hoge.fooなら以下のようになるので1から始める
+    //0:f
+    //1:hoge
+    //2:foo
+    for (let i = 2; i < splitVariable.length; i++) {
+      const temp = variableObject.nestVariableData.find((value) => value.name === splitVariable[i])
+      if (temp) {
+        sentence += `.${temp.name}`;
+        variableObject = temp;
+      } else {
+        return completions;
+      }
+      if (i === splitVariable.length - 1) {
+        variableObject.nestVariableData.forEach((value) => {
+          let comp = new vscode.CompletionItem(`${value.name}`);
+          comp.filterText = `${sentence}.${value.name}`;
+          comp.kind = vscode.CompletionItemKind.Variable;
+          comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
+          comp.detail = `${sentence}.${value.name}`;
+          completions.push(comp);
+        });
+      }
+    }
+
+    return completions;
+  }
+
+  /**
    * 変数の予測変換
    */
-  private async completionVariable(projectPath: string, variableType: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
+  private async completionVariable(projectPath: string, variableKind: string): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
     let completions: vscode.CompletionItem[] = new Array();
     this.infoWs.variableMap.forEach((variable, key) => {
       if (key === projectPath) {
         this.infoWs.variableMap.get(key)?.forEach((value, key2) => {
-          if (value.type == variableType) {
-            let comp = new vscode.CompletionItem(value.type + "." + value.name);
+          if (value.kind == variableKind) {
+            let comp = new vscode.CompletionItem(value.kind + "." + value.name);
             comp.kind = vscode.CompletionItemKind.Variable;
-            comp.insertText = new vscode.SnippetString(value.type + "." + value.name);
+            comp.insertText = new vscode.SnippetString(value.kind + "." + value.name);
             completions.push(comp);
           }
         });
       }
     });
-
     return completions;
-
   }
 
 
@@ -371,8 +464,8 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     for (const item in suggestions) {
       const tagName = suggestions[item]["name"].toString();//タグ名。jumpとかpとかimageとか。
       if (selectedTag === tagName) {
-        //FIXME:chara_partタグならパラメータを追加する処理を入れる？
         //nameの値によって、追加するパラメータを変更する。
+        //chara_partタグなら特別にCharacterDataに存在するpartの値を追加する。
         if (selectedTag === "chara_part") {
           partList.forEach((part) => {
             suggestions[item]["parameters"].push({
@@ -382,7 +475,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
             });
           });
         }
-
         for (const item2 of suggestions[item]["parameters"]) {
           if (!(item2["name"] in parameters)) {//タグにないparameterのみインテリセンスに出す
             const detailText = item2["required"] ? "（必須）" : "";
