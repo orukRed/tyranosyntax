@@ -461,8 +461,6 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     //item:{}で囲ったタグの番号。0,1,2,3...
     //name:そのまんま。middle.jsonを見て。
     //item2:タグのパラメータ。0,1,2,3...って順に。
-
-
     for (const item in suggestions) {
       const tagName = suggestions[item]["name"].toString();//タグ名。jumpとかpとかimageとか。
       if (selectedTag === tagName) {

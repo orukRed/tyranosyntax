@@ -30,6 +30,56 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス、chara_newタグで指定したnameやface、chara_layerタグで指定したpartやid等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
 
+#### プラグイン/マクロのパラメータ補完（β版）
+
+> [!WARNING]
+> また、この機能は今後変更されたり削除されたりする可能性があります。
+
+`setting.json`の`TyranoScript syntax.plugin.parameter`を変更することで、プラグインやマクロで用いるパラメータの補完ができます。
+
+以下の点にご注意ください。
+
+- プラグインやマクロのパラメータの値に対して、リソースのパスやchara_newタグで指定した値などは補完することができません。
+- 複数プロジェクトを開いている場合、すべてのプロジェクトに対して`TyranoScript syntax.plugin.parameter`で定義したプラグイン/マクロの補完が可能になります。
+- この設定で登録したプラグイン/マクロはplugin/macroタグで未定義の場合でも診断機能でエラーが出ません。
+- `setting.json`の変更後は、拡張機能を再起動してください。再起動後に`setting.json`の変更が反映されます。
+
+下記の例を参考にし、`setting.json`に追加してご利用ください。
+（基本的に大文字の箇所とdescriptionの値を変更することで動きます。）
+
+- `PLUGIN_NAME`をプラグインの名前やマクロの名前します。
+- `parameters`で指定しているnameを、補完したいパラメータ名に変更します。
+- `description`で補完したいパラメータの説明文を指定します。
+- `required`で補完したいパラメータが必須かどうかを指定します。
+
+```json
+"TyranoScript syntax.plugin.parameter": {
+    "PLUGIN_NAME1": {
+      "name": "PLUGIN_NAME1",
+      "description": "プラグインの説明文です。",
+      "parameters": [
+        {
+          "name": "PARAMETER1",
+          "required": true,
+          "description": "parameterサンプルです。ここに説明文を書いてください。"
+        },
+        {
+          "name": "PARAMETER2",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    "PLUGIN_NAME2": {
+      "name": "PLUGIN_NAME2",
+      "description": "プラグインの説明文です。",
+      "parameters": [
+      ]
+    }
+  }
+```
+
+
 
 ### アウトライン表示(Outline)
 
