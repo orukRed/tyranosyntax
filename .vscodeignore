@@ -8,3 +8,4 @@ eslint.configs.mjs
 vsc-extension-quickstart.md
 *.vsix
 test.ks
+test_project/**

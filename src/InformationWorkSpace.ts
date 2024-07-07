@@ -593,7 +593,7 @@ export class InformationWorkSpace {
    */
   public getProjectFiles(projectRootPath: string, permissionExtension: string[] = [], isAbsolute: boolean = false): string[] {
     //ルートパスが存在していない場合
-    if (projectRootPath === undefined || projectRootPath === "") {
+    if (projectRootPath === undefined || projectRootPath === "" || !fs.existsSync(projectRootPath)) {
       return [];
     }
 
@@ -629,7 +629,6 @@ export class InformationWorkSpace {
    * @returns 
    */
   public async getProjectPathByFilePath(filePath: string): Promise<string> {
-
     let searchDir;
     do {
       const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
