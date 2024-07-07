@@ -213,7 +213,10 @@ export class InformationWorkSpace {
               const macroData: DefineMacroData = new DefineMacroData(macroName, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath, description);
               macroData.parameter.push(new MacroParameterData("parameter", false, "description"));//TODO:パーサーでパラメータの情報読み込んで追加する
               this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
-              this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
+              //suggetionsに登録されてない場合のみ追加
+              if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+                this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
+              }
             }
           }
         } catch (error) {
@@ -366,7 +369,10 @@ export class InformationWorkSpace {
           const macroData: DefineMacroData = new DefineMacroData(await data["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), absoluteScenarioFilePath, description);
           const macroName: string = await data["pm"]["name"];
           this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
-          this._suggestions.get(projectPath)![await data["pm"]["name"]] = macroData.parseToJsonObject();
+          //suggetionsに登録されてない場合のみ追加
+          if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+            this._suggestions.get(projectPath)![await data["pm"]["name"]] = macroData.parseToJsonObject();
+          }
         } else if (await data["name"] === "label") {
           //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
           if (await data["pm"]["label_name"] !== "/") {
