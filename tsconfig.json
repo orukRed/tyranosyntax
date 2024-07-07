@@ -114,7 +114,7 @@
     "out/**/*",
 	  "node_modules",
     "eslint.config.mjs",
-    ".vscode-test"
+    ".vscode-test",
 	  "out/**/*",
 	  "test_project/**/*",
 	  "webpack.config.js"
