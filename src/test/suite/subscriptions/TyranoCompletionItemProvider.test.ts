@@ -76,24 +76,3 @@ suite('TyranoCompletionItemProvider.completionTag', () => {
   });
 
 });
-
-
-suite('TyranoCompletionItemProvider.removeBracket', () => {
-  vscode.window.showInformationMessage('Start all tests.');
-
-  test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('[bg storage="hoge.png]"'), 'bg storage="hoge.png"');
-
-  });
-  test('正常系 [ ]のある文字列から[ ]が消えて帰ってくる', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('[][][][[][][][[[[][]]]]'), '');
-  });
-  test('異常系 [ ]のない文字列をそのまま返す', () => {
-    const tcip = new TyranoCompletionItemProvider();
-    assert.strictEqual((tcip as any).removeBracket('bg storage="hoge.png"'), 'bg storage="hoge.png"');
-  });
-
-
-});

@@ -4,6 +4,7 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import { InformationWorkSpace } from '../../InformationWorkSpace';
+import path from 'path';
 // import * as myExtension from '../../extension';
 
 suite('InformationWorkSpace.getProjectRootPath', () => {
@@ -47,15 +48,18 @@ suite('InformationWorkSpace.getProjectFiles', () => {
   vscode.window.showInformationMessage('Start all tests.');
   // 配列はdeepStrictEqualを使うこと。配列を再帰的に中身まで見てくれる。
   // strictEqualだとアドレスを比較する。
-  test('正常系 プロジェクトパスだとファイル多すぎるのでbgimageフォルダを指定', () => {
+  test('正常系 プロジェクトパスだとファイル多すぎるのでbgimageフォルダを指定', async () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
 
-    const expect = ["bgimage/room.jpg", "bgimage/rouka.jpg", "bgimage/title.jpg", "bgm/music.ogg", "image/config/bg_config.jpg"];
+    const expect = ["room.jpg", "rouka.jpg", "title.jpg"];
+    const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+    const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks",);
+    const projectRootPath = await (info as any).getProjectPathByFilePath(filePath);
+    const bgimagePath = path.join(projectRootPath, "data", "bgimage");
 
-    assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + info.DATA_DIRECTORY, [".jpg", ".ogg"], false), expect);
+    assert.deepStrictEqual(await (info as any).getProjectFiles(bgimagePath, [".jpg", ".ogg"], false), expect);
   });
-
   test('異常系 不正なパスを与える', () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
