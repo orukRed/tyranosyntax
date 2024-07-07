@@ -113,6 +113,7 @@
 	  "node_modules",
 	  ".vscode-test",
 	  "out/**/*",
+	  "test_project/**/*",
 	  "webpack.config.js"
   ]
 }
