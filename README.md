@@ -30,6 +30,127 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス、chara_newタグで指定したnameやface、chara_layerタグで指定したpartやid等の補完ができます。
 `macroタグ`やjsで定義したタグについても補完ができます。
 
+### プラグイン/マクロのパラメータ補完（β版）
+
+> [!WARNING]
+> この機能は今後変更されたり削除されたりする可能性があります。
+
+`setting.json`の`TyranoScript syntax.plugin.parameter`を変更することで、プラグインやマクロで用いるパラメータの補完ができます。
+
+以下の点にご注意ください。
+
+- プラグインやマクロのパラメータの値に対して、リソースのパスやchara_newタグで指定した値などは補完することができません。
+- 複数プロジェクトを開いている場合、すべてのプロジェクトに対して`TyranoScript syntax.plugin.parameter`で定義したプラグイン/マクロの補完が可能になります。
+- この設定で登録したプラグイン/マクロはplugin/macroタグで未定義の場合でも診断機能でエラーが出ません。
+- `setting.json`の変更後は、拡張機能を再起動してください。再起動後に`setting.json`の変更が反映されます。
+
+下記を参考にし、`setting.json`に追加してご利用ください。
+（基本的に大文字の箇所とdescriptionの値を変更することで動きます。）
+
+- `PLUGIN_NAME`をプラグインの名前やマクロの名前します。
+- `parameters`で指定しているnameを、補完したいパラメータ名に変更します。
+- `description`で補完したいパラメータの説明文を指定します。
+- `required`で補完したいパラメータが必須かどうかを指定します。
+
+```json
+"TyranoScript syntax.plugin.parameter": {
+    "PLUGIN_NAME1": {
+      "name": "PLUGIN_NAME1",
+      "description": "プラグインの説明文です。",
+      "parameters": [
+        {
+          "name": "PARAMETER1",
+          "required": true,
+          "description": "parameterサンプルです。ここに説明文を書いてください。"
+        },
+        {
+          "name": "PARAMETER2",
+          "required": true,
+          "description": ""
+        }
+      ]
+    }
+  }
+```
+
+例として、ティラノスクリプト公式より配布されている[ダイスロールプラグイン](https://plugin.tyrano.jp/item/5038)の場合以下のようになります。
+
+```json
+  "TyranoScript syntax.plugin.parameter": {
+    "dice": {
+      "name": "dice",
+      "description": "ゲーム中でダイスを振ることができるようになります。対応ダイスは 2,3,4,6,8,10,12,20,100面ダイスです。",
+      "parameters": [
+        {
+          "name": "roll",
+          "required": true,
+          "description": "実際にふるダイスを指定します（必須）。複数指定する場合は「,」カンマで区切ってください。例えば６面ダイス２個と3面ダイス１個を振りたい場合は「6,6,3」と指定できます。また「2d6,1d3」のような書き方も可能です。"
+        },
+        {
+          "name": "result",
+          "required": false,
+          "description": "ダイス結果を指定できます。例えばrollで「6,6,6」と指定してresultに「1,2,3」とした場合ダイス目がそのとおりになり合計6になります。指定しない場合はランダムな数字になります。"
+        },
+        {
+          "name": "output",
+          "required": false,
+          "description": "ダイス結果を格納する変数を指定できます。例えば「f.dice_result」のようにしておくことで結果を変数に格納することができます。"
+        },
+        {
+          "name": "output_array",
+          "required": false,
+          "description": "ダイス結果について、個々のダイス目を格納する変数を指定できます。例えば3d6を降った場合に4,2,6 といった感じの配列が格納されます。"
+        },
+        {
+          "name": "layer",
+          "required": false,
+          "description": "ダイスを表示するレイヤを指定できます。デフォルトは０"
+        },
+        {
+          "name": "scale",
+          "required": false,
+          "description": "ダイスの大きさを指定できます。デフォルトは1.5。ゲームの画面サイズによって適切な値は変わってきますので適宜調整をお願いします。"
+        },
+        {
+          "name": "skiproll",
+          "required": false,
+          "description": "trueを指定するとダイスをふる演出をスキップできます。結果だけが変数に格納されます。デフォルトはfalse。"
+        },
+        {
+          "name": "min_left",
+          "required": false,
+          "description": "ダイスが転がる範囲の左端を指定します。中央からの相対距離を指定します。デフォルトは-450。"
+        },
+        {
+          "name": "max_left",
+          "required": false,
+          "description": "ダイスが転がる範囲の右端を指定します。中央からの相対距離を指定します。デフォルトは150。"
+        },
+        {
+          "name": "min_top",
+          "required": false,
+          "description": "ダイスが転がる範囲の上端を指定します。中央からの相対距離を指定します。デフォルトは-150。"
+        },
+        {
+          "name": "max_top",
+          "required": false,
+          "description": "ダイスが転がる範囲の下端を指定します。中央からの相対距離を指定します。デフォルトは50。"
+        }
+      ]
+    },
+    "dice_hide": {
+      "name": "dice_hide",
+      "description": "画面上のダイスを非表示にします。timeパラメータは消える時間をミリ秒で指定できます。",
+      "parameters": [
+        {
+          "name": "time",
+          "required": false,
+          "description": "パラメータが消える時間をミリ秒で指定できます。"
+        }
+      ]
+    }
+  }
+```
 
 ### アウトライン表示(Outline)
 

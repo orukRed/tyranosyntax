@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.0]- 2024-07-07
+
+- プラグイン/マクロのパラメータ補完（β版）を追加しました。[issue#105](https://github.com/orukRed/tyranosyntax/issues/105)
+READMEを更新していますので、使用する際はご確認ください。
+
+また、上記設定で登録したプラグイン/マクロはplugin/macroタグで未定義の場合でも診断機能でエラーとして扱われませんのでご注意ください。
+
 ## [0.23.0]- 2024-07-06
 
 - 以下のようなネストしたオブジェクトについても補完できるようにしました。[issue#146](https://github.com/orukRed/tyranosyntax/issues/146)

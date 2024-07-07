@@ -57,7 +57,7 @@ export class InformationWorkSpace {
 
   private readonly _resourceExtensions: Object = vscode.workspace.getConfiguration().get('TyranoScript syntax.resource.extension')!;
   private readonly _resourceExtensionsArrays = Object.keys(this.resourceExtensions).map(key => this.resourceExtensions[key]).flat();//resourceExtensionsをオブジェクトからstring型の一次配列にする
-  private readonly _tagNameParams: String[] = vscode.workspace.getConfiguration().get('TyranoScript syntax.tag.name.parameters')!;
+  private readonly pluginTags: Object = JSON.parse(JSON.stringify(vscode.workspace.getConfiguration().get('TyranoScript syntax.plugin.parameter')!));
 
   private _extensionPath: string = "";
 
@@ -84,9 +84,12 @@ export class InformationWorkSpace {
       try {
         const passJoined = path.join(InformationExtension.path + `${path.sep}snippet${path.sep}tyrano.snippet.json`);
         const jsonData = fs.readFileSync(passJoined, "utf8");
-        const parsedJson = JSON.parse(jsonData);
+        const parsedJson = JSON.parse(jsonData)
+        const combinedObject = { ...parsedJson, ...this.pluginTags };
+
         this.defaultTagList = Object.keys(parsedJson);
-        this.suggestions.set(projectPath, parsedJson);
+        this.defaultTagList.push(...Object.keys(this.pluginTags));//pluginTagsをdefaultTagListに追加
+        this.suggestions.set(projectPath, combinedObject);
         if (Object.keys(this.suggestions.get(projectPath)!).length === 0) {
           throw new Error("suggestions is empty");
         }
@@ -210,7 +213,10 @@ export class InformationWorkSpace {
               const macroData: DefineMacroData = new DefineMacroData(macroName, new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc.start.line, path.node.loc.start.column)), absoluteScenarioFilePath, description);
               macroData.parameter.push(new MacroParameterData("parameter", false, "description"));//TODO:パーサーでパラメータの情報読み込んで追加する
               this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
-              this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
+              //suggetionsに登録されてない場合のみ追加
+              if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+                this._suggestions.get(projectPath)![macroName] = macroData.parseToJsonObject();
+              }
             }
           }
         } catch (error) {
@@ -363,7 +369,10 @@ export class InformationWorkSpace {
           const macroData: DefineMacroData = new DefineMacroData(await data["pm"]["name"], new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"])), absoluteScenarioFilePath, description);
           const macroName: string = await data["pm"]["name"];
           this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
-          this._suggestions.get(projectPath)![await data["pm"]["name"]] = macroData.parseToJsonObject();
+          //suggetionsに登録されてない場合のみ追加
+          if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+            this._suggestions.get(projectPath)![await data["pm"]["name"]] = macroData.parseToJsonObject();
+          }
         } else if (await data["name"] === "label") {
           //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
           if (await data["pm"]["label_name"] !== "/") {
@@ -682,9 +691,6 @@ export class InformationWorkSpace {
   }
   public set suggestions(value: Map<string, object>) {
     this._suggestions = value;
-  }
-  public get tagNameParams() {
-    return this._tagNameParams;
   }
   public get extensionPath() {
     return this._extensionPath;
