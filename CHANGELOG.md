@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.0]- 2024-07-xx
+
+- タグ補完、ツールチップをv6用のものへアップデートしました。[issue#160](https://github.com/orukRed/tyranosyntax/issues/160)
+
 ## [0.24.0]- 2024-07-07
 
 - プラグイン/マクロのパラメータ補完（β版）を追加しました。[issue#105](https://github.com/orukRed/tyranosyntax/issues/105)
