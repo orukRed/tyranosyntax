@@ -378,6 +378,179 @@
             ""
         ]
     },
+    "skipstart": {
+        "prefix": "skipstart",
+        "body": [
+            "[skipstart cond=\"\"]"
+        ],
+        "description": [
+            "スキップモードを開始します。テキストが一瞬で表示されるようになります。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "skipstop": {
+        "prefix": "skipstop",
+        "body": [
+            "[skipstop cond=\"\"]"
+        ],
+        "description": [
+            "スキップモードを解除します。[cancelskip]と同じ動作。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "cancelskip": {
+        "prefix": "cancelskip",
+        "body": [
+            "[cancelskip cond=\"\"]"
+        ],
+        "description": [
+            "スキップモードを解除します。[skipstop]と同じ動作。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "autostart": {
+        "prefix": "autostart",
+        "body": [
+            "[autostart cond=\"\"]"
+        ],
+        "description": [
+            "オートモードを開始します。テキストの文字数に応じた時間経過によってクリック待ちを自動的で通過するようになります。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "autostop": {
+        "prefix": "autostop",
+        "body": [
+            "[autostop cond=\"\"]"
+        ],
+        "description": [
+            "オートモードを停止します。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "autoconfig": {
+        "prefix": "autoconfig",
+        "body": [
+            "[autoconfig speed=\"\" clickstop=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "オートモードに関する設定を行います。",
+            "[パラメータ]",
+            "  speed:",
+            "    オートモード時のスピードをミリ秒で指定してください",
+            "  clickstop:",
+            "    画面クリック時にオートモードを停止するかどうか。trueまたはfalseで指定します。falseを指定すると、画面をクリックしてもオートモードが止まらないようになります。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "position_filter": {
+        "prefix": "position_filter",
+        "body": [
+            "[position_filter layer=\"\" page=\"\" remove=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "メッセージウィンドウの裏側にフィルター効果をかけることができます。",
+            "これによって、たとえばメッセージウィンドウをすりガラスのように見せることができます。",
+            "[パラメータ]",
+            "  layer:",
+            "    対象とするメッセージレイヤを指定します。",
+            "  page:",
+            "    レイヤの表ページと裏ページ、どちらを対象とするか。foreまたはbackで指定します。省略すると、表ページとみなされます。",
+            "  remove:",
+            "    trueまたはfalse。trueを指定すると、フィルターを除去する処理を行います。",
+            "  grayscale:",
+            "    0(デフォルト)～100を指定することで、画像の表示をグレースケールに変換できます。",
+            "  sepia:",
+            "    0(デフォルト)～100を指定することで、画像の表示をセピア調に変換できます。",
+            "  saturate:",
+            "    0～100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。",
+            "  hue:",
+            "    0(デフォルト)～360を指定することで、画像の表示の色相を変更できます。",
+            "  invert:",
+            "    0(デフォルト)～100を指定することで、画像の表示の階調を反転させることができます。",
+            "  opacity:",
+            "    0～100(デフォルト)を指定することで、画像の表示の透過度を変更できます。",
+            "  brightness:",
+            "    100(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。0で真っ暗に、100以上の数値でより明るくなります。",
+            "  contrast:",
+            "    0～100(デフォルト)を指定することで、画像の表示のコントラストを変更できます。",
+            "  blur:",
+            "    0(デフォルト)～任意の値を指定することで、画像の表示をぼかすことができます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "nolog": {
+        "prefix": "nolog",
+        "body": [
+            "[nolog cond=\"\"]"
+        ],
+        "description": [
+            "このタグに到達すると、テキストがバックログに記録されなくなります。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "endnolog": {
+        "prefix": "endnolog",
+        "body": [
+            "[endnolog cond=\"\"]"
+        ],
+        "description": [
+            "[nolog]タグで一時停止したバックログへの記録を再開します。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "pushlog": {
+        "prefix": "pushlog",
+        "body": [
+            "[pushlog text=\"\" join=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "バックログに任意のテキストを追加できます。",
+            "[パラメータ]",
+            "  text[必須]:",
+            "    バックログに追加するテキストを指定します。",
+            "  join:",
+            "    バックログを前のテキストに連結するかどうか。trueまたはfalseで指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
     "config_record_label": {
         "prefix": "config_record_label",
         "body": [
@@ -681,179 +854,6 @@
             ""
         ]
     },
-    "skipstart": {
-        "prefix": "skipstart",
-        "body": [
-            "[skipstart cond=\"\"]"
-        ],
-        "description": [
-            "スキップモードを開始します。テキストが一瞬で表示されるようになります。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "skipstop": {
-        "prefix": "skipstop",
-        "body": [
-            "[skipstop cond=\"\"]"
-        ],
-        "description": [
-            "スキップモードを解除します。[cancelskip]と同じ動作。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "cancelskip": {
-        "prefix": "cancelskip",
-        "body": [
-            "[cancelskip cond=\"\"]"
-        ],
-        "description": [
-            "スキップモードを解除します。[skipstop]と同じ動作。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "autostart": {
-        "prefix": "autostart",
-        "body": [
-            "[autostart cond=\"\"]"
-        ],
-        "description": [
-            "オートモードを開始します。テキストの文字数に応じた時間経過によってクリック待ちを自動的で通過するようになります。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "autostop": {
-        "prefix": "autostop",
-        "body": [
-            "[autostop cond=\"\"]"
-        ],
-        "description": [
-            "オートモードを停止します。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "autoconfig": {
-        "prefix": "autoconfig",
-        "body": [
-            "[autoconfig speed=\"\" clickstop=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "オートモードに関する設定を行います。",
-            "[パラメータ]",
-            "  speed:",
-            "    オートモード時のスピードをミリ秒で指定してください",
-            "  clickstop:",
-            "    画面クリック時にオートモードを停止するかどうか。trueまたはfalseで指定します。falseを指定すると、画面をクリックしてもオートモードが止まらないようになります。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "position_filter": {
-        "prefix": "position_filter",
-        "body": [
-            "[position_filter layer=\"\" page=\"\" remove=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "メッセージウィンドウの裏側にフィルター効果をかけることができます。",
-            "これによって、たとえばメッセージウィンドウをすりガラスのように見せることができます。",
-            "[パラメータ]",
-            "  layer:",
-            "    対象とするメッセージレイヤを指定します。",
-            "  page:",
-            "    レイヤの表ページと裏ページ、どちらを対象とするか。foreまたはbackで指定します。省略すると、表ページとみなされます。",
-            "  remove:",
-            "    trueまたはfalse。trueを指定すると、フィルターを除去する処理を行います。",
-            "  grayscale:",
-            "    0(デフォルト)～100を指定することで、画像の表示をグレースケールに変換できます。",
-            "  sepia:",
-            "    0(デフォルト)～100を指定することで、画像の表示をセピア調に変換できます。",
-            "  saturate:",
-            "    0～100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。",
-            "  hue:",
-            "    0(デフォルト)～360を指定することで、画像の表示の色相を変更できます。",
-            "  invert:",
-            "    0(デフォルト)～100を指定することで、画像の表示の階調を反転させることができます。",
-            "  opacity:",
-            "    0～100(デフォルト)を指定することで、画像の表示の透過度を変更できます。",
-            "  brightness:",
-            "    100(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。0で真っ暗に、100以上の数値でより明るくなります。",
-            "  contrast:",
-            "    0～100(デフォルト)を指定することで、画像の表示のコントラストを変更できます。",
-            "  blur:",
-            "    0(デフォルト)～任意の値を指定することで、画像の表示をぼかすことができます。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "nolog": {
-        "prefix": "nolog",
-        "body": [
-            "[nolog cond=\"\"]"
-        ],
-        "description": [
-            "このタグに到達すると、テキストがバックログに記録されなくなります。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "endnolog": {
-        "prefix": "endnolog",
-        "body": [
-            "[endnolog cond=\"\"]"
-        ],
-        "description": [
-            "[nolog]タグで一時停止したバックログへの記録を再開します。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "pushlog": {
-        "prefix": "pushlog",
-        "body": [
-            "[pushlog text=\"\" join=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "バックログに任意のテキストを追加できます。",
-            "[パラメータ]",
-            "  text[必須]:",
-            "    バックログに追加するテキストを指定します。",
-            "  join:",
-            "    バックログを前のテキストに連結するかどうか。trueまたはfalseで指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
     "jump": {
         "prefix": "jump",
         "body": [
@@ -1067,7 +1067,7 @@
     "glink": {
         "prefix": "glink",
         "body": [
-            "[glink color=\"\" font_color=\"\" storage=\"\" target=\"\" name=\"\" text=\"\" font_color=\"\" x=\"\" y=\"\" width=\"\" height=\"\" size=\"\" face=\"\" graphic=\"\" enterimg=\"\" clickse=\"\" enterse=\"\" leavese=\"\" cm=\"\" exp=\"\" preexp=\"\" bold=\"\" opacity=\"\" edge=\"\" shadow=\"\" keyfocus=\"\" cond=\"\"]"
+            "[glink color=\"\" font_color=\"\" storage=\"\" target=\"\" name=\"\" text=\"\" x=\"\" y=\"\" width=\"\" height=\"\" size=\"\" face=\"\" graphic=\"\" enterimg=\"\" clickse=\"\" enterse=\"\" leavese=\"\" cm=\"\" exp=\"\" preexp=\"\" bold=\"\" opacity=\"\" edge=\"\" shadow=\"\" keyfocus=\"\" autopos=\"\" cond=\"\"]"
         ],
         "description": [
             "グラフィカルリンク(テキストボタン)を表示できます。画像は必要ありません。",
@@ -1085,8 +1085,6 @@
             "    [anim]タグなどからこの名前でアニメーションさせられます。カンマで区切ることで複数指定できます。（高度な知識：name属性で指定した値はHTMLのクラス属性になります）",
             "  text:",
             "    テキストの内容を指定します。",
-            "  font_color:",
-            "    フォントの色を指定できます。",
             "  x:",
             "    ボタンの横位置を指定します。",
             "  y:",
@@ -1127,6 +1125,8 @@
             "    文字に影をつけます。影の色を0xRRGGBB形式で指定します。",
             "  keyfocus:",
             "    falseを指定すると、キーボードやゲームパッドで選択できなくなります。また1や2などの数値を指定すると、キーコンフィグのfocus_nextアクションでボタンを選択していくときの順序を指定できます。",
+            "  autopos:",
+            "    trueかfalseを指定します。デフォルトはfalse。trueを指定するとボタンの位置を自動的に調整します。つまりxとyに何も指定しなかったと同じ動作になります",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -1525,10 +1525,26 @@
             ""
         ]
     },
+    "clearfix": {
+        "prefix": "clearfix",
+        "body": [
+            "[clearfix name=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "fixレイヤーの要素を消去します。name属性を指定することで特定の要素のみを消去することもできます。",
+            "[パラメータ]",
+            "  name:",
+            "    これを指定すると、該当する要素だけを消去することができます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
     "image": {
         "prefix": "image",
         "body": [
-            "[image storage=\"\" layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" x=\"\" y=\"\" width=\"\" height=\"\" folder=\"\" name=\"\" time=\"\" wait=\"\" zindex=\"\" depth=\"\" reflect=\"\" pos=\"\" cond=\"\"]"
+            "[image storage=\"\" layer=\"\" page=\"\" visible=\"\" left=\"\" top=\"\" x=\"\" y=\"\" width=\"\" height=\"\" folder=\"\" name=\"\" time=\"\" wait=\"\" zindex=\"\" depth=\"\" reflect=\"\" pos=\"\" animimg=\"\" cond=\"\"]"
         ],
         "description": [
             "指定したレイヤに画像を追加します。キャラクター表示や背景切り替えなどに使用できます。",
@@ -1574,6 +1590,8 @@
             "    各キーワードにはそれぞれ省略形があり、l、lc、c、rc、rと指定することもできます。動作は同じです。",
             "    この属性を指定した場合はleftパラメータは無視されます。",
             "    layerをbaseと指定した場合、この属性は指定しないでください。",
+            "  animimg:",
+            "    trueを指定すると、GIFまたはAPNG形式のアニメーション画像を最初から再生できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -1789,16 +1807,177 @@
             ""
         ]
     },
-    "clearfix": {
-        "prefix": "clearfix",
+    "mask": {
+        "prefix": "mask",
         "body": [
-            "[clearfix name=\"\" cond=\"\"]"
+            "[mask time=\"\" effect=\"\" color=\"\" graphic=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
-            "fixレイヤーの要素を消去します。name属性を指定することで特定の要素のみを消去することもできます。",
+            "ゲーム画面全体を豊富な効果とともに暗転させることができます。",
+            "暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。",
             "[パラメータ]",
+            "  time:",
+            "    暗転が完了するまでの時間をミリ秒で指定できます。",
+            "  effect:",
+            "    暗転の効果を指定できます。以下のキーワードが指定できます。",
+            "    fadeInfadeInDownBigfadeInLeftBigfadeInRightBigfadeInUpBigflipInXflipInYlightSpeedInrotateInrotateInDownLeftrotateInDownRightrotateInUpLeftrotateInUpRightzoomInzoomInDownzoomInLeftzoomInRightzoomInUpslideInDownslideInLeftslideInRightslideInUpbounceIn bounceInDownbounceInLeftbounceInRightbounceInUprollIn",
+            "  color:",
+            "    暗転の色を0xRRGGBB形式で指定します。デフォルトは黒。",
+            "  graphic:",
+            "    指定すると、暗転部分に画像を使用できます。画像はdata/imageフォルダに配置します。",
+            "  folder:",
+            "    graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。bgimagefgimageなどを指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "mask_off": {
+        "prefix": "mask_off",
+        "body": [
+            "[mask_off time=\"\" effect=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "スクリーンマスクを消去してゲームを再開します。",
+            "[パラメータ]",
+            "  time:",
+            "    暗転が完了するまでの時間をミリ秒で指定できます。",
+            "  effect:",
+            "    暗転の効果を指定できます。以下のキーワードが指定できます。",
+            "    fadeOutfadeOutDownBigfadeOutLeftBigfadeOutRightBigfadeOutUpBigflipOutXflipOutYlightSpeedOutrotateOutrotateOutDownLeftrotateOutDownRightrotateOutUpLeftrotateOutUpRightzoomOutzoomOutDownzoomOutLeftzoomOutRightzoomOutUpslideOutDownslideOutLeftslideOutRightslideOutUpbounceOut bounceOutDownbounceOutLeftbounceOutRightbounceOutUp",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "movie": {
+        "prefix": "movie",
+        "body": [
+            "[movie storage=\"\" skip=\"\" mute=\"\" volume=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "ゲーム画面上で動画を再生します。動画ファイルはdata/videoフォルダに配置します。",
+            "[パラメータ]",
+            "  storage[必須]:",
+            "    再生する動画ファイルを指定します。",
+            "  skip:",
+            "    動画を途中でスキップできるようにするかどうか。trueまたはfalseで指定します。trueを指定すると、プレイヤーが画面クリックで動画を飛ばせるようになります。",
+            "  mute:",
+            "    動画の音をミュートするかどうか。trueまたはfalseで指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、trueを指定することでこの制限を無視できます。",
+            "  volume:",
+            "    動画の音量を0〜100で指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "bgmovie": {
+        "prefix": "bgmovie",
+        "body": [
+            "[bgmovie storage=\"\" time=\"\" mute=\"\" volume=\"\" loop=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "ゲーム画面の背景に動画を使用できます。動画ファイルはdata/videoフォルダに配置します。",
+            "[パラメータ]",
+            "  storage[必須]:",
+            "    再生する動画ファイルを指定します。",
+            "  time:",
+            "    フェードイン時間をミリ秒で指定します。",
+            "  mute:",
+            "    動画の音をミュートするかどうか。trueまたはfalseで指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、trueを指定することでこの制限を無視できます。",
+            "  volume:",
+            "    動画の音量を0〜100で指定します。",
+            "  loop:",
+            "    背景動画をループさせるかどうか。trueまたはfalseで指定します。falseを指定すると動画の最後の状態で停止します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "wait_bgmovie": {
+        "prefix": "wait_bgmovie",
+        "body": [
+            "[wait_bgmovie cond=\"\"]"
+        ],
+        "description": [
+            "再生中の背景ムービーの完了を待ちます。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "stop_bgmovie": {
+        "prefix": "stop_bgmovie",
+        "body": [
+            "[stop_bgmovie time=\"\" wait=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "bgmovieで再生した背景動画を停止します。",
+            "[パラメータ]",
+            "  time:",
+            "    フェードアウト時間をミリ秒で指定します。",
+            "  wait:",
+            "    フェードアウト完了を待つかどうかをtrueまたはfalseで指定できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "filter": {
+        "prefix": "filter",
+        "body": [
+            "[filter layer=\"\" name=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "レイヤやオブジェクトを指定して、様々なフィルター効果を追加できます。",
+            "[パラメータ]",
+            "  layer:",
+            "    フィルタをかけるレイヤを指定します。省略すると、もしくはallと指定するとゲーム画面全てに効果がかかります。",
             "  name:",
-            "    これを指定すると、該当する要素だけを消去することができます。",
+            "    特定の要素にフィルタをかけたい場合に、その要素のnameを指定します。",
+            "  grayscale:",
+            "    0(デフォルト)～100を指定することで、画像の表示をグレースケールに変換できます。",
+            "  sepia:",
+            "    0(デフォルト)～100を指定することで、画像の表示をセピア調に変換できます。",
+            "  saturate:",
+            "    0～100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。",
+            "  hue:",
+            "    0(デフォルト)～360を指定することで、画像の表示の色相を変更できます。",
+            "  invert:",
+            "    0(デフォルト)～100を指定することで、画像の表示の階調を反転させることができます。",
+            "  opacity:",
+            "    0～100(デフォルト)を指定することで、画像の表示の透過度を変更できます。",
+            "  brightness:",
+            "    100(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。0で真っ暗に、100以上の数値でより明るくなります。",
+            "  contrast:",
+            "    0～100(デフォルト)を指定することで、画像の表示のコントラストを変更できます。",
+            "  blur:",
+            "    0(デフォルト)～任意の値を指定することで、画像の表示をぼかすことができます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "free_filter": {
+        "prefix": "free_filter",
+        "body": [
+            "[free_filter layer=\"\" name=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "レイヤやオブジェクトを指定して、[filter]効果を無効にします。",
+            "[パラメータ]",
+            "  layer:",
+            "    フィルターを消去するレイヤを指定します。指定がない場合、すべてのフィルターが消去されます。",
+            "  name:",
+            "    特定の要素のフィルターを消去したい場合に、その要素のnameを指定します。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -1991,183 +2170,6 @@
             "    フェードアウト時間をミリ秒で指定します。",
             "  wait:",
             "    フェードアウトの完了を待つかどうか。trueまたはfalseで指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "movie": {
-        "prefix": "movie",
-        "body": [
-            "[movie storage=\"\" skip=\"\" mute=\"\" volume=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "ゲーム画面上で動画を再生します。動画ファイルはdata/videoフォルダに配置します。",
-            "[パラメータ]",
-            "  storage[必須]:",
-            "    再生する動画ファイルを指定します。",
-            "  skip:",
-            "    動画を途中でスキップできるようにするかどうか。trueまたはfalseで指定します。trueを指定すると、プレイヤーが画面クリックで動画を飛ばせるようになります。",
-            "  mute:",
-            "    動画の音をミュートするかどうか。trueまたはfalseで指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、trueを指定することでこの制限を無視できます。",
-            "  volume:",
-            "    動画の音量を0〜100で指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "bgmovie": {
-        "prefix": "bgmovie",
-        "body": [
-            "[bgmovie storage=\"\" time=\"\" mute=\"\" volume=\"\" loop=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "ゲーム画面の背景に動画を使用できます。動画ファイルはdata/videoフォルダに配置します。",
-            "[パラメータ]",
-            "  storage[必須]:",
-            "    再生する動画ファイルを指定します。",
-            "  time:",
-            "    フェードイン時間をミリ秒で指定します。",
-            "  mute:",
-            "    動画の音をミュートするかどうか。trueまたはfalseで指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、trueを指定することでこの制限を無視できます。",
-            "  volume:",
-            "    動画の音量を0〜100で指定します。",
-            "  loop:",
-            "    背景動画をループさせるかどうか。trueまたはfalseで指定します。falseを指定すると動画の最後の状態で停止します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "wait_bgmovie": {
-        "prefix": "wait_bgmovie",
-        "body": [
-            "[wait_bgmovie cond=\"\"]"
-        ],
-        "description": [
-            "再生中の背景ムービーの完了を待ちます。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "stop_bgmovie": {
-        "prefix": "stop_bgmovie",
-        "body": [
-            "[stop_bgmovie time=\"\" wait=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "bgmovieで再生した背景動画を停止します。",
-            "[パラメータ]",
-            "  time:",
-            "    フェードアウト時間をミリ秒で指定します。",
-            "  wait:",
-            "    フェードアウト完了を待つかどうかをtrueまたはfalseで指定できます。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "filter": {
-        "prefix": "filter",
-        "body": [
-            "[filter layer=\"\" name=\"\" grayscale=\"\" sepia=\"\" saturate=\"\" hue=\"\" invert=\"\" opacity=\"\" brightness=\"\" contrast=\"\" blur=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "レイヤやオブジェクトを指定して、様々なフィルター効果を追加できます。",
-            "[パラメータ]",
-            "  layer:",
-            "    フィルタをかけるレイヤを指定します。省略すると、もしくはallと指定するとゲーム画面全てに効果がかかります。",
-            "  name:",
-            "    特定の要素にフィルタをかけたい場合に、その要素のnameを指定します。",
-            "  grayscale:",
-            "    0(デフォルト)～100を指定することで、画像の表示をグレースケールに変換できます。",
-            "  sepia:",
-            "    0(デフォルト)～100を指定することで、画像の表示をセピア調に変換できます。",
-            "  saturate:",
-            "    0～100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。",
-            "  hue:",
-            "    0(デフォルト)～360を指定することで、画像の表示の色相を変更できます。",
-            "  invert:",
-            "    0(デフォルト)～100を指定することで、画像の表示の階調を反転させることができます。",
-            "  opacity:",
-            "    0～100(デフォルト)を指定することで、画像の表示の透過度を変更できます。",
-            "  brightness:",
-            "    100(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。0で真っ暗に、100以上の数値でより明るくなります。",
-            "  contrast:",
-            "    0～100(デフォルト)を指定することで、画像の表示のコントラストを変更できます。",
-            "  blur:",
-            "    0(デフォルト)～任意の値を指定することで、画像の表示をぼかすことができます。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "free_filter": {
-        "prefix": "free_filter",
-        "body": [
-            "[free_filter layer=\"\" name=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "レイヤやオブジェクトを指定して、[filter]効果を無効にします。",
-            "[パラメータ]",
-            "  layer:",
-            "    フィルターを消去するレイヤを指定します。指定がない場合、すべてのフィルターが消去されます。",
-            "  name:",
-            "    特定の要素のフィルターを消去したい場合に、その要素のnameを指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "mask": {
-        "prefix": "mask",
-        "body": [
-            "[mask time=\"\" effect=\"\" color=\"\" graphic=\"\" folder=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "ゲーム画面全体を豊富な効果とともに暗転させることができます。",
-            "暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。",
-            "[パラメータ]",
-            "  time:",
-            "    暗転が完了するまでの時間をミリ秒で指定できます。",
-            "  effect:",
-            "    暗転の効果を指定できます。以下のキーワードが指定できます。",
-            "    fadeInfadeInDownBigfadeInLeftBigfadeInRightBigfadeInUpBigflipInXflipInYlightSpeedInrotateInrotateInDownLeftrotateInDownRightrotateInUpLeftrotateInUpRightzoomInzoomInDownzoomInLeftzoomInRightzoomInUpslideInDownslideInLeftslideInRightslideInUpbounceIn bounceInDownbounceInLeftbounceInRightbounceInUprollIn",
-            "  color:",
-            "    暗転の色を0xRRGGBB形式で指定します。デフォルトは黒。",
-            "  graphic:",
-            "    指定すると、暗転部分に画像を使用できます。画像はdata/imageフォルダに配置します。",
-            "  folder:",
-            "    graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。bgimagefgimageなどを指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "mask_off": {
-        "prefix": "mask_off",
-        "body": [
-            "[mask_off time=\"\" effect=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "スクリーンマスクを消去してゲームを再開します。",
-            "[パラメータ]",
-            "  time:",
-            "    暗転が完了するまでの時間をミリ秒で指定できます。",
-            "  effect:",
-            "    暗転の効果を指定できます。以下のキーワードが指定できます。",
-            "    fadeOutfadeOutDownBigfadeOutLeftBigfadeOutRightBigfadeOutUpBigflipOutXflipOutYlightSpeedOutrotateOutrotateOutDownLeftrotateOutDownRightrotateOutUpLeftrotateOutUpRightzoomOutzoomOutDownzoomOutLeftzoomOutRightzoomOutUpslideOutDownslideOutLeftslideOutRightslideOutUpbounceOut bounceOutDownbounceOutLeftbounceOutRightbounceOutUp",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -2527,50 +2529,6 @@
             ""
         ]
     },
-    "s": {
-        "prefix": "s",
-        "body": [
-            "[s cond=\"\"]"
-        ],
-        "description": [
-            "シナリオファイルの実行を停止します。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "wait": {
-        "prefix": "wait",
-        "body": [
-            "[wait time=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "ウェイトを入れます。time属性で指定した時間、操作できなくなります。",
-            "[パラメータ]",
-            "  time[必須]:",
-            "    ウェイトをミリ秒で指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
-    "wait_cancel": {
-        "prefix": "wait_cancel",
-        "body": [
-            "[wait_cancel cond=\"\"]"
-        ],
-        "description": [
-            "[wait]タグによるウェイト状態をキャンセルできます。",
-            "[パラメータ]",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ""
-        ]
-    },
     "close": {
         "prefix": "close",
         "body": [
@@ -2775,127 +2733,44 @@
             ""
         ]
     },
-    "glyph": {
-        "prefix": "glyph",
+    "s": {
+        "prefix": "s",
         "body": [
-            "[glyph line=\"\" fix=\"\" left=\"\" top=\"\" folder=\"\" width=\"\" height=\"\" marginl=\"\" marginb=\"\" anim=\"\" time=\"\" figure=\"\" color=\"\" name=\"\" html=\"\" keyframe=\"\" easing=\"\" count=\"\" delay=\"\" direction=\"\" mode=\"\" koma_anim=\"\" koma_count=\"\" koma_width=\"\" koma_anim_time=\"\" cond=\"\"]"
+            "[s cond=\"\"]"
         ],
         "description": [
-            "クリック待ちグリフ（[l]や[p]でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。",
+            "シナリオファイルの実行を停止します。",
             "[パラメータ]",
-            "  line:",
-            "    グリフに使用する画像を指定できます。画像ファイルは、デフォルトではtyrano/images/systemフォルダ（nextpage.gifがあるフォルダ）から探されます。folderパラメータで変更可。",
-            "  fix:",
-            "    trueを指定すると、グリフがメッセージの末尾ではなくゲーム画面上の固定位置に表示されます。",
-            "  left:",
-            "    グリフを表示する横の位置を指定します。（fix属性をtrueにした場合に有効）",
-            "  top:",
-            "    グリフを表示する縦の位置を指定します。（fix属性をtrueにした場合に有効）",
-            "  folder:",
-            "    グリフの画像を探すフォルダを指定できます。",
-            "  width:",
-            "    グリフの横幅をpx単位で指定できます。",
-            "  height:",
-            "    グリフの高さをpx単位で指定できます。",
-            "  marginl:",
-            "    グリフの左側の余白をpx単位で指定できます。",
-            "  marginb:",
-            "    グリフの下側の余白をpx単位で指定できます。",
-            "  anim:",
-            "    グリフに適用するアニメーションを以下のキーワードから指定できます。",
-            "    flash_momentary(瞬間的な点滅)",
-            "    flash(滑らかな点滅)",
-            "    spin_x(X軸を中心に回転)",
-            "    spin_y(Y軸を中心に回転)",
-            "    spin_z(Z軸を中心に回転)",
-            "    bounce(バウンド)",
-            "    rotate_bounce(回転しながらバウンド)",
-            "    soft_bounce(ぽよんと弾むバウンド)",
-            "    zoom(拡縮)",
-            "  time:",
-            "    グリフに適用するアニメーションの時間をミリ秒単位で指定します。",
-            "  figure:",
-            "    グリフに使用する図形を以下のキーワードから指定できます。",
-            "    circle(円)",
-            "    triangle(三角形)",
-            "    v_triangle(下向き三角形)",
-            "    rectangle(四角形)",
-            "    diamond(ひし形)",
-            "    start(星)",
-            "  color:",
-            "    グリフに図形を使用する場合に、図形の色を指定できます。",
-            "  name:",
-            "    グリフに付けるクラス名を指定できます。（上級者向け）",
-            "  html:",
-            "    グリフのコンテンツとしてHTMLを直接指定できます。（上級者向け）",
-            "  keyframe:",
-            "    適用するキーフレームアニメーションのnameを指定します。animと併用することはできません。",
-            "  easing:",
-            "    アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。",
-            "    ease(開始時点と終了時点を滑らかに再生する)",
-            "    linear(一定の間隔で再生する)",
-            "    ease-in(開始時点をゆっくり再生する)",
-            "    ease-out(終了時点をゆっくり再生する)",
-            "    ease-in-out(開始時点と終了時点をゆっくり再生する)",
-            "    この他にcubic-bezier関数を使って独自のイージングを指定することも可能です。",
-            "  count:",
-            "    再生回数を指定できます。infiniteを指定することで無限ループさせることもできます。",
-            "  delay:",
-            "    開始までの時間を指定できます。初期値は0、つまり遅延なしです。",
-            "  direction:",
-            "    アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合はalternateを指定します。",
-            "  mode:",
-            "    アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。forwards(デフォルト)で維持。noneを指定すると、アニメーション再生前の状態に戻ります。",
-            "  koma_anim:",
-            "    グリフに使用するコマアニメの画像を指定できます。コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。",
-            "  koma_count:",
-            "    コマアニメを使用する場合、画像に含まれるコマ数を指定します。これを指定した場合、koma_widthを省略できます。",
-            "  koma_width:",
-            "    コマアニメを使用する場合、1コマあたりの横幅をpx単位で指定します。これを指定した場合、koma_countを省略できます。",
-            "  koma_anim_time:",
-            "    コマアニメが1周するまでの時間をミリ秒単位で指定します。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
     },
-    "glyph_skip": {
-        "prefix": "glyph_skip",
+    "wait": {
+        "prefix": "wait",
         "body": [
-            "[glyph_skip use=\"\" delete=\"\" その他=\"\" cond=\"\"]"
+            "[wait time=\"\" cond=\"\"]"
         ],
         "description": [
-            "スキップモード中に表示されるグリフを設定できます。",
+            "ウェイトを入れます。time属性で指定した時間、操作できなくなります。",
             "[パラメータ]",
-            "  use:",
-            "    すでに画面上に出ている要素をスキップモード中のグリフとして扱うようにできます。[ptext]や[image]に設定したnameをここに指定します。",
-            "  delete:",
-            "    trueを指定した場合、グリフの定義を削除する処理を実行します。",
-            "  その他:",
-            "    [glyph]と同じパラメータが指定できます。ただしfixパラメータはtrueで固定されます。",
+            "  time[必須]:",
+            "    ウェイトをミリ秒で指定します。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
         ]
     },
-    "glyph_auto": {
-        "prefix": "glyph_auto",
+    "wait_cancel": {
+        "prefix": "wait_cancel",
         "body": [
-            "[glyph_auto fix=\"\" use=\"\" delete=\"\" その他=\"\" cond=\"\"]"
+            "[wait_cancel cond=\"\"]"
         ],
         "description": [
-            "オートモード中に表示されるグリフを設定できます。",
+            "[wait]タグによるウェイト状態をキャンセルできます。",
             "[パラメータ]",
-            "  fix:",
-            "    画面固定グリフの設定をするならtrue、メッセージ末尾のグリフの設定をするならfalseを指定します。オートモードグリフに限り、固定グリフと非固定グリフを両方設定できます。",
-            "  use:",
-            "    すでに画面上に出ている要素を画面固定グリフとして扱うようにできます。[ptext]や[image]に設定したnameをここに指定します。",
-            "  delete:",
-            "    trueを指定した場合、グリフの定義を削除する処理を実行します。",
-            "  その他:",
-            "    [glyph]と同じパラメータが指定できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -3158,7 +3033,7 @@
     "dialog_config_ok": {
         "prefix": "dialog_config_ok",
         "body": [
-            "[dialog_config_ok text=\"\" type=\"\" width=\"\" margin=\"\" padding=\"\" fontsize=\"\" fontbold=\"\" fontface=\"\" fontcolor=\"\" img=\"\" imgwidth=\"\" enterimg=\"\" activeimg=\"\" clickimg=\"\" enterse=\"\" leavese=\"\" clickse=\"\" cond=\"\"]"
+            "[dialog_config_ok text=\"\" type=\"\" width=\"\" margin=\"\" padding=\"\" fontsize=\"\" fontbold=\"\" fontface=\"\" fontcolor=\"\" img=\"\" imgwidth=\"\" enterimg=\"\" activeimg=\"\" clickimg=\"\" enterse=\"\" leavese=\"\" clickse=\"\" btnimgtype=\"\" cond=\"\"]"
         ],
         "description": [
             "タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。",
@@ -3197,6 +3072,8 @@
             "    マウスがOKボタンの上から離れたときに再生する音声ファイル。soundフォルダから探します。",
             "  clickse:",
             "    マウスがOKボタンを押し込んだときに再生する音声ファイル。soundフォルダから探します。",
+            "  btnimgtype:",
+            "    このパラメータにbgを指定しておくと、imgやenterimgなどのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、imgに画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -3206,7 +3083,7 @@
     "dialog_config_ng": {
         "prefix": "dialog_config_ng",
         "body": [
-            "[dialog_config_ng text=\"\" type=\"\" width=\"\" margin=\"\" padding=\"\" fontsize=\"\" fontbold=\"\" fontface=\"\" fontcolor=\"\" img=\"\" imgwidth=\"\" enterimg=\"\" activeimg=\"\" clickimg=\"\" enterse=\"\" leavese=\"\" clickse=\"\" cond=\"\"]"
+            "[dialog_config_ng text=\"\" type=\"\" width=\"\" margin=\"\" padding=\"\" fontsize=\"\" fontbold=\"\" fontface=\"\" fontcolor=\"\" img=\"\" imgwidth=\"\" enterimg=\"\" activeimg=\"\" clickimg=\"\" enterse=\"\" leavese=\"\" clickse=\"\" btnimgtype=\"\" cond=\"\"]"
         ],
         "description": [
             "タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。",
@@ -3245,6 +3122,8 @@
             "    マウスがキャンセルボタンの上から離れたときに再生する音声ファイル。soundフォルダから探します。",
             "  clickse:",
             "    マウスがキャンセルボタンを押し込んだときに再生する音声ファイル。soundフォルダから探します。",
+            "  btnimgtype:",
+            "    このパラメータにbgを指定しておくと、imgやenterimgなどのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、imgに画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -3341,6 +3220,150 @@
             "    テキストの後ろに「...」というドットが増えていくアニメーションの所要時間をミリ秒で指定できます。0を指定するとドットアニメーションを無くすことができます。",
             "  icon:",
             "    ローディングアイコンを表示するかどうかをtrueまたはfalseで指定します。ローディングアイコンを非表示にしてテキストのみにしたい場合にはfalseを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "lang_set": {
+        "prefix": "lang_set",
+        "body": [
+            "[lang_set name=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "ゲームで使用する言語を変更することができます。",
+            "例えば[lang_set name=\"en\"] を指定すると data/others/lang/en.json の翻訳設定が採用されます。",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    defaultを指定するとローカライズを行いません。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "glyph": {
+        "prefix": "glyph",
+        "body": [
+            "[glyph line=\"\" fix=\"\" left=\"\" top=\"\" folder=\"\" width=\"\" height=\"\" marginl=\"\" marginb=\"\" anim=\"\" time=\"\" figure=\"\" color=\"\" name=\"\" html=\"\" keyframe=\"\" easing=\"\" count=\"\" delay=\"\" direction=\"\" mode=\"\" koma_anim=\"\" koma_count=\"\" koma_width=\"\" koma_anim_time=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "クリック待ちグリフ（[l]や[p]でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。",
+            "[パラメータ]",
+            "  line:",
+            "    グリフに使用する画像を指定できます。画像ファイルは、デフォルトではtyrano/images/systemフォルダ（nextpage.gifがあるフォルダ）から探されます。folderパラメータで変更可。",
+            "  fix:",
+            "    trueを指定すると、グリフがメッセージの末尾ではなくゲーム画面上の固定位置に表示されます。",
+            "  left:",
+            "    グリフを表示する横の位置を指定します。（fix属性をtrueにした場合に有効）",
+            "  top:",
+            "    グリフを表示する縦の位置を指定します。（fix属性をtrueにした場合に有効）",
+            "  folder:",
+            "    グリフの画像を探すフォルダを指定できます。",
+            "  width:",
+            "    グリフの横幅をpx単位で指定できます。",
+            "  height:",
+            "    グリフの高さをpx単位で指定できます。",
+            "  marginl:",
+            "    グリフの左側の余白をpx単位で指定できます。",
+            "  marginb:",
+            "    グリフの下側の余白をpx単位で指定できます。",
+            "  anim:",
+            "    グリフに適用するアニメーションを以下のキーワードから指定できます。",
+            "    flash_momentary(瞬間的な点滅)",
+            "    flash(滑らかな点滅)",
+            "    spin_x(X軸を中心に回転)",
+            "    spin_y(Y軸を中心に回転)",
+            "    spin_z(Z軸を中心に回転)",
+            "    bounce(バウンド)",
+            "    rotate_bounce(回転しながらバウンド)",
+            "    soft_bounce(ぽよんと弾むバウンド)",
+            "    zoom(拡縮)",
+            "  time:",
+            "    グリフに適用するアニメーションの時間をミリ秒単位で指定します。",
+            "  figure:",
+            "    グリフに使用する図形を以下のキーワードから指定できます。",
+            "    circle(円)",
+            "    triangle(三角形)",
+            "    v_triangle(下向き三角形)",
+            "    rectangle(四角形)",
+            "    diamond(ひし形)",
+            "    start(星)",
+            "  color:",
+            "    グリフに図形を使用する場合に、図形の色を指定できます。",
+            "  name:",
+            "    グリフに付けるクラス名を指定できます。（上級者向け）",
+            "  html:",
+            "    グリフのコンテンツとしてHTMLを直接指定できます。（上級者向け）",
+            "  keyframe:",
+            "    適用するキーフレームアニメーションのnameを指定します。animと併用することはできません。",
+            "  easing:",
+            "    アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。",
+            "    ease(開始時点と終了時点を滑らかに再生する)",
+            "    linear(一定の間隔で再生する)",
+            "    ease-in(開始時点をゆっくり再生する)",
+            "    ease-out(終了時点をゆっくり再生する)",
+            "    ease-in-out(開始時点と終了時点をゆっくり再生する)",
+            "    この他にcubic-bezier関数を使って独自のイージングを指定することも可能です。",
+            "  count:",
+            "    再生回数を指定できます。infiniteを指定することで無限ループさせることもできます。",
+            "  delay:",
+            "    開始までの時間を指定できます。初期値は0、つまり遅延なしです。",
+            "  direction:",
+            "    アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合はalternateを指定します。",
+            "  mode:",
+            "    アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。forwards(デフォルト)で維持。noneを指定すると、アニメーション再生前の状態に戻ります。",
+            "  koma_anim:",
+            "    グリフに使用するコマアニメの画像を指定できます。コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。",
+            "  koma_count:",
+            "    コマアニメを使用する場合、画像に含まれるコマ数を指定します。これを指定した場合、koma_widthを省略できます。",
+            "  koma_width:",
+            "    コマアニメを使用する場合、1コマあたりの横幅をpx単位で指定します。これを指定した場合、koma_countを省略できます。",
+            "  koma_anim_time:",
+            "    コマアニメが1周するまでの時間をミリ秒単位で指定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "glyph_skip": {
+        "prefix": "glyph_skip",
+        "body": [
+            "[glyph_skip use=\"\" delete=\"\" その他=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "スキップモード中に表示されるグリフを設定できます。",
+            "[パラメータ]",
+            "  use:",
+            "    すでに画面上に出ている要素をスキップモード中のグリフとして扱うようにできます。[ptext]や[image]に設定したnameをここに指定します。",
+            "  delete:",
+            "    trueを指定した場合、グリフの定義を削除する処理を実行します。",
+            "  その他:",
+            "    [glyph]と同じパラメータが指定できます。ただしfixパラメータはtrueで固定されます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "glyph_auto": {
+        "prefix": "glyph_auto",
+        "body": [
+            "[glyph_auto fix=\"\" use=\"\" delete=\"\" その他=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "オートモード中に表示されるグリフを設定できます。",
+            "[パラメータ]",
+            "  fix:",
+            "    画面固定グリフの設定をするならtrue、メッセージ末尾のグリフの設定をするならfalseを指定します。オートモードグリフに限り、固定グリフと非固定グリフを両方設定できます。",
+            "  use:",
+            "    すでに画面上に出ている要素を画面固定グリフとして扱うようにできます。[ptext]や[image]に設定したnameをここに指定します。",
+            "  delete:",
+            "    trueを指定した場合、グリフの定義を削除する処理を実行します。",
+            "  その他:",
+            "    [glyph]と同じパラメータが指定できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -3695,7 +3718,7 @@
     "loadjs": {
         "prefix": "loadjs",
         "body": [
-            "[loadjs storage=\"\" cond=\"\"]"
+            "[loadjs storage=\"\" type=\"\" cond=\"\"]"
         ],
         "description": [
             "外部JavaScriptファイルをロードします。無制限な機能拡張が可能です。",
@@ -3703,6 +3726,8 @@
             "[パラメータ]",
             "  storage[必須]:",
             "    ロードするJavaScriptファイルを指定します。",
+            "  type:",
+            "    読み込み方式。moduleを指定することができます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -3899,7 +3924,7 @@
     "playbgm": {
         "prefix": "playbgm",
         "body": [
-            "[playbgm storage=\"\" loop=\"\" sprite_time=\"\" volume=\"\" html5=\"\" restart=\"\" cond=\"\"]"
+            "[playbgm storage=\"\" loop=\"\" sprite_time=\"\" volume=\"\" html5=\"\" pause=\"\" seek=\"\" restart=\"\" cond=\"\"]"
         ],
         "description": [
             "BGMを再生します。再生する音声ファイルはdata/bgmフォルダに配置します。",
@@ -3915,6 +3940,10 @@
             "    再生する音量を指定できます。0〜100の範囲で指定して下さい。",
             "  html5:",
             "    通常は指定しなくてOKです。HTML5 Audioを使う場合はtrue、Web Audio APIを使う場合はfalse(デフォルト)で指定します。",
+            "  pause:",
+            "    trueを指定するとタグ実行時にBGMを再生しません。[resumebgm]で再生できます",
+            "  seek:",
+            "    再生開始時間を設定できます。例えば4.5と指定すると4.5秒進んだ位置からBGMが再生されます",
             "  restart:",
             "    この[playbgm]で再生しようとしたBGMがすでに再生されていた場合の処理を設定できます。trueなら最初から再生し直し、falseなら無視となります。",
             "  cond:",
@@ -3940,7 +3969,7 @@
     "fadeinbgm": {
         "prefix": "fadeinbgm",
         "body": [
-            "[fadeinbgm storage=\"\" loop=\"\" sprite_time=\"\" time=\"\" volume=\"\" html5=\"\" cond=\"\"]"
+            "[fadeinbgm storage=\"\" loop=\"\" sprite_time=\"\" time=\"\" volume=\"\" html5=\"\" pause=\"\" seek=\"\" cond=\"\"]"
         ],
         "description": [
             "BGMを徐々に再生します。",
@@ -3958,6 +3987,10 @@
             "    再生する音量を指定できます。0〜100の範囲で指定して下さい。",
             "  html5:",
             "    通常は指定しなくてOKです。HTML5 Audioを使う場合はtrue、Web Audio APIを使う場合はfalse(デフォルト)で指定します。",
+            "  pause:",
+            "    trueを指定するとタグ実行時にBGMを再生しません。[resumebgm]で再生できます",
+            "  seek:",
+            "    再生開始時間を設定できます。例えば4.5と指定すると4.5秒進んだ位置からBGMが再生されます",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4006,7 +4039,7 @@
             "[playse storage=\"\" buf=\"\" loop=\"\" sprite_time=\"\" clear=\"\" volume=\"\" html5=\"\" cond=\"\"]"
         ],
         "description": [
-            "BGMを再生します。再生する音声ファイルはdata/soundフォルダに配置します。",
+            "効果音を再生します。再生する音声ファイルはdata/soundフォルダに配置します。",
             "[パラメータ]",
             "  storage[必須]:",
             "    再生する音楽ファイルを指定します。",
@@ -4169,6 +4202,7 @@
         ],
         "description": [
             "現在再生中のBGMを一時停止できます。",
+            "少しあとに同じBGMの再生を再開する場合のみ使用してください。それ以外の場合は[stopbgm]での停止が適切です。",
             "[パラメータ]",
             "  buf:",
             "    スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。",
@@ -4184,6 +4218,7 @@
             "[resumebgm buf=\"\" cond=\"\"]"
         ],
         "description": [
+            "[pausebgm]で停止していたBGM再生を再開できます。",
             "一時停止中のオーディオを再開できます。",
             "[パラメータ]",
             "  buf:",
@@ -4395,21 +4430,23 @@
     "3d_init": {
         "prefix": "3d_init",
         "body": [
-            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\" cond=\"\"]"
+            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\" debug_option=\"\" cond=\"\"]"
         ],
         "description": [
             "3D関連の機能を使用するために必要な宣言です。",
-            "このタグを通過するとき、ゲーム内に3Dを表示するための初期化が行われます。",
-            "このタグを通過するまで[3d_...]で始まるタグは使えません。",
+            "このタグを通過時、ゲーム内に3Dを表示するためのシーンが追加されます。",
+            "また、タグを配置していないと3d_xxx で始まるタグを使用できません。",
             "[パラメータ]",
             "  layer:",
             "    3Dモデルを配置するレイヤを指定できます。",
             "  camera:",
-            "    カメラのモードを指定できます。Perspective(遠近感あり)、Orthographic(遠近感なしの平行投影)",
+            "    カメラのモードを指定できます。「Perspective」（遠近感あり）「Orthographic」（遠近感なしの平行投影）デフォルトはPerspective",
             "  near:",
-            "    カメラに近いオブジェクトをどの距離まで描画するかを設定できます。",
+            "    カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１",
             "  far:",
-            "    カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。",
+            "    カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000",
+            "  debug_option:",
+            "    自分のいるポジション座標を画面に表示するか否か",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4422,26 +4459,26 @@
             "[3d_model_new name=\"\" storage=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" motion=\"\" folder=\"\" cond=\"\"]"
         ],
         "description": [
-            "外部ファイルの3Dモデルを読み込んで定義します。",
-            "このタグを実行しただけでは、3Dモデルはまだゲーム画面に表示されません。表示するには[3d_show]が必要です。",
-            "3Dモデルファイルはdata/others/3d/modelフォルダに配置します。",
+            "外部ファイル形式の3Dモデルを読み込んで定義します。",
+            "実行時はゲーム画面には表示されません。表示するには[3d_show ]が必要です。",
+            "3Dモデルファイルは data/others/3d/modelフォルダに配置します。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  storage[必須]:",
-            "    3Dモデルのファイルを指定します。対応している形式はgltf、objです。ファイルはdataothers/3d/modelフォルダに配置します。",
+            "    3Dファイルを指定します。gltf obj json 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  tonemap:",
-            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトはtrue。無効にする場合はfalseを指定します。",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
             "  motion:",
-            "    3Dモデルにモーションが存在する場合、モーション名を指定できます。指定がない場合はひとつめのモーションファイルが自動的に適応されます。",
+            "    ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。",
             "  folder:",
-            "    ファイルの配置フォルダを変更できます。たとえばfgimageと指定すると、data/fgimageフォルダにある3Dモデルファイルを探します。",
+            "    ファイルの配置フォルダを変更できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4451,31 +4488,33 @@
     "3d_sphere_new": {
         "prefix": "3d_sphere_new",
         "body": [
-            "[3d_sphere_new name=\"\" texture=\"\" color=\"\" pos=\"\" rot=\"\" scale=\"\" radius=\"\" width=\"\" height=\"\" tonemap=\"\" cond=\"\"]"
+            "[3d_sphere_new name=\"\" texture=\"\" color=\"\" pos=\"\" rot=\"\" scale=\"\" radius=\"\" width=\"\" height=\"\" side=\"\" tonemap=\"\" cond=\"\"]"
         ],
         "description": [
-            "球体の3Dモデルを定義します。",
+            "球体の3Dモデルを定義します",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  texture:",
-            "    球体にテクスチャを貼ることができます。画像はdata/others/3d/texture以下に配置します。画像サイズは256x256や512x512が推奨されます。",
+            "    球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。",
             "  color:",
-            "    球体の色を0xRRGGBB形式で指定します。",
+            "    色を指定できます。0xRRGGBB 形式で指定します。",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  radius:",
-            "    球体の半径を指定します。",
+            "    球体の半径を指定します。デフォルトは300",
             "  width:",
-            "    球体の横幅を指定します。",
+            "    球体の横幅を指定します。デフォルトは30",
             "  height:",
-            "    球体の高さを指定します。",
+            "    球体の高さを指定します。デフォルトは30",
+            "  side:",
+            "    テクスチャをどの面に適応するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront",
             "  tonemap:",
-            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトはtrue。無効にする場合はfalseを指定します。",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4494,17 +4533,17 @@
             "  name[必須]:",
             "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  storage[必須]:",
-            "    表示する画像ファイルを指定します。ファイルは「others/3d/sprite」フォルダ以下に配置してください。",
+            "    表示する画像ファイルを指定します。ファイルは「othres/3d/sprite」フォルダ以下に配置してください。",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  tonemap:",
-            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトはtrue。無効にする場合はfalseを指定します。",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
             "  folder:",
-            "    ファイルの配置フォルダを変更できます。たとえばfgimageと指定すると、data/fgimageフォルダにある3Dモデルファイルを探します。",
+            "    ファイルの配置フォルダを変更できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4514,17 +4553,30 @@
     "3d_event": {
         "prefix": "3d_event",
         "body": [
-            "[3d_event name=\"\" storage=\"\" target=\"\" cond=\"\"]"
+            "[3d_event name=\"\" storage=\"\" target=\"\" type=\"\" exp=\"\" distance=\"\" ground=\"\" mode=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dオブジェクトがクリックされたときにイベントを発火（シナリオをジャンプ）させることができます。イベントは[s]タグに到達していないと発火しません。",
+            "3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。",
+            "イベントは[s]タグに到達していないと発火しません。",
+            "また、一度イベントが発火すると自動的に全イベントが無効化されます（イベント定義自体は残っている）",
+            "再度イベントを発生させたい場合は[3d_event_start]を通過する必要があります。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定します。",
+            "    3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定してください。",
             "  storage:",
-            "    ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。",
+            "    移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます",
             "  target:",
-            "    ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。",
+            "    ジャンプ先のラベル名を指定します。省略すると先頭から実行されます",
+            "  type:",
+            "    jump or eval を指定する。デフォルトはjump。evalを指定した場合はexpパラメーターに指定したjsが実行される。",
+            "  exp:",
+            "    typeにevalを指定した場合に実行されるjsを記述します。",
+            "  distance:",
+            "    クリック時にイベントが発生する距離を指定できます。この指定より遠くにあるオブジェクトは反応しません",
+            "  ground:",
+            "    FPSモードの際に自分が特定のオブジェクトの上にいるときだけ発火させることができます。ここで指定したnameのオブジェクト上にいるときだけイベントが発火。",
+            "  mode:",
+            "    click or collision を指定します。fpsの場合にクリックで発火するか、collisionで発火するかを選択できます。デフォルトはclick。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4540,7 +4592,7 @@
             "登録した3Dイベントを無効化します。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定します。",
+            "    3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定してください。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4554,7 +4606,7 @@
         ],
         "description": [
             "登録した3Dイベントを開始します。",
-            "イベントが一度実行された後は全イベントが無効化されるため、受付を再開したい場合はこのタグを配置する必要があります。",
+            "イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。",
             "[パラメータ]",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
@@ -4568,7 +4620,9 @@
             "[3d_event_stop cond=\"\"]"
         ],
         "description": [
-            "登録した3Dイベントを一時的に停止します。",
+            "登録した3Dイベントを停止します。",
+            "[3d_event_start]で再開できます。",
+            "登録したイベント自体は消えません。",
             "[パラメータ]",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
@@ -4585,9 +4639,9 @@
             "立方体の3Dモデルを定義します。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示を制御します。",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  texture:",
-            "    表示する画像ファイルを指定します。ファイルはdata/others/3d/textureフォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます",
+            "    表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます",
             "  color:",
             "    色を指定できます。0xRRGGBB 形式で指定します。",
             "  width:",
@@ -4597,13 +4651,13 @@
             "  depth:",
             "    3Dオブジェクトの深さを指定します。デフォルトは1です",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  tonemap:",
-            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトはtrue。無効にする場合はfalseを指定します。",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4613,7 +4667,7 @@
     "3d_image_new": {
         "prefix": "3d_image_new",
         "body": [
-            "[3d_image_new name=\"\" texture=\"\" width=\"\" height=\"\" pos=\"\" rot=\"\" scale=\"\" tonemap=\"\" doubleside=\"\" cond=\"\"]"
+            "[3d_image_new name=\"\" texture=\"\" width=\"\" height=\"\" pos=\"\" rot=\"\" scale=\"\" doubleside=\"\" tonemap=\"\" cond=\"\"]"
         ],
         "description": [
             "イメージの3Dモデルを定義します。",
@@ -4622,21 +4676,21 @@
             "  name[必須]:",
             "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  texture:",
-            "    表示する画像ファイルを指定します。ファイルは「others/3d/texture」フォルダ以下に配置してください。",
+            "    表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。",
             "  width[必須]:",
             "    3Dオブジェクトの横幅を指定します。デフォルトは1です",
             "  height:",
             "    3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
-            "  tonemap:",
-            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトはtrue。無効にする場合はfalseを指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  doubleside:",
             "    テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。",
+            "  tonemap:",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4646,23 +4700,57 @@
     "3d_show": {
         "prefix": "3d_show",
         "body": [
-            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" cond=\"\"]"
+            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" group=\"\" group_uuid=\"\" force_sprite=\"\" visible=\"\" cond=\"\"]"
         ],
         "description": [
             "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定します",
+            "    3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください",
             "  time:",
-            "    表示させるまでの時間をミリ秒で指定します。",
+            "    表示させるまでの時間をミリ秒で指定します。デフォルトは500",
             "  wait:",
-            "    表示の完了を待つか否か。",
+            "    表示の完了を待つか否か。デフォルトはtrue。",
             "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
+            "  group:",
+            "    グループに所属させることができます。グループ名を指定してください",
+            "  group_uuid:",
+            "    シーン中でuuidを指定してグループの直下に追加することが可能です",
+            "  force_sprite:",
+            "    該当オブジェクトは強制的にスプライトグループに格納されます。",
+            "  visible:",
+            "    true or false を指定。初期状態で非表示状態でシーンに追加したい場合はfalseを指定。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_clone": {
+        "prefix": "3d_clone",
+        "body": [
+            "[3d_clone name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください",
+            "  time:",
+            "    表示させるまでの時間をミリ秒で指定します。デフォルトは500",
+            "  wait:",
+            "    表示の完了を待つか否か。デフォルトはtrue。",
+            "  pos:",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
+            "  rot:",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
+            "  scale:",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4677,14 +4765,14 @@
         "description": [
             "3Dオブジェクトをゲーム画面から退場させます。",
             "このタグを実行しても定義自体は削除されません。",
-            "もう一度表示させるには[3d_show]タグを使います。",
+            "もう一度表示する場合は[3d_show]タグを使ってください。",
             "[パラメータ]",
             "  name[必須]:",
-            "    退場させるオブジェクトのnameを指定します。",
+            "    3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定してください",
             "  time:",
-            "    退場させるまでの時間をミリ秒で指定します。",
+            "    退場させるまでの時間をミリ秒で指定します。デフォルトは500",
             "  wait:",
-            "    退場の完了を待つかどうか。trueまたはfalseで指定します。",
+            "    退場の完了を待つか否か。デフォルトはtrue。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4702,9 +4790,9 @@
             "もう一度表示する場合は[3d_show]タグを使ってください。",
             "[パラメータ]",
             "  time:",
-            "    退場させるまでの時間をミリ秒で指定します。",
+            "    退場させるまでの時間をミリ秒で指定します。デフォルトは500",
             "  wait:",
-            "    退場の完了を待つかどうか。trueまたはfalseで指定します",
+            "    退場の完了を待つか否か。デフォルトはtrue。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4717,12 +4805,13 @@
             "[3d_delete name=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dオブジェクトの定義を削除します。",
-            "このタグは[3d_hide]とは異なり3Dモデルの定義自体を削除するので、モデルを再度使用するには[3d_model_new]タグを使う必要があります。",
-            "使用しなくなった3Dオブジェクトの定義をこまめに削除しておくことで軽量な動作が期待できます。",
+            "3Dオブジェクトを削除します。",
+            "このタグは定義からも削除されるので、再度使用する場合は",
+            "もう一度 new タグで定義する必要があります。",
+            "使用しなくなった3Dオブジェクトはこまめに削除することで軽量な動作が期待できます。",
             "[パラメータ]",
             "  name[必須]:",
-            "    削除したい3Dオブジェクトのnameを指定します。",
+            "    3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4747,15 +4836,12 @@
     "3d_canvas_show": {
         "prefix": "3d_canvas_show",
         "body": [
-            "[3d_canvas_show time=\"\" cond=\"\"]"
+            "[3d_canvas_show cond=\"\"]"
         ],
         "description": [
-            "3Dキャンバスを表示状態にします。",
-            "対になる[3d_canvas_hide]タグと組み合わせて使います。",
-            "3Dシーンとノベルパートを頻繁に行き来する場合に活用できます。",
+            "3Dキャンバスを表示にします。",
+            "例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。",
             "[パラメータ]",
-            "  time:",
-            "    表示にかける時間をミリ秒で指定できます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4770,7 +4856,7 @@
         "description": [
             "3Dキャンバスを非表示にします。",
             "3Dシーン自体は維持されます。",
-            "3Dシーンとノベルパートを頻繁に行き来する場合に活用できます。",
+            "例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。",
             "[パラメータ]",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
@@ -4786,7 +4872,7 @@
         "description": [
             "3Dシーンをすべて削除します。",
             "このタグを使用すると3D系の機能は全て使えなくなります。",
-            "もう一度3D系の機能を使用するには[3d_init]タグを使用してください。",
+            "もう一度使用する場合は[3d_init]タグを通過させてください。",
             "[パラメータ]",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
@@ -4800,25 +4886,25 @@
             "[3d_anim name=\"\" pos=\"\" rot=\"\" scale=\"\" time=\"\" wait=\"\" lookat=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
-            "シーン上の3Dオブジェクトをアニメーションさせます。",
+            "シーン上の3Dオブジェクトをアニメーションさせることができます。",
             "[パラメータ]",
             "  name[必須]:",
-            "    アニメーション対象の3Dオブジェクトのnameを指定します。ただしcameraを指定した場合はカメラをアニメーションさせる動作となります。",
+            "    3Dオブジェクトの名前です。この名前の3Dオブジェクトをアニメーションさせます。カメラをアニメーションさせる場合は「camera」という名前を指定します。",
             "  pos:",
-            "    アニメーション後の座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    アニメーション後、3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    アニメーション後の回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。",
+            "    アニメーション後、3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
             "  scale:",
-            "    アニメーション後の拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。",
+            "    アニメーション後、3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  time:",
-            "    アニメーションにかける時間をミリ秒で指定します。",
+            "    アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。",
             "  wait:",
-            "    アニメーションの完了を待つかどうかをtrueまたはfalseで指定します。",
+            "    アニメーションの完了を待つか否か。true or false デフォルトはtrueです。",
             "  lookat:",
-            "    nameがcameraのときだけ有効。オブジェクトのnameかpos座標を指定することで、カメラを特定の方向に向けられます。",
+            "    ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。",
             "  effect:",
-            "    変化のエフェクトを指定します。以下のキーワードが指定できます。",
-            "    jswingdefeaseInQuadeaseOutQuadeaseInOutQuadeaseInCubiceaseOutCubiceaseInOutCubiceaseInQuarteaseOutQuarteaseInOutQuarteaseInQuinteaseOutQuinteaseInOutQuinteaseInSineeaseOutSineeaseInOutSineeaseInExpoeaseOutExpoeaseInOutExpoeaseInCirceaseOutCirceaseInOutCirceaseInElasticeaseOutElasticeaseInOutElasticeaseInBackeaseOutBackeaseInOutBackeaseInBounceeaseOutBounceeaseInOutBounce",
+            "    変化のエフェクトを指定します。指定できる文字列は以下の種類です",
+            "    jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4831,12 +4917,12 @@
             "[3d_anim_stop name=\"\" finish=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dオブジェクトのアニメーションを停止できます。",
+            "アニメーション中の3Dオブジェクトを停止することができます。",
             "[パラメータ]",
             "  name[必須]:",
-            "    アニメーションを停止する3Dオブジェクトのnameを指定します。",
+            "    アニメーションを停止する3Dオブジェクトの名前を指定します。",
             "  finish:",
-            "    trueまたはfalseを指定します。trueを指定すると3Dオブジェクトが最終的にアニメーションする予定だった場所まで移動します。falseを指定するとその場で停止します。",
+            "    true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4849,15 +4935,14 @@
             "[3d_scene tonemap=\"\" tonemap_value=\"\" light_amb=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dシーン全体に影響する設定を行うことができます。",
+            "3Dのシーン全体に影響する設定を行うことができます。",
             "[パラメータ]",
             "  tonemap:",
-            "    トーンマッピングをシーンに設定できます。以下のキーワードが指定できます。NoLinearReinhardUncharted2CineonACESFilmic",
-            "    デフォルトはNo(トーンマッピングなし)",
+            "    トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。",
             "  tonemap_value:",
-            "    トーンマッピングの強さを設定します。",
+            "    トーンマッピングの強さを設定します。デフォルトは0.8です。",
             "  light_amb:",
-            "    環境光の強さを指定します。デフォルトは1。0.5だと暗めに、2だとかなり明るくなります。",
+            "    環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4867,18 +4952,20 @@
     "3d_camera": {
         "prefix": "3d_camera",
         "body": [
-            "[3d_camera pos=\"\" rot=\"\" lookat=\"\" cond=\"\"]"
+            "[3d_camera pos=\"\" rot=\"\" tonemap=\"\" lookat=\"\" cond=\"\"]"
         ],
         "description": [
             "3Dシーンのカメラを設定できます。",
             "カメラの座標を確認したい場合は[camera_debug]をつかって、座標や傾きをテストするのがおすすめです。",
             "[パラメータ]",
             "  pos:",
-            "    カメラの座標を指定します。xyz座標をそれぞれ半角カンマで区切って指定します。",
+            "    カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
             "  rot:",
-            "    カメラの回転を指定します。xyz軸の回転をそれぞれ半角カンマで区切って指定します。",
+            "    カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
+            "  tonemap:",
+            "    トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。",
             "  lookat:",
-            "    シーン上の3Dオブジェクトのnameを指定することで、そのオブジェクトの方にカメラを向けることができます。もしくはxyz座標を直接指定することで、その座標にカメラを向けることもできます。",
+            "    シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4891,15 +4978,15 @@
             "[3d_gyro max_x=\"\" max_y=\"\" mode=\"\" cond=\"\"]"
         ],
         "description": [
-            "ジャイロ（スマホの傾き）でカメラを制御できます。",
-            "PCゲームの場合はマウスの位置でジャイロを再現できます。",
+            "スマホの傾きでカメラを制御することができます。",
+            "PCゲームの場合はマウスの位置でジャイロを再現することができます。",
             "[パラメータ]",
             "  max_x:",
-            "    X軸方向の傾き上限を角度で指定します。",
+            "    X軸方向の傾き上限を角度で指定します。デフォルトは30",
             "  max_y:",
-            "    Y軸方向の傾き上限を角度で指定します。",
+            "    Y軸方向の傾き上限を角度で指定します。デフォルトは30",
             "  mode:",
-            "    positionまたはrotation。カメラの「座標」と「回転」のうちどちらをジャイロで制御するのかを指定できます。回転をジャイロで制御できるようするにはrotationを、座標をジャイロで制御できるようにするにはpositionを指定します。",
+            "    position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4912,9 +4999,10 @@
             "[3d_gyro_stop cond=\"\"]"
         ],
         "description": [
+            "スマホ限定",
             "ジャイロの動きを停止します。",
-            "カメラの位置や回転をもとに戻したい場合、このタグの直後に[3d_camera]で指定する必要があります。",
-            "ジャイロを有効にするには再び[3d_gyro]タグを使用します。",
+            "カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定してください。",
+            "再度ジャイロを有効にしたい場合は [3d_gyro] タグです。",
             "[パラメータ]",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
@@ -4928,13 +5016,17 @@
             "[3d_debug_camera button_text=\"\" menu=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら調整できます。",
+            "3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整することができます。",
             "デバッグを終了する場合は画面左上のボタンを押します。",
+            "マウス操作",
+            "左クリック：カメラの向き(rot)",
+            "右クリック：カメラの位置(pos)",
+            "中央クリック：ポジションのz軸",
             "[パラメータ]",
             "  button_text:",
-            "    デバッグ終了ボタンのテキストを自由に設定できます。",
+            "    デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」",
             "  menu:",
-            "    デバッグのメニューを表示するかどうか。falseを指定すると終了ボタンのみになります。",
+            "    デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示)",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4947,12 +5039,12 @@
             "[3d_motion name=\"\" motion=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dモデルのモーションを変更できます。",
+            "3Dモデルのモーションを変更することができます。",
             "[パラメータ]",
             "  name[必須]:",
-            "    3Dオブジェクトのnameを指定します。",
+            "    3Dオブジェクトの名前を指定します。",
             "  motion[必須]:",
-            "    モーション名を指定します。",
+            "    モーション名を指定してください。",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -4965,19 +5057,177 @@
             "[3d_debug name=\"\" button_text=\"\" menu=\"\" overlap=\"\" reset=\"\" cond=\"\"]"
         ],
         "description": [
-            "3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整できます。",
+            "3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整することができます。",
             "デバッグを終了する場合は画面左上のボタンを押します。",
+            "マウス操作",
+            "左クリック：カメラの向き(rot)",
+            "右クリック：カメラの位置(pos)",
+            "中央クリック：ポジションのz軸",
+            "スクロール：拡大縮小（scale）",
             "[パラメータ]",
             "  name[必須]:",
-            "    デバッグする3Dオブジェクトのnameを指定します。",
+            "    デバッグする3Dオブジェクトのnameを指定してください。",
             "  button_text:",
-            "    デバッグ終了ボタンのテキストを自由に設定できます。",
+            "    デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」",
             "  menu:",
-            "    デバッグのメニューを表示するかどうか。falseを指定すると終了ボタンのみになります。",
+            "    デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示)",
             "  overlap:",
-            "    trueまたはfalse。trueを指定すると、モデルが最前面に表示されます。モデルがメニューに隠れてしまう場合はここをtrueにしてください。",
+            "    true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase",
             "  reset:",
-            "    trueまたはfalse。trueを指定すると、デバッグ終了後にモデルの状態がデバッグ前に戻ります。",
+            "    true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_debug_bk": {
+        "prefix": "3d_debug_bk",
+        "body": [
+            "[3d_debug_bk name=\"\" button_text=\"\" menu=\"\" overlap=\"\" reset=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整することができます。",
+            "デバッグを終了する場合は画面左上のボタンを押します。",
+            "マウス操作",
+            "左クリック：カメラの向き(rot)",
+            "右クリック：カメラの位置(pos)",
+            "中央クリック：ポジションのz軸",
+            "スクロール：拡大縮小（scale）",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    デバッグする3Dオブジェクトのnameを指定してください。",
+            "  button_text:",
+            "    デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」",
+            "  menu:",
+            "    デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示)",
+            "  overlap:",
+            "    true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase",
+            "  reset:",
+            "    true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_fps_control": {
+        "prefix": "3d_fps_control",
+        "body": [
+            "[3d_fps_control cond=\"\"]"
+        ],
+        "description": [
+            "FPSコントロールが可能になる。",
+            "[s]に到達していないと実行されません。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_new_group": {
+        "prefix": "3d_new_group",
+        "body": [
+            "[3d_new_group name=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3Dオブジェクトをグループで管理することができるようにする。",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    新規作成するグループ名を設定します。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_add_group": {
+        "prefix": "3d_add_group",
+        "body": [
+            "[3d_add_group name=\"\" new_name=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3Dオブジェクトをグループに追加します。",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    追加する3Dオブジェクトを指定します。",
+            "  new_name:",
+            "    ここが指定されている場合、nameのオブジェクトをコピーして新しい名前で登録できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_text_new": {
+        "prefix": "3d_text_new",
+        "body": [
+            "[3d_text_new name=\"\" text=\"\" pos=\"\" rot=\"\" scale=\"\" size=\"\" sprite=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3D空間にテキストを表示できます。",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
+            "  text[必須]:",
+            "    表示するテキスト文字列を指定します",
+            "  pos:",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
+            "  rot:",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
+            "  scale:",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
+            "  size:",
+            "    フォントサイズ。デフォルトは42",
+            "  sprite:",
+            "    true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_sound": {
+        "prefix": "3d_sound",
+        "body": [
+            "[3d_sound name=\"\" text=\"\" pos=\"\" rot=\"\" scale=\"\" size=\"\" sprite=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3D空間にテキストを表示できます。",
+            "[パラメータ]",
+            "  name:",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
+            "  text:",
+            "    表示するテキスト文字列を指定します",
+            "  pos:",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
+            "  rot:",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
+            "  scale:",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
+            "  size:",
+            "    フォントサイズ。デフォルトは42",
+            "  sprite:",
+            "    true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
+        ]
+    },
+    "3d_helper": {
+        "prefix": "3d_helper",
+        "body": [
+            "[3d_helper name=\"\" text=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "3D空間に操作補助用のラインを描画させることができる",
+            "[パラメータ]",
+            "  name:",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
+            "  text:",
+            "    表示するテキスト文字列を指定します",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
