@@ -110,8 +110,11 @@
 	"suppressImplicitAnyIndexErrors": true,/*str[1]など、添字にマジックナンバーを許可する*/
 },
   "exclude": [
+    "webpack.config.js",
+    "out/**/*",
 	  "node_modules",
-	  ".vscode-test",
+    "eslint.config.mjs",
+    ".vscode-test",
 	  "out/**/*",
 	  "test_project/**/*",
 	  "webpack.config.js"

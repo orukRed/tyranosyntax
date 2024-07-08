@@ -1,6 +1,10 @@
 .vscode/**
 .vscode-test/**
 .gitignore
+.editorconfig
+.prettierignore
+.prettierrc.yaml
+eslint.configs.mjs
 vsc-extension-quickstart.md
 *.vsix
 test.ks

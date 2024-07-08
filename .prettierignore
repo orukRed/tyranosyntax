@@ -1,0 +1,19 @@
+# https://prettier.io
+
+.git
+node_modules/
+package-lock.json
+
+out/
+
+# Files from external sources
+src/lib/
+
+# TODO: Gradually format source code
+.vscode
+language-configuration*.json
+package.json
+src/
+syntaxes/
+Tooltip/
+webpack.config.js
