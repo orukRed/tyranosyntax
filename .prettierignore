@@ -6,9 +6,6 @@ package-lock.json
 
 out/
 
-# Files from external sources
-src/lib/
-
 # TODO: Gradually format source code
 .vscode
 language-configuration*.json
