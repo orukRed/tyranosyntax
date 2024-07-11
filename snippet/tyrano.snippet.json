@@ -21,7 +21,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_new_group name=\"mygroup\" ]\n\n[3d_image_new name=\"model_A\" texture=\"t.png\" width=100 doubleside=true ]\n[3d_add_group name=\"model_A\" group=\"mygroup\" pos=\"0,100,0\" rot=\"-0,0,0\" scale=\"1\" ]\n\n[3d_show name=\"mygroup\" ]"
   },
   "3d_anim": {
     "name": "3d_anim",
@@ -75,7 +75,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_model_new name=\"mymodel\" storage=\"mymodel/scene.gltf\" ]\n[3d_anim name=\"miruku\" pos=\"79,-458,727\" scale=\"318.45,318.45,318.45\" rot=\"0.13,-0.64,0\" effect=\"easeInCubic\" wait=true]"
   },
   "3d_anim_stop": {
     "name": "3d_anim_stop",
@@ -163,7 +163,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ボックスの定義と表示 \n[3d_box_new name=\"mybox1\" ]\n[3d_show name=\"mybox1\" pos=\"365,145,0\" rot=\"0.92,-4.3,0\" scale=\"0.77,0.77,0.77\" time=2000]\n\n;テクスチャの６面に異なる画像を使う場合の例\n[3d_box_new name=\"mybox2\" width=100 height=100 depth=100 texture=\"dice/1.png,dice/2.png,dice/3.png,dice/4.png,dice/5.png,dice/6.png\" ]\n[3d_show name=\"mybox2\" time=2000 ]"
   },
   "3d_camera": {
     "name": "3d_camera",
@@ -197,7 +197,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_camera pos=\"10,20,30\" ]"
   },
   "3d_canvas_hide": {
     "name": "3d_canvas_hide",
@@ -211,7 +211,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
   },
   "3d_canvas_show": {
     "name": "3d_canvas_show",
@@ -225,7 +225,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
   },
   "3d_clone": {
     "name": "3d_clone",
@@ -269,7 +269,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]"
   },
   "3d_close": {
     "name": "3d_close",
@@ -322,7 +322,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_model_new name=\"Robot\" storage=\"Robot.glb\" ]\n[3d_show name=\"Robot\" rot=\"0.28,0.67,0\" pos=\"-129,-24,910\" scale=\"9.68\" ]\n\nモーションを変更します。[p]\n\n[3d_debug name=\"Robot\" ]"
   },
   "3d_debug_bk": {
     "name": "3d_debug_bk",
@@ -361,7 +361,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_model_new name=\"Robot\" storage=\"Robot.glb\" ]\n[3d_show name=\"Robot\" rot=\"0.28,0.67,0\" pos=\"-129,-24,910\" scale=\"9.68\" ]\n\nモーションを変更します。[p]\n\n[3d_debug name=\"Robot\" ]"
   },
   "3d_debug_camera": {
     "name": "3d_debug_camera",
@@ -385,7 +385,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_debug_camera ]"
   },
   "3d_delete": {
     "name": "3d_delete",
@@ -404,7 +404,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]\n\n非表示にします。[p]\n[3d_hide name=\"myimg\"]\n\n定義からも削除[p]\n[3d_delete name=\"myimg\"]"
   },
   "3d_delete_all": {
     "name": "3d_delete_all",
@@ -472,7 +472,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dモデルの定義と表示\n[3d_model_new name=\"miruku\" storage=\"miruku/scene.gltf\" scale=300 pos=\"0,-300,500\" ]\n[3d_event name=\"miruku\" target=\"miruku\"]\n\n;ボックスの表示\n[3d_box_new name=\"box\" width=100 height=100 depth=100 scale=2 tone=false color=\"0xFFFFFF\"]\n[3d_show name=\"box\" time=2000 ]\n\n;イベントの定義 \n[3d_event name=\"miruku\" target=\"miruku_click\"]\n[3d_event name=\"box\" target=\"box_click\"]\n\n[s]\n\n*miruku_click\n3Dモデルがクリックされた[p]\n\n@jump target=\"common\"\n\n*box_click\nボックスがクリックされた[p]\n\n*common\n\nイベントを再開する[p]\n@3d_event_start"
   },
   "3d_event_delete": {
     "name": "3d_event_delete",
@@ -491,7 +491,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ボックスの表示\n[3d_box_new name=\"box\" width=100 height=100 depth=100 scale=2 tone=false color=\"0xFFFFFF\"]\n[3d_show name=\"box\" time=2000 ]\n\n;イベントの定義の削除。これ移行はクリックしても反応しなくなります。\n[3d_event_delete name=\"box\" ]\n\n[s]"
   },
   "3d_event_start": {
     "name": "3d_event_start",
@@ -533,7 +533,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_fps_control]\n\n[3d_debug_camera rotate=true move=false menu=false menu_close=false ]\n\n[s]"
   },
   "3d_gyro": {
     "name": "3d_gyro",
@@ -562,7 +562,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_gyro max_x=\"20\" max_y=\"20\" ]"
   },
   "3d_gyro_stop": {
     "name": "3d_gyro_stop",
@@ -600,7 +600,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_new_text name=\"text1\" text=\"あああ\" ]\n[3d_show name=\"text1\"]"
   },
   "3d_hide": {
     "name": "3d_hide",
@@ -629,7 +629,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]\n\n非表示にします。[p]\n[3d_hide name=\"myimg\"]"
   },
   "3d_hide_all": {
     "name": "3d_hide_all",
@@ -712,7 +712,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]"
   },
   "3d_init": {
     "name": "3d_init",
@@ -751,7 +751,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_init layer=0 ]"
   },
   "3d_model_new": {
     "name": "3d_model_new",
@@ -805,7 +805,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_init layer=0]\n\n[3d_model_new name=\"mymodel\" storage=\"mymodel/scene.gltf\" ]\n[3d_show name=\"mymodel\" pos=\"100,20,20\" rot=\"1,1,1\" scale=10 ]"
   },
   "3d_motion": {
     "name": "3d_motion",
@@ -829,7 +829,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";モデルの定義。最初はRunningというモーションで表示。 \n[3d_model_new name=\"Robot\" storage=\"Robot.glb\" pos=\"0,0,0\" scale=\"2\" motion=\"Running\" ]\n[3d_show name=\"Robot\" rot=\"0.28,0.67,0\" pos=\"-129,-24,910\" scale=\"9.68\" ]\n\nモーションを変更します。[p]\n\n[3d_motion name=\"Robot\" motion=\"Punch\"]"
   },
   "3d_new_group": {
     "name": "3d_new_group",
@@ -848,7 +848,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_new_group name=\"mygroup\" ]\n\n[3d_image_new name=\"model_A\" texture=\"t.png\" width=100 doubleside=true ]\n[3d_add_group name=\"model_A\" group=\"mygroup\" pos=\"0,100,0\" rot=\"-0,0,0\" scale=\"1\" ]\n\n[3d_show name=\"mygroup\" ]"
   },
   "3d_scene": {
     "name": "3d_scene",
@@ -877,7 +877,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_scene light_amb=\"2\" tonemap=\"\"]"
   },
   "3d_show": {
     "name": "3d_show",
@@ -941,7 +941,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]"
   },
   "3d_sound": {
     "name": "3d_sound",
@@ -990,7 +990,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_new_text name=\"text1\" text=\"あああ\" ]\n[3d_show name=\"text1\"]"
   },
   "3d_sphere_new": {
     "name": "3d_sphere_new",
@@ -1059,7 +1059,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_sphere_new name=\"tama\" ]\n[3d_show name=tama pos=\"365,145,0\" rot=\"0.92,-4.3,0\" scale=\"0.77,0.77,0.77\" time=2000]"
   },
   "3d_sprite_new": {
     "name": "3d_sprite_new",
@@ -1108,7 +1108,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_sprite_new name=\"yamato\" storage=\"doki.png\"]\n[3d_show name=\"yamato\"]"
   },
   "3d_text_new": {
     "name": "3d_text_new",
@@ -1157,7 +1157,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[3d_new_text name=\"text1\" text=\"あああ\" ]\n[3d_show name=\"text1\"]"
   },
   "anim": {
     "name": "anim",
@@ -1221,7 +1221,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[ptext layer=1 page=fore text=\"文字列\" size=30 x=0 y=0 color=red vertical=true]\n\n[image layer=0 left=100 top=100  storage = yuko1.png page=fore visible=true name=yuko,chara ]\n[image layer=1 left=300 top=100 storage = haruko1.png page=fore visible=true name=haruko ]\n\n;name属性を指定してアニメーション\n[anim name=haruko left=\"+=100\" time=10000 effect=easeInCirc opacity=0  ]\n\n;レイヤを指定してアニメーション\n[anim layer=1 left=\"+=100\" effect=easeInCirc opacity=0  ]\n\n;すべてのアニメーション完了を待ちます\n[wa]\n\nアニメーション終了"
   },
   "apply_local_patch": {
     "name": "apply_local_patch",
@@ -1245,7 +1245,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[apply_local_patch file=\"test.tpatch\" ]"
   },
   "autoconfig": {
     "name": "autoconfig",
@@ -1302,7 +1302,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "オートセーブデータの判定を行います[l][r]\n\n[if exp=\"sf.system.autosave === true\"]\n\n  自動的に保存されたデータが存在します。ロードしますか？[r]\n  [link target=select1]【１】はい[endlink][r]\n  [link target=select2]【２】いいえ[endlink][r]\n  [s]\n\n  *select1\n  ロードを実行します[l]\n  [autoload]\n\n  *select2\n  [cm]\n  ロードを実行しません[l][r]\n\n[else]\n\n  自動的に保存されたデータはありません[l][r]\n\n[endif]\n\nオートセーブを実行しました[autosave][l][r]\nゲームを再起動してみてください[s]"
   },
   "autostart": {
     "name": "autostart",
@@ -1373,7 +1373,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";背景変更をトランジションで実施\n@layopt layer=message0 visible=false\n[backlay]\n[image layer=base page=back storage=rouka.jpg]\n[trans time=2000]\n[wt]"
   },
   "bg": {
     "name": "bg",
@@ -1417,7 +1417,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bg storage=fg0.png time=1500 wait=true]"
   },
   "bg2": {
     "name": "bg2",
@@ -1481,7 +1481,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bg storage=fg0.png time=1500 wait=true]"
   },
   "bgcamera": {
     "name": "bgcamera",
@@ -1555,7 +1555,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";背景にカメラの入力を表示\n[bgcamera time=2000]\n\n;背景を通常に戻す\n[stop_bgcamera]\n\n;座標を指定してカメラの入力を表示\n[bgcamera width=300 height=200 left=100 top=100]\n\n;QRコードに反応させる場合。背面カメラを指定\n[bgcamera mode=\"back\" fit=true qrcode=\"all\"]"
   },
   "bgmopt": {
     "name": "bgmopt",
@@ -1599,7 +1599,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bgmopt volume=50 ]"
   },
   "bgmovie": {
     "name": "bgmovie",
@@ -1638,7 +1638,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bgmovie storage=cat.mp4]"
   },
   "body": {
     "name": "body",
@@ -1682,7 +1682,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[body bgimage=\"back.png\" bgcolor=\"black\" ]"
   },
   "breakgame": {
     "name": "breakgame",
@@ -1840,7 +1840,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[locate x=20 y=100]\n[button graphic=\"oda.png\" target=*oda]\n\n[locate x=300 y=100]\n[button graphic=\"toyo.png\" target=*toyo]"
   },
   "call": {
     "name": "call",
@@ -1864,7 +1864,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "頭をなでた。[p]\n[call target=sub]\nしっぽをなでた。[p]\n[call target=sub]\nおなかをなでた。[p]\n[call target=sub]\nおわり[s]\n\n*sub\n[font color=green]\n好感度が上がったぞ！\n[resetfont][p]\n[return]"
   },
   "camera": {
     "name": "camera",
@@ -1938,7 +1938,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[camera zoom=2 x=180 y=100 time=1000]\n[camera x=-180 y=100 time=2000]\n[camera zoom=2 from_zoom=3 x=180 y=100 time=1000]\n\n;カメラの位置を元に戻す\n[reset_camera]"
   },
   "cancelskip": {
     "name": "cancelskip",
@@ -1986,7 +1986,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bgmopt volume=\"30\"]Config: 30[l][r]\n[playbgm volume=\"40\" storage=\"music.ogg\"]Audio: 40[l][r]\n[changevol volume=\"100\"]Audio: 40→100[l][r]\n[changevol volume=\"15\" time=\"1000\"]Audio: 100→15[l][r]\n[bgmopt volume=\"100\" effect=\"true\"]Config: 30→100[l][r]\n[changevol volume=\"100\"]Audio: 15→100[l][r]"
   },
   "chara_config": {
     "name": "chara_config",
@@ -2089,7 +2089,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_delete=\"yuko\" ]"
   },
   "chara_face": {
     "name": "chara_face",
@@ -2118,7 +2118,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";表情の登録\n[chara_face name=\"yuko\" face=\"angry\" storage=\"newface.png\"]\n\n;表情の適用\n[chara_mod name=\"yuko\" face=\"angry\"]\n\n;発言者の名前も同時にかえたい場合\n[chara_ptext name=\"yuko\" face=\"angry\"]\n\n;短縮して書けます。以下も同じ意味\n#yuko:angry\n\n;chara_new で登録した画像はdefaultという名前で指定可能\n#yuko:default"
   },
   "chara_hide": {
     "name": "chara_hide",
@@ -2157,7 +2157,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_hide name=\"yuko\"]"
   },
   "chara_hide_all": {
     "name": "chara_hide_all",
@@ -2186,7 +2186,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_hide_all time=1000 wait=true]"
   },
   "chara_layer": {
     "name": "chara_layer",
@@ -2225,7 +2225,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_layer name=\"yuko\" part=mouse id=egao storage=\"image/egao.png\" ]"
   },
   "chara_layer_mod": {
     "name": "chara_layer_mod",
@@ -2254,7 +2254,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_layer_mod name=\"yuko\" part=mouse zindex=20 ]"
   },
   "chara_mod": {
     "name": "chara_mod",
@@ -2303,7 +2303,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_mod name=\"yuko\" storage=\"newface.png\"]"
   },
   "chara_move": {
     "name": "chara_move",
@@ -2362,7 +2362,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_move name=\"yuko\" time=100 left=20 top=100 ]"
   },
   "chara_new": {
     "name": "chara_new",
@@ -2411,7 +2411,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_new name=yuko storage=yuko.png jname=ゆうこ]"
   },
   "chara_part": {
     "name": "chara_part",
@@ -2445,7 +2445,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_part name=yuko mouse=happy eye=happy]"
   },
   "chara_part_reset": {
     "name": "chara_part_reset",
@@ -2469,7 +2469,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_part_reset name=yuko]"
   },
   "chara_ptext": {
     "name": "chara_ptext",
@@ -2493,7 +2493,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";レイヤ0を表示\n[layopt layer=\"0\" visible=\"true\"]\n\n;テキスト領域をレイヤ0に作成\n[ptext layer=\"0\" name=\"name_space\" x=\"100\" y=\"200\" text=\"ここにキャラの名前が入る\"]\n\n;↑で作ったテキスト領域(name_space)をキャラ名表示用であると宣言する\n[chara_config ptext=\"name_space\"]\n\n;キャラ定義\n[chara_new name=\"akane\" storage=\"chara/akane/normal.png\" jname=\"あかね\"]\n[chara_new name=\"yamato\" storage=\"chara/yamato/normal.png\" jname=\"やまと\"]\n\n;キャラ名表示！\n[chara_ptext name=\"akane\"]\nあかねです[p]\n\n;このような省略記法もあります（行頭に#を書いて、キャラのnameを続けて書く）\n;実際にはこの書き方を使うことがほとんどでしょう\n#yamato\nやまとです[p]\n\n;消去もできる\n#\n地の文です[p]\n\n;キャラ登録されていなくてもOK\n#？？？\nこんにちは[p]"
   },
   "chara_show": {
     "name": "chara_show",
@@ -2577,7 +2577,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[chara_show name=\"yuko\" ]"
   },
   "check_web_patch": {
     "name": "check_web_patch",
@@ -2596,7 +2596,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[check_web_patch url=\"http://tyrano.jp/patch/mygame.json\" ]"
   },
   "clearfix": {
     "name": "clearfix",
@@ -2615,7 +2615,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";fixレイヤーへの追加\n[ptext name=\"sample\" layer=fix page=fore text=\"テキストテキスト\" size=30 x=200 y=100 color=red ]\n\n;fixレイヤーのクリア\n[clearfix name=\"sample\"]"
   },
   "clearstack": {
     "name": "clearstack",
@@ -2731,7 +2731,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[locate x=20 y=100]\n[clickable width=200 height=300 target=*oda]\n\n[locate x=300 y=100]\n[clickable width=100 height=100 border=\"10px:dotted:red\" target=*oda]\n\n[s]"
   },
   "close": {
     "name": "close",
@@ -2778,7 +2778,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "ここで閉じようとしても終了時の確認はない[p]\nここで閉じようとしても終了時の確認はない[p]\n[closeconfirm_on]\nここから未保存状態で閉じようとすると終了時の確認が出る[p]\nここから未保存状態で閉じようとすると終了時の確認が出る[p]\n[closeconfirm_off]\nここで閉じようとしても終了時の確認はない[p]\nここで閉じようとしても終了時の確認はない[p]"
   },
   "cm": {
     "name": "cm",
@@ -2792,7 +2792,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "テキスト表示[l]\n画面クリアする[l][cm]\nもう一度画面クリアする[l][cm]"
   },
   "commit": {
     "name": "commit",
@@ -2863,7 +2863,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "テキスト表示[l]\n画面リセットする[l][ct]\nもう一度画面リセットする[l][ct]"
   },
   "current": {
     "name": "current",
@@ -2887,7 +2887,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[current layer=\"message0\"]\nmessage0レイヤに表示されています[l]\n[current layer=\"message1\"]\nmessage1レイヤに表示されています[l]"
   },
   "cursor": {
     "name": "cursor",
@@ -2961,7 +2961,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";デフォルトのマウスカーソル画像を変更\n[cursor storage=\"my_cursor_32x32.png\"]\n\n;ボタンの上にマウスカーソルを乗せたときの画像を変更\n[cursor storage=\"my_cursor_pointer_32x32.png\" type=\"pointer\"]\n\n;一定時間マウスの操作がなかった場合にマウスカーソルを非表示にする\n[cursor auto_hide=\"true\"]\n\n;クリックエフェクトを有効にする\n[cursor click_effect=\"true\"]\n\n;クリックエフェクトの設定変更\n[cursor e_width=\"200\" e_color=\"0xff0000\" e_time=\"600\" e_scale=\"200\" e_blend=\"normal\" e_opacity=\"100\"]\n\n;クリックエフェクトの設定変更(デフォルト設定)\n[cursor e_width=\"100\" e_color=\"0xffffff\" e_time=\"300\" e_scale=\"120\" e_blend=\"overlay\" e_opacity=\"204\"]"
   },
   "deffont": {
     "name": "deffont",
@@ -3108,7 +3108,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";警告\n[dialog type=\"alert\" text=\"ここから先は危険地帯です\"]\n\n;確認してOKならシナリオジャンプ\n[dialog type=\"confirm\" text=\"本当に進みますか？\" target=\"ok\" target_cancel=\"cancel\"]\n\n*ok\n進みます[p]\n[jump target=input]\n\n*cancel\n進みませんでした[p]\n[jump target=input]\n\n*input\n;inputは廃止予定！！\n;入力\n[dialog type=\"input\" name=\"f.name\" text=\"名前を教えてください\" target=\"next\"]\n\n*next\nあなたの名前は[emb exp=\"f.name\"]ですね[s]"
   },
   "dialog_config": {
     "name": "dialog_config",
@@ -3297,7 +3297,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[dialog_config bgimg=\"pattern.jpg\" bgimgrepeat=\"repeat\" bgopacity=\"66\"]\n[dialog_config boxradius=\"20\" boxcolor=\"#F0E3FD\" boximg=\"../bgimage/title.jpg\" boximgpos=\"right bottom\" boximgsize=\"200\" boxopacity=\"200\"]\n[dialog_config openeffect=\"rotateIn\" opentime=\"800\" closeeffect=\"rotateOut\" closetime=\"800\"]"
   },
   "dialog_config_filter": {
     "name": "dialog_config_filter",
@@ -3366,7 +3366,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[dialog_config_filter blur=\"15\"]"
   },
   "dialog_config_ng": {
     "name": "dialog_config_ng",
@@ -3470,7 +3470,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[dialog_config_ng text=\"ダメです\"]\n[dialog_config_ng width=\"200\" margin=\"10,30\" type=\"btn_04_white\"]"
   },
   "dialog_config_ok": {
     "name": "dialog_config_ok",
@@ -3574,7 +3574,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[dialog_config_ok text=\"いいですよ\"]\n[dialog_config_ok width=\"200\" margin=\"10,30\" type=\"btn_04_green\"]\n\n;画像ボタンにする場合はひとつのタグで記述\n[dialog_config_ok img=\"dialog/ok.png\" width=\"100\" margin=\"20\" enterimg=\"dialog/ok_enter.png\" activeimg=\"dialog/ok_active.png\" clickimg=\"dialog/ok_click.png\" enterse=\"lab1.mp3\" leavese=\"lab2.mp3\" clickse=\"lab3.mp3\"]"
   },
   "edit": {
     "name": "edit",
@@ -3638,7 +3638,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "この子の名前を決めなければ…[l]\n\n[edit name=\"f.dog_name\" left=50 top=100]\n[glink text=\"決定\" target=next x=250 y=100 cm=false]\n[s]\n\n*next\n[commit name=\"f.dog_name\"]\n[cm]\nこの子の名前は「[emb exp=f.dog_name]」だ！[r]\nやあ[emb exp=f.dog_name]！一緒に遊ぼう！[s]"
   },
   "else": {
     "name": "else",
@@ -3690,7 +3690,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ゲーム変数 name に ポチ という文字列をセット\n[eval exp=\"f.name='ポチ'\"]\n;↑長くなるためここでは扱いませんが\n; [edit]タグでプレイヤーに入力させてみても面白いですね\n\n;テキスト中に変数の中身を埋め込む\n今日からこの子の名前は[emb exp=\"f.name\"]だ。[l][r]\n\n;キャラの名前のようなケースでは\n;仮名でマクロ化しておくとシナリオファイルが読みやすくなるでしょう\n[macro name=\"シロ\"]\n  [emb exp=\"f.name\"]\n[endmacro]\n\n;仮名マクロで記述する\nおーい、[シロ]。[シロ]！元気？[s]\n;※サンプルでは f.name に ポチ が入っているのでポチと表示される"
   },
   "endhtml": {
     "name": "endhtml",
@@ -3760,7 +3760,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[link target=*select1]【１】選択肢　その１[endlink][r]\n[link target=*select2]【２】選択肢　その２[endlink][r]"
   },
   "endmacro": {
     "name": "endmacro",
@@ -3788,7 +3788,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。\n\n[mark color=\"0xff7f50\" size=70 ]マーカーの色やサイズを指定することもできます。[endmark]"
   },
   "endnolog": {
     "name": "endnolog",
@@ -3802,7 +3802,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "ここはログに記録される[p]\n[nolog]\nログに記録されない[p]\nここもログに記録されない[p]\n[endnolog]\nここから、ログ記録再開[p]"
   },
   "endnowait": {
     "name": "endnowait",
@@ -3849,7 +3849,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "クリックするとメッセージがクリアされます[l][er]\nクリアされました[l]"
   },
   "erasemacro": {
     "name": "erasemacro",
@@ -3887,7 +3887,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[eval exp=\"f.akane_like=50\"]\n;↑ゲーム変数 akane_like に 50 という数値をセット\n;あかねの好感度は50のようだ\n\n[eval exp=\"f.akane_nickname=''\"]\n;↑ゲーム変数 akane_nickname に あーちゃん という文字列をセット\n;あかねのあだ名はあーちゃんのようだ\n;※文字列はシングルクォーテーション（'）で囲みます\n\n[eval exp=\"f.yamato_like = f.akane_like * 2\"]\n;↑ゲーム変数 yamato_like に ゲーム変数 akane_like の 2倍の数値をセット\n;やまとの好感度はあかねの好感度の2倍のようだ"
   },
   "fadeinbgm": {
     "name": "fadeinbgm",
@@ -3941,7 +3941,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[fadeinbgm storage=sample.mp3 loop=false time=3000]"
   },
   "fadeinse": {
     "name": "fadeinse",
@@ -3985,7 +3985,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[fadeinse storage=sound.mp3 loop=false time=2000]"
   },
   "fadeoutbgm": {
     "name": "fadeoutbgm",
@@ -4004,7 +4004,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[fadeoutbgm time=3000]"
   },
   "fadeoutse": {
     "name": "fadeoutse",
@@ -4028,7 +4028,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[fadeoutse time=2000]"
   },
   "filter": {
     "name": "filter",
@@ -4097,7 +4097,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";特定のオブジェクトを指定して、フィルター効果\n[filter layer=0 name=chara_a grayscale=50 ]\n\n;レイヤを指定してフィルター効果\n[filter layer=0 brightness=50 ]"
   },
   "font": {
     "name": "font",
@@ -4166,7 +4166,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[font size=40 bold=true]\nこの文字は大きく、そして太字で表示されます。\n[resetfont]\nもとの大きさに戻りました。"
   },
   "frame": {
     "name": "frame",
@@ -4304,7 +4304,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[backlay]\n;キャラクター表示\n[image name=\"myimage\" layer=0 page=back visible=true top=100 left=300  storage = chara.png]\n[trans time=2000]\n@wt\n\n;キャラクター非表示\n[free name=\"myimage\" layer=0 ]"
   },
   "free_filter": {
     "name": "free_filter",
@@ -4328,7 +4328,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";特定のオブジェクトを指定して、フィルターを打ち消す\n[free_filter layer=0 name=chara_a]\n\n;全部のフィルターを打ち消す\n[free_filter]"
   },
   "free_layermode": {
     "name": "free_layermode",
@@ -4357,7 +4357,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[free_layermode name=\"test\"]"
   },
   "freeimage": {
     "name": "freeimage",
@@ -4391,7 +4391,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";イメージを配置\n[image layer=\"0\" page=\"fore\" visible=\"true\" top=\"100\" left=\"300\"  storage=\"chara.png\"]\n\n;レイヤをクリア\n[freeimage layer=\"0\"]\n\n;名前を指定してイメージを配置\n[image name=\"myimg\" layer=\"0\" visible=\"true\" top=\"100\" left=\"300\"  storage=\"myimg.png\"]\n\n;イメージの名前を指定して１つだけ消す\n[free name=\"myimg\" layer=\"0\"]"
   },
   "fuki_chara": {
     "name": "fuki_chara",
@@ -4490,7 +4490,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ふきだしの表示位置をキャラごとに設定する\n[fuki_chara name=\"akane\" left=200 top=270 sippo_left=30 sippo_top=30 sippo=\"top\" max_width=300 radius=15]\n[fuki_chara name=\"yamato\" left=350 top=280  sippo_left=30 sippo_top=30 sippo=\"top\" ]\n\n;キャラクターが画面上に存在しない場合に適応するふきだし設定 name=others\n[fuki_chara name=\"others\" left=250 top=500 max_width=700 fix_width=700 radius=0 ]"
   },
   "fuki_start": {
     "name": "fuki_start",
@@ -4509,7 +4509,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";通常のメッセージレイヤに対して、ふきだしに適応したいデザインを設定する\n[font color=\"black\"]\n[position layer=\"message0\" page=fore radius=15 visible=true color=\"white\" opacity=255 border_size=\"3\" border_color=\"black\" ]\n\n;ふきだしの表示位置をキャラごとに設定する\n[fuki_chara name=\"akane\" left=200 top=270 sippo_left=30 sippo_top=30 sippo=\"top\" max_width=300 radius=15]\n[fuki_chara name=\"yamato\" left=350 top=280  sippo_left=30 sippo_top=30 sippo=\"top\" ]\n\n;キャラクターが画面上に存在しない場合に適応するふきだし設定 name=others\n[fuki_chara name=\"others\" left=250 top=500 max_width=700 fix_width=700 radius=0 ]\n\n;ふきだし表示を開始する\n[fuki_start ]\n\n#akane\nあかねの位置にふきだしを表示[p]\n\n#yamato\nやまとのいちにふきだしを表示[p]\n\n#\nothersで設定した位置にふきだしを表示[p]"
   },
   "fuki_stop": {
     "name": "fuki_stop",
@@ -4667,7 +4667,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[glink target=\"j1\" text=\"選択肢１\" size=20  width=\"500\" y=300]\n[glink target=\"j2\" text=\"選択肢２\" size=30  width=\"500\" y=400]\n[glink target=\"j3\" text=\"選択肢３\" size=30  width=\"500\" y=400]\n\n[s]"
   },
   "glink_config": {
     "name": "glink_config",
@@ -4816,7 +4816,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[glink_config auto_place=\"true\" show_time=\"300\"]\n[position left=\"160\" top=\"500\" width=\"1000\" height=\"200\" visible=\"true\"]\n[position margint=\"45\" marginl=\"50\" marginr=\"70\" marginb=\"60\"]\nティラノスクリプトに興味ある？[l]\n[glink  color=\"btn_13_red\" text=\"はい。興味あります\"  target=\"*selectinterest\"]\n[glink  color=\"btn_13_red\" text=\"興味あります！\"  target=\"*selectinterest\"]\n[glink  color=\"btn_13_red\" text=\"どちらかと言うと興味あり\"  target=\"*selectinterest\"]\n[s]\n\n*selectinterest\nホント！？うれしいなー[p]"
   },
   "glyph": {
     "name": "glyph",
@@ -4955,7 +4955,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[glyph]\nデフォルトのクリック待ちグリフ（gif動画）[p]\n\n[glyph fix=\"true\" left=\"640\" top=\"600\"]\n画面下中央に固定表示[p]\n\n[glyph figure=\"rectangle\" anim=\"bounce\" width=\"5\" color=\"0xCEE7F5\" marginl=\"15\"]\nデフォルトのクリック待ちグリフを図形＋アニメーションで再現[p]\n\n[glyph figure=\"v_triangle\" anim=\"flash_momentary\" delay=\"200\"]\n瞬間的に点滅する下向き三角[p]\n\n[glyph figure=\"diamond\" anim=\"flash\"]\n滑らかに点滅するひし形[p]\n\n[glyph figure=\"circle\" anim=\"soft_bounce\" marginl=\"10\"]\nやわらかく弾む円[p]\n\n[glyph figure=\"rectangle\" anim=\"rotate_bounce\"]\nぐるぐるしながらバウンドする四角[p]\n\n[glyph figure=\"star\" anim=\"spin_y\" color=\"yellow\"]\nY軸スピンする星[p]\n\n[glyph figure=\"star\" anim=\"spin_x\" color=\"yellow\"]\nX軸スピンする星[p]\n\n[glyph figure=\"star\" anim=\"spin_z\" color=\"yellow\"]\nZ軸スピンする星[p]\n\n[glyph figure=\"star\" anim=\"zoom\" color=\"yellow\"]\n拡縮する星[p]\n\n[glyph koma_anim=\"stepanim.jpg\" koma_count=\"4\" width=\"28\"]\nコマアニメ[p]\n\n[glyph html='<span style=\"color: white; font-size: 20px;\">🥺</span>']\nHTMLを直接指定[p]\n\n[keyframe name=\"yoko\"]\n[frame p=\"0%\" x=\"0\"]\n[frame p=\"50%\" x=\"10\"]\n[frame p=\"100%\" x=\"0\"]\n[endkeyframe]\n[glyph line=\"nextpage.gif\" easing=\"linear\" keyframe=\"yoko\"]\n自分で定義したキーフレームアニメーションを適用[p]"
   },
   "glyph_auto": {
     "name": "glyph_auto",
@@ -5018,7 +5018,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";固定スキップモードグリフ、固定オートモードグリフを設定\n[glyph_skip fix=\"true\" left=\"10\" top=\"10\" figure=\"diamond\" anim=\"flash\"  color=\"orange\" time=\"400\" width=\"80\"]\n[glyph_auto fix=\"true\" left=\"10\" top=\"10\" figure=\"star\"    anim=\"spin_y\" color=\"green\" time=\"5000\" width=\"80\"]\n\n;オートモードグリフについては、\n;固定グリフと同時にメッセージ末尾型のオートモードグリフも設定できる\n[glyph_auto html=\"⌛\" anim=\"flash\"]\n\n;[ptext]で出した文字をスキップグリフ、オートグリフとして扱うパターン\n[ptext     name=\"glyph_skip\" layer=\"message0\" x=\"20\" y=\"10\" text=\"SKIP!\" edge=\"4px orange\" size=\"30\"]\n[ptext     name=\"glyph_auto\" layer=\"message0\" x=\"20\" y=\"10\" text=\"AUTO\" edge=\"4px green\" size=\"30\"]\n[glyph_skip use=\"glyph_skip\"]\n[glyph_auto use=\"glyph_auto\"]\n\n;上記のすべての設定を抹消する\n[glyph_auto delete=\"true\" fix=\"true\"]\n[glyph_auto delete=\"true\" fix=\"false\"]\n[glyph_skip delete=\"true\"]"
   },
   "graph": {
     "name": "graph",
@@ -5037,7 +5037,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";heart.png はハートマークの画像\n[macro name=\"heart\"]\n[graph storage=\"heart.png\"]\n[endmacro]\n\n;以後、[heart] タグでハートマークを使用可能\n大好き[heart][p]"
   },
   "hidemenubutton": {
     "name": "hidemenubutton",
@@ -5051,7 +5051,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[hidemenubutton]"
   },
   "hidemessage": {
     "name": "hidemessage",
@@ -5094,7 +5094,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";youtubeのプレイヤーを指定した位置に挿入します\n;yoububeから埋め込み用タグを取得してきています\n[html top=100 left=300]\n\n<object width=\"200\" height=\"113\">\n<param name=\"movie\" value=\"http://www.youtube.com/v/60TMm2sQTBU?version=3&amp;hl=ja_JP&amp;rel=0\">\n</param>\n<param name=\"allowFullScreen\" value=\"true\"></param>\n<param name=\"allowscriptaccess\" value=\"always\"></param>\n<embed src=\"http://www.youtube.com/v/60TMm2sQTBU?version=3&amp;hl=ja_JP&amp;rel=0\" type=\"application/x-shockwave-flash\" width=\"200\" height=\"113\" allowscriptaccess=\"always\" allowfullscreen=\"true\">\n</embed></object>\n\n[endhtml]"
   },
   "if": {
     "name": "if",
@@ -5113,7 +5113,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ゲーム変数 like に 50 という数値をセット\n;自由に変えてみてください\n[iscript]\nf.like = 50\n[endscript]\n\n例1[p]\n\n[if exp=\"f.like < 30\"]\n  好感度が低いです[p]\n[endif]\n\n例2[p]\n\n[if exp=\"f.like < 3c0\"]\n  好感度が低いです[p]\n[else]\n  好感度が低くはないようです[p]\n[endif]\n\n例3[p]\n\n[if exp=\"f.like >= 80\"]\n  最高の好感度です[p]\n[elsif exp=\"f.like >= 40\"]\n  かなり高い好感度です[p]\n[else]\n  好感度は高くありません[p]\n[endif]"
   },
   "ignore": {
     "name": "ignore",
@@ -5241,7 +5241,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";レイヤ1を表示状態に\n[layopt layer=\"1\" visible=\"true\"]\n;レイヤ1にcat.pngを追加\n[image layer=\"1\" x=\"150\" y=\"150\" storage=\"cat.png\"]\n[l]\n\n;画像を削除\n[freeimage layer=\"1\"]"
   },
   "iscript": {
     "name": "iscript",
@@ -5255,7 +5255,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[iscript]\n\nvar test = 22;\nf.name = test;\n//JavaScriptの関数にアクセス可能\nalert(\"JavaScript\");\n//jQueryも利用可能\n$(\"body\").html();\n\n//JS方式の行コメントも書けますが\n;ティラノスクリプトの行コメントも有効のままなので注意が必要です\n;alert(\"!!\")\n\n[endscript]"
   },
   "jump": {
     "name": "jump",
@@ -5279,7 +5279,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";second.ks というシナリオファイルの *start ラベルへ移動する\n[jump storage=second.ks target=*start]"
   },
   "kanim": {
     "name": "kanim",
@@ -5357,7 +5357,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";----keyframeの定義\n[keyframe name=\"fuwafuwa\"]\n\n[frame p=40%  x=\"100\" ]\n[frame p=100% y=\"-200\" opacity=0 ]\n\n[endkeyframe]\n\n;-----定義したアニメーションを実行"
   },
   "l": {
     "name": "l",
@@ -5371,7 +5371,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "テキスト表示[l]\nテキスト表示[l][r]"
   },
   "lang_set": {
     "name": "lang_set",
@@ -5390,7 +5390,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[lang_set name=\"en\"]"
   },
   "layermode": {
     "name": "layermode",
@@ -5444,7 +5444,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[layermode graphic=fg0.png time=1500 mode=overlay]"
   },
   "layermode_movie": {
     "name": "layermode_movie",
@@ -5533,7 +5533,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[layermode_movie video=test.webm time=1500 wait=true]"
   },
   "layopt": {
     "name": "layopt",
@@ -5577,7 +5577,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";メッセージレイヤを消去\n@layopt layer=message0 visible=false\n[backlay]\n[image layer=0 page=back visible=true top=100 left=50  storage = miku1.png]\n[trans time=2000]\n@wt\n;そしてレイヤ表示\n@layopt layer=message0 visible=true"
   },
   "link": {
     "name": "link",
@@ -5606,7 +5606,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "選択肢を表示します[l][r][r]\n\n[link target=*select1]【１】選択肢　その１[endlink][r]\n[link target=*select2]【２】選択肢　その２[endlink][r]\n\n[s]\n\n*select1\n[cm]\n「選択肢１」がクリックされました[l]\n@jump target=*common\n\n*select2\n[cm]\n「選択肢２」がクリックされました[l]\n@jump target=*common\n\n*common\n[cm]\n\n共通ルートです"
   },
   "loadcss": {
     "name": "loadcss",
@@ -5625,7 +5625,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";CSSファイルの読み込み\n[loadcss file=\"./data/others/css/mystyle.css\" ]"
   },
   "loading_log": {
     "name": "loading_log",
@@ -5664,7 +5664,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[loading_log all=\"default\"]"
   },
   "loadjs": {
     "name": "loadjs",
@@ -5688,7 +5688,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";data/others/sample.jsを読み込み\n[loadjs storage=\"sample.js\"]"
   },
   "locate": {
     "name": "locate",
@@ -5712,7 +5712,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[locate x=20 y=100]\n[button graphic=\"oda.png\" target=*oda]\n\n[locate x=300 y=100]\n[button graphic=\"toyo.png\" target=*toyo]"
   },
   "macro": {
     "name": "macro",
@@ -5731,7 +5731,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";自分で[my_color_1]というタグを作れる！！\n[macro name=\"my_color_1\"]\n  [font color=\"0xff0000\"]\n  新しいタグです[p]\n  [resetfont]\n[endmacro]\n\n;さっそく使ってみる\n[my_color_1]\n\n;iroパラメータを指定できる、もし指定がなかったら0xff0000\n[macro name=\"my_color_2\"]\n  [font color=%iro|0xff0000]\n  iroパラメータを指定できるタグです[p]\n  [resetfont]\n[endmacro]\n\n;さっそく使ってみる\n[my_color_2 iro=0x00ff00]\n[my_color_2]\n\n;すべてのパラメータを流用するマクロ\n[macro name=\"my_color_3\"]\n  [font *]\n  すべてのパラメータを渡せるタグです[p]\n  [resetfont]\n[endmacro]\n\n[my_color_3 color=0x0000ff bold=true size=80]"
   },
   "mark": {
     "name": "mark",
@@ -5760,7 +5760,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。\n\n[mark color=\"0xff7f50\" size=70]マーカーの色やサイズを指定することもできます。[endmark]"
   },
   "mask": {
     "name": "mask",
@@ -5799,7 +5799,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";暗転開始\n[mask effect=\"fadeInDownBig\" time=2000]\n\n;裏で画面操作\n[bg storage=\"umi.jpg\" time=500]\n\n;暗転解除\n[mask_off]"
   },
   "mask_off": {
     "name": "mask_off",
@@ -5823,7 +5823,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";暗転開始\n[mask effect=\"fadeInDownBig\" time=2000]\n\n;裏で画面操作\n[bg storage=\"umi.jpg\" time=500]\n\n;暗転解除\n[mask_off]"
   },
   "message_config": {
     "name": "message_config",
@@ -5897,7 +5897,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";クリックされても文字表示速度を変更しない\n[message_config ch_speed_in_click=\"default\" effect_speed_in_click=\"default\"]\n\n;クリックされたら残りを瞬間表示\n[message_config ch_speed_in_click=\"0\" effect_speed_in_click=\"0ms\"]\n\n;セリフの先頭のカギカッコだけを左側にずらして、カギカッコの下に文章が回り込まないようにする\n[message_config speech_bracket_float=\"true\"]\n\n;\"――\"はワードブレイクされてほしくない\n[message_config add_word_nobreak=\"――\"]\n\n;行間も字間もめちゃくちゃ広げてみる\n[message_config line_spacing=\"50\" letter_spacing=\"30\"]\n\n;ダッシュの字間を詰めてみる\n@macro name=\"――\"\n  [message_config letter_spacing=\"-4\"]―[message_config letter_spacing=\"0\"]―\n@endmacro\n――力が欲しいか？[l][r]\n[――]力が欲しいか？[l][r]"
   },
   "mode_effect": {
     "name": "mode_effect",
@@ -5966,7 +5966,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[mode_effect all=\"default\" holdskip=\"none\" holdstop=\"none\"]"
   },
   "movie": {
     "name": "movie",
@@ -6000,7 +6000,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";動画を再生した回数をゲーム変数f.watch_countで数えてみる\n[eval exp=\"f.watch_count = 0\"]\n\n*loop\n動画を再生するよ[p]\n\n;動画を再生したことがまだ1回もないなら、スキップできない\n;動画を再生したことが1回以上あるなら、スキップできる\n;という設定を一時変数tf.skipにをセット\n[iscript]\nif (f.watch_count === 0) {\n  tf.skip = \"false\";\n} else {\n  tf.skip = \"true\";\n}\n[endscript]\n\n;data/video/cat.mp4を再生するよ\n[movie storage=\"cat.mp4\" skip=&tf.skip]\n\n動画を再生しおわったよ[p]\n\n;動画を再生した回数を増やす\n[eval exp=\"f.watch_count += 1\"]\n[jump target=\"loop\"]"
   },
   "mtext": {
     "name": "mtext",
@@ -6164,7 +6164,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";レイヤ0を表示状態に\n[layopt layer=0 visible=true]\n;演出テキストを表示\n[mtext text=\"演出テキスト\" x=100 y=100 in_effect=\"fadeIn\" out_effect=\"fadeOut\"]"
   },
   "nolog": {
     "name": "nolog",
@@ -6178,7 +6178,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "ここはログに記録される[p]\n[nolog]\nログに記録されない[p]\nここもログに記録されない[p]\n[endnolog]\nここから、ログ記録再開[p]"
   },
   "nowait": {
     "name": "nowait",
@@ -6206,7 +6206,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "テキスト表示[p]\nテキスト表示[p][r]"
   },
   "pausebgm": {
     "name": "pausebgm",
@@ -6298,7 +6298,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[playbgm storage=music.mp3]"
   },
   "playse": {
     "name": "playse",
@@ -6347,7 +6347,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[playse storage=sound.mp3 loop=false ]"
   },
   "plugin": {
     "name": "plugin",
@@ -6371,7 +6371,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";プラグイン my_plugin を読み込み\n[plugin name=\"my_plugin\" ]\n;↑ data/others/plugin/my_plugin/init.ks にジャンプしているよ\n\n;自由に引数を渡すことも可能\n[plugin name=\"my_plugin\" font_color=\"black\" arg2=\"aaaaaa\" ]"
   },
   "position": {
     "name": "position",
@@ -6485,7 +6485,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";メッセージウィンドウの位置とサイズを変更\n[position width=400 height=300 top=100 left=20]\n;メッセージウィンドウの色と透明度を変更\n[position color=blue opacity=100]"
   },
   "position_filter": {
     "name": "position_filter",
@@ -6559,7 +6559,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "フィルターをかける[p]\n[position_filter blur=\"5\"]\nすりガラスのような効果[p]\n[position_filter invert=\"100\"]\n色調反転[p]\n[position_filter grayscale=\"100\"]\nグレースケールに[p]"
   },
   "preload": {
     "name": "preload",
@@ -6593,7 +6593,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";画像ファイルはフルパス（プロジェクトファイル以下）で指定します\n[preload storage=\"data/fgimage/girl.jpg\"]\n\n;配列を渡すと、まとめてロードすることもできます。\n[iscript]\nf.preload_images = [\n  'data/fgimage/girl.jpg',\n  'data/fgimage/haruko.png',\n  'data/fgimage/miku1.png',\n  'data/fgimage/miku2.png'\n];\n[endscript]\n\n[preload storage=&f.preload_images]"
   },
   "ptext": {
     "name": "ptext",
@@ -6697,7 +6697,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[backlay]\n[ptext page=back text=\"テキストテキスト\" size=30 x=200 y=300 color=red vertical=true]\n[trans time=2000]\n[wt]\n[l]\n表示したテキストを消去します\n[freeimage layer=0]"
   },
   "pushlog": {
     "name": "pushlog",
@@ -6721,7 +6721,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[pushlog text=\"ここに好きなログ文字列を記述できます\"]"
   },
   "qr_config": {
     "name": "qr_config",
@@ -6740,7 +6740,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";QRコードでティラノのジャップのみ有効にする\n[qr_config qrcode=\"jump\"]"
   },
   "qr_define": {
     "name": "qr_define",
@@ -6774,7 +6774,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[qr_define url=\"https://tyrano.jp\" storage=\"scene1.ks\" target=\"test\" ]"
   },
   "quake": {
     "name": "quake",
@@ -6813,7 +6813,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[quake count=5 time=300 hmax=20]"
   },
   "quake2": {
     "name": "quake2",
@@ -6852,7 +6852,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "画面を揺らすよ。[l][s]\n\n[quake2 time=\"1000\"]\n\n[cm]揺れたね。[p]\n\n[quake2 time=\"1000\" wait=\"false\"]\n\n揺らしたまま次のタグに進むよ。[p]\n\n[quake2 time=\"3000\" wait=\"false\"]\n\n揺らしたまま次のタグに進んで、揺れの完了を待つよ…[wa]終わったよ。[p]"
   },
   "r": {
     "name": "r",
@@ -6866,7 +6866,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "テキスト表示[l]\n改行します[l][r]\n改行します[l][r]"
   },
   "reset_camera": {
     "name": "reset_camera",
@@ -6928,7 +6928,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[deffont size=30]\nデフォルトの文字サイズ[p]\n\n[font size=55 bold=true]\nうおおおおおおおおおお！！！[p]\n\n[resetfont]\nい、いきなりなんだよ！\n[font size=20]（びっくりした…）[p]\n\n[resetfont]"
   },
   "resumebgm": {
     "name": "resumebgm",
@@ -6999,7 +6999,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[ruby text=\"かん\"]漢[ruby text=\"じ\"]字"
   },
   "s": {
     "name": "s",
@@ -7013,7 +7013,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[link target=*select1]【１】選択肢　その１[endlink][r]\n[link target=*select2]【２】選択肢　その２[endlink][r]\n[s]"
   },
   "save_img": {
     "name": "save_img",
@@ -7037,7 +7037,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";サムネイル画像の変更\n[save_img storage=\"my_capture.png\" ]"
   },
   "savesnap": {
     "name": "savesnap",
@@ -7070,7 +7070,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[screen_full]"
   },
   "seopt": {
     "name": "seopt",
@@ -7109,7 +7109,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[seopt volume=50 ]"
   },
   "set_resizecall": {
     "name": "set_resizecall",
@@ -7133,7 +7133,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[call storage=\"resize.ks\"]\n\n;画面比率が変わったタイミングでresize.ksを呼び出す、という宣言\n[set_resizecall storage=\"resize.ks\" ]"
   },
   "showload": {
     "name": "showload",
@@ -7147,7 +7147,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[showload]"
   },
   "showlog": {
     "name": "showlog",
@@ -7161,7 +7161,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[showlog]"
   },
   "showmenu": {
     "name": "showmenu",
@@ -7175,7 +7175,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[showmenu]"
   },
   "showmenubutton": {
     "name": "showmenubutton",
@@ -7194,7 +7194,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[showmenubutton]"
   },
   "showsave": {
     "name": "showsave",
@@ -7208,7 +7208,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[showsave]"
   },
   "skipstart": {
     "name": "skipstart",
@@ -7265,7 +7265,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[sleepgame storage=\"scene3.ks\" target=\"*start\" ]\n\n;buttonに紐付ける方法\n[button name=\"button\" role=\"sleepgame\" fix=\"true\" graphic=\"button/skip.gif\" x=450 y=400 storage=\"scene3.ks\" ]"
   },
   "speak_off": {
     "name": "speak_off",
@@ -7279,7 +7279,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[speak_off]"
   },
   "speak_on": {
     "name": "speak_on",
@@ -7313,7 +7313,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[speak_on]"
   },
   "start_keyconfig": {
     "name": "start_keyconfig",
@@ -7327,7 +7327,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[start_keyconfig]"
   },
   "stop_bgcamera": {
     "name": "stop_bgcamera",
@@ -7351,7 +7351,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[stop_bgcamera time=1000]"
   },
   "stop_bgmovie": {
     "name": "stop_bgmovie",
@@ -7375,7 +7375,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[bgmovie storage=cat.mp4]\n動画を停止します[p]\n\n[stop_bgmovie]\n動画を停止しました[p]"
   },
   "stop_kanim": {
     "name": "stop_kanim",
@@ -7413,7 +7413,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "キーコンフィグが有効[p]\n[stop_keyconfig]\nここは無効[p]\nここも無効[p]\n[start_keyconfig]\nここからまた有効[p]"
   },
   "stop_xanim": {
     "name": "stop_xanim",
@@ -7475,7 +7475,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[stopbgm]"
   },
   "stopse": {
     "name": "stopse",
@@ -7494,7 +7494,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[stopse]"
   },
   "sysview": {
     "name": "sysview",
@@ -7518,7 +7518,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[sysview type=\"save\" storage=\"./data/others/plugin/mytheme/html/save.html\" ]\n[sysview type=\"load\" storage=\"./data/others/plugin/mytheme/html/load.html\" ]\n[sysview type=\"backlog\" storage=\"./data/others/plugin/mytheme/html/backlog.html\" ]\n[sysview type=\"menu\" storage=\"./data/others/plugin/mytheme/html/menu.html]"
   },
   "title": {
     "name": "title",
@@ -7537,7 +7537,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[title name=\"変更後のタイトル\"]"
   },
   "trace": {
     "name": "trace",
@@ -7556,7 +7556,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";ゲーム変数testに1を入れる\n[eval exp=\"f.test=1\"]\n\n;ゲーム変数testの内容をコンソールに出力する\n[trace exp=\"f.test\"]"
   },
   "trans": {
     "name": "trans",
@@ -7590,7 +7590,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[backlay]\n[image storage=fg0 layer=0 page=back]\n[trans time=1500 ]\n[wt]"
   },
   "unload": {
     "name": "unload",
@@ -7648,7 +7648,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[vibrate time=1000 power=100]\n1秒振動[p]\n\n[vibrate time=\"800,200\" power=\"50\" count=\"3\"]\nパターン振動を3回繰り返し[p]\n\n[vibrate time=\"5000\" power=\"50\" count=\"3\"]\n途中で振動停止…\n[wait time=\"1000\"]\n[vibrate_stop]\n停止させました。[p]"
   },
   "vibrate_stop": {
     "name": "vibrate_stop",
@@ -7701,7 +7701,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[voconfig sebuf=2 name=\"akane\" vostorage=\"akane_{number}.ogg\" number=1 ]\n[voconfig sebuf=2 name=\"yamato\" vostorage=\"yamato_{number}.ogg\" number=1 ]\n\n;音声自動再生を開始する。必ず必要です。\n[vostart]\n\n#akane\nここで音声再生(akane_1.ogg)[p]\n\n#akane\n次の音声再生(akane_2.ogg)[p]\n\n#yamato\nやまとの音声再生(yamato_1.ogg)[p]\n\n#akane\nあかねの音声再生(akane_3.ogg)[p]"
   },
   "vostart": {
     "name": "vostart",
@@ -7762,7 +7762,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "2秒待つよ……\n\n;2000ミリ秒（2秒）処理を停止します\n[wait time=2000]\n\n2秒待ったよ[p]"
   },
   "wait_bgmovie": {
     "name": "wait_bgmovie",
@@ -7790,7 +7790,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[camera zoom=2 x=180 y=100 time=10000 wait=false]\nカメラ演出中[p]\nここでもカメラ演出中[p]\nカメラの演出を待ちます[wait_camera]\nカメラの演出が終わったので進行[p]"
   },
   "wait_cancel": {
     "name": "wait_cancel",
@@ -7837,7 +7837,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";クリック待ちを挟む\n公式サイトを開きます[p]\n[web url=\"http://tyrano.jp\"]\n\n;ローカルのファイルを開きたい場合\n[web url=\"./data/bgimage/room.jpg\"]"
   },
   "wse": {
     "name": "wse",
@@ -7865,7 +7865,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[backlay]\n[image layer=base page=back storage=rouka.jpg]\n[trans time=2000]\nトランジションしてるよ……\n[wt]\n\n[cm]\nトランジションが終わったよ[p]"
   },
   "xanim": {
     "name": "xanim",
@@ -7954,7 +7954,7 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": ";キーフレームアニメーションを無限ループで適用\n[keyframe name=\"yoko\"]\n[frame p=\"0%\" x=\"0\"]\n[frame p=\"100%\" x=\"100\"]\n[endkeyframe]\n[xanim name=\"akane\" keyframe=\"yoko\" count=\"infinite\" time=\"1000\" direction=\"alternate\" easing=\"linear\"]\n\n;2秒かけて500px右に移動 デフォルトではアニメーションの完了は待たずに次に進むよ\n[xanim name=\"akane\" x=\"500\" time=\"2000\"]"
   },
   "xchgbgm": {
     "name": "xchgbgm",
@@ -7983,6 +7983,6 @@
         "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
       }
     ],
-    "sample": ""
+    "sample": "[xchgbgm storage=new.mp3 loop=true time=3000]"
   }
 }
