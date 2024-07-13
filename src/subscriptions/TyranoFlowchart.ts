@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-const express = require('express');
-const open = require('open');
+import express from 'express';
+import open from 'open';
+import { type Server } from 'http';
 
 import { InformationWorkSpace } from '../InformationWorkSpace';
 import { InformationExtension } from '../InformationExtension';
@@ -10,7 +10,9 @@ import { TyranoLogger } from '../TyranoLogger';
 
 
 export class TyranoFlowchart {
-  private static serverInstance: any = undefined;
+
+  private static serverInstance: Server | undefined = undefined;
+
   public static async openFlowchart() {
     const createServer = async () => {
       try {
@@ -24,11 +26,18 @@ export class TyranoFlowchart {
         //ルートの設定
 
         //特定のルートに対するGETリクエストを処理するためのメソッド
-        app.get('/get-transition-data', (req: any, res: any) => {
+        app.get('/get-transition-data', (req, res) => {
           TyranoLogger.print("get-transition-data start");
           const infoWs = InformationWorkSpace.getInstance();
           //scenario=FILE_PATHの形で指定したファイルのデータを取得
-          const scenarioFilePath = req.query["scenario"]; // GETパラメータからキーを取得
+          const scenarioFilePath = (() => {
+            switch (typeof req.query["scenario"]) {
+              case "string":
+                return req.query.scenario; // クエリパラメータからキーを取得
+              default:
+                return;
+            }
+          })();
           if (!scenarioFilePath) {
             return;
           }
@@ -52,7 +61,7 @@ export class TyranoFlowchart {
           TyranoLogger.print("get-transition-data end");
         });
 
-        app.get('/get-scenario-list', (req: any, res: any) => {
+        app.get('/get-scenario-list', (_req, res) => {
           //シナリオファイルのリストと、プロジェクトパスのリストから、{PROJECT_NAME: [SCENARIO_FILE_PATH, ...]}の形式のオブジェクトを作成する
           const organizeData = (scenarioList: string[], rootPathList: string[]) => {
             const data: { [key: string]: { fullPath: string; scenarioName: string }[] } = {};
@@ -104,7 +113,7 @@ export class TyranoFlowchart {
       location: vscode.ProgressLocation.Notification,
       title: "フローチャート作成中...",
       cancellable: true
-    }, async (progress, token) => {
+    }, async (_progress, _token) => {
       createServer();
     });
   }
