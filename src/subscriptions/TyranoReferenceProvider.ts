@@ -8,6 +8,7 @@ export class TyranoReferenceProvider {
   }
 
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): vscode.Location[] | null | undefined {
     // console.log("provideReference");
     // console.log(`document:${document.fileName}\nposition:${position.line}\ncontext:${context}\ntoken:${token}\n`);

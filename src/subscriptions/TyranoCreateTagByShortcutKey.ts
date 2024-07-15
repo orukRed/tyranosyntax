@@ -10,7 +10,7 @@ export class TyranoCreateTagByShortcutKey {
     const text: string | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.keyboard.shift + enter');
     const editor = vscode.window.activeTextEditor;
     if (editor != undefined) {
-      let cursorPos = editor.selection.active;
+      const cursorPos = editor.selection.active;
       if (text != undefined) {
         editor.edit((editbuilder) => {
           editbuilder.insert(cursorPos, text);
@@ -33,7 +33,7 @@ export class TyranoCreateTagByShortcutKey {
     const text: string | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.keyboard.ctrl + enter(cmd + enter)');
     const editor = vscode.window.activeTextEditor;
     if (editor != undefined) {
-      let cursorPos = editor.selection.active;
+      const cursorPos = editor.selection.active;
       if (text != undefined) {
         editor.edit((editbuilder) => {
           editbuilder.insert(cursorPos, text);
@@ -56,7 +56,7 @@ export class TyranoCreateTagByShortcutKey {
     const text: string | undefined = vscode.workspace.getConfiguration().get('TyranoScript syntax.keyboard.alt + enter(option + enter)');
     const editor = vscode.window.activeTextEditor;
     if (editor != undefined) {
-      let cursorPos = editor.selection.active;
+      const cursorPos = editor.selection.active;
       if (text != undefined) {
         editor.edit((editbuilder) => {
           editbuilder.insert(cursorPos, text);

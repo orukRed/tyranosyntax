@@ -1,10 +1,7 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-const express = require('express');
+import express from 'express';
 
 import { InformationWorkSpace } from '../InformationWorkSpace';
-import { InformationExtension } from '../InformationExtension';
 import { previewPanel } from '../extension';
 import { TyranoLogger } from '../TyranoLogger';
 
@@ -49,7 +46,7 @@ export class TyranoPreview {
           location: vscode.ProgressLocation.Notification,
           title: "プレビューの作成中...",
           cancellable: true
-        }, async (progress, token) => {
+        }, async (_progress, _token) => {
           create(previewPanel);
         });
       }

@@ -18,6 +18,7 @@ export class TyranoRenameProvider {
    * @return A workspace edit or a thenable that resolves to such. The lack of a result can be
    * signaled by returning `undefined` or `null`.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): vscode.WorkspaceEdit | null | undefined {
     // console.log("provideRenameEdits");
     // console.log(`document:${document.fileName}\nposition:${position.line}\nnewName:${newName}\ntoken:${token}\n`);
