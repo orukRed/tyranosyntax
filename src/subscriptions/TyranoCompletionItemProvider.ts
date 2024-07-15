@@ -46,9 +46,12 @@ export class TyranoCompletionItemProvider
           return;
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      // TODO: Write the reason why `console.log` is used, or replace to `console.warn(error);`
+      TyranoLogger.print(
+        `${this.getVariableName.name} failed`,
+        ErrorLevel.ERROR,
+      );
+      TyranoLogger.printStackTrace(error);
       return "";
     }
     return variableName;
@@ -253,7 +256,10 @@ export class TyranoCompletionItemProvider
         }
       }
     } catch (error) {
-      TyranoLogger.print("provideCompletionItems failed", ErrorLevel.ERROR);
+      TyranoLogger.print(
+        `${this.provideCompletionItems.name} failed`,
+        ErrorLevel.ERROR,
+      );
       TyranoLogger.printStackTrace(error);
     }
   }
@@ -749,8 +755,11 @@ export class TyranoCompletionItemProvider
         }; //ここに、サンプル2のような予測候補を出すコマンド
         completions.push(comp);
       } catch (error) {
-        // TODO: Write the reason why `console.log` is used, or replace to `console.warn(error);`
-        console.log(error);
+        TyranoLogger.print(
+          `${this.completionTag.name} failed`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
       }
     }
     return completions;
@@ -773,9 +782,12 @@ export class TyranoCompletionItemProvider
         ? [...characterData.layer.keys()]
         : [];
       return layerParts;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      // FIXME: Specify the reason why the `error` is ignored, or notify the error by exec `console.warn(error);`
+      TyranoLogger.print(
+        `${this.findLayerParts.name} failed`,
+        ErrorLevel.ERROR,
+      );
+      TyranoLogger.printStackTrace(error);
       return [];
     }
   }
