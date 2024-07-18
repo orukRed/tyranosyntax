@@ -10,7 +10,8 @@ out/
 .vscode
 language-configuration*.json
 package.json
-/src/**/*
+/src/**/*.*
+!/src/subscriptions/TyranoCompletionItemProvider.ts
 !/src/subscriptions/TyranoCreateTagByShortcutKey.ts
 !/src/subscriptions/TyranoDefinitionProvider.ts
 !/src/subscriptions/TyranoPreview.ts
