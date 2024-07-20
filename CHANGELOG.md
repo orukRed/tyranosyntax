@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.3]- 2024-07-20
+
+- iscript内部にコメントアウトがあったときに変数補完されない問題を修正しました。[issue#172](https://github.com/orukRed/tyranosyntax/issues/172)
+
 ## [0.24.2]- 2024-07-11
 
 - ツールチップにサンプルコードがなかった問題を修正しました。[issue#160](https://github.com/orukRed/tyranosyntax/issues/160)
