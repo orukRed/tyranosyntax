@@ -294,26 +294,23 @@ export class InformationWorkSpace {
     const typeConverter = this.typeConverter;
     let keyName = "";
     traverse(ast, {
-      enter: (path) => {
-
-      },
-      Identifier(path) {
-      },
-      MemberExpression(path) {
-        const left = path.node;
-        if (left.object.type === 'Identifier' && variablePrefixList.includes(left.object.name)) {
-          if (left.property.type === 'Identifier') {
-            // 'f.' をキー名の先頭に追加してプロパティ名を取得
-            const variableName = left.property.name
-            const type = typeConverter(left.property.type);
-            const variableData = new VariableData(variableName, undefined, left.object.name, type);
-            const location = new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc?.start.line!, path.node.loc?.start.column!));
-            variableData.addLocation(location);
-            keyName = variableName;
-            that.variableMap.get(projectPath)?.set(variableName, variableData);
-          }
+       enter: (path) => {
+    },
+    MemberExpression(path) {
+      const left = path.node;
+      if (left.object.type === 'Identifier' && variablePrefixList.includes(left.object.name)) {
+        if (left.property.type === 'Identifier') {
+          // 'f.' をキー名の先頭に追加してプロパティ名を取得
+          const variableName = left.property.name
+          const type = typeConverter(left.property.type);
+          const variableData = new VariableData(variableName, undefined, left.object.name, type);
+          const location = new vscode.Location(vscode.Uri.file(absoluteScenarioFilePath), new vscode.Position(path.node.loc?.start.line!, path.node.loc?.start.column!));
+          variableData.addLocation(location);
+          keyName = variableName;
+          that.variableMap.get(projectPath)?.set(variableName, variableData);
         }
-      },
+      }
+    },
       ObjectExpression: (path) => {
         const nowObject: VariableData | undefined = that.variableMap.get(projectPath)?.get(keyName);
         if (nowObject) {
@@ -360,7 +357,7 @@ export class InformationWorkSpace {
 
         //iscript-endscript間のテキストを取得。
         if (isIscript && data["name"] === "text") {
-          iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(data["line"]).text;
+          iscriptSentence += this.scenarioFileMap.get(absoluteScenarioFilePath)?.lineAt(data["line"]).text + '\n';
         }
 
 
