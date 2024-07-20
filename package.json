@@ -177,7 +177,8 @@
           },
           "TyranoScript syntax.plugin.parameter": {
             "type": "object",
-            "default": {}
+            "default": {},
+            "description": "追加でタグ補完したいものを設定します"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",
