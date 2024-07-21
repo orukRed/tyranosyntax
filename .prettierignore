@@ -7,9 +7,6 @@ package-lock.json
 out/
 
 # TODO: Gradually format source code
-.vscode
-language-configuration*.json
-package.json
 /src/**/*.*
 !/src/subscriptions/TyranoCompletionItemProvider.ts
 !/src/subscriptions/TyranoCreateTagByShortcutKey.ts
