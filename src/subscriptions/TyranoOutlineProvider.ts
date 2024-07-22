@@ -7,13 +7,13 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
   constructor() {
   }
 
-  public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentSymbol[] | vscode.SymbolInformation[]> {
+  public provideDocumentSymbols(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentSymbol[] | vscode.SymbolInformation[]> {
 
-    let symbols = [];
+    const symbols = [];
     let commentFlag: boolean = false; //複数行コメントになっているかのフラグ
 
     for (let i = 0; i < document.lineCount; i++) {
-      let line = document.lineAt(i);//i行目のドキュメントを取得
+      const line = document.lineAt(i);//i行目のドキュメントを取得
 
       //ブロックコメント中ならアウトラインとして表示しない(β機能)
       //FIXME: 「hoge /**/」とか「/**/ hoge」のような書き方をすると正しくアウトラインに表示されない。
@@ -35,21 +35,21 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
 
       //タグのアウトライン表示
       if (this.isAddTagOutline(line.text)) {
-        let symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Class, line.range, line.range);
+        const symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Class, line.range, line.range);
         symbols.push(symbol);
       }
 
       //変数のアウトライン表示
       if (this.isAddVariableOutLine(line.text)) {
-        const outlineText: string | null = line.text.match(this.REGEX_VARIABLE)![0];
-        let symbol = new vscode.DocumentSymbol(outlineText, 'Component', vscode.SymbolKind.Variable, line.range, line.range);
+        const outlineText = line.text.match(this.REGEX_VARIABLE)![0];
+        const symbol = new vscode.DocumentSymbol(outlineText, 'Component', vscode.SymbolKind.Variable, line.range, line.range);
         symbols.push(symbol);
       }
 
 
       //ラベルをアウトラインに表示
       if (this.isAddLabelOutLine(line.text)) {
-        let symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Function, line.range, line.range);
+        const symbol = new vscode.DocumentSymbol(line.text, 'Component', vscode.SymbolKind.Function, line.range, line.range);
         symbols.push(symbol);
       }
     }
