@@ -85,28 +85,23 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
    * @returns アウトライン表示するタグが含まれているならtrue,そうでないならfalse
    */
   private isAddTagOutline(text: string): boolean {
-    const REGEX = /((\w+))\s*((\S*)=\"?(\w*)\"?)*()/; //タグ検出用の正規表現
-    const MATCH_TEXT = text.match(REGEX); //[hoge param=""]の形式のタグでマッチしてるかを探して変数に格納
-    const OUTLINE_TAG: string[] | undefined = vscode.workspace
+    const outlineTags: string[] | undefined = vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.outline.tag"); //setting.jsonに記載のタグ取得
-    let matchText: string = "";
-
-    // タグとマッチしないなら戻る
-    if (!MATCH_TEXT) {
+    if (!outlineTags) {
       return false;
     }
-    matchText = MATCH_TEXT[1];
 
-    //matchTextがMATCH_TEXTSで定義したいずれかのタグがあるならアウトラインに表示
-    if (OUTLINE_TAG !== undefined) {
-      for (let j = 0; j < OUTLINE_TAG.length; j++) {
-        if (matchText === OUTLINE_TAG[j]) {
-          return true;
-        }
-      }
+    const REGEX = /((\w+))\s*((\S*)="?(\w*)"?)*()/; //タグ検出用の正規表現
+    const matcher = text.match(REGEX); //[hoge param=""]の形式のタグでマッチしてるかを探して変数に格納
+    // タグとマッチしないなら戻る
+    if (!matcher) {
+      return false;
     }
-    return false;
+
+    const tagName = matcher[1];
+
+    return outlineTags.includes(tagName);
   }
 
   /**
