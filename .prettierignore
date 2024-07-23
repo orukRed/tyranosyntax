@@ -11,6 +11,7 @@ out/
 !/src/subscriptions/TyranoCompletionItemProvider.ts
 !/src/subscriptions/TyranoCreateTagByShortcutKey.ts
 !/src/subscriptions/TyranoDefinitionProvider.ts
+!/src/subscriptions/TyranoOutlineProvider.ts
 !/src/subscriptions/TyranoPreview.ts
 !/src/subscriptions/TyranoReferenceProvider.ts
 !/src/subscriptions/TyranoRenameProvider.ts
