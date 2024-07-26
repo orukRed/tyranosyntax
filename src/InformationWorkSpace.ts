@@ -152,12 +152,13 @@ export class InformationWorkSpace {
     }
 
     // 指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
-    const listFiles = (dir: string): string[] =>
-      fs.readdirSync(dir, { withFileTypes: true }).
-        flatMap(dirent =>
-          dirent.isFile() ?
-            [`${dir}${this.pathDelimiter}${dirent.name}`].filter((file) => dirent.name === "index.html").map(str => str.replace(this.pathDelimiter + "index.html", "")) :
-            listFiles(`${dir}${this.pathDelimiter}${dirent.name}`))
+const listFiles = (dir: string): string[] =>
+  fs.readdirSync(dir, { withFileTypes: true })
+    .flatMap(dirent =>
+      dirent.name === '.git' ? [] : // .git ディレクトリを無視
+      dirent.isFile() ?
+        [`${dir}${this.pathDelimiter}${dirent.name}`].filter((file) => dirent.name === "index.html").map(str => str.replace(this.pathDelimiter + "index.html", "")) :
+        listFiles(`${dir}${this.pathDelimiter}${dirent.name}`))
 
     const ret = listFiles(this.getWorkspaceRootPath());
 
@@ -596,18 +597,19 @@ export class InformationWorkSpace {
 
 
     //指定したファイルパスの中のファイルのうち、permissionExtensionの中に入ってる拡張子のファイルパスのみを取得
-    const listFiles = (dir: string): string[] =>
-      fs.readdirSync(dir, { withFileTypes: true }).
-        flatMap(dirent =>
-          dirent.isFile() ?
-            [`${dir}${this.pathDelimiter}${dirent.name}`].filter(file => {
-              if (permissionExtension.length <= 0) {
-                return file;
-              }
-              return permissionExtension.includes(path.extname(file))
-            }) :
-            listFiles(`${dir}${this.pathDelimiter}${dirent.name}`))
-    let ret = listFiles(projectRootPath);//絶対パスで取得
+const listFiles = (dir: string): string[] =>
+  fs.readdirSync(dir, { withFileTypes: true })
+    .flatMap(dirent =>
+      dirent.name === '.git' ? [] : // .git ディレクトリを無視
+      dirent.isFile() ?
+        [`${dir}${this.pathDelimiter}${dirent.name}`].filter(file => {
+          if (permissionExtension.length <= 0) {
+            return file;
+          }
+          return permissionExtension.includes(path.extname(file))
+        }) :
+        listFiles(`${dir}${this.pathDelimiter}${dirent.name}`));
+            let ret = listFiles(projectRootPath);//絶対パスで取得
 
     //相対パスに変換
     if (!isAbsolute) {

@@ -4,9 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.5]- 2024-07-27
+
+- 拡張機能読み込み時に.gitフォルダを無視するようにしました。[issue#178](https://github.com/orukRed/tyranosyntax/issues/178)
+
 ## [0.24.4]- 2024-07-21
 
-拡張機能マーケットプレイスでの視認性を上げるため、アイコンを設定しました。
+- 拡張機能マーケットプレイスでの視認性を上げるため、アイコンを設定しました。
 
 ## [0.24.3]- 2024-07-20
 
