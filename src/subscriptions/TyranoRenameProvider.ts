@@ -1,5 +1,4 @@
-
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export class TyranoRenameProvider {
   constructor() {}

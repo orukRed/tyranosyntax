@@ -1,17 +1,16 @@
-import * as vscode from 'vscode';
-import { CharacterFaceData } from './CharacterFaceData';
-import { CharacterLayerData as CharacterPartData } from './CharacterLayerData';
+import * as vscode from "vscode";
+import { CharacterFaceData } from "./CharacterFaceData";
+import { CharacterLayerData as CharacterPartData } from "./CharacterLayerData";
 
 /**
  * キャラクター操作カテゴリのタグで定義したキャラクター情報を格納するためのクラス
  */
 export class CharacterData {
-
-  private _name: string = "";//chara_newのnameで定義した名前
-  private _jname: string = "";//chara_newのjnameで定義した表示名
-  private _faceList: CharacterFaceData[] = [];//chara_faceのfaceで定義した表情名
-  private _layer: Map<string, CharacterPartData[]> = new Map();//キーをpart,値をid[]として、それらを配列で持つ
-  private _location: vscode.Location;//chara_newで定義した場所
+  private _name: string = ""; //chara_newのnameで定義した名前
+  private _jname: string = ""; //chara_newのjnameで定義した表示名
+  private _faceList: CharacterFaceData[] = []; //chara_faceのfaceで定義した表情名
+  private _layer: Map<string, CharacterPartData[]> = new Map(); //キーをpart,値をid[]として、それらを配列で持つ
+  private _location: vscode.Location; //chara_newで定義した場所
   constructor(name: string, jname: string, location: vscode.Location) {
     this._name = name;
     this._jname = jname;
@@ -23,7 +22,9 @@ export class CharacterData {
   }
 
   public deleteFaceByFilePath(fsPath: string) {
-    this._faceList = this._faceList.filter((face) => { return face.location?.uri.fsPath !== fsPath; });
+    this._faceList = this._faceList.filter((face) => {
+      return face.location?.uri.fsPath !== fsPath;
+    });
   }
 
   public addLayer(part: string, parts: CharacterPartData) {
@@ -36,7 +37,12 @@ export class CharacterData {
 
   public deleteLayerByFilePath(fsPath: string) {
     for (const [part, parts] of this._layer) {
-      this._layer.set(part, parts.filter((part) => { return part.location?.uri.fsPath !== fsPath; }));
+      this._layer.set(
+        part,
+        parts.filter((part) => {
+          return part.location?.uri.fsPath !== fsPath;
+        }),
+      );
     }
   }
 
@@ -51,7 +57,6 @@ export class CharacterData {
   }
   public set faceList(value: CharacterFaceData[]) {
     this._faceList = value;
-
   }
   public get layer(): Map<string, CharacterPartData[]> {
     return this._layer;
@@ -62,7 +67,4 @@ export class CharacterData {
   public get location(): vscode.Location {
     return this._location;
   }
-
-
-
 }

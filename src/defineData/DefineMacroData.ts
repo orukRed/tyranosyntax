@@ -1,15 +1,19 @@
-import * as vscode from 'vscode';
-import { MacroParameterData } from './MacroParameterData';
+import * as vscode from "vscode";
+import { MacroParameterData } from "./MacroParameterData";
 
 export class DefineMacroData {
-  private _macroName: string = "";//マクロ名。[hoge]などのhoge部分。
+  private _macroName: string = ""; //マクロ名。[hoge]などのhoge部分。
   private _filePath: string = "";
-  private _location: vscode.Location | null = null;//定義ジャンプに使う位置情報
-  private _parameter: MacroParameterData[] = [];//TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
-  private _description: string = "";//マクロの説明
+  private _location: vscode.Location | null = null; //定義ジャンプに使う位置情報
+  private _parameter: MacroParameterData[] = []; //TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
+  private _description: string = ""; //マクロの説明
 
-
-  public constructor(macroName: string, location: vscode.Location, filePath: string, description: string) {
+  public constructor(
+    macroName: string,
+    location: vscode.Location,
+    filePath: string,
+    description: string,
+  ) {
     this._macroName = macroName;
     this._location = location;
     this._filePath = filePath;
@@ -19,17 +23,25 @@ export class DefineMacroData {
   private parseParametersToJsonObject(): object {
     let obj = {};
     this._parameter.forEach((parameter) => {
-      Object.assign(this._parameter, { name: parameter.name, required: parameter.required, description: parameter.description });
+      Object.assign(this._parameter, {
+        name: parameter.name,
+        required: parameter.required,
+        description: parameter.description,
+      });
     });
     return obj;
   }
 
   /**
    * 入力補完に使うjsonオブジェクトへと変換します。
-   * @returns 
+   * @returns
    */
   public parseToJsonObject(): object {
-    return { "name": this.macroName, "description": this.description, "parameters": this.parseParametersToJsonObject() };
+    return {
+      name: this.macroName,
+      description: this.description,
+      parameters: this.parseParametersToJsonObject(),
+    };
   }
 
   public get macroName(): string {

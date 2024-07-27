@@ -1,11 +1,10 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * ksファイル内で定義したラベル情報を格納するためのクラス
  */
 export class LabelData {
-
-  private _name: string;//ラベル名
+  private _name: string; //ラベル名
   private _location: vscode.Location;
 
   public get name(): string {
@@ -18,5 +17,4 @@ export class LabelData {
     this._name = _name;
     this._location = _location;
   }
-
 }
