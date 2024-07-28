@@ -138,14 +138,14 @@
       },
       "patterns": [
         {
-          "patterns": [
-            {
-              "include": "$self"
-            }
-          ]
+          "include": "text.html.basic"
         },
         {
-          "include": "text.html.basic"
+          "information_for_contributors": [
+            "The tag `html` might contain `source.ks source.tyrano`",
+            "See orukRed/tyranosyntax#139"
+          ],
+          "include": "$self"
         }
       ]
     },
@@ -176,7 +176,14 @@
       },
       "patterns": [
         {
-          "include": "source.js"
+          "include": "text.html.basic"
+        },
+        {
+          "information_for_contributors": [
+            "The tag `html` might contain `source.ks source.tyrano`",
+            "See orukRed/tyranosyntax#139"
+          ],
+          "include": "$self"
         }
       ]
     },
