@@ -1,14 +1,13 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * マクロのパラメータ（[bg storage="hoge.ks"]のstorageの部分）
  * 将来的にjsで定義したタグのパラメータをこれに格納する
  */
 export class MacroParameterData {
-  private _name: string = "";//parameter名
-  private _required: boolean = false;//必須かどうか
-  private _description: string = "";//parameterの説明
-
+  private _name: string = ""; //parameter名
+  private _required: boolean = false; //必須かどうか
+  private _description: string = ""; //parameterの説明
 
   constructor(name: string, required: boolean, description: string) {
     this._name = name;
