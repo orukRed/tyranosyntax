@@ -296,6 +296,7 @@ export class TyranoDiagnostic {
               }
             } else if (!this.isValueIsIncludeVariable(data["pm"]["storage"])) {
               //targetがundefinedじゃない &&storageがundefinedじゃない && storageが変数でもない
+
               //targetから*を外して表記ゆれ防ぐ
               data["pm"]["target"] = data["pm"]["target"].replace("*", "");
 
