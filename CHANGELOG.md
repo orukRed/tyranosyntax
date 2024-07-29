@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.6]- 2024-07-29
+
+- `@html` `@endhtml`で囲ったときにただしくハイライトされない問題を修正しました。[PR#182](https://github.com/orukRed/tyranosyntax/pull/182)
+- jnameが未指定のchara_newタグがあるときに`#`からの補完ができなくなる問題の修正[issue#183](https://github.com/orukRed/tyranosyntax/issues/183)
+- `TyranoScript syntax.resource.extension`の設定にoggが複数あることによりoggファイルの補完ができない問題の修正[issue#184](https://github.com/orukRed/tyranosyntax/issues/184)
+
 ## [0.24.5]- 2024-07-27
 
 - 拡張機能読み込み時に.gitフォルダを無視するようにしました。[issue#178](https://github.com/orukRed/tyranosyntax/issues/178)

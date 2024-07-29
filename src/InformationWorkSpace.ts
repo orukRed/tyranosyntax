@@ -392,7 +392,8 @@ const listFiles = (dir: string): string[] =>
         }
         else if (data["name"] === "chara_new") {
           const location = new vscode.Location(scenarioData.uri, new vscode.Position(await data["line"], await data["column"]))
-          const characterData = new CharacterData(data["pm"]["name"], data["pm"]["jname"], location);
+          const jname = data["pm"]["jname"] || "";
+          const characterData = new CharacterData(data["pm"]["name"], jname, location);
           this.characterMap.get(projectPath)?.push(characterData);
         } else if (data["name"] === "chara_face") {
           const characterData = this.characterMap.get(projectPath)?.find((value) => value.name === data["pm"]["name"]);
