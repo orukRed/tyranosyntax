@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -170,8 +170,7 @@
               ],
               "video": [
                 ".mp4",
-                ".webm",
-                ".ogg"
+                ".webm"
               ]
             },
             "description": "インテリセンスに使うリソースファイルの拡張子を設定します。"
