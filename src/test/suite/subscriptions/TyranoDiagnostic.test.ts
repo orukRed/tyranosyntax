@@ -1,39 +1,31 @@
-import * as assert from 'assert';
+import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import * as vscode from 'vscode';
-import { TyranoDiagnostic } from '../../../subscriptions/TyranoDiagnostic';
-// import * as myExtension from '../../extension';
+import * as vscode from "vscode";
+import { TyranoDiagnostic } from "../../../subscriptions/TyranoDiagnostic";
 
+suite("TyranoDiagnostic.isExistAmpersandAtBeginning", () => {
+  vscode.window.showInformationMessage("Start all tests.");
 
-
-
-suite('TyranoDiagnostic.isExistAmpersandAtBeginning', () => {
-  vscode.window.showInformationMessage('Start all tests.');
-
-  test('&f.hoge true返却', () => {
+  test("&f.hoge true返却", () => {
     //値定義
     const diag = new TyranoDiagnostic();
-    assert.strictEqual((diag as any).isExistAmpersandAtBeginning("&f.hoge"), true);
+    assert.strictEqual(
+      (diag as any).isExistAmpersandAtBeginning("&f.hoge"),
+      true,
+    );
   });
 
-  test('f.hoge false返却', () => {
+  test("f.hoge false返却", () => {
     //値定義
     const diag = new TyranoDiagnostic();
-    assert.strictEqual((diag as any).isExistAmpersandAtBeginning("f.hoge"), false);
+    assert.strictEqual(
+      (diag as any).isExistAmpersandAtBeginning("f.hoge"),
+      false,
+    );
   });
-
-
-
 });
-
-
-
-
-
-
-
 
 // suite('InformationWorkSpace.getProjectFiles', () => {
 // 	vscode.window.showInformationMessage('Start all tests.');

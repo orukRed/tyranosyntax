@@ -10,3 +10,6 @@ out/
 /src/**/*.*
 !/src/defineData/**/*.*
 !/src/subscriptions/**/*.*
+!src/test/**/*.*
+!src/InformationExtension.ts
+!src/TyranoLogger.ts

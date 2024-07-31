@@ -1,9 +1,8 @@
-import { InformationWorkSpace } from './InformationWorkSpace';
-
+import { InformationWorkSpace } from "./InformationWorkSpace";
 
 export class InformationExtension {
   private static instance: InformationExtension = new InformationExtension();
-  private constructor() { }
+  private constructor() {}
   public static getInstance(): InformationExtension {
     return this.instance;
   }

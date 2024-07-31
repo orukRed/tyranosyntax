@@ -1,7 +1,6 @@
-import * as path from 'path';
+import * as path from "path";
 
-import { runTests } from 'vscode-test';
-
+import { runTests } from "vscode-test";
 
 async function main() {
   try {
@@ -9,28 +8,29 @@ async function main() {
     // Passed to `--extensionDevelopmentPath`
     //拡張マニフェストpackage.jsonを含むフォルダー
     // `--extensionDevelopmentPath`に渡されます
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../');
+    const extensionDevelopmentPath = path.resolve(__dirname, "../../");
 
     // The path to test runner
     // Passed to --extensionTestsPath
     //テストランナーへのパス
     //-extensionTestsPathに渡されます
-    const extensionTestsPath = path.resolve(__dirname, './suite/index');
+    const extensionTestsPath = path.resolve(__dirname, "./suite/index");
 
-    const testWorkSpace = path.resolve(__dirname, '../../test_project/index.html');
+    const testWorkSpace = path.resolve(
+      __dirname,
+      "../../test_project/index.html",
+    );
 
     // Download VS Code, unzip it and run the integration test
     // VS Codeをダウンロードして解凍し、統合テストを実行します
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: [
-        testWorkSpace,
-        '--disable-extensions']
-    }); await runTests({ extensionDevelopmentPath, extensionTestsPath });
-
+      launchArgs: [testWorkSpace, "--disable-extensions"],
+    });
+    await runTests({ extensionDevelopmentPath, extensionTestsPath });
   } catch (err) {
-    console.error('Failed to run tests');
+    console.error("Failed to run tests");
     process.exit(1);
   }
 }
