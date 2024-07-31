@@ -143,7 +143,7 @@ export class TyranoCompletionItemProvider
         typeof leftSideText === "string" &&
         leftSideText?.charAt(leftSideText.length - 1) === "#"
       ) {
-        return await this.completionJName(projectPath);
+        return await this.completionNameParameter(projectPath);
       } else if (variableValue) {
         const variableKind = variableValue[0].split(".")[0].replace("&", "");
         const variableName = this.getVariableName(variableValue[0]);
@@ -262,27 +262,6 @@ export class TyranoCompletionItemProvider
       );
       TyranoLogger.printStackTrace(error);
     }
-  }
-  private async completionJName(
-    projectPath: string,
-  ): Promise<
-    | vscode.CompletionItem[]
-    | vscode.CompletionList<vscode.CompletionItem>
-    | null
-    | undefined
-  > {
-    const characterDataList = this.infoWs.characterMap.get(projectPath);
-    if (!characterDataList) {
-      return null;
-    }
-    const completions: vscode.CompletionItem[] = [];
-    characterDataList.forEach((characterData) => {
-      const comp = new vscode.CompletionItem(characterData.jname);
-      comp.kind = vscode.CompletionItemKind.Variable;
-      comp.insertText = characterData.jname;
-      completions.push(comp);
-    });
-    return completions;
   }
 
   /**
