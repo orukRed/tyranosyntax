@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.7]- 2024-07-31
+
+- #での補完でnameではなくjnameの値が出力されてしまう問題を修正しました。[PR#187](https://github.com/orukRed/tyranosyntax/issues/187)
+- region endregionで囲った個所が正しく閉じられない問題を修正しました。 [PR#186](https://github.com/orukRed/tyranosyntax/pull/186)
+- READMEに折りたたみとショートカットについての説明を追加しました。
+
 ## [0.24.6]- 2024-07-29
 
 - `@html` `@endhtml`で囲ったときにただしくハイライトされない問題を修正しました。[PR#182](https://github.com/orukRed/tyranosyntax/pull/182)

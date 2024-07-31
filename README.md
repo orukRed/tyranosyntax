@@ -245,6 +245,27 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ![](src/readme_img/flowchart1.png)
 ![](src/readme_img/flowchart2.png)
 
+### 処理のフォールディング（折り畳み）
+
+`region`と`endregion`で囲まれた範囲を折り畳むことができます。
+以下のような記述を行うことで、折り畳むことができます。
+```tyrano
+; region
+[p]
+"This line can be folded."
+; endregion
+```
+
+## ショートカット一覧
+
+Ctrl + Space : タグや変数などの補完
+F12 : タグの定義元へ移動
+Alt + J : jump系タグのジャンプ先へ移動
+Ctrl + Alt + P : プレビュー機能（β版）
+Ctrl + Alt + F : フローチャート表示
+Ctrl + / : コメントアウト
+
+
 ## 設定ファイルについて
 
 TyranoScript_syntaxの一部機能は設定ファイルから変更を行うことができます。
