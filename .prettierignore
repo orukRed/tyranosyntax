@@ -5,11 +5,3 @@ node_modules/
 package-lock.json
 
 out/
-
-# TODO: Gradually format source code
-/src/**/*.*
-!/src/defineData/**/*.*
-!/src/subscriptions/**/*.*
-!src/test/**/*.*
-!src/InformationExtension.ts
-!src/TyranoLogger.ts
