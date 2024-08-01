@@ -1,5 +1,4 @@
-import * as vscode from 'vscode';
-
+import * as vscode from "vscode";
 
 export class ErrorLevel {
   public static readonly DEBUG = "DEBUG";
@@ -15,18 +14,21 @@ export class ErrorLevel {
  * ログは出力ウィンドウのウィンドウで出力されるため、try-catchでこれを出力するのはNG
  */
 export class TyranoLogger {
+  private static channel = vscode.window.createOutputChannel(
+    "TyranoScript syntax",
+  );
 
-  private static channel = vscode.window.createOutputChannel("TyranoScript syntax");
-
-  private constructor() { }
+  private constructor() {}
   /**
    *  ログ出力
-   * @param text  出力する文字列 
+   * @param text  出力する文字列
    * @param errorLevel  出力するエラーレベル ErrorLevelを使用
    */
   public static print(text: string, errorLevel: ErrorLevel = ErrorLevel.DEBUG) {
     const currentTime = new Date();
-    TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`);
+    TyranoLogger.channel.appendLine(
+      `[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] [${errorLevel}]  ${text}`,
+    );
   }
 
   /**
@@ -36,10 +38,9 @@ export class TyranoLogger {
   public static printStackTrace(e: Error | unknown) {
     if (e instanceof Error) {
       const currentTime = new Date();
-      TyranoLogger.channel.appendLine(`[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] ${e.stack}`);
+      TyranoLogger.channel.appendLine(
+        `[${currentTime.toLocaleString()}:${currentTime.getMilliseconds()}] ${e.stack}`,
+      );
     }
-
   }
-
 }
-
