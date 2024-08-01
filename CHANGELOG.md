@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.8]- 2024-08-01
+
+- #での補完時、行頭に#がある場合にしか補完が効かない問題を修正しました。[PR#191](https://github.com/orukRed/tyranosyntax/issues/191)
+
+
 ## [0.24.7]- 2024-07-31
 
 - #での補完でnameではなくjnameの値が出力されてしまう問題を修正しました。[PR#187](https://github.com/orukRed/tyranosyntax/issues/187)

@@ -139,10 +139,7 @@ export class TyranoCompletionItemProvider
       const layerParts = this.findLayerParts(projectPath, tagIndex, parsedData);
 
       //カーソルの左隣の文字取得
-      if (
-        typeof leftSideText === "string" &&
-        leftSideText?.charAt(leftSideText.length - 1) === "#"
-      ) {
+      if (typeof leftSideText === "string" && /\s*#.*$/.test(leftSideText)) {
         return await this.completionNameParameter(projectPath);
       } else if (variableValue) {
         const variableKind = variableValue[0].split(".")[0].replace("&", "");
