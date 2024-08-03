@@ -1,12 +1,10 @@
-import * as path from 'path';
-
 /**
  * ティラノスクリプト本体に存在するパーサー処理を用いたパーサークラスです。
  * parseScenarioした後に追加の処理をすることが多かったため作成したクラスです。
  */
 export class Parser {
   private static instance: Parser = new Parser();
-  private constructor() { }
+  private constructor() {}
   public static getInstance(): Parser {
     return this.instance;
   }
@@ -15,7 +13,7 @@ export class Parser {
    * 引数から、カーソルより左側のタグを返却する
    * @param parsedData getParseTextで取得したパース済みのデータ
    * @param character カーソル位置(position.character)
-   * @returns 
+   * @returns
    */
   public getIndex(parsedData: any, character: number): number {
     let ret: number = -1;
@@ -29,19 +27,16 @@ export class Parser {
     return ret;
   }
 
-
-
   /**
    * 引数で与えたテキストをパースして、パースしたデータを返却します。
-   * @param text 
-   * @returns 
+   * @param text
+   * @returns
    */
   public parseText(text: string): any {
     // 外部からtyrano_parser.jsを呼び出すのでなく、パーサー処理を移植した物を呼び出す
     // return this.parser.parseScenario(text)["array_s"];
     return this.parseScenario(text)["array_s"];
   }
-
 
   //----------------------------------------------
   // 以下、移植したパーサー処理
@@ -50,13 +45,13 @@ export class Parser {
   private flag_script = false;
   /**
    * ティラノスクリプトのkag.parser.jsに存在するparseScenario関数を移植したものです。
-   * @param text 
+   * @param text
    */
   private parseScenario(text_str: string): any {
     var array_s = [];
 
-    var column = -1;//ラベルやマクロの定義開始位置
-    var lastColumn = 0;//前のタグやラベルの定義開始位置
+    var column = -1; //ラベルやマクロの定義開始位置
+    var lastColumn = 0; //前のタグやラベルの定義開始位置
 
     var map_label = {}; //ラベル一覧
 
@@ -95,7 +90,7 @@ export class Parser {
           name: "chara_ptext",
           pm: { name: chara_name, face: chara_face },
           // val: text,
-          val: "text"
+          val: "text",
         };
 
         array_s.push(text_obj);
@@ -146,7 +141,7 @@ export class Parser {
       } else if (first_char === "@") {
         //コマンド行確定なので、その残りの部分を、ごそっと回す
         var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
-        var tmpobj = this.makeTag(tag_str, i, 0, flag_comment, first_char);//@から始まるところはcolumnは0で確定
+        var tmpobj = this.makeTag(tag_str, i, 0, flag_comment, first_char); //@から始まるところはcolumnは0で確定
         array_s.push(tmpobj);
       } else {
         //テキストか[]記法のタグ
@@ -176,7 +171,9 @@ export class Parser {
 
               if (num_kakko == 0) {
                 flag_tag = false;
-                array_s.push(this.makeTag(tag_str, i, column, flag_comment, first_char));
+                array_s.push(
+                  this.makeTag(tag_str, i, column, flag_comment, first_char),
+                );
                 //tag_str をビルドして、命令配列に格納
                 tag_str = "";
               } else {
@@ -195,7 +192,9 @@ export class Parser {
           ) {
             num_kakko++;
             column = j;
-            column += Math.abs(array_row[i].trim().length - array_row[i].length);//先頭にスペースがある場合に空白を追加する処理
+            column += Math.abs(
+              array_row[i].trim().length - array_row[i].length,
+            ); //先頭にスペースがある場合に空白を追加する処理
             //テキストファイルを命令に格納
             if (text != "") {
               let text_obj = {
@@ -252,12 +251,17 @@ export class Parser {
     return result_obj;
   }
 
-
   /**
    * ティラノスクリプトのkag.parser.jsに存在するmakeTag関数を移植したものです。
-   * @param text 
+   * @param text
    */
-  private makeTag(str: any, line: any, column: any, flag_comment: any, first_char: any): any {
+  private makeTag(
+    str: any,
+    line: any,
+    column: any,
+    flag_comment: any,
+    first_char: any,
+  ): any {
     var obj = {
       line: line,
       column: column,
@@ -326,7 +330,6 @@ export class Parser {
     } else {
       obj.name = array[0].trim();
     }
-
 
     //=のみが出てきた場合は前後のをくっつけて、ひとつの変数にしてしまって良い
     for (var k = 1; k < array.length; k++) {
@@ -409,10 +412,10 @@ export class Parser {
 
   /**
    * ティラノスクリプトのkag.parser.jsに存在するreplaceAll関数を移植したものです
-   * @param text 
-   * @param searchString 
-   * @param replacement 
-   * @returns 
+   * @param text
+   * @param searchString
+   * @param replacement
+   * @returns
    */
   private replaceAll(text: any, searchString: any, replacement: any) {
     if (typeof text != "string") {
