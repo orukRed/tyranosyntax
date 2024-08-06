@@ -20,7 +20,7 @@
 4. 変更をコミットします。コミットメッセージは変更内容を簡潔に説明してください。
 
     ```sh
-    git commit -m "Add new feature: your feature description
+    git commit -m"Add new feature: your feature description"
     ```
 
 5. リモートリポジトリにプッシュします。
