@@ -4,10 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.9]- 2024-08-06
+
+- ラベルでハイフンがハイライトされないようにしました。[issue#198](https://github.com/orukRed/tyranosyntax/issues/198)
+
 ## [0.24.8]- 2024-08-02
 
 - #での補完時、行頭に#がある場合にしか補完が効かない問題を修正しました。[PR#191](https://github.com/orukRed/tyranosyntax/issues/191)
-
 
 ## [0.24.7]- 2024-07-31
 
