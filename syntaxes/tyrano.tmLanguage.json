@@ -210,7 +210,7 @@
     "tyrano_labels": {
       "name": "constant.language.tyrano",
       "comment": "ラベル表示に使う",
-      "match": "^\\s*\\*[\\w\\-]+"
+      "match": "^\\s*\\*[\\w]+"
     },
     "tyrano_labels_in_tag": {
       "name": "constant.language.tyrano",
