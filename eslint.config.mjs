@@ -1,6 +1,7 @@
 // https://eslint.org/
 import globals from "globals";
 import pluginJs from "@eslint/js";
+import sonarjs from "eslint-plugin-sonarjs";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 
@@ -27,4 +28,10 @@ export default [
   },
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
+  {
+    plugins: { sonarjs },
+    rules: {
+      "sonarjs/cognitive-complexity": "warn",
+    },
+  },
 ];
