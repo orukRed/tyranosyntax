@@ -84,24 +84,18 @@ export class TyranoJumpProvider {
 
     //カーソル位置のタグ名取得
     const tagName = parsedData[tagIndex]["name"];
-    let jumpStorage = parsedData[tagIndex]["pm"]["storage"];
-    let jumpTarget = parsedData[tagIndex]["pm"]["target"];
 
     //TODO:loadcssタグ専用にfileを見るんじゃなくて、参照ラベル名（storageとかfileとか）をpackage.jsonで指定できるようにする。TyranoScript syntax.tag.parameterのような感じのobjectにすればいけるはず
     //リファクタリングに時間がかかりそうなことや、バグの懸念、今後も設計が変わるおそれがあるので今はこのままで
-    if (jumpStorage === undefined) {
-      if (parsedData[tagIndex]["pm"]["file"] !== undefined) {
-        jumpStorage = parsedData[tagIndex]["pm"]["file"];
-      } else {
-        jumpStorage = document.fileName.substring(
-          document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,
-        );
-      }
-    }
-    //ラベルから*の除去しておく
-    if (jumpTarget) {
-      jumpTarget = jumpTarget.replace("*", "");
-    }
+    const jumpStorage =
+      parsedData[tagIndex]["pm"]?.["storage"] ??
+      parsedData[tagIndex]["pm"]?.["file"] ??
+      document.fileName.substring(
+        document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,
+      );
+
+    const jumpTarget = parsedData[tagIndex]["pm"]?.["target"]?.replace("*", ""); //ラベルから `*` を除去しておく
+
     //カーソルの位置のタグがジャンプ系タグなら
     if (Object.keys(jumpTagObject).includes(tagName)) {
       //変数を使っている場合はジャンプさせない
