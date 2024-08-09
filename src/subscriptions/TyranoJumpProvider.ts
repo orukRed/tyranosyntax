@@ -9,13 +9,11 @@ export class TyranoJumpProvider {
    * alt(option) + J でシナリオジャンプした時の挙動
    */
   public async toDestination() {
-    const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
-    const parser: Parser = Parser.getInstance();
-    let jumpTagObject: object = {};
-    const document: vscode.TextDocument | undefined =
-      vscode.window.activeTextEditor?.document;
-    const position: vscode.Position | undefined =
-      vscode.window.activeTextEditor?.selection.active;
+    const infoWs = InformationWorkSpace.getInstance();
+    const parser = Parser.getInstance();
+    const jumpTagObject: { [tag: string]: string } = {};
+    const document = vscode.window.activeTextEditor?.document;
+    const position = vscode.window.activeTextEditor?.selection.active;
     if (
       document === undefined ||
       position === undefined ||
@@ -52,7 +50,7 @@ export class TyranoJumpProvider {
     }
 
     //F12押した付近のタグのデータを取得
-    const tagIndex: number = parser.getIndex(parsedData, position.character);
+    const tagIndex = parser.getIndex(parsedData, position.character);
 
     //カーソル位置のタグ名取得
     const tagName = parsedData[tagIndex]["name"];
