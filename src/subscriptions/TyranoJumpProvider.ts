@@ -3,6 +3,34 @@ import { InformationWorkSpace } from "../InformationWorkSpace";
 import * as fs from "fs";
 import { Parser } from "../Parser";
 
+type LabelsByName = {
+  [tag: string]: {
+    name: string;
+    pm: {
+      label_name: string;
+      line: number;
+    };
+  };
+};
+
+type TagUse = {
+  name: string;
+  pm: {
+    storage?: string;
+    target?: string;
+    file?: string;
+  };
+};
+
+type TagsByName = {
+  [tag: string]: {
+    [param: string]: {
+      type: string[];
+      path: string;
+    };
+  };
+};
+
 export class TyranoJumpProvider {
   constructor() {}
   /**
@@ -24,10 +52,12 @@ export class TyranoJumpProvider {
     const projectPath = await infoWs.getProjectPathByFilePath(
       document.uri.fsPath,
     );
-    const parsedData = parser.parseText(document.lineAt(position.line).text);
+    const parsedData: TagUse[] = parser.parseText(
+      document.lineAt(position.line).text,
+    );
 
     // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
-    const tags: Object = await vscode.workspace
+    const tagsByName: TagsByName = await vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.tag.parameter")!;
     const enableJumpTags = [
@@ -124,7 +154,7 @@ export class TyranoJumpProvider {
         return;
       }
 
-      const jumpDefinitionArray_s = parser.parseText(
+      const jumpDefinitionArray_s: LabelsByName = parser.parseText(
         jumpDefinitionFile.getText(),
       );
 
