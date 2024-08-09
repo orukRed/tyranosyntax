@@ -56,11 +56,7 @@ export class TyranoJumpProvider {
       document.lineAt(position.line).text,
     );
 
-    // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
-    const tagsByName: TagsByName = await vscode.workspace
-      .getConfiguration()
-      .get("TyranoScript syntax.tag.parameter")!;
-    const enableJumpTags = [
+    const TAGS_TO_JUMP = [
       "scenario",
       "script",
       "html",
@@ -69,11 +65,16 @@ export class TyranoJumpProvider {
       "button",
       "glink",
     ]; //TODO:ジャンプ系タグとしてどこかで定義すべき？
-    for (let tagName in tags) {
-      for (let paramName in tags[tagName]) {
-        for (let type of tags[tagName][paramName].type) {
-          if (enableJumpTags.includes(type)) {
-            jumpTagObject[tagName] = tags[tagName][paramName].path;
+    // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
+    const tagsByName: TagsByName = await vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.tag.parameter")!;
+    for (const [tagName, tag] of Object.entries(tagsByName)) {
+      for (const param of Object.values(tag)) {
+        const types = [...param.type]; // NOTE: Every `param.type` is an array, not a string
+        for (const type of types) {
+          if (TAGS_TO_JUMP.includes(type)) {
+            jumpTagObject[tagName] = param.path;
           }
         }
       }
@@ -153,27 +154,22 @@ export class TyranoJumpProvider {
       );
 
       //ラベル探索して見つかったらその位置でジャンプしてreturn
-      for (let data in jumpDefinitionArray_s) {
-        if (jumpDefinitionArray_s[data]["name"] === "label") {
-          if (jumpDefinitionArray_s[data]["pm"]["label_name"] === jumpTarget) {
+      for (const jumpDefinition of Object.values(jumpDefinitionArray_s)) {
+        if (jumpDefinition["name"] === "label") {
+          const { label_name: labelName, line = 0 } = jumpDefinition["pm"];
+          if (labelName === jumpTarget) {
             const activeTextEditor = await vscode.window.showTextDocument(
               jumpDefinitionFile,
               { preview: true },
             );
             activeTextEditor.selection = new vscode.Selection(
-              new vscode.Position(jumpDefinitionArray_s[data]["pm"]["line"], 0),
-              new vscode.Position(jumpDefinitionArray_s[data]["pm"]["line"], 0),
+              new vscode.Position(line, 0),
+              new vscode.Position(line, 0),
             );
             activeTextEditor.revealRange(
               new vscode.Range(
-                new vscode.Position(
-                  jumpDefinitionArray_s[data]["pm"]["line"],
-                  0,
-                ),
-                new vscode.Position(
-                  jumpDefinitionArray_s[data]["pm"]["line"],
-                  0,
-                ),
+                new vscode.Position(line, 0),
+                new vscode.Position(line, 0),
               ),
               vscode.TextEditorRevealType.InCenter,
             );
