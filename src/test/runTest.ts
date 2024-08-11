@@ -29,10 +29,12 @@ async function main() {
       launchArgs: [testWorkSpace, "--disable-extensions"],
     });
     await runTests({ extensionDevelopmentPath, extensionTestsPath });
-  } catch (err) {
+  } catch (_err) {
     console.error("Failed to run tests");
     process.exit(1);
   }
 }
 
 main();
+
+
