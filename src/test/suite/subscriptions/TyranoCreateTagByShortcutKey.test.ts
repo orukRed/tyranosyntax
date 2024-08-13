@@ -11,11 +11,11 @@ suite("TyranoCreateTagByShortcutKey.KeyPushShiftEnter関数", () => {
 
   test("正常系", () => {
     //値定義
-    let ctby = new TyranoCreateTagByShortcutKey();
-    let excepted = true;
+    const ctby = new TyranoCreateTagByShortcutKey();
+    const excepted = true;
 
     //実行
-    let actual = ctby.KeyPushShiftEnter();
+    const actual = ctby.KeyPushShiftEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);
@@ -27,11 +27,11 @@ suite("TyranoCreateTagByShortcutKey.KeyPushCtrlEnter関数", () => {
 
   test("正常系", () => {
     //値定義
-    let ctby = new TyranoCreateTagByShortcutKey();
-    let excepted = true;
+    const ctby = new TyranoCreateTagByShortcutKey();
+    const excepted = true;
 
     //実行
-    let actual = ctby.KeyPushCtrlEnter();
+    const actual = ctby.KeyPushCtrlEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);
@@ -43,11 +43,11 @@ suite("TyranoCreateTagByShortcutKey.KeyPushAltEnter関数", () => {
 
   test("正常系", () => {
     //値定義
-    let ctby = new TyranoCreateTagByShortcutKey();
-    let excepted = true;
+    const ctby = new TyranoCreateTagByShortcutKey();
+    const excepted = true;
 
     //実行
-    let actual = ctby.KeyPushAltEnter();
+    const actual = ctby.KeyPushAltEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);

@@ -1,5 +1,3 @@
-import { InformationWorkSpace } from "./InformationWorkSpace";
-
 export class InformationExtension {
   private static instance: InformationExtension = new InformationExtension();
   private constructor() {}
@@ -9,3 +7,4 @@ export class InformationExtension {
 
   public static path: string | undefined = undefined;
 }
+

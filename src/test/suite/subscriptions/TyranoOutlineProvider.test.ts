@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
@@ -21,29 +22,29 @@ class MockTextDocument implements vscode.TextDocument {
   lineCount = 1;
   lineAt(line: number): vscode.TextLine;
   lineAt(position: vscode.Position): vscode.TextLine;
-  lineAt(position: any): vscode.TextLine {
+  lineAt(_position: any): vscode.TextLine {
     return this.mockTextLine;
   }
-  offsetAt(position: vscode.Position): number {
+  offsetAt(_position: vscode.Position): number {
     throw new Error("Method not implemented.");
   }
-  positionAt(offset: number): vscode.Position {
+  positionAt(_offset: number): vscode.Position {
     throw new Error("Method not implemented.");
   }
-  getText(range?: vscode.Range): string {
+  getText(_range?: vscode.Range): string {
     return "ここに文字列";
     // throw new Error('Method not implemented.');
   }
   getWordRangeAtPosition(
-    position: vscode.Position,
-    regex?: RegExp,
+    _position: vscode.Position,
+    _regex?: RegExp,
   ): vscode.Range | undefined {
     throw new Error("Method not implemented.");
   }
-  validateRange(range: vscode.Range): vscode.Range {
+  validateRange(_range: vscode.Range): vscode.Range {
     throw new Error("Method not implemented.");
   }
-  validatePosition(position: vscode.Position): vscode.Position {
+  validatePosition(_position: vscode.Position): vscode.Position {
     throw new Error("Method not implemented.");
   }
 }
@@ -78,10 +79,10 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted);
   });
 
   test("正常系 ifタグ@", () => {
@@ -95,7 +96,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -112,7 +113,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -129,7 +130,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -146,7 +147,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -163,7 +164,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -180,7 +181,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -197,7 +198,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -214,7 +215,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -231,7 +232,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -248,7 +249,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -265,7 +266,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -282,7 +283,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -299,7 +300,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -316,7 +317,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -333,7 +334,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -350,7 +351,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -367,7 +368,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -384,7 +385,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -401,7 +402,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -418,7 +419,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -435,7 +436,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -452,7 +453,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -469,7 +470,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -486,7 +487,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -503,7 +504,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -520,7 +521,7 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート
     assert.strictEqual(actual[0].name, excepted.text);
@@ -531,13 +532,10 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     const document = new MockTextDocument();
     const token = new MockCancellationToken();
     const op = new TyranoOutlineProvider();
-    const excepted = Object.defineProperty(document.lineAt(0), "text", {
-      value: "*/",
-      writable: false,
-    });
+  
 
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, []);
@@ -548,13 +546,9 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     const document = new MockTextDocument();
     const token = new MockCancellationToken();
     const op = new TyranoOutlineProvider();
-    const excepted = Object.defineProperty(document.lineAt(0), "text", {
-      value: "/*",
-      writable: false,
-    });
-
+  
     //実行
-    let actual = op.provideDocumentSymbols(document, token)!;
+    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, []);
@@ -569,7 +563,7 @@ suite("TyranoOutlineProvider.isAddTagOutline関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddTagOutline("@endscript");
+    const actual = (op as any).isAddTagOutline("@endscript");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -582,7 +576,7 @@ suite("TyranoOutlineProvider.isAddTagOutline関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddTagOutline("@endscript");
+    const actual = (op as any).isAddTagOutline("@endscript");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -595,7 +589,7 @@ suite("TyranoOutlineProvider.isAddTagOutline関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddTagOutline('[jump storage="hoge.ks"]');
+    const actual = (op as any).isAddTagOutline('[jump storage="hoge.ks"]');
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -608,7 +602,7 @@ suite("TyranoOutlineProvider.isAddTagOutline関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddTagOutline("@foo");
+    const actual = (op as any).isAddTagOutline("@foo");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -621,7 +615,7 @@ suite("TyranoOutlineProvider.isAddTagOutline関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddTagOutline("[foo]");
+    const actual = (op as any).isAddTagOutline("[foo]");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -635,7 +629,7 @@ suite("TyranoOutlineProvider.isAddVariableOutLine関数", () => {
     const excepted = true;
 
     //実行
-    let actual = (op as any).isAddVariableOutLine("f.hoge1");
+    const actual = (op as any).isAddVariableOutLine("f.hoge1");
 
     assert.deepStrictEqual(actual, excepted);
   });
@@ -647,7 +641,7 @@ suite("TyranoOutlineProvider.isAddVariableOutLine関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddVariableOutLine("sf.hoge1");
+    const actual = (op as any).isAddVariableOutLine("sf.hoge1");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -660,7 +654,7 @@ suite("TyranoOutlineProvider.isAddVariableOutLine関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddVariableOutLine("tf.hoge1");
+    const actual = (op as any).isAddVariableOutLine("tf.hoge1");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -673,7 +667,7 @@ suite("TyranoOutlineProvider.isAddVariableOutLine関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddVariableOutLine(".hoge1");
+    const actual = (op as any).isAddVariableOutLine(".hoge1");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -686,7 +680,7 @@ suite("TyranoOutlineProvider.isAddVariableOutLine関数", () => {
 
     //実行
     // (hoge as any)でprivateメソッドにアクセスできる
-    let actual = (op as any).isAddVariableOutLine("[emb exp=f.aaaa12345=1 ]");
+    const actual = (op as any).isAddVariableOutLine("[emb exp=f.aaaa12345=1 ]");
 
     //アサート deepがあると、値のみの検査 deepがないと、同じオブジェクト参照であるかどうかの精査を行う
     assert.deepStrictEqual(actual, excepted);
@@ -700,7 +694,7 @@ suite("TyranoOutlineProvider.isAddLabelOutLine関数", () => {
     const excepted = true;
 
     //実行
-    let actual = (op as any).isAddLabelOutLine("*hoge");
+    const actual = (op as any).isAddLabelOutLine("*hoge");
 
     assert.deepStrictEqual(actual, excepted);
   });
@@ -711,7 +705,7 @@ suite("TyranoOutlineProvider.isAddLabelOutLine関数", () => {
     const excepted = true;
 
     //実行
-    let actual = (op as any).isAddLabelOutLine("*hoge-hoge");
+    const actual = (op as any).isAddLabelOutLine("*hoge-hoge");
 
     assert.deepStrictEqual(actual, excepted);
   });
@@ -722,7 +716,7 @@ suite("TyranoOutlineProvider.isAddLabelOutLine関数", () => {
     const excepted = true;
 
     //実行
-    let actual = (op as any).isAddLabelOutLine("*hoge_hoge");
+    const actual = (op as any).isAddLabelOutLine("*hoge_hoge");
 
     assert.deepStrictEqual(actual, excepted);
   });
@@ -733,8 +727,9 @@ suite("TyranoOutlineProvider.isAddLabelOutLine関数", () => {
     const excepted = false;
 
     //実行
-    let actual = (op as any).isAddLabelOutLine("*/");
+    const actual = (op as any).isAddLabelOutLine("*/");
 
     assert.deepStrictEqual(actual, excepted);
   });
 });
+

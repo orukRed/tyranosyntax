@@ -20,6 +20,7 @@ export class TyranoHoverProvider {
       ),
     );
     // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
+    // eslint-disable-next-line no-useless-escape
     this.regExp = /(\[||\@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
   }
 
@@ -36,7 +37,7 @@ export class TyranoHoverProvider {
 
 ${textCopy.join("  \n")}
 `;
-    let markdownText = new vscode.MarkdownString(sentence);
+    const markdownText = new vscode.MarkdownString(sentence);
 
     return markdownText;
   }
@@ -104,7 +105,7 @@ ${textCopy.join("  \n")}
       const parameterValue = match !== null ? match[1] : "";
 
       //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
-      let tagParams: Object = await vscode.workspace
+      const tagParams: Object = await vscode.workspace
         .getConfiguration()
         .get("TyranoScript syntax.tag.parameter")!;
       const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
@@ -139,3 +140,7 @@ ${textCopy.join("  \n")}
     return new vscode.Hover(markdownText); //解決したPromiseオブジェクトを返却。この場合、現在の文字列を返却
   }
 }
+
+
+
+

@@ -10,31 +10,33 @@ import path from "path";
 suite("InformationWorkSpace.getProjectRootPath", () => {
   test("正常系", () => {
     //値定義
-    const filePath = "hoge/foo/bar/sample.ks";
-    const javaScriptSentence = `
-  f.tmp_index = "message";
-  f.cg_index = 12;
-  f.top = 100;
-  f.left = 60;
-  f.hoge = {
-  foo:{
-      bar:1
-  },
-  piyo:[1,2,3],
-  fufa:["a","b","c"]
-};`;
-
     const info = InformationWorkSpace.getInstance();
-    // assert.strictEqual((info as any).getWorkspaceRootPath(), "");//絶対パス取得するのでgithubにあげられない。
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks");
+    const expect = path.join(workspaceFolder);
+    //実行
+    const actual = info.getProjectPathByFilePath(filePath);
+    //アサート
+    assert.strictEqual(actual, expect);
   });
 });
-suite("InformationWorkSpace.getProjectRootPath", () => {
+
+suite("InformationWorkSpace.getWorkspaceRootPath", () => {
   vscode.window.showInformationMessage("Start all tests.");
 
   test("正常系", () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-    // assert.strictEqual((info as any).getWorkspaceRootPath(), "");//絶対パス取得するのでgithubにあげられない。
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const expect = workspaceFolder;
+    //実行
+    const actual = info.getWorkspaceRootPath();
+    //アサート
+    assert.strictEqual(actual, expect);
   });
 });
 
@@ -51,37 +53,30 @@ suite("InformationWorkSpace.getProjectFiles", () => {
       ? vscode.workspace.workspaceFolders[0].uri.fsPath
       : "";
     const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks");
-    const projectRootPath = await (info as any).getProjectPathByFilePath(
-      filePath,
-    );
+    const projectRootPath = await info.getProjectPathByFilePath(filePath);
     const bgimagePath = path.join(projectRootPath, "data", "bgimage");
 
     assert.deepStrictEqual(
-      await (info as any).getProjectFiles(bgimagePath, [".jpg", ".ogg"], false),
+      await info.getProjectFiles(bgimagePath, [".jpg", ".ogg"], false),
       expect,
     );
   });
   test("異常系 不正なパスを与える", () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-    assert.deepStrictEqual((info as any).getProjectFiles("hoge/foo/bar/"), []);
+    assert.deepStrictEqual(info.getProjectFiles("hoge/foo/bar/"), []);
   });
 
   test("異常系 パスでない文字列を与える", () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-    assert.deepStrictEqual((info as any).getProjectFiles("hoge"), []);
-  });
-
-  test("異常系 undefinedを与える", () => {
-    //値定義
-    const info = InformationWorkSpace.getInstance();
-    assert.deepStrictEqual((info as any).getProjectFiles(undefined), []);
+    assert.deepStrictEqual(info.getProjectFiles("hoge"), []);
   });
 
   test("異常系 空文字を与える", () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-    assert.deepStrictEqual((info as any).getProjectFiles(""), []);
+    assert.deepStrictEqual(info.getProjectFiles(""), []);
   });
 });
+

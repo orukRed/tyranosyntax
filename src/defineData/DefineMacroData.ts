@@ -20,8 +20,13 @@ export class DefineMacroData {
     this._description = description;
   }
 
+  /**
+   * マクロで定義したパラメータを入れる用のメソッド
+   * //FIXME: 現在マクロのパラメータの補完はsetting.jsonで定義しており、このメソッドは使われていない。
+   * そのため空のオブジェクトを返す実装となっている。将来的にどうするか要検討すること。
+   */
   private parseParametersToJsonObject(): object {
-    let obj = {};
+    const obj = {};
     this._parameter.forEach((parameter) => {
       Object.assign(this._parameter, {
         name: parameter.name,
@@ -63,3 +68,4 @@ export class DefineMacroData {
     return this._parameter;
   }
 }
+

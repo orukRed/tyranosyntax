@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
@@ -27,22 +28,3 @@ suite("TyranoDiagnostic.isExistAmpersandAtBeginning", () => {
   });
 });
 
-// suite('InformationWorkSpace.getProjectFiles', () => {
-// 	vscode.window.showInformationMessage('Start all tests.');
-// 	// 配列はdeepStrictEqualを使うこと。配列を再帰的に中身まで見てくれる。
-// 	// strictEqualだとアドレスを比較する。
-// 	test('正常系 プロジェクトパスだとファイル多すぎるのでbgimageフォルダを指定', () => {
-// 		//値定義
-// 		const info = InformationWorkSpace.getInstance();
-
-// 		const expect = ['room.jpg', 'rouka.jpg', 'title.jpg'];
-
-// 		assert.deepStrictEqual((info as any).getProjectFiles((info as any).getProjectRootPath() + info.DATA_DIRECTORY + "/bgimage"), expect);
-// 	});
-
-// 	test('異常系 不正なパスを与える', () => {
-// 		//値定義
-// 		const info = InformationWorkSpace.getInstance();
-
-// 		assert.deepStrictEqual((info as any).getProjectFiles("hoge/foo/bar/"), []);
-// 	});

@@ -11,7 +11,7 @@ export class TyranoJumpProvider {
   public async toDestination() {
     const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
     const parser: Parser = Parser.getInstance();
-    let jumpTagObject: object = {};
+    const jumpTagObject: object = {};
     const document: vscode.TextDocument | undefined =
       vscode.window.activeTextEditor?.document;
     const position: vscode.Position | undefined =
@@ -41,9 +41,9 @@ export class TyranoJumpProvider {
       "button",
       "glink",
     ]; //TODO:ジャンプ系タグとしてどこかで定義すべき？
-    for (let tagName in tags) {
-      for (let paramName in tags[tagName]) {
-        for (let type of tags[tagName][paramName].type) {
+    for (const tagName in tags) {
+      for (const paramName in tags[tagName]) {
+        for (const type of tags[tagName][paramName].type) {
           if (enableJumpTags.includes(type)) {
             jumpTagObject[tagName] = tags[tagName][paramName].path;
           }
@@ -131,7 +131,7 @@ export class TyranoJumpProvider {
       );
 
       //ラベル探索して見つかったらその位置でジャンプしてreturn
-      for (let data in jumpDefinitionArray_s) {
+      for (const data in jumpDefinitionArray_s) {
         if (jumpDefinitionArray_s[data]["name"] === "label") {
           if (jumpDefinitionArray_s[data]["pm"]["label_name"] === jumpTarget) {
             const activeTextEditor = await vscode.window.showTextDocument(
@@ -181,3 +181,4 @@ export class TyranoJumpProvider {
     }
   }
 }
+

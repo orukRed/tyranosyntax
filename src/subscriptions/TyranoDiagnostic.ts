@@ -1,9 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import * as path from "path";
 import { InformationWorkSpace as workspace } from "../InformationWorkSpace";
-import { TextDecoder } from "util";
-import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
+import { TyranoLogger } from "../TyranoLogger";
 import { Parser } from "../Parser";
 
 export class TyranoDiagnostic {
@@ -135,7 +133,7 @@ export class TyranoDiagnostic {
     diagnosticArray: any[],
     projectPath: string,
   ) {
-    for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
+    for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
       const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(
         scenarioDocument.fileName,
       );
@@ -145,8 +143,8 @@ export class TyranoDiagnostic {
       }
 
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
-      let diagnostics: vscode.Diagnostic[] = [];
-      for (let data of parsedData) {
+      const diagnostics: vscode.Diagnostic[] = [];
+      for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
@@ -188,7 +186,7 @@ export class TyranoDiagnostic {
     diagnosticArray: any[],
     projectPath: string,
   ) {
-    for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
+    for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
       const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(
         scenarioDocument.fileName,
       );
@@ -198,8 +196,8 @@ export class TyranoDiagnostic {
       }
 
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
-      let diagnostics: vscode.Diagnostic[] = [];
-      for (let data of parsedData) {
+      const diagnostics: vscode.Diagnostic[] = [];
+      for (const data of parsedData) {
         if (data["name"] === "comment") {
           continue;
         }
@@ -226,7 +224,7 @@ export class TyranoDiagnostic {
 
             if (this.isValueIsIncludeVariable(data["pm"]["storage"])) {
               if (!this.isExistAmpersandAtBeginning(data["pm"]["storage"])) {
-                let diag = new vscode.Diagnostic(
+                const diag = new vscode.Diagnostic(
                   range,
                   "パラメータに変数を使う場合は先頭に'&'が必要です。",
                   vscode.DiagnosticSeverity.Error,
@@ -330,7 +328,7 @@ export class TyranoDiagnostic {
                 storageScenarioDocument.getText(),
               ); //構文解析
               let isLabelExsit: boolean = false; //targetで指定したラベルが存在しているかどうか
-              for (let storageData in storageParsedData) {
+              for (const storageData in storageParsedData) {
                 if (
                   storageParsedData[storageData]["pm"]["label_name"] ===
                   data["pm"]["target"]
@@ -422,7 +420,7 @@ export class TyranoDiagnostic {
     diagnosticArray: any[],
     projectPath: string,
   ) {
-    for (const [filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
+    for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
       const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(
         scenarioDocument.fileName,
       );
@@ -434,7 +432,7 @@ export class TyranoDiagnostic {
       let isInIf: boolean = false; //if文の中にいるかどうか
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
       const diagnostics: vscode.Diagnostic[] = [];
-      for (let data of parsedData) {
+      for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
@@ -481,7 +479,7 @@ export class TyranoDiagnostic {
     const value = 4; //ダブルクォート*2とイコールと半角スペースの分
     const firstValue = 2; //アットマークor[]と、最初の半角スペース分
     totalLength += firstValue;
-    for (let key in obj) {
+    for (const key in obj) {
       if (typeof key === "string") {
         totalLength += key.length;
       }
@@ -493,3 +491,6 @@ export class TyranoDiagnostic {
     return totalLength;
   }
 }
+
+
+

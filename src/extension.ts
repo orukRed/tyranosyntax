@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
         title: "TyranoScript_syntaxの初期化中...",
         cancellable: true,
       },
-      async (progress, token) => {
+      async (_progress, _token) => {
         InformationExtension.path = context.extensionPath;
         TyranoLogger.print("TyranoScript syntax initialize start.");
         try {
@@ -57,7 +57,7 @@ export async function activate(context: vscode.ExtensionContext) {
           TyranoLogger.print("TyranoCompletionItemProvider activate");
 
           //ショートカットコマンドの登録
-          let ctbs = new TyranoCreateTagByShortcutKey();
+          const ctbs = new TyranoCreateTagByShortcutKey();
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.shiftEnter",
@@ -104,7 +104,7 @@ export async function activate(context: vscode.ExtensionContext) {
             await infoWs.initializeMaps();
             infoWs.extensionPath = context.extensionPath;
             TyranoLogger.print("TyranoDiagnostic activate");
-            let tyranoJumpProvider = new TyranoJumpProvider();
+            const tyranoJumpProvider = new TyranoJumpProvider();
             context.subscriptions.push(
               vscode.commands.registerCommand(
                 "tyrano.diagnostic",
@@ -153,6 +153,7 @@ export async function activate(context: vscode.ExtensionContext) {
                         `診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`,
                         ErrorLevel.ERROR,
                       );
+                      console.log(error);
                     } finally {
                       tyranoDiagnostic.isDiagnosing = false;
                     }
@@ -233,7 +234,7 @@ export async function activate(context: vscode.ExtensionContext) {
             });
 
             //すべてのプロジェクトに対して初回診断実行
-            for (let i of infoWs.getTyranoScriptProjectRootPaths()) {
+            for (const i of infoWs.getTyranoScriptProjectRootPaths()) {
               tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
             }
           }
@@ -277,7 +278,7 @@ export async function tmpDiagnostic() {
   //実行速度が改善され次第削除予定
 
   TyranoLogger.print("manual diagnostic start");
-  let tyranoDiagnostic: TyranoDiagnostic = new TyranoDiagnostic();
+  const tyranoDiagnostic: TyranoDiagnostic = new TyranoDiagnostic();
   await tyranoDiagnostic.createDiagnostics(
     vscode.window.activeTextEditor?.document.fileName,
   );
@@ -287,3 +288,4 @@ export async function tmpDiagnostic() {
 export function deactivate() {
   return undefined;
 }
+

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as path from "path";
@@ -198,7 +199,7 @@ export class InformationWorkSpace {
           ? [] // .git ディレクトリを無視
           : dirent.isFile()
             ? [`${dir}${this.pathDelimiter}${dirent.name}`]
-                .filter((file) => dirent.name === "index.html")
+                .filter((_file) => dirent.name === "index.html")
                 .map((str) =>
                   str.replace(this.pathDelimiter + "index.html", ""),
                 )
@@ -237,7 +238,6 @@ export class InformationWorkSpace {
     TyranoLogger.print(
       `InformationWorkSpace.updateMacroDataMapByJs(${absoluteScenarioFilePath})`,
     );
-    const reg = /[^a-zA-Z0-9_$]/g;
     // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
     const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
     const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
@@ -300,7 +300,7 @@ export class InformationWorkSpace {
               }
             }
           }
-        } catch (error) {
+        } catch (_error) {
           //例外発生するのは許容？
           // console.log(error);
         }
@@ -329,7 +329,6 @@ export class InformationWorkSpace {
   private getNestedObject(
     property: any,
     absoluteScenarioFilePath: string,
-    parentName: string = "",
   ): VariableData[] {
     const nestedObjects: VariableData[] = [];
     if (property.type === "ObjectExpression") {
@@ -354,7 +353,6 @@ export class InformationWorkSpace {
             variableData.nestVariableData = this.getNestedObject(
               prop.value,
               absoluteScenarioFilePath,
-              name,
             );
           }
           nestedObjects.push(variableData);
@@ -395,7 +393,7 @@ export class InformationWorkSpace {
     const typeConverter = this.typeConverter;
     let keyName = "";
     traverse(ast, {
-      enter: (path) => {},
+      enter: (_path) => {},
       MemberExpression(path) {
         const left = path.node;
         if (
@@ -734,7 +732,7 @@ export class InformationWorkSpace {
     const deleteTagList: string[] = [];
     const projectPath = await this.getProjectPathByFilePath(filePath);
 
-    this.defineMacroMap.get(projectPath)?.forEach((value, key) => {
+    this.defineMacroMap.get(projectPath)?.forEach((value, _key) => {
       if (value.filePath == filePath) {
         this.defineMacroMap.get(projectPath)?.delete(value.macroName);
         deleteTagList.push(value.macroName);
@@ -952,3 +950,4 @@ export class InformationWorkSpace {
     this._characterMap = value;
   }
 }
+
