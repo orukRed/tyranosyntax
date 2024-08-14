@@ -20,8 +20,7 @@ export class TyranoHoverProvider {
       ),
     );
     // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
-    // eslint-disable-next-line no-useless-escape
-    this.regExp = /(\[||\@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
+    this.regExp = /(\[||@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
   }
 
   private createMarkdownText(textValue: string): vscode.MarkdownString | null {
@@ -140,4 +139,5 @@ ${textCopy.join("  \n")}
     return new vscode.Hover(markdownText); //解決したPromiseオブジェクトを返却。この場合、現在の文字列を返却
   }
 }
+
 
