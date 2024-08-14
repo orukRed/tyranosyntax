@@ -29,7 +29,7 @@ export class TyranoJumpProvider {
     const parsedData = parser.parseText(document.lineAt(position.line).text);
 
     // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
-    const tags: Object = await vscode.workspace
+    const tags: object = await vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.tag.parameter")!;
     const enableJumpTags = [

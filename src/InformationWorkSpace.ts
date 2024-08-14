@@ -67,7 +67,7 @@ export class InformationWorkSpace {
   >(); //ファイル名、TransitionDataの配列
   private defaultTagList: string[] = [];
 
-  private readonly _resourceExtensions: Object = vscode.workspace
+  private readonly _resourceExtensions: object = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.resource.extension")!;
   private readonly _resourceExtensionsArrays = Object.keys(
@@ -75,7 +75,7 @@ export class InformationWorkSpace {
   )
     .map((key) => this.resourceExtensions[key])
     .flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
-  private readonly pluginTags: Object = JSON.parse(
+  private readonly pluginTags: object = JSON.parse(
     JSON.stringify(
       vscode.workspace
         .getConfiguration()
@@ -253,6 +253,7 @@ export class InformationWorkSpace {
     await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
 
     traverse(parsedData, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       enter: (path: any) => {
         try {
           //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
@@ -293,7 +294,10 @@ export class InformationWorkSpace {
               this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
               //suggetionsに登録されてない場合のみ追加
               if (
-                !this._suggestions.get(projectPath)!.hasOwnProperty(macroName)
+                !Object.prototype.hasOwnProperty.call(
+                  this._suggestions.get(projectPath)!,
+                  macroName,
+                )
               ) {
                 this._suggestions.get(projectPath)![macroName] =
                   macroData.parseToJsonObject();
@@ -327,11 +331,13 @@ export class InformationWorkSpace {
   }
 
   private getNestedObject(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     property: any,
     absoluteScenarioFilePath: string,
   ): VariableData[] {
     const nestedObjects: VariableData[] = [];
     if (property.type === "ObjectExpression") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       property.properties.forEach((prop: any) => {
         if (prop.key && prop.key.type === "Identifier") {
           const name = prop.key.name;
@@ -410,16 +416,20 @@ export class InformationWorkSpace {
               left.object.name,
               type,
             );
-            const location = new vscode.Location(
-              vscode.Uri.file(absoluteScenarioFilePath),
-              new vscode.Position(
-                path.node.loc?.start.line!,
-                path.node.loc?.start.column!,
-              ),
-            );
-            variableData.addLocation(location);
-            keyName = variableName;
-            that.variableMap.get(projectPath)?.set(variableName, variableData);
+            if (path.node.loc?.start) {
+              const location = new vscode.Location(
+                vscode.Uri.file(absoluteScenarioFilePath),
+                new vscode.Position(
+                  path.node.loc.start.line,
+                  path.node.loc.start.column,
+                ),
+              );
+              variableData.addLocation(location);
+              keyName = variableName;
+              that.variableMap
+                .get(projectPath)
+                ?.set(variableName, variableData);
+            }
           }
         }
       },
@@ -504,7 +514,12 @@ export class InformationWorkSpace {
           const macroName: string = await data["pm"]["name"];
           this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
           //suggetionsに登録されてない場合のみ追加
-          if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+          if (
+            !Object.prototype.hasOwnProperty.call(
+              this._suggestions.get(projectPath)!,
+              macroName,
+            )
+          ) {
             this._suggestions.get(projectPath)![await data["pm"]["name"]] =
               macroData.parseToJsonObject();
           }
@@ -913,7 +928,7 @@ export class InformationWorkSpace {
   public get defineMacroMap(): Map<string, Map<string, DefineMacroData>> {
     return this._defineMacroMap;
   }
-  public get resourceExtensions(): Object {
+  public get resourceExtensions(): object {
     return this._resourceExtensions;
   }
   public get resourceExtensionsArrays() {

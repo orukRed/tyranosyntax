@@ -130,7 +130,7 @@ export class TyranoDiagnostic {
   private async detectionNotDefineMacro(
     tyranoTag: string[],
     absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>,
-    diagnosticArray: any[],
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
     projectPath: string,
   ) {
     for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
@@ -183,7 +183,7 @@ export class TyranoDiagnostic {
    */
   private async detectionNotExistScenarioAndLabels(
     absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>,
-    diagnosticArray: any[],
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
     projectPath: string,
   ) {
     for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
@@ -417,7 +417,7 @@ export class TyranoDiagnostic {
    */
   private async detectJumpAndCallInIfStatement(
     absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>,
-    diagnosticArray: any[],
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
     projectPath: string,
   ) {
     for (const [_filePath, scenarioDocument] of absoluteScenarioFilePathMap) {
@@ -474,7 +474,7 @@ export class TyranoDiagnostic {
     }
   }
 
-  private sumStringLengthsInObject(obj: any): number {
+  private sumStringLengthsInObject(obj: object): number {
     let totalLength = 0;
     const value = 4; //ダブルクォート*2とイコールと半角スペースの分
     const firstValue = 2; //アットマークor[]と、最初の半角スペース分
@@ -491,6 +491,7 @@ export class TyranoDiagnostic {
     return totalLength;
   }
 }
+
 
 
 
