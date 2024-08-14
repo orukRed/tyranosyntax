@@ -365,7 +365,7 @@ export class TyranoDiagnostic {
 
   /**
    * 引数に入れた値の先頭に%記号があるかを判断します。
-   * @returns trueなら&がある、 falseなら&がない
+   * @returns trueなら%がある、 falseなら%がない
    */
   private isExistPercentAtBeginning(value: string): boolean {
     return value.indexOf("%") === 0 ? true : false;
@@ -389,27 +389,6 @@ export class TyranoDiagnostic {
       return false;
     }
     return true;
-  }
-
-  /**
-   * 読み込んだスクリプトの現在位置がラベルで定義済みかを判断します。
-   * @param scenarioFileLabel  ジャンプ系タグで指定されたtargetの値
-   * @param loadingScriptLabel 現在読み込んでいるシナリオの現在のラベル
-   * @returns
-   */
-  private async checkLoadingScriptIsDefinedLabel(
-    scenarioFileLabel: string,
-    loadingScriptLabel: string,
-  ): Promise<boolean> {
-    //ターゲットが未指定、もしくはターゲットとラベルが一致する
-    if (
-      scenarioFileLabel === undefined ||
-      scenarioFileLabel === "" ||
-      loadingScriptLabel === scenarioFileLabel
-    ) {
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -491,6 +470,7 @@ export class TyranoDiagnostic {
     return totalLength;
   }
 }
+
 
 
 

@@ -80,3 +80,62 @@ suite("InformationWorkSpace.getProjectFiles", () => {
   });
 });
 
+suite("InformationWorkSpace.initializeMaps", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.getTyranoScriptProjectRootPaths", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.updateScriptFileMap", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.updateScenarioFileMap", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.updateMacroDataMapByJs", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.updateVariableMapByJS", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.updateMacroLabelVariableDataMapByKs", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.addResourceFileMap", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceResourceFileMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceScenarioFileMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceScriptFileMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceMacroDataMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceLabelMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceVariableMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceCharacterMapByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.spliceSuggestionsByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.getProjectPathByFilePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.isSamePath", () => {
+  test("正常系", async () => {});
+});
+suite("InformationWorkSpace.convertToAbsolutePathFromRelativePath", () => {
+  test("正常系", async () => {});
+});
+
+

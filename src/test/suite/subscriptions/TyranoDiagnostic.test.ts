@@ -6,6 +6,15 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { TyranoDiagnostic } from "../../../subscriptions/TyranoDiagnostic";
 
+suite("TyranoDiagnostic.createDiagnostics", () => {
+  test("正常系 detectionNotDefineMacro", () => {});
+  test("正常系 detectionNotExistScenarioAndLabels", () => {});
+  test("正常系 detectJumpAndCallInIfStatement", () => {});
+  test("異常系 detectionNotDefineMacro", () => {});
+  test("異常系 detectionNotExistScenarioAndLabels", () => {});
+  test("異常系 detectJumpAndCallInIfStatement", () => {});
+});
+
 suite("TyranoDiagnostic.isExistAmpersandAtBeginning", () => {
   vscode.window.showInformationMessage("Start all tests.");
 
@@ -27,4 +36,5 @@ suite("TyranoDiagnostic.isExistAmpersandAtBeginning", () => {
     );
   });
 });
+
 
