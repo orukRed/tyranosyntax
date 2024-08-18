@@ -8,7 +8,7 @@ import path from "path";
 // import * as myExtension from '../../extension';
 
 suite("InformationWorkSpace.getProjectRootPath", () => {
-  test("正常系", () => {
+  test("正常系", async () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
     const workspaceFolder = vscode.workspace.workspaceFolders
@@ -17,9 +17,9 @@ suite("InformationWorkSpace.getProjectRootPath", () => {
     const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks");
     const expect = path.join(workspaceFolder);
     //実行
-    const actual = info.getProjectPathByFilePath(filePath);
+    const actual = await info.getProjectPathByFilePath(filePath);
     //アサート
-    assert.strictEqual(actual, expect);
+    assert.deepStrictEqual(actual, expect);
   });
 });
 

@@ -79,10 +79,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.deepStrictEqual(actual[0].name, excepted);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 ifタグ@", () => {
@@ -94,12 +97,14 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
       value: '@if exp="true"',
       writable: false,
     });
-
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 elsifタグ[]", () => {
@@ -113,10 +118,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 elsifタグ@", () => {
@@ -130,10 +138,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 elseタグ[]", () => {
@@ -147,10 +158,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 elseタグ@", () => {
@@ -164,10 +178,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endifタグ[]", () => {
@@ -181,10 +198,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endifタグ@", () => {
@@ -198,10 +218,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 ignoreタグ[]", () => {
@@ -215,10 +238,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 ignoreタグ@", () => {
@@ -232,10 +258,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endignoreタグ[]", () => {
@@ -249,10 +278,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endignoreタグ@", () => {
@@ -266,10 +298,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 jumpタグ[]", () => {
@@ -283,10 +318,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 jumpタグ@", () => {
@@ -300,10 +338,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 callタグ[]", () => {
@@ -317,10 +358,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 callタグ@", () => {
@@ -334,10 +378,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 buttonタグ[]", () => {
@@ -351,10 +398,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 buttonタグ@", () => {
@@ -368,10 +418,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 linkタグ[]", () => {
@@ -385,10 +438,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 linkタグ@", () => {
@@ -402,10 +458,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 iscriptタグ[]", () => {
@@ -419,10 +478,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 iscriptタグ@", () => {
@@ -436,10 +498,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endscriptタグ[]", () => {
@@ -453,10 +518,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 endscriptタグ@", () => {
@@ -470,10 +538,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 loadjsタグ[]", () => {
@@ -487,10 +558,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 loadjsタグ@", () => {
@@ -504,10 +578,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("正常系 *ラベル", () => {
@@ -521,10 +598,13 @@ suite("TyranoOutlineProvider.provideDocumentSymbols関数", () => {
     });
 
     //実行
-    const actual = op.provideDocumentSymbols(document, token) as vscode.DocumentSymbol[];
+    const actual = op.provideDocumentSymbols(
+      document,
+      token,
+    ) as vscode.DocumentSymbol[];
 
     //アサート
-    assert.strictEqual(actual[0].name, excepted.text);
+    assert.deepStrictEqual(actual[0].name, excepted.text);
   });
 
   test("異常系 */で終わるブロックコメントの行", () => {
