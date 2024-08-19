@@ -56,11 +56,7 @@ export class TyranoJumpProvider {
       document.lineAt(position.line).text,
     );
 
-    // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
-    const tags: Object = await vscode.workspace
-      .getConfiguration()
-      .get("TyranoScript syntax.tag.parameter")!;
-    const enableJumpTags = [
+    const TAGS_TO_JUMP = [ 
       "scenario",
       "script",
       "html",
