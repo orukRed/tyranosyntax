@@ -65,11 +65,16 @@ export class TyranoJumpProvider {
       "button",
       "glink",
     ]; //TODO:ジャンプ系タグとしてどこかで定義すべき？
-    for (let tagName in tags) {
-      for (let paramName in tags[tagName]) {
-        for (let type of tags[tagName][paramName].type) {
-          if (enableJumpTags.includes(type)) {
-            jumpTagObject[tagName] = tags[tagName][paramName].path;
+    // TyranoScript syntax.tag.parameterから、{"tagName":"Path"}の形のObjectを作成
+    const tagsByName: TagsByName = await vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.tag.parameter")!;
+    for (const [tagName, tag] of Object.entries(tagsByName)) {
+      for (const param of Object.values(tag)) {
+        const types = [...param.type]; // NOTE: Every `param.type` is an array, not a string
+        for (const type of types) {
+          if (TAGS_TO_JUMP.includes(type)) {
+            jumpTagObject[tagName] = param.path;
           }
         }
       }
