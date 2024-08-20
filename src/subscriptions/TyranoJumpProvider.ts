@@ -56,7 +56,7 @@ export class TyranoJumpProvider {
       document.lineAt(position.line).text,
     );
 
-    const TAGS_TO_JUMP = [ 
+    const TAGS_TO_JUMP = [
       "scenario",
       "script",
       "html",
