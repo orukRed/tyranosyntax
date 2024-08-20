@@ -20,7 +20,7 @@ export class TyranoHoverProvider {
       ),
     );
     // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
-    this.regExp = /(\[||\@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
+    this.regExp = /(\[||@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
   }
 
   private createMarkdownText(textValue: string): vscode.MarkdownString | null {
@@ -36,7 +36,7 @@ export class TyranoHoverProvider {
 
 ${textCopy.join("  \n")}
 `;
-    let markdownText = new vscode.MarkdownString(sentence);
+    const markdownText = new vscode.MarkdownString(sentence);
 
     return markdownText;
   }
@@ -69,7 +69,7 @@ ${textCopy.join("  \n")}
   public async provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
+    _token: vscode.CancellationToken,
   ): Promise<vscode.Hover> {
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
@@ -84,7 +84,7 @@ ${textCopy.join("  \n")}
       );
 
       //タグ名取得
-      const exp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;
+      const exp = /(\w+)(\s*((\w*)="?([a-zA-Z0-9_./*]*)"?)*)*/;
       const wordRange = document.getWordRangeAtPosition(position, exp);
       const matcher: RegExpMatchArray | null = document
         .getText(wordRange)
@@ -104,7 +104,7 @@ ${textCopy.join("  \n")}
       const parameterValue = match !== null ? match[1] : "";
 
       //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
-      let tagParams: Object = await vscode.workspace
+      const tagParams: object = await vscode.workspace
         .getConfiguration()
         .get("TyranoScript syntax.tag.parameter")!;
       const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
@@ -139,3 +139,5 @@ ${textCopy.join("  \n")}
     return new vscode.Hover(markdownText); //解決したPromiseオブジェクトを返却。この場合、現在の文字列を返却
   }
 }
+
+

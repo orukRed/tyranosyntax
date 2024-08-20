@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as path from "path";
@@ -66,7 +67,7 @@ export class InformationWorkSpace {
   >(); //ファイル名、TransitionDataの配列
   private defaultTagList: string[] = [];
 
-  private readonly _resourceExtensions: Object = vscode.workspace
+  private readonly _resourceExtensions: object = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.resource.extension")!;
   private readonly _resourceExtensionsArrays = Object.keys(
@@ -74,7 +75,7 @@ export class InformationWorkSpace {
   )
     .map((key) => this.resourceExtensions[key])
     .flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
-  private readonly pluginTags: Object = JSON.parse(
+  private readonly pluginTags: object = JSON.parse(
     JSON.stringify(
       vscode.workspace
         .getConfiguration()
@@ -198,7 +199,7 @@ export class InformationWorkSpace {
           ? [] // .git ディレクトリを無視
           : dirent.isFile()
             ? [`${dir}${this.pathDelimiter}${dirent.name}`]
-                .filter((file) => dirent.name === "index.html")
+                .filter((_file) => dirent.name === "index.html")
                 .map((str) =>
                   str.replace(this.pathDelimiter + "index.html", ""),
                 )
@@ -237,7 +238,6 @@ export class InformationWorkSpace {
     TyranoLogger.print(
       `InformationWorkSpace.updateMacroDataMapByJs(${absoluteScenarioFilePath})`,
     );
-    const reg = /[^a-zA-Z0-9_$]/g;
     // const reg = /[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\uFF65-\uFF9F_]/g; //日本語も許容したいときはこっち.でも動作テストしてないからとりあえずは半角英数のみで
     const reg2 = /TYRANO\.kag\.ftag\.master_tag\.[a-zA-Z0-9_$]/g;
     const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
@@ -253,6 +253,7 @@ export class InformationWorkSpace {
     await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
 
     traverse(parsedData, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       enter: (path: any) => {
         try {
           //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
@@ -293,14 +294,17 @@ export class InformationWorkSpace {
               this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
               //suggetionsに登録されてない場合のみ追加
               if (
-                !this._suggestions.get(projectPath)!.hasOwnProperty(macroName)
+                !Object.prototype.hasOwnProperty.call(
+                  this._suggestions.get(projectPath)!,
+                  macroName,
+                )
               ) {
                 this._suggestions.get(projectPath)![macroName] =
                   macroData.parseToJsonObject();
               }
             }
           }
-        } catch (error) {
+        } catch (_error) {
           //例外発生するのは許容？
           // console.log(error);
         }
@@ -327,12 +331,13 @@ export class InformationWorkSpace {
   }
 
   private getNestedObject(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     property: any,
     absoluteScenarioFilePath: string,
-    parentName: string = "",
   ): VariableData[] {
     const nestedObjects: VariableData[] = [];
     if (property.type === "ObjectExpression") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       property.properties.forEach((prop: any) => {
         if (prop.key && prop.key.type === "Identifier") {
           const name = prop.key.name;
@@ -354,7 +359,6 @@ export class InformationWorkSpace {
             variableData.nestVariableData = this.getNestedObject(
               prop.value,
               absoluteScenarioFilePath,
-              name,
             );
           }
           nestedObjects.push(variableData);
@@ -395,7 +399,7 @@ export class InformationWorkSpace {
     const typeConverter = this.typeConverter;
     let keyName = "";
     traverse(ast, {
-      enter: (path) => {},
+      enter: (_path) => {},
       MemberExpression(path) {
         const left = path.node;
         if (
@@ -412,16 +416,20 @@ export class InformationWorkSpace {
               left.object.name,
               type,
             );
-            const location = new vscode.Location(
-              vscode.Uri.file(absoluteScenarioFilePath),
-              new vscode.Position(
-                path.node.loc?.start.line!,
-                path.node.loc?.start.column!,
-              ),
-            );
-            variableData.addLocation(location);
-            keyName = variableName;
-            that.variableMap.get(projectPath)?.set(variableName, variableData);
+            if (path.node.loc?.start) {
+              const location = new vscode.Location(
+                vscode.Uri.file(absoluteScenarioFilePath),
+                new vscode.Position(
+                  path.node.loc.start.line,
+                  path.node.loc.start.column,
+                ),
+              );
+              variableData.addLocation(location);
+              keyName = variableName;
+              that.variableMap
+                .get(projectPath)
+                ?.set(variableName, variableData);
+            }
           }
         }
       },
@@ -506,7 +514,12 @@ export class InformationWorkSpace {
           const macroName: string = await data["pm"]["name"];
           this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
           //suggetionsに登録されてない場合のみ追加
-          if (!this._suggestions.get(projectPath)!.hasOwnProperty(macroName)) {
+          if (
+            !Object.prototype.hasOwnProperty.call(
+              this._suggestions.get(projectPath)!,
+              macroName,
+            )
+          ) {
             this._suggestions.get(projectPath)![await data["pm"]["name"]] =
               macroData.parseToJsonObject();
           }
@@ -734,7 +747,7 @@ export class InformationWorkSpace {
     const deleteTagList: string[] = [];
     const projectPath = await this.getProjectPathByFilePath(filePath);
 
-    this.defineMacroMap.get(projectPath)?.forEach((value, key) => {
+    this.defineMacroMap.get(projectPath)?.forEach((value, _key) => {
       if (value.filePath == filePath) {
         this.defineMacroMap.get(projectPath)?.delete(value.macroName);
         deleteTagList.push(value.macroName);
@@ -915,7 +928,7 @@ export class InformationWorkSpace {
   public get defineMacroMap(): Map<string, Map<string, DefineMacroData>> {
     return this._defineMacroMap;
   }
-  public get resourceExtensions(): Object {
+  public get resourceExtensions(): object {
     return this._resourceExtensions;
   }
   public get resourceExtensionsArrays() {
@@ -952,3 +965,4 @@ export class InformationWorkSpace {
     this._characterMap = value;
   }
 }
+

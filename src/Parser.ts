@@ -1,3 +1,5 @@
+/* eslint-disable no-var */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ティラノスクリプト本体に存在するパーサー処理を用いたパーサークラスです。
  * parseScenarioした後に追加の処理をすることが多かったため作成したクラスです。
@@ -51,7 +53,6 @@ export class Parser {
     var array_s = [];
 
     var column = -1; //ラベルやマクロの定義開始位置
-    var lastColumn = 0; //前のタグやラベルの定義開始位置
 
     var map_label = {}; //ラベル一覧
 
@@ -85,7 +86,7 @@ export class Parser {
           chara_name = tmp_line;
         }
         //キャラクターボックスへの名前表示
-        let text_obj = {
+        const text_obj = {
           line: i,
           name: "chara_ptext",
           pm: { name: chara_name, face: chara_face },
@@ -197,7 +198,7 @@ export class Parser {
             ); //先頭にスペースがある場合に空白を追加する処理
             //テキストファイルを命令に格納
             if (text != "") {
-              let text_obj = {
+              const text_obj = {
                 line: i,
                 column: column - text.length,
                 name: "text",
@@ -428,3 +429,4 @@ export class Parser {
     return result;
   }
 }
+

@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { InformationWorkSpace } from "../InformationWorkSpace";
 /**
  * jump系のタグで指定したファイル名やラベル名を保持するクラス
  */
@@ -37,7 +36,6 @@ export class TransitionData {
     this.currentLabel = currentLabel;
     this.condition = condition;
     this.fileUri = fileUri;
-    const infoWs = InformationWorkSpace.getInstance();
     if (fileUri) {
       //data / scenario以降のパスを取得
       this.currentFile = this.extractAfter(fileUri.uri.path, "data/scenario/");
@@ -59,3 +57,4 @@ export class TransitionData {
     }
   }
 }
+

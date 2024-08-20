@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-
 /**
  * マクロのパラメータ（[bg storage="hoge.ks"]のstorageの部分）
  * 将来的にjsで定義したタグのパラメータをこれに格納する
@@ -33,3 +31,4 @@ export class MacroParameterData {
     this._description = value;
   }
 }
+
