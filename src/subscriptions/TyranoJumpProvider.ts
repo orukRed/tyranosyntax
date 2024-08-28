@@ -91,10 +91,12 @@ export class TyranoJumpProvider {
     const jumpStorage =
       parsedData[tagIndex]["pm"]?.["storage"] ??
       parsedData[tagIndex]["pm"]?.["file"] ??
-      document.fileName.substring(
-        document.fileName.lastIndexOf(infoWs.pathDelimiter) + 1,
-      );
+      "";
 
+    const filePath = `${projectPath}${infoWs.pathDelimiter}${jumpTagObject[tagName]}${infoWs.pathDelimiter}`;
+    const storagePath = jumpStorage
+      ? `${filePath}${jumpStorage}`
+      : document.uri.fsPath;
     const jumpTarget = parsedData[tagIndex]["pm"]?.["target"]?.replace("*", ""); //ラベルから `*` を除去しておく
 
     //カーソルの位置のタグがジャンプ系タグなら
@@ -114,11 +116,8 @@ export class TyranoJumpProvider {
         return;
       }
 
-      const jumpDefinitionFile = await vscode.workspace.openTextDocument(
-        vscode.Uri.file(
-          `${projectPath}${infoWs.pathDelimiter}${jumpTagObject[tagName]}${infoWs.pathDelimiter}${jumpStorage}`,
-        ),
-      );
+      const jumpDefinitionFile =
+        await vscode.workspace.openTextDocument(storagePath);
       //ラベル未指定ならファイル頭にジャンプ
       if (jumpTarget == undefined) {
         const activeTextEditor = await vscode.window.showTextDocument(
