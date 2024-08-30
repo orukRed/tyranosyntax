@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.11]- 2024-xx-xx
+
+- v6のタグに対応しました。
+- 設定からタグホバー、補完を英語に切り替えられるようにしました。[issue#180](https://github.com/orukRed/tyranosyntax/issues/180)
+
+
 ## [0.24.10]- 2024-08-28
 
 - scenarioフォルダの中に再帰的なフォルダを置き、storageを指定しない場合TyranoJumpProviderが起動しなくなる問題を修正しました。[issue#209](https://github.com/orukRed/tyranosyntax/issues/209)

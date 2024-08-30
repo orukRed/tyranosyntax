@@ -266,11 +266,20 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - Ctrl + Alt + F : フローチャート表示
 - Ctrl + / : コメントアウト
 
-
 ## 設定ファイルについて
 
 TyranoScript_syntaxの一部機能は設定ファイルから変更を行うことができます。
 特にマクロタグやjsから定義したタグの補完やファイルジャンプを行う場合、設定ファイルを見直してください。
+
+### 言語設定
+
+TyranoScript syntax.languageで言語設定を変更することができます。
+
+日本語と英語にのみ対応しています。
+
+You can change the language settings with TyranoScript syntax.language.
+
+Only Japanese and English are supported.
 
 ## Release Notes
 

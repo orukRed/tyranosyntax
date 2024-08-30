@@ -126,6 +126,16 @@
             "default": true,
             "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
           },
+          "TyranoScript syntax.language": {
+            "type": "string",
+            "enum": [
+              "default",
+              "ja",
+              "en"
+            ],
+            "default": "default",
+            "description": "タグホバー、補完で表示される言語を選択します。"
+          },
           "TyranoScript syntax.resource.extension": {
             "type": "object",
             "default": {
