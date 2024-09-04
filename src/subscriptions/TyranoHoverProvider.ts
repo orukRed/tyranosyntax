@@ -90,7 +90,8 @@ ${textCopy.join("  \n")}
       );
 
       //タグ名取得
-      const exp = /(\w+)(\s*((\w*)="?([a-zA-Z0-9_./*]*)"?)*)*/;
+      const exp =
+        /(\w+)(\s*((\w*)="?([\w\u3040-\u30FF\u4E00-\u9FFF./*]*)"?)*)*/;
       const wordRange = document.getWordRangeAtPosition(position, exp);
       const matcher: RegExpMatchArray | null = document
         .getText(wordRange)

@@ -4,10 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.24.11]- 2024-xx-xx
+## [0.24.11]- 2024-09-04
 
 - v6のタグに対応しました。
 - 設定からタグホバー、補完を英語に切り替えられるようにしました。[issue#180](https://github.com/orukRed/tyranosyntax/issues/180)
+- chara_layerタグでpartに日本語が使われていた場合に、storageで指定した画像をツールチップで表示できないバグを修正しました。
+
 
 
 ## [0.24.10]- 2024-08-28
