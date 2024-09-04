@@ -11,16 +11,22 @@ export class TyranoHoverProvider {
 
   constructor() {
     this.jsonTyranoSnippet = JSON.parse(
-      fs.readFileSync(
-        path.join(
-          InformationExtension.path +
-            `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`,
-        ),
-        "utf8",
-      ),
+      fs.readFileSync(this.getTooltipPath(), "utf8"),
     );
     // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
     this.regExp = /(\[||@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
+  }
+
+  private getTooltipPath(): string {
+    return InformationExtension.language === "ja"
+      ? path.join(
+          InformationExtension.path +
+            `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`,
+        )
+      : path.join(
+          InformationExtension.path +
+            `${path.sep}Tooltip${path.sep}en.tyrano.Tooltip.json`,
+        );
   }
 
   private createMarkdownText(textValue: string): vscode.MarkdownString | null {
@@ -84,7 +90,8 @@ ${textCopy.join("  \n")}
       );
 
       //タグ名取得
-      const exp = /(\w+)(\s*((\w*)="?([a-zA-Z0-9_./*]*)"?)*)*/;
+      const exp =
+        /(\w+)(\s*((\w*)="?([\w\u3040-\u30FF\u4E00-\u9FFF./*]*)"?)*)*/;
       const wordRange = document.getWordRangeAtPosition(position, exp);
       const matcher: RegExpMatchArray | null = document
         .getText(wordRange)

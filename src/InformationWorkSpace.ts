@@ -89,6 +89,18 @@ export class InformationWorkSpace {
   public static getInstance(): InformationWorkSpace {
     return this.instance;
   }
+  private getSnippetPath(): string {
+    return InformationExtension.language === "ja"
+      ? path.join(
+          InformationExtension.path +
+            `${path.sep}snippet${path.sep}tyrano.snippet.json`,
+        )
+      : path.join(
+          InformationExtension.path +
+            `${path.sep}snippet${path.sep}en.tyrano.snippet.json`,
+        );
+  }
+
   /**
    * マップファイルの初期化。
    * 本当はコンストラクタに書きたいのですがコンストラクタはasync使えないのでここに。await initializeMaps();の形でコンストラクタの直後に呼んで下さい。
@@ -106,10 +118,7 @@ export class InformationWorkSpace {
       this._resourceFileMap.set(projectPath, []);
       this.variableMap.set(projectPath, new Map<string, VariableData>());
       try {
-        const passJoined = path.join(
-          InformationExtension.path +
-            `${path.sep}snippet${path.sep}tyrano.snippet.json`,
-        );
+        const passJoined = this.getSnippetPath();
         const jsonData = fs.readFileSync(passJoined, "utf8");
         const parsedJson = JSON.parse(jsonData);
         const combinedObject = { ...parsedJson, ...this.pluginTags };
