@@ -114,10 +114,10 @@
             "[3d_camera pos = \"10,20,30\"]"
         ]
     },
-    "3d_canvas_show": {
-        "prefix": "3d_canvas_show",
+    "3d_canvas_hide": {
+        "prefix": "3d_canvas_hide",
         "body": [
-            "[3d_canvas_show time=\"\" cond=\"\"]"
+            "[3d_canvas_hide time=\"\" cond=\"\"]"
         ],
         "description": [
             "Hides, but does not delete the 3D canvas.",
@@ -125,6 +125,23 @@
             "[parameter]",
             "  time:",
             "    The time in milliseconds over which the 3D canvas will disappear. The default is 1000.",
+            "  cond:",
+            "    You can input a JavaScript formula, and the tag will only be executed if the result is true.",
+            "[example]",
+            ""
+        ]
+    },
+    "3d_canvas_show": {
+        "prefix": "3d_canvas_show",
+        "body": [
+            "[3d_canvas_show time=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "Displays the 3D canvas.",
+            "This is useful, for example, if the game frequently switches between a 3D scene and visual novel gameplay.",
+            "[parameter]",
+            "  time:",
+            "    The time in milliseconds over which the 3D canvas will appear. The default is 1000.",
             "  cond:",
             "    You can input a JavaScript formula, and the tag will only be executed if the result is true.",
             "[example]",
@@ -4430,18 +4447,18 @@
             "[web url=\"\" cond=\"\"]"
         ],
         "description": [
-            "Open a specified website in the browser.",
-            "Note: an ‘await click’ must be placed immediately this tag.",
-            "Many environments restrict browsers from opening without user initiation.",
+            "Opens a website in the default browser.",
+            "Note: An await click must be used immediately before this tag.",
+            "In many environments, opening a browser without a user action is prohibited.",
             "[parameter]",
             "  url[required]:",
-            "    Sets the URL of the webpage to be opened.",
+            "    Enter the URL of the webpage to be opened.",
             "  cond:",
             "    You can input a JavaScript formula, and the tag will only be executed if the result is true.",
             "[example]",
-            "; First, await click Open the official website",
-            "[p]",
-            "[web url = \"https://www.nyu-media.com/\"]"
+            "; Should be preceded by an await click",
+            "Open the TyranoBuilder Website[p]",
+            "[web url=\"http://tyranobuilder.com\"]"
         ]
     },
     "wse": {

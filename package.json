@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "0.24.11",
+  "version": "0.24.12",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -189,6 +189,11 @@
             "type": "object",
             "default": {},
             "description": "追加でタグ補完したいものを設定します"
+          },
+          "TyranoScript syntax.parser.read_plugin": {
+            "type": "boolean",
+            "default": false,
+            "description": "others/pluginフォルダの中を構文解析するかどうかを選択します。（falseを推奨）"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",
@@ -745,7 +750,7 @@
                   "type": [
                     "css"
                   ],
-                  "path": "data"
+                  "path": "./"
                 }
               },
               "playbgm": {

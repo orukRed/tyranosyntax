@@ -82,6 +82,9 @@ export class InformationWorkSpace {
         .get("TyranoScript syntax.plugin.parameter")!,
     ),
   );
+  private readonly isParsePluginFolder: boolean = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.parser.read_plugin")!;
 
   private _extensionPath: string = "";
 
@@ -252,10 +255,20 @@ export class InformationWorkSpace {
     const reg3 = /tyrano\.plugin\.kag\.tag\.[a-zA-Z0-9_$]/g;
     const parsedData = babel.parse(
       this.scriptFileMap.get(absoluteScenarioFilePath)!,
+      {
+        allowAwaitOutsideFunction: true,
+        allowUndeclaredExports: true,
+        errorRecovery: true,
+        allowSuperOutsideMethod: true,
+      },
     );
     const projectPath: string = await this.getProjectPathByFilePath(
       absoluteScenarioFilePath,
     );
+
+    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
+      return;
+    }
     const deleteTagList = await this.spliceMacroDataMapByFilePath(
       absoluteScenarioFilePath,
     );
@@ -391,6 +404,10 @@ export class InformationWorkSpace {
     const projectPath: string = await this.getProjectPathByFilePath(
       absoluteScenarioFilePath,
     );
+    //others/pluginの中に入っているファイルならreturn
+    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
+      return;
+    }
     if (sentence === undefined) {
       sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
     }
@@ -480,7 +497,10 @@ export class InformationWorkSpace {
     const projectPath = await this.getProjectPathByFilePath(
       absoluteScenarioFilePath,
     );
-
+    //others/pluginの中に入っているファイルならreturn
+    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
+      return;
+    }
     if (scenarioData != undefined) {
       const parsedData = this.parser.parseText(scenarioData.getText()); //構文解析
       this.labelMap.set(absoluteScenarioFilePath, new Array<LabelData>());
@@ -923,6 +943,20 @@ export class InformationWorkSpace {
    */
   public convertToAbsolutePathFromRelativePath(relativePath: string): string {
     return path.resolve(relativePath);
+  }
+
+  private isSkipParse(filePath: string, directory: string): boolean {
+    if (this.isParsePluginFolder) {
+      return false;
+    }
+    const pluginFolder = path.resolve(directory + "/data/others/plugin");
+
+    const normalizedFilePath = path.resolve(filePath);
+    const normalizedFolderPath = path.resolve(pluginFolder);
+
+    // ファイルパスがフォルダパスで始まっているかを判定
+    const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
+    return ret;
   }
 
   public get scriptFileMap(): Map<string, string> {

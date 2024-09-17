@@ -291,7 +291,7 @@ Only Japanese and English are supported.
 バグ報告や機能追加の要望お待ちしております！
 以下のいずれかの方法で報告をお願いします。
 
-- [Googleフォームから報告](https://orukred.github.io/Contact.html)
+- [Googleフォームから報告](https://forms.gle/PnWAzHiN8MYKhUrG6)
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
