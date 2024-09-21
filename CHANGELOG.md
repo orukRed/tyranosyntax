@@ -4,12 +4,17 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.24.13]- 2024-09-21
+
+TyranoScript_syntaxのアイコンを変更しました。
+
 ## [0.24.12]- 2024-09-18
 
 - others/pluginフォルダに入っている`.ks`,`js`ファイルを読み込まないようにしました。[issue#213](https://github.com/orukRed/tyranosyntax/issues/213)
   - 本修正は、ライブラリを追加したことにより拡張機能が起動しなくなる問題を解決するためのものです。
   - 基本的には読み込まない（初期設定のまま）を推奨しますが、読み込ませたい場合は設定から変更可能です。
 - `loadcss`タグの`file`パラメータの補完先を正しく修正しました。
+
 ## [0.24.11]- 2024-09-04
 
 - v6のタグに対応しました。
