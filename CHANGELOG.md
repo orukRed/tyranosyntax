@@ -4,6 +4,20 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.25.0]- 2024-10-05
+
+- 診断機能のONOFFを切り替えられるようにしました。
+  - 設定から`TyranoScript syntax.execute.diagnostic`の値を修正してください。
+以下のように定義されていますので、不要なものをfalseに変更しvscodeを再起動することで診断機能をOFFにできます。
+
+```json
+  "TyranoScript syntax.execute.diagnostic": {
+    "undefinedMacro": true,
+    "missingScenariosAndLabels": true,
+    "jumpAndCallInIfStatement": true
+  }
+```
+
 ## [0.24.13]- 2024-09-21
 
 TyranoScript_syntaxのアイコンを変更しました。
