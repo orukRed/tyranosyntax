@@ -4,6 +4,7 @@ import { InformationWorkSpace as workspace } from "../InformationWorkSpace";
 import { TyranoLogger } from "../TyranoLogger";
 import { Parser } from "../Parser";
 
+
 export class TyranoDiagnostic {
   public static diagnosticCollection: vscode.DiagnosticCollection =
     vscode.languages.createDiagnosticCollection("tyranoDiagnostic");
@@ -15,6 +16,14 @@ export class TyranoDiagnostic {
   //ティラノスクリプトのプロジェクトのルートパス
   private readonly tyranoProjectPaths: string[] =
     this.infoWs.getTyranoScriptProjectRootPaths();
+
+  //診断を実行するかどうかの設定
+  private readonly executeDiagnostic: object = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.execute.diagnostic")!;
+  private readonly undefinedMacro = "undefinedMacro";
+  private readonly missingScenariosAndLabels = "missingScenariosAndLabels";
+  private readonly jumpAndCallInIfStatement = "jumpAndCallInIfStatement";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -38,7 +47,7 @@ export class TyranoDiagnostic {
 
   constructor() {
     this.tyranoProjectPaths.forEach((element) => {
-      TyranoLogger.print(element + "をプロジェクトとして読み込みました。");
+      TyranoLogger.print(element + "の診断準備ができました。");
     });
   }
 
@@ -86,31 +95,40 @@ export class TyranoDiagnostic {
 
     //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
     //未定義のマクロを使用しているか検出
-    await this.detectionNotDefineMacro(
-      tyranoTag,
-      this.infoWs.scenarioFileMap,
-      diagnosticArray,
-      diagnosticProjectPath,
-    );
-    TyranoLogger.print(`[${diagnosticProjectPath}] macro detection finished.`);
+    if (this.isExecuteDiagnostic(this.undefinedMacro)) {
+      await this.detectionUndefineMacro(
+        tyranoTag,
+        this.infoWs.scenarioFileMap,
+        diagnosticArray,
+        diagnosticProjectPath,
+      );
+      TyranoLogger.print(
+        `[${diagnosticProjectPath}] macro detection finished.`,
+      );
+    }
     //存在しないシナリオファイル、未定義のラベルを検出
-    await this.detectionNotExistScenarioAndLabels(
-      this.infoWs.scenarioFileMap,
-      diagnosticArray,
-      diagnosticProjectPath,
-    );
-    TyranoLogger.print(
-      `[${diagnosticProjectPath}] scenario and label detection finished.`,
-    );
+    if (this.isExecuteDiagnostic(this.missingScenariosAndLabels)) {
+      await this.detectionMissingScenariosAndLabels(
+        this.infoWs.scenarioFileMap,
+        diagnosticArray,
+        diagnosticProjectPath,
+      );
+      TyranoLogger.print(
+        `[${diagnosticProjectPath}] scenario and label detection finished.`,
+      );
+    }
+
     //if文の中でjump,callタグを使用しているか検出
-    await this.detectJumpAndCallInIfStatement(
-      this.infoWs.scenarioFileMap,
-      diagnosticArray,
-      diagnosticProjectPath,
-    );
-    TyranoLogger.print(
-      `[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`,
-    );
+    if (this.isExecuteDiagnostic(this.jumpAndCallInIfStatement)) {
+      await this.detectJumpAndCallInIfStatement(
+        this.infoWs.scenarioFileMap,
+        diagnosticArray,
+        diagnosticProjectPath,
+      );
+      TyranoLogger.print(
+        `[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`,
+      );
+    }
 
     //これから診断機能はここのfor文に追加していく
     // for(){
@@ -127,7 +145,7 @@ export class TyranoDiagnostic {
    * 未定義のマクロを使用しているか検出します。
    * @param tyranoTag 現在プロジェクトに定義しているティラノスクリプトのタグ
    */
-  private async detectionNotDefineMacro(
+  private async detectionUndefineMacro(
     tyranoTag: string[],
     absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>,
     diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
@@ -181,7 +199,7 @@ export class TyranoDiagnostic {
    * @param diagnosticArray 参照渡しで更新する診断結果
    * @param projectPath 診断するプロジェクトの絶対パス
    */
-  private async detectionNotExistScenarioAndLabels(
+  private async detectionMissingScenariosAndLabels(
     absoluteScenarioFilePathMap: Map<string, vscode.TextDocument>,
     diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
     projectPath: string,
@@ -468,6 +486,11 @@ export class TyranoDiagnostic {
       totalLength += value;
     }
     return totalLength;
+  }
+
+  private isExecuteDiagnostic(key: string): boolean {
+    const value = this.executeDiagnostic[key];
+    return typeof value === "boolean" ? value : false;
   }
 }
 

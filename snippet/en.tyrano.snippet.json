@@ -200,23 +200,23 @@
         "sample": ""
     },
     "3d_canvas_show": {
-        "name": "3d_canvas_show",
-        "summary": "Show the 3D canvas",
-        "category": "3D-related",
-        "description": "Displays the 3D canvas.\nThis is useful, for example, if the game frequently switches between a 3D scene and visual novel gameplay.",
-        "parameters": [
-            {
-                "name": "time",
-                "required": false,
-                "description": "The time in milliseconds over which the 3D canvas will appear. The default is 1000."
-            },
-            {
-                "name": "cond",
-                "required": false,
-                "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
-            }
-        ],
-        "sample": ""
+      "name": "3d_canvas_show",
+      "summary": "Show the 3D canvas",
+      "category": "3D-related",
+      "description": "Hides, but does not delete the 3D canvas.\nThis is useful, for example, if the game frequently switches between a 3D scene and visual novel gameplay.",
+      "parameters": [
+        {
+          "name": "time",
+          "required": false,
+          "description": "The time in milliseconds over which the 3D canvas will disappear. The default is 1000."
+        },
+        {
+          "name": "cond",
+          "required": false,
+          "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
+        }
+      ],
+      "sample": ""
     },
     "3d_debug": {
         "name": "3d_debug",
@@ -1493,43 +1493,43 @@
         "sample": ";Register Expression\n[chara_face name=\"yuko\" face=\"angry\" storage=\"newface.png\"]\n;Apply Expression\n[chara_mod name=\"yuko\" face=\"angry\"]\n;When you want to change the speaker's name as well.\n[chara_ptext name=\"yuko\" face=\"angry\"]\n;These can be shortened, as per below.\n#yuko:angry\n;The image registered when chara_new was used can be accessed using the word default.\n#yuko:default"
     },
     "chara_hide": {
-        "name": "chara_hide",
-        "summary": "Hide Character",
-        "category": "Characters",
-        "description": "hide a character that has been displayed with [chara_show]",
-        "parameters": [
-            {
-                "name": "name",
-                "required": true,
-                "description": "the name defined by [chara_new]’s name attribute"
-            },
-            {
-                "name": "wait",
-                "required": false,
-                "description": "if this is set to true the character will wait to disappear. Default is true"
-            },
-            {
-                "name": "time",
-                "required": false,
-                "description": "set in milliseconds. this is the length of time for a character to disappear. The default is 1000 milliseconds"
-            },
-            {
-                "name": "layer",
-                "required": false,
-                "description": "remove the character from the layer set by [chara_show] if it is set. the default is 0"
-            },
-            {
-                "name": "overwrite",
-                "required": false,
-                "description": "if set to true and the ptext of the name already exists on the screen you can change just the text. the default is false"
-            },
-            {
-                "name": "cond",
-                "required": false,
-                "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
-            }
-        ],
-        "sample": "[chara_hide name=\"yuko\" ]"
+      "name": "chara_hide",
+      "summary": "Hide Character",
+      "category": "undefined",
+      "description": "hide a character that has been displayed with [chara_show]",
+      "parameters": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "the name defined by [chara_new]’s name attribute"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "description": "if this is set to true the character will wait to disappear. Default is true"
+        },
+        {
+          "name": "time",
+          "required": false,
+          "description": "set in milliseconds. this is the length of time for a character to disappear. The default is 1000 milliseconds"
+        },
+        {
+          "name": "layer",
+          "required": false,
+          "description": "remove the character from the layer set by [chara_show] if it is set. the default is 0"
+        },
+        {
+          "name": "overwrite",
+          "required": false,
+          "description": "if set to true and the ptext of the name already exists on the screen you can change just the text. the default is false"
+        },
+        {
+          "name": "cond",
+          "required": false,
+          "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
+        }
+      ],
+      "sample": "[chara_hide name=\"yuko\" ]"
     },
     "chara_hide_all": {
         "name": "chara_hide_all",
@@ -5359,23 +5359,23 @@
         "sample": ""
     },
     "web": {
-        "name": "web",
-        "summary": "Open a Webpage",
-        "category": "Other",
-        "description": "Opens a website in the default browser.\nNote: An await click must be used immediately before this tag.\nIn many environments, opening a browser without a user action is prohibited.",
-        "parameters": [
-            {
-                "name": "url",
-                "required": true,
-                "description": "Enter the URL of the webpage to be opened."
-            },
-            {
-                "name": "cond",
-                "required": false,
-                "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
-            }
-        ],
-        "sample": "; Should be preceded by an await click\nOpen the TyranoBuilder Website[p]\n[web url=\"http://tyranobuilder.com\"]"
+      "name": "web",
+      "summary": "Open a website",
+      "category": "Other",
+      "description": "Open a specified website in the browser.\nNote: an ‘await click’ must be placed immediately this tag.\nMany environments restrict browsers from opening without user initiation.",
+      "parameters": [
+        {
+          "name": "url",
+          "required": true,
+          "description": "Sets the URL of the webpage to be opened."
+        },
+        {
+          "name": "cond",
+          "required": false,
+          "description": "You can input a JavaScript formula, and the tag will only be executed if the result is true."
+        }
+      ],
+      "sample": "; First, await click Open the official website\n[p]\n[web url = \"https://www.nyu-media.com/\"]"
     },
     "wse": {
         "name": "wse",
