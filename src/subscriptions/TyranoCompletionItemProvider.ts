@@ -711,10 +711,13 @@ export class TyranoCompletionItemProvider
     ) as SuggestionsMiniumByTag; // FIXME: Don't use type assertion
 
     for (const suggestion of Object.values(suggestionsByTag)) {
-      if (!suggestion.name || !suggestion.description) continue;
+      if (!suggestion.name) continue;
       const { name, description } = suggestion;
       try {
-        // FIXME: Make the `try`-block smaller
+        // FIXME: Make the `try`-block smaller[]
+        if (name.indexOf("endreplay") !== -1) {
+          console.log("aaaa");
+        }
         const textLabel = name.toString();
         const comp = new vscode.CompletionItem(textLabel);
         const inputType = vscode.workspace

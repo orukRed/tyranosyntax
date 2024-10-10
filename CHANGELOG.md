@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.25.1]- 2024-10-11
+
+`[macro]`タグでタグを定義したとき、頭にコメントアウトがないと正しく補完されない不具合を修正しました。
+
 ## [0.25.0]- 2024-10-05
 
 - 診断機能のONOFFを切り替えられるようにしました。
