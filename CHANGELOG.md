@@ -4,13 +4,21 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.25.2]- 2024-10-16
+
+- TyranoScript syntax.autoDiagnostic.isEnabledが正しく動作していなかった不具合を修正しました。[issue#219](https://github.com/orukRed/tyranosyntax/issues/219)
+- CHANGELOGに、0.25.1の更新で「others/pluginフォルダの中身をパーサーかけないようにしました。」という記載が漏れていたので追記しました。
+
 ## [0.25.1]- 2024-10-11
 
-`[macro]`タグでタグを定義したとき、頭にコメントアウトがないと正しく補完されない不具合を修正しました。
+- `[macro]`タグでタグを定義したとき、頭にコメントアウトがないと正しく補完されない不具合を修正しました。[issue#212](https://github.com/orukRed/tyranosyntax/issues/212)
+- others/pluginフォルダの中身をパーサーかけないようにしました。[issue#213](https://github.com/orukRed/tyranosyntax/issues/213)
+  - 必要な場合は、設定から`TyranoScript syntax.parser.read_plugin`の値を変更してください。
+
 
 ## [0.25.0]- 2024-10-05
 
-- 診断機能のONOFFを切り替えられるようにしました。
+- 診断機能のONOFFを切り替えられるようにしました。[issue#216](https://github.com/orukRed/tyranosyntax/issues/216)
   - 設定から`TyranoScript syntax.execute.diagnostic`の値を修正してください。
 以下のように定義されていますので、不要なものをfalseに変更しvscodeを再起動することで診断機能をOFFにできます。
 

@@ -61,7 +61,14 @@ export class TyranoDiagnostic {
     if (changedTextDocumentPath === undefined) {
       return;
     }
-
+    //設定で診断しないようにしているならリターン
+    if (
+      vscode.workspace
+        .getConfiguration()
+        .get("TyranoScript syntax.autoDiagnostic.isEnabled")
+    ) {
+      return;
+    }
     //ログへの変更なら診断しない
     if (
       changedTextDocumentPath ===
