@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.25.3]- 2024-10-16
+
+0.25.2で修正した内容に誤りがあったため修正しました。[issue#221](https://github.com/orukRed/tyranosyntax/issues/221)
+診断機能ON/OFFが逆になっていたため、正しく動作するように修正しました。
+
 ## [0.25.2]- 2024-10-16
 
 - TyranoScript syntax.autoDiagnostic.isEnabledが正しく動作していなかった不具合を修正しました。[issue#219](https://github.com/orukRed/tyranosyntax/issues/219)
