@@ -63,7 +63,7 @@ export class TyranoDiagnostic {
     }
     //設定で診断しないようにしているならリターン
     if (
-      vscode.workspace
+      !vscode.workspace
         .getConfiguration()
         .get("TyranoScript syntax.autoDiagnostic.isEnabled")
     ) {
