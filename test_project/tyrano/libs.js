@@ -13,7 +13,6 @@
     };
 
     $.isHTTP = function (str) {
-
         if ($.isBase64(str)) {
             return true;
         }
@@ -303,7 +302,7 @@
     $.tag = function (tag_name, pm) {
         var pm_str = "";
         for (key in pm) {
-            pm_str += " " + key + "=\"" + pm[key] + "\" ";
+            pm_str += " " + key + '="' + pm[key] + '" ';
         }
         return "[" + tag_name + " " + pm_str + " ]";
     };
@@ -357,7 +356,7 @@
     };
 
     //パスにfgimage bgimage image が含まれていた場合、それを適応する
-    $.convertStorage = function (path) { };
+    $.convertStorage = function (path) {};
 
     $.convertColor = function (val) {
         if (val.indexOf("0x") != -1) {
@@ -410,6 +409,7 @@
 
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
+            dataType: 'text',
             cache: false,
             success: function (text) {
                 if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
@@ -428,6 +428,7 @@
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: file_path + "?" + Math.floor(Math.random() * 1000000),
+                dataType: 'text',
                 cache: false,
                 success: function (text) {
                     if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
@@ -441,7 +442,6 @@
                     reject();
                 },
             });
-
         });
     };
 
@@ -1037,7 +1037,7 @@
             }
             const file_path = out_path + "/" + key + ".sav";
             fs.unlinkSync(file_path);
-        } catch (e) { }
+        } catch (e) {}
     };
 
     $.setStorageFile = function (key, val) {
@@ -1292,19 +1292,14 @@
     };
 
     $.prompt = function (str, cb) {
-
         alertify.prompt(str, function (flag, text) {
-
             if (typeof cb == "function") {
                 cb(flag, text);
             }
-
         });
-
     };
 
     $.isBase64 = function (str) {
-
         if (!str) return false;
 
         if (str.substr(0, 10) == "data:image") {
@@ -1312,9 +1307,7 @@
         } else {
             return false;
         }
-
-
-    }
+    };
 
     //オブジェクトの個数をもってきます。1
     $.countObj = function (obj) {
@@ -2713,6 +2706,20 @@
             return $.convertLength(item);
         });
         return hash.join(" ");
+    };
+
+    $.fn.showAtIndexWithVisibility = function (index) {
+        return this.each(function (i) {
+            if (i === index) {
+                if (this.style.visibility !== "visible") {
+                    this.style.visibility = "visible";
+                }
+            } else {
+                if (this.style.visibility !== "hidden") {
+                    this.style.visibility = "hidden";
+                }
+            }
+        });
     };
 
     $.captureStackTrace = (str = "captured stack trace!") => {
