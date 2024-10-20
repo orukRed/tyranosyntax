@@ -41,16 +41,18 @@ export class TyranoPreview {
           vscode.window.activeTextEditor?.document.fileName!,
         );
 
-        const filePath = InformationExtension.path + path.sep + "preview";
-        app.use(express.static(filePath));
+        const folderPath = InformationExtension.path + path.sep + "preview";
+        app.use(express.static(folderPath));
+        app.use(express.static(projectPath));
 
         //API定義
         app.get("/get-html", (req, res) => {
           //index.htmlとなるファイルを返す
           console.log("get-html");
+          console.log(InformationExtension.path);
           const indexHtml = TyranoPreview.getIndex(
             projectPath,
-            InformationExtension.path!,
+            InformationExtension.path! + `/preview`,
           );
           res.send(indexHtml);
         });
@@ -92,70 +94,70 @@ export class TyranoPreview {
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
         <meta name="robots" content="noindex,nofollow" />
-        <link href="${relativePath}/tyrano/tyrano.css" rel="stylesheet" />
-        <link href="${relativePath}/tyrano/libs/jquery-ui/jquery-ui.css" rel="stylesheet" />
+        <link href="./tyrano/tyrano.css" rel="stylesheet" />
+        <link href="./tyrano/libs/jquery-ui/jquery-ui.css" rel="stylesheet" />
 
         <!-- jQuery -->
-        <script src="${relativePath}/tyrano/libs/jquery-3.6.0.min.js"></script>
+        <script src="./tyrano/libs/jquery-3.6.0.min.js"></script>
         <script>
             try {
-                window.jQuery = window.$ = require("${relativePath}/tyrano/libs/jquery-3.6.0.min.js");
+                window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
             } catch (e) {}
         </script>
 
         <!-- jQuery Plugins -->
-        <script src="${relativePath}/tyrano/libs/jquery-migrate-1.4.1.js"></script>
-        <script src="${relativePath}/tyrano/libs/jquery-ui/jquery-ui.min.js"></script>
-        <script src="${relativePath}/tyrano/libs/jquery.a3d.js"></script>
-        <script src="${relativePath}/tyrano/libs/jsrender.min.js"></script>
+        <script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>
+        <script src="./tyrano/libs/jquery-ui/jquery-ui.min.js"></script>
+        <script src="./tyrano/libs/jquery.a3d.js"></script>
+        <script src="./tyrano/libs/jsrender.min.js"></script>
 
         <!-- 廃止予定 alertify.js -->
-        <link href="${relativePath}/tyrano/libs/alertify/alertify.core.css" rel="stylesheet" />
-        <link href="${relativePath}/tyrano/libs/alertify/alertify.default.css" rel="stylesheet" />
-        <script src="${relativePath}/tyrano/libs/alertify/alertify.min.js"></script>
+        <link href="./tyrano/libs/alertify/alertify.core.css" rel="stylesheet" />
+        <link href="./tyrano/libs/alertify/alertify.default.css" rel="stylesheet" />
+        <script src="./tyrano/libs/alertify/alertify.min.js"></script>
 
         <!-- remodal -->
-        <link href="${relativePath}/tyrano/libs/remodal/remodal.css" rel="stylesheet" />
-        <link href="${relativePath}/tyrano/libs/remodal/remodal-default-theme.css" rel="stylesheet" />
-        <script src="${relativePath}/tyrano/libs/remodal/remodal.js"></script>
+        <link href="./tyrano/libs/remodal/remodal.css" rel="stylesheet" />
+        <link href="./tyrano/libs/remodal/remodal-default-theme.css" rel="stylesheet" />
+        <script src="./tyrano/libs/remodal/remodal.js"></script>
 
         <!-- html2canvas -->
-        <script src="${relativePath}/tyrano/libs/html2canvas.js"></script>
+        <script src="./tyrano/libs/html2canvas.js"></script>
 
         <!-- KeyConfig.js -->
-        <script src="${relativePath}/data/system/KeyConfig.js"></script>
+        <script src="./data/system/KeyConfig.js"></script>
 
         <!-- tyrano -->
-        <script src="${relativePath}/tyrano/lang.js"></script>
-        <script src="${relativePath}/tyrano/libs.js"></script>
-        <script src="${relativePath}/tyrano/tyrano.js"></script>
-        <script src="${relativePath}/tyrano/tyrano.base.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.event.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.key_mouse.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.layer.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.menu.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.parser.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.rider.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.studio.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_audio.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_camera.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_ext.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_system.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_vchat.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_ar.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag_three.js"></script>
-        <script src="${relativePath}/tyrano/plugins/kag/kag.tag.js"></script>
+        <script src="./tyrano/lang.js"></script>
+        <script src="./tyrano/libs.js"></script>
+        <script src="./tyrano/tyrano.js"></script>
+        <script src="./tyrano/tyrano.base.js"></script>
+        <script src="./tyrano/plugins/kag/kag.js"></script>
+        <script src="./tyrano/plugins/kag/kag.event.js"></script>
+        <script src="./tyrano/plugins/kag/kag.key_mouse.js"></script>
+        <script src="./tyrano/plugins/kag/kag.layer.js"></script>
+        <script src="./tyrano/plugins/kag/kag.menu.js"></script>
+        <script src="./tyrano/plugins/kag/kag.parser.js"></script>
+        <script src="./tyrano/plugins/kag/kag.rider.js"></script>
+        <script src="./tyrano/plugins/kag/kag.studio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_audio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_camera.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_ext.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_system.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_vchat.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_ar.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_three.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag.js"></script>
 
         <!-- Others -->
-        <link href="${relativePath}/tyrano/libs/textillate/assets/animate.css" rel="stylesheet" />
-        <script src="${relativePath}/tyrano/libs/textillate/assets/jquery.lettering.js"></script>
-        <script src="${relativePath}/tyrano/libs/textillate/jquery.textillate.js"></script>
-        <script src="${relativePath}/tyrano/libs/jquery.touchSwipe.min.js"></script>
-        <script src="${relativePath}/tyrano/libs/howler.js"></script>
-        <script src="${relativePath}/tyrano/libs/jsQR.js"></script>
-        <script src="${relativePath}/tyrano/libs/anime.min.js"></script>
-        <script src="${relativePath}/tyrano/libs/lz-string.min.js"></script>
+        <link href="./tyrano/libs/textillate/assets/animate.css" rel="stylesheet" />
+        <script src="./tyrano/libs/textillate/assets/jquery.lettering.js"></script>
+        <script src="./tyrano/libs/textillate/jquery.textillate.js"></script>
+        <script src="./tyrano/libs/jquery.touchSwipe.min.js"></script>
+        <script src="./tyrano/libs/howler.js"></script>
+        <script src="./tyrano/libs/jsQR.js"></script>
+        <script src="./tyrano/libs/anime.min.js"></script>
+        <script src="./tyrano/libs/lz-string.min.js"></script>
         
     </head>
 
@@ -164,7 +166,7 @@ export class TyranoPreview {
         <div id="vchat_base" class="vchat_base" style="overflow: hidden" unselectable="on" ondragstart="return false"></div>
 
         <!--  First シナリオファイルに外部ファイルを利用したい場合は、こちらにシナリオファイルのURLを指定できます-->
-        <input type="hidden" id="first_scenario_file" value="${extensionPath}/preview.ks">
+    <!--    <input type="hidden" id="first_scenario_file" value="${extensionPath}/preview.ks"> -->
 
         <!-- コンフィグ調整をindex.htmlでもできる -->
         <!--
