@@ -45,20 +45,16 @@ export class TyranoPreview {
         app.use(express.static(folderPath));
         app.use(express.static(projectPath));
 
-        //API定義
-        app.get("/get-html", (req, res) => {
-          //index.htmlとなるファイルを返す
-          console.log("get-html");
-          console.log(InformationExtension.path);
-          const indexHtml = TyranoPreview.getIndex(
+        app.get("/preview", (req, res) => {
+          const dynamicHtml = TyranoPreview.getIndex(
             projectPath,
             InformationExtension.path! + `/preview`,
           );
-          res.send(indexHtml);
+          res.send(dynamicHtml);
         });
 
         TyranoPreview.serverInstance = app.listen(3100, () => {
-          open(`http://localhost:3100/preview.html`);
+          open(`http://localhost:3100/preview`);
         });
       } catch (error) {
         TyranoLogger.printStackTrace(error);
@@ -83,8 +79,7 @@ export class TyranoPreview {
   }
 
   private static getIndex(projectPath: string, extensionPath: string): string {
-    //FIXME:linkタグのhrefが誤っている？
-    const relativePath = "./" + path.relative(extensionPath, projectPath);
+    const relativePath = path.relative(extensionPath, projectPath);
     return `
 <!DOCTYPE html>
 <html>
@@ -102,7 +97,9 @@ export class TyranoPreview {
         <script>
             try {
                 window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
-            } catch (e) {}
+            } catch (e) {
+              console.log(e); 
+            }
         </script>
 
         <!-- jQuery Plugins -->
@@ -166,7 +163,7 @@ export class TyranoPreview {
         <div id="vchat_base" class="vchat_base" style="overflow: hidden" unselectable="on" ondragstart="return false"></div>
 
         <!--  First シナリオファイルに外部ファイルを利用したい場合は、こちらにシナリオファイルのURLを指定できます-->
-    <!--    <input type="hidden" id="first_scenario_file" value="${extensionPath}/preview.ks"> -->
+        <input type="hidden" id="first_scenario_file" value="./../../preview.ks">
 
         <!-- コンフィグ調整をindex.htmlでもできる -->
         <!--
