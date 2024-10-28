@@ -115,6 +115,8 @@
     ".vscode-test",
     "out/**/*",
     "test_project/**/*",
-    "webpack.config.js"
+    "webpack.config.js",
+    "test_project/**/*",
+    "preview/**/*"
   ]
 }
