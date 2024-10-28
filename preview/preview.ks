@@ -13,6 +13,7 @@
 ;各種文字送り速度を最大にして音量系を0にする
 ;---------------------------
 [iscript ]
+  tf._speedSkip = parseInt(mp.speed || 1)
   TYRANO.kag.config.skipSpeed = 1;
   TYRANO.kag.config.skipEffectIgnore=true;
   TYRANO.kag.config.chSpee=1;

@@ -8,6 +8,7 @@ import { previewPanel } from "../extension";
 import { TyranoLogger } from "../TyranoLogger";
 import { InformationExtension } from "../InformationExtension";
 import path from "path";
+import { Parser } from "../Parser";
 /**
  * 
  * メモ
@@ -49,7 +50,16 @@ export class TyranoPreview {
           projectPath + "/data/scenario",
           activeFilePath,
         );
-        const targetName = ""; //将来的には、アクティブファイルからラベルを取得したい
+
+        //もっとも近いラベルを取得
+        const parser: Parser = Parser.getInstance();
+        const parsedText = parser.parseText(
+          vscode.window.activeTextEditor?.document.getText()!,
+        );
+        //vscodeの現在のカーソル位置を取得
+        const activeEditor = vscode.window.activeTextEditor;
+        const cursorPosition = activeEditor?.selection.active;
+        const nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
 
         app.use((req, res, next) => {
           if (req.path === "/preview.ks") {
@@ -72,7 +82,7 @@ export class TyranoPreview {
                   )
                   .replaceAll(
                     "&f.ORUKRED_TYRANO_SYNTAX_TARGET_NAME",
-                    targetName,
+                    nearestLabel,
                   )
                   .replaceAll(
                     "&f.ORUKRED_TYRANO_SYNTAX_PREPROCESS",
