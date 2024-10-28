@@ -7,8 +7,7 @@
 ;---------------------------
 ;事前に実行する処理
 ;---------------------------
-;カレントディレクトリは、test_projectのフォルダになる。
-[call storage="./../../preprocess.ks" ]
+&f.ORUKRED_TYRANO_SYNTAX_PREPROCESS
 
 ;---------------------------
 ;各種文字送り速度を最大にして音量系を0にする
@@ -20,6 +19,16 @@
   TYRANO.kag.config.defaultBgmVolume = 0;
   TYRANO.kag.config.defaultSeVolume = 0;
   TYRANO.kag.config.defaultMovieVolume = 0;
+
+  //プレビュー中にアラートが出ないように上書きする
+  const originalAlert = window.alert;
+  // カスタムalert関数を定義
+  window.alert = function(message) {
+      console.log("カスタムアラート: " + message);
+      // 必要に応じて元のalert関数を呼び出す
+      // originalAlert(message);
+  };
+
 //各種処理をスキップするために爆速スキッププラグイン導入してみる
 //ディレクトリの関係上pluginフォルダに入れられないので処理をここに書いている
 {
@@ -109,7 +118,6 @@
 [skipstart]
 
 ;指定したファイルまでジャンプ
-; [jump storage="XXX" target="XXX"]
-[layopt layer="message0" ]
-その場プレビューテストです。
+;カレントディレクトリは、test_projectのフォルダになる。
+[jump storage="&f.ORUKRED_TYRANO_SYNTAX_STORAGE_NAME" target="&f.ORUKRED_TYRANO_SYNTAX_TARGET_NAME"]
 [s]

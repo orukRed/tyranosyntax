@@ -204,6 +204,11 @@
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },
+          "TyranoScript syntax.preview.preprocess": {
+            "type": "string",
+            "default": "",
+            "description": "その場プレビューで事前に読み込む処理を設定します。chara_newタグや変数定義を入れてください。また、jump等の元のシナリオに戻ってこれないタグを使った場合その場プレビューが正しく起動しません。"
+          },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",
             "default": {

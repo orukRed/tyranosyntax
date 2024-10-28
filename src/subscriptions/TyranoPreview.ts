@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
 import express from "express";
 import open from "open";
 import { type Server } from "http";
@@ -42,6 +43,82 @@ export class TyranoPreview {
         );
 
         const folderPath = InformationExtension.path + path.sep + "preview";
+        const activeFilePath =
+          vscode.window.activeTextEditor?.document.fileName!;
+        const scenarioName = path.relative(
+          projectPath + "/data/scenario",
+          activeFilePath,
+        );
+        const targetName = ""; //将来的には、アクティブファイルからラベルを取得したい
+
+        app.use((req, res, next) => {
+          if (req.path === "/preview.ks") {
+            const filePath = folderPath + path.sep + "preview.ks";
+
+            fs.readFile(filePath, "utf8", (err, data) => {
+              if (err) {
+                return next(err);
+              }
+              const preprocess = vscode.workspace
+                .getConfiguration()
+                .get("TyranoScript syntax.preview.preprocess")!
+                .toString();
+              // ファイルオブジェクトを作成
+              const fileObject = {
+                content: data
+                  .replaceAll(
+                    "&f.ORUKRED_TYRANO_SYNTAX_STORAGE_NAME",
+                    scenarioName,
+                  )
+                  .replaceAll(
+                    "&f.ORUKRED_TYRANO_SYNTAX_TARGET_NAME",
+                    targetName,
+                  )
+                  .replaceAll(
+                    "&f.ORUKRED_TYRANO_SYNTAX_PREPROCESS",
+                    preprocess,
+                  ),
+                path: filePath,
+                name: path.basename(filePath),
+              };
+
+              // ファイルの内容をレスポンスとして送信
+              res.send(fileObject.content);
+            });
+          }
+          //activeFilePathからprojectPathを切り取った値とreq.pathが一致した場合、そのファイルを返す
+          else if (req.path === "/data/scenario/" + scenarioName) {
+            const filePath = projectPath + "/data/scenario/" + scenarioName;
+            fs.readFile(filePath, "utf8", (err, data) => {
+              if (err) {
+                return next(err);
+              }
+              //現在のカーソル位置に[s]タグを挿入する
+              const activeEditor = vscode.window.activeTextEditor;
+              const cursorPosition = activeEditor?.selection.active;
+              const line = cursorPosition?.line;
+              const character = cursorPosition?.character;
+              const text = data.split("\n");
+              text[line!] =
+                text[line!].substring(0, character!) +
+                "[s]" +
+                text[line!].substring(character!);
+              data = text.join("\n");
+
+              // ファイルオブジェクトを作成
+              const fileObject = {
+                content: data,
+                path: filePath,
+                name: path.basename(filePath),
+              };
+              res.send(fileObject.content);
+            });
+          } else {
+            next();
+          }
+        });
+
+        // // 静的ファイルを提供する
         app.use(express.static(folderPath));
         app.use(express.static(projectPath));
 
