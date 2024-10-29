@@ -60,18 +60,19 @@ export class TyranoPreview {
     }
     const createServer = async () => {
       try {
+        // サーバーが既に起動している場合は、一度閉じる
         if (TyranoPreview.serverInstance) {
           TyranoPreview.serverInstance.close(() => {
             console.log("Existing server closed");
           });
         }
-
         if (wss) {
           wss.close(() => {
             console.log("Existing WebSocket server closed");
           });
         }
 
+        //起動処理
         TyranoLogger.print("preview server start");
         app = express();
         wss = new WebSocket.Server({ port: 8100 });
@@ -81,31 +82,19 @@ export class TyranoPreview {
           });
           ws.send("connected");
         });
-
         console.log("preview");
-        const infoWs = InformationWorkSpace.getInstance();
+
+        // シナリオ、ラベル、事前に読み込む処理を取得
         const activeFilePath: string =
           vscode.window.activeTextEditor?.document.fileName || "";
-
         const projectPath =
           await infoWs.getProjectPathByFilePath(activeFilePath);
-
         const folderPath = InformationExtension.path + path.sep + "preview";
-        scenarioName = path.relative(
-          projectPath + "/data/scenario",
-          activeFilePath,
-        );
+        scenarioName = getScenarioName();
+        nearestLabel = getNearestLabel();
+        preprocess = getPreprocess();
 
-        //もっとも近いラベルを取得
-        const parser: Parser = Parser.getInstance();
-        const parsedText = parser.parseText(
-          vscode.window.activeTextEditor?.document.getText() || "",
-        );
-        //vscodeの現在のカーソル位置を取得
-        const activeEditor = vscode.window.activeTextEditor;
-        const cursorPosition = activeEditor?.selection.active;
-        nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
-
+        //expressのルーティング
         app.use((req, res, next) => {
           if (req.path === "/preview.ks") {
             const filePath = folderPath + path.sep + "preview.ks";
@@ -114,7 +103,7 @@ export class TyranoPreview {
               if (err) {
                 return next(err);
               }
-              preprocess = getPreprocess();
+
               // ファイルオブジェクトを作成
               const fileObject = {
                 content: data
@@ -174,6 +163,7 @@ export class TyranoPreview {
         app.use(express.static(folderPath));
         app.use(express.static(projectPath));
 
+        // プレビュー用のAPI
         app.get("/preview", (_req, res) => {
           const dynamicHtml = TyranoPreview.getIndex(
             projectPath,
