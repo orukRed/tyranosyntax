@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import express from "express";
+import express, { Application } from "express";
 import WebSocket from "ws";
 import open from "open";
 import { IncomingMessage, Server } from "http";
@@ -11,6 +11,41 @@ import path from "path";
 import { Parser } from "../Parser";
 
 let wss: WebSocket.Server<typeof WebSocket, typeof IncomingMessage> | undefined; //クラス変数だとなぜかエラーが出たのでこちらに定義
+let app: Application | undefined;
+let scenarioName: string = "";
+let nearestLabel: string = "";
+let preprocess: string = "";
+const infoWs = InformationWorkSpace.getInstance();
+
+const getScenarioName = () => {
+  const activeFilePath: string =
+    vscode.window.activeTextEditor?.document.fileName || "";
+  infoWs.getProjectPathByFilePath(activeFilePath).then((projectPath) => {
+    scenarioName = path.relative(
+      projectPath + "/data/scenario",
+      activeFilePath,
+    );
+    return scenarioName;
+  });
+  return "";
+};
+const getNearestLabel = () => {
+  const parser: Parser = Parser.getInstance();
+  const parsedText = parser.parseText(
+    vscode.window.activeTextEditor?.document.getText() || "",
+  );
+  //vscodeの現在のカーソル位置を取得
+  const activeEditor = vscode.window.activeTextEditor;
+  const cursorPosition = activeEditor?.selection.active;
+  nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
+  return nearestLabel;
+};
+const getPreprocess = () => {
+  return vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.preview.preprocess")!
+    .toString();
+};
 
 /**
  * その場プレビュー機能を提供するクラス
@@ -18,14 +53,27 @@ let wss: WebSocket.Server<typeof WebSocket, typeof IncomingMessage> | undefined;
 export class TyranoPreview {
   private static serverInstance: Server | undefined = undefined;
   private static clientCount: number = 0;
+
   public static async createWindow() {
     if (!vscode.window.activeTextEditor || !InformationExtension.path) {
       return;
     }
     const createServer = async () => {
       try {
+        if (TyranoPreview.serverInstance) {
+          TyranoPreview.serverInstance.close(() => {
+            console.log("Existing server closed");
+          });
+        }
+
+        if (wss) {
+          wss.close(() => {
+            console.log("Existing WebSocket server closed");
+          });
+        }
+
         TyranoLogger.print("preview server start");
-        const app = express();
+        app = express();
         wss = new WebSocket.Server({ port: 8100 });
         wss.on("connection", (ws) => {
           ws.on("message", (message) => {
@@ -43,7 +91,7 @@ export class TyranoPreview {
           await infoWs.getProjectPathByFilePath(activeFilePath);
 
         const folderPath = InformationExtension.path + path.sep + "preview";
-        const scenarioName = path.relative(
+        scenarioName = path.relative(
           projectPath + "/data/scenario",
           activeFilePath,
         );
@@ -56,7 +104,7 @@ export class TyranoPreview {
         //vscodeの現在のカーソル位置を取得
         const activeEditor = vscode.window.activeTextEditor;
         const cursorPosition = activeEditor?.selection.active;
-        const nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
+        nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
 
         app.use((req, res, next) => {
           if (req.path === "/preview.ks") {
@@ -66,10 +114,7 @@ export class TyranoPreview {
               if (err) {
                 return next(err);
               }
-              const preprocess = vscode.workspace
-                .getConfiguration()
-                .get("TyranoScript syntax.preview.preprocess")!
-                .toString();
+              preprocess = getPreprocess();
               // ファイルオブジェクトを作成
               const fileObject = {
                 content: data
@@ -136,7 +181,6 @@ export class TyranoPreview {
           );
           res.send(dynamicHtml);
         });
-
         TyranoPreview.serverInstance = app.listen(3100, () => {
           open(`http://localhost:3100/preview`);
         });
@@ -177,7 +221,20 @@ export class TyranoPreview {
   }
 
   public static triggerHotReload() {
-    //すべてのクライアントにリロードを通知
+    // すべてのクライアントにリロードを通知;
+    if (
+      wss === undefined ||
+      TyranoPreview.serverInstance === undefined ||
+      app === undefined
+    ) {
+      return;
+    }
+
+    //開始シナリオ&ラベル、事前に読み込む処理を定義しなおす
+    scenarioName = getScenarioName();
+    nearestLabel = getNearestLabel();
+    preprocess = getPreprocess();
+
     wss?.clients.forEach((client) => {
       client.send("reload");
     });
@@ -187,7 +244,6 @@ export class TyranoPreview {
     _projectPath: string,
     _extensionPath: string,
   ): string {
-    // const relativePath = path.relative(extensionPath, projectPath);
     return `
 <!DOCTYPE html>
 <html>
