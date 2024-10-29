@@ -1,34 +1,23 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import express from "express";
+import WebSocket from "ws";
 import open from "open";
-import { type Server } from "http";
+import { IncomingMessage, Server } from "http";
 import { InformationWorkSpace } from "../InformationWorkSpace";
-import { previewPanel } from "../extension";
 import { TyranoLogger } from "../TyranoLogger";
 import { InformationExtension } from "../InformationExtension";
 import path from "path";
 import { Parser } from "../Parser";
-/**
- * 
- * メモ
- * index.htmlを改造して、 <input type="hidden" id="first_scenario_file" value="http://test.com/tyrano/data/scenario/first.ks">のコメントアウトを解除する
- * preview.ksを作成し、そこをfirst.ks代わりのエントリポイントとする。
- * そしてそこにあらかじめ設定した処理を読み込ませる
- * 現在のカーソル位置を取得し、そこに[s]タグを入れる。
- * その後、ローカルホスト上でindex.htmlを開いて、localhost:3100/preview.ksにアクセスさせる  
- * エラーが出た場合、出力ウィンドウあたりに表示させる
 
-
-WARN:
-storage等の指定先が、ユーザーの指定したディレクトリになっているかの確認が必要
-*/
+let wss: WebSocket.Server<typeof WebSocket, typeof IncomingMessage> | undefined; //クラス変数だとなぜかエラーが出たのでこちらに定義
 
 /**
  * その場プレビュー機能を提供するクラス
  */
 export class TyranoPreview {
   private static serverInstance: Server | undefined = undefined;
+  private static clientCount: number = 0;
   public static async createWindow() {
     if (!vscode.window.activeTextEditor || !InformationExtension.path) {
       return;
@@ -37,15 +26,23 @@ export class TyranoPreview {
       try {
         TyranoLogger.print("preview server start");
         const app = express();
+        wss = new WebSocket.Server({ port: 8100 });
+        wss.on("connection", (ws) => {
+          ws.on("message", (message) => {
+            console.log(`Received message => ${message}`);
+          });
+          ws.send("connected");
+        });
+
         console.log("preview");
         const infoWs = InformationWorkSpace.getInstance();
-        const projectPath = await infoWs.getProjectPathByFilePath(
-          vscode.window.activeTextEditor?.document.fileName!,
-        );
+        const activeFilePath: string =
+          vscode.window.activeTextEditor?.document.fileName || "";
+
+        const projectPath =
+          await infoWs.getProjectPathByFilePath(activeFilePath);
 
         const folderPath = InformationExtension.path + path.sep + "preview";
-        const activeFilePath =
-          vscode.window.activeTextEditor?.document.fileName!;
         const scenarioName = path.relative(
           projectPath + "/data/scenario",
           activeFilePath,
@@ -54,7 +51,7 @@ export class TyranoPreview {
         //もっとも近いラベルを取得
         const parser: Parser = Parser.getInstance();
         const parsedText = parser.parseText(
-          vscode.window.activeTextEditor?.document.getText()!,
+          vscode.window.activeTextEditor?.document.getText() || "",
         );
         //vscodeの現在のカーソル位置を取得
         const activeEditor = vscode.window.activeTextEditor;
@@ -132,7 +129,7 @@ export class TyranoPreview {
         app.use(express.static(folderPath));
         app.use(express.static(projectPath));
 
-        app.get("/preview", (req, res) => {
+        app.get("/preview", (_req, res) => {
           const dynamicHtml = TyranoPreview.getIndex(
             projectPath,
             InformationExtension.path! + `/preview`,
@@ -142,6 +139,20 @@ export class TyranoPreview {
 
         TyranoPreview.serverInstance = app.listen(3100, () => {
           open(`http://localhost:3100/preview`);
+        });
+        //状態を監視して、クライアントがいなくなったらサーバーを閉じる
+        wss.on("connection", (ws) => {
+          TyranoPreview.clientCount++;
+          ws.on("close", () => {
+            TyranoPreview.clientCount--;
+            if (TyranoPreview.clientCount === 0) {
+              //TODO:リロード処理入れると接続切れてサーバー閉じちゃうみたいなので一時的にコメントアウト
+              // TyranoPreview.serverInstance?.close(() => {});
+            }
+          });
+          ws.on("message", (message) => {
+            console.log(`Received message => ${message}`);
+          });
         });
       } catch (error) {
         TyranoLogger.printStackTrace(error);
@@ -165,8 +176,18 @@ export class TyranoPreview {
     );
   }
 
-  private static getIndex(projectPath: string, extensionPath: string): string {
-    const relativePath = path.relative(extensionPath, projectPath);
+  public static triggerHotReload() {
+    //すべてのクライアントにリロードを通知
+    wss?.clients.forEach((client) => {
+      client.send("reload");
+    });
+  }
+
+  private static getIndex(
+    _projectPath: string,
+    _extensionPath: string,
+  ): string {
+    // const relativePath = path.relative(extensionPath, projectPath);
     return `
 <!DOCTYPE html>
 <html>
@@ -188,6 +209,20 @@ export class TyranoPreview {
               console.log(e); 
             }
         </script>
+        <!-- web socketでリロード -->
+        <script>
+            const ws = new WebSocket("ws://localhost:8100");
+            ws.onopen = () => {
+                console.log("WebSocket connection established");
+            };
+            ws.onmessage = (event) => {
+                if (event.data === "reload") {
+                    location.reload();
+                }
+            };
+        </script>
+
+
 
         <!-- jQuery Plugins -->
         <script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>
