@@ -4,10 +4,12 @@
 
 ## 使い方
 
-vscodeの`ファイル`→`フォルダーを開く`から、
-ティラノスクリプトの`index.html` が存在するフォルダを選択してください。
+vscodeの`ファイル`→`フォルダーを開く`から、  
+ティラノスクリプトの`index.html` が存在するフォルダを選択してください。  
+
 その後、`.ks`拡張子のファイルを開いたタイミングで
-`TyranoScript syntaxの初期化が完了しました。`と通知が出れば拡張機能が正常に読み込まれています。
+`TyranoScript syntaxの初期化が完了しました。`と通知が出れば拡張機能が正常に読み込まれています。  
+
 ※構文の強調表示など、一部の機能は上記手順を踏まなくても使用できます。
 
 ## 機能
@@ -16,7 +18,7 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 
 ![](src/readme_img/highlight.png)
 
-タグやラベルなどの構文が強調表示されます。
+タグやラベルなどの構文が強調表示されます。  
 画像はMonokai Dimmedの場合です。
 
 ### タグ補完（Completion）
@@ -27,7 +29,7 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 
 ![](src/readme_img/completion_layer.gif)
 
-Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス、chara_newタグで指定したnameやface、chara_layerタグで指定したpartやid等の補完ができます。
+Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパス、chara_newタグで指定したnameやface、chara_layerタグで指定したpartやid等の補完ができます。  
 `macroタグ`やjsで定義したタグについても補完ができます。
 
 ### プラグイン/マクロのパラメータ補完（β版）
@@ -44,7 +46,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - この設定で登録したプラグイン/マクロはplugin/macroタグで未定義の場合でも診断機能でエラーが出ません。
 - `setting.json`の変更後は、拡張機能を再起動してください。再起動後に`setting.json`の変更が反映されます。
 
-下記を参考にし、`setting.json`に追加してご利用ください。
+下記を参考にし、`setting.json`に追加してご利用ください。  
 （基本的に大文字の箇所とdescriptionの値を変更することで動きます。）
 
 - `PLUGIN_NAME`をプラグインの名前やマクロの名前します。
@@ -156,8 +158,9 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ![](src/readme_img/outline.png)
 
-ラベルや変数、一部のタグがアウトラインビューに表示されます。
-現在アウトラインタグで表示されるタグは以下です。（設定の`TyranoScript syntax.outline.tag`から変更可能）
+ラベルや変数、一部のタグがアウトラインビューに表示されます。  
+現在アウトラインタグで表示されるタグは以下です。  
+（設定の`TyranoScript syntax.outline.tag`から変更可能）
 
 - ifタグ
 - elseifタグ
@@ -180,7 +183,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ![](src/readme_img/diagnostics.png)
 
-設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。
+設定からAutoDiagnosticがONをしている場合、文字入力時にエラーを検出します。  
 現在検出できるエラーは以下です。
 
 - ジャンプ系（"jump", "call", "link", "button", "glink", "clickable"）タグにてstorage,targetで指定した先が存在するかどうかの検出
@@ -233,18 +236,55 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 `F12`を押したとき、マクロタグで定義した箇所へジャンプできます。
 
-### プレビュー機能（β版）
+### その場プレビュー機能（β版）
 
-`ctrl + alt + P`でプレビューを開くことができます。
-将来的に現在開いているアクティブエディタのその場プレビュー機能に置き換える予定です。
+`ctrl + alt + P`でその場プレビューを開くことができます。
+
+以下の条件でプレビューが開きます。
+
+- 現在開いているファイルの、カーソルに最も近いラベルから処理が開始します。
+- 現在開いているカーソルの位置で処理が停止します。
+- 上記により、ラベル内で定義していない変数などは未定義として扱われてしまいます。
+- そのため、プレビュー時に事前に変数定義や`[chara_new]`タグなどの設定をしたい場合、以下の手順を踏んでください。
+  - 任意の.ksファイルに変数定義や`[chara_new]`タグなどの設定を記述する
+  - 設定から`TyranoScript syntax.preview.preprocess`にその.ksファイルの絶対パスを入力する
+  - 以下はその例です。
+  ```preview_init.ks
+  ;その場プレビューで事前に定義するキャラ、変数
+
+  ;このゲームで登場するキャラクターを宣言
+  ;akane
+  [chara_new  name="akane" storage="chara/akane/normal.png" jname="あかね"  ]
+  ;キャラクターの表情登録
+  [chara_face name="akane" face="angry" storage="chara/akane/angry.png"]
+  [chara_face name="akane" face="doki" storage="chara/akane/doki.png"]
+  [chara_face name="akane" face="happy" storage="chara/akane/happy.png"]
+  [chara_face name="akane" face="sad" storage="chara/akane/sad.png"]
+
+  ;yamato
+  [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
+  
+  ;変数の初期化
+  [iscript ]
+    f.hoge=0;
+    f.fuga="piyo"
+  [endscript ]
+  ```
+
+
+
+> [!NOTE]
+> `TyranoScript syntax.preview.preprocess`はプレビューを開いたときに一度だけ更新されます。<br>
+> そのため、`TyranoScript syntax.preview.preprocess`で読み込むファイルに更新を加えた場合は再度`ctrl + alt + P`でプレビューを開いてください。
+
 > [!WARNING]
-> ポート番号3100を使用しています。他のアプリケーションで使用している場合にはご注意ください。
-> また、この機能は今後変更されたり削除されたりする可能性があります。
+> ポート番号3100を使用しています。他のアプリケーションで使用している場合にはご注意ください。<br>
+> また、この機能は今後変更されたりする可能性があります。
 
 ### フローチャート表示
 
-`ctrl + alt + F`で現在開いているファイルのフローチャートを表示することができます。
-ブラウザでlocalhost:3200/flowchart-list.htmlにアクセスすることシナリオ一覧へのリンクが表示されます。
+`ctrl + alt + F`で現在開いているファイルのフローチャートを表示することができます。  
+ブラウザでlocalhost:3200/flowchart-list.htmlにアクセスすることシナリオ一覧へのリンクが表示されます。  
 フローチャートを見たいファイルのリンクをクリックしてください。
 
 
@@ -280,17 +320,15 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ## 設定ファイルについて
 
-TyranoScript_syntaxの一部機能は設定ファイルから変更を行うことができます。
+TyranoScript_syntaxの一部機能は設定ファイルから変更を行うことができます。  
 特にマクロタグやjsから定義したタグの補完やファイルジャンプを行う場合、設定ファイルを見直してください。
 
 ### 言語設定
 
-TyranoScript syntax.languageで言語設定を変更することができます。
+TyranoScript syntax.languageでタグ補完、ツールチップの言語設定を変更することができます。  
+日本語と英語にのみ対応しています。  
 
-日本語と英語にのみ対応しています。
-
-You can change the language settings with TyranoScript syntax.language.
-
+You can change the language settings for tag completion and tooltips with TyranoScript syntax.language.  
 Only Japanese and English are supported.
 
 ## Release Notes

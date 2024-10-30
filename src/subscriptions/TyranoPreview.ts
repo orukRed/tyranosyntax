@@ -41,11 +41,22 @@ const getNearestLabel = () => {
   return nearestLabel;
 };
 const getPreprocess = () => {
-  return vscode.workspace
-    .getConfiguration()
-    .get("TyranoScript syntax.preview.preprocess")!
-    .toString();
+  try {
+    const filePath = vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.preview.preprocess")!
+      .toString();
+    vscode.workspace.fs.readFile(vscode.Uri.file(filePath)).then((data) => {
+      preprocess = data.toString();
+      console.log(preprocess);
+      return preprocess;
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return "";
 };
+preprocess = getPreprocess();
 
 /**
  * その場プレビュー機能を提供するクラス
@@ -223,7 +234,6 @@ export class TyranoPreview {
     //開始シナリオ&ラベル、事前に読み込む処理を定義しなおす
     scenarioName = getScenarioName();
     nearestLabel = getNearestLabel();
-    preprocess = getPreprocess();
 
     wss?.clients.forEach((client) => {
       client.send("reload");
