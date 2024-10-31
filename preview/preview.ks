@@ -3,7 +3,6 @@
 ; storageは現在編集中のファイル
 ; targetは、設定から選んだファイル
 *main
-
 ;---------------------------
 ;事前に実行する処理
 ;---------------------------
@@ -21,8 +20,7 @@
   TYRANO.kag.config.defaultBgmVolume = 0;
   TYRANO.kag.config.defaultSeVolume = 0;
   TYRANO.kag.config.defaultMovieVolume = 0;
-
-  //プレビュー中にアラートが出ないように上書きする
+//プレビュー中にアラートが出ないように上書きする
   const originalAlert = window.alert;
   // カスタムalert関数を定義
   window.alert = function(message) {
@@ -59,8 +57,9 @@
   ];
 
   //除外タグリスト
-  const excludeList = ["configdelay"];
-
+  //const excludeList = ["configdelay"];
+  //暫定対応
+  const excludeList = ["configdelay", "chara_part", "chara_show"];
 
   //関数定義
   const cutTime = (time) => {

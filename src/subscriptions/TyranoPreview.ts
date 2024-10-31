@@ -17,17 +17,23 @@ let nearestLabel: string = "";
 let preprocess: string = "";
 const infoWs = InformationWorkSpace.getInstance();
 
-const getScenarioName = () => {
+const getScenarioName = async (): Promise<string> => {
   const activeFilePath: string =
     vscode.window.activeTextEditor?.document.fileName || "";
-  infoWs.getProjectPathByFilePath(activeFilePath).then((projectPath) => {
-    scenarioName = path.relative(
+
+  try {
+    const projectPath = await infoWs.getProjectPathByFilePath(activeFilePath);
+    const scenarioPathBase = path.relative(
       projectPath + "/data/scenario",
       activeFilePath,
     );
-    return scenarioName;
-  });
-  return "";
+    // filePathの区切り文字が\\なら/にする
+    const scenarioPath = scenarioPathBase.replace(/\\/g, "/");
+    return scenarioPath;
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
 };
 const getNearestLabel = () => {
   const parser: Parser = Parser.getInstance();
@@ -101,7 +107,7 @@ export class TyranoPreview {
         const projectPath =
           await infoWs.getProjectPathByFilePath(activeFilePath);
         const folderPath = InformationExtension.path + path.sep + "preview";
-        scenarioName = getScenarioName();
+        scenarioName = await getScenarioName();
         nearestLabel = getNearestLabel();
         preprocess = getPreprocess();
 
@@ -109,7 +115,6 @@ export class TyranoPreview {
         app.use((req, res, next) => {
           if (req.path === "/preview.ks") {
             const filePath = folderPath + path.sep + "preview.ks";
-
             fs.readFile(filePath, "utf8", (err, data) => {
               if (err) {
                 return next(err);
@@ -153,7 +158,7 @@ export class TyranoPreview {
               const text = data.split("\n");
               text[line!] =
                 text[line!].substring(0, character!) +
-                "[s]" +
+                "\n[s]\n" +
                 text[line!].substring(character!);
               data = text.join("\n");
 
@@ -171,7 +176,7 @@ export class TyranoPreview {
         });
 
         // // 静的ファイルを提供する
-        app.use(express.static(folderPath));
+        // app.use(express.static(folderPath));//不要そうなのでいったんコメントアウト
         app.use(express.static(projectPath));
 
         // プレビュー用のAPI
@@ -221,7 +226,7 @@ export class TyranoPreview {
     );
   }
 
-  public static triggerHotReload() {
+  public static async triggerHotReload() {
     // すべてのクライアントにリロードを通知;
     if (
       wss === undefined ||
@@ -232,7 +237,7 @@ export class TyranoPreview {
     }
 
     //開始シナリオ&ラベル、事前に読み込む処理を定義しなおす
-    scenarioName = getScenarioName();
+    scenarioName = await getScenarioName();
     nearestLabel = getNearestLabel();
 
     wss?.clients.forEach((client) => {

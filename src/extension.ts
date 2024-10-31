@@ -241,7 +241,7 @@ export async function activate(context: vscode.ExtensionContext) {
           //カーソル移動時のイベント登録
           context.subscriptions.push(
             vscode.window.onDidChangeTextEditorSelection(async (_e) => {
-              TyranoPreview.triggerHotReload();
+           await TyranoPreview.triggerHotReload();
             }),
           );
 
