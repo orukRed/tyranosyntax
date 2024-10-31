@@ -114,6 +114,75 @@
     });
     return pm;
   };
+  //音楽系のタグを上書きする
+  //今は処理止まりそうなところのみ。他も必要に応じて追加する
+  const playbgm = {
+    vital: ['storage'],
+    pm: {
+    },
+    waitClick: function (pm) {},
+    start: function (pm) {
+       TG.ftag.nextOrder();
+    },
+    parseMilliSeconds: function (_str) {},
+    play: async function (pm) {},
+    analyzeAudioForLipSync(howl, name) {},
+  };
+  TG.ftag.master_tag["playbgm"] = playbgm;
+
+  const fadeinbgm = {
+    vital: ["storage"],
+    pm: {},
+    start: function (pm) {
+      TG.ftag.nextOrder();
+    },
+  }
+  TG.ftag.master_tag["fadeinbgm"] = fadeinbgm;
+
+  const xchgbgm = {
+    vital: ["storage"],
+    pm: {},
+    start: function (pm) {
+      TG.ftag.nextOrder();
+    },
+  }
+  TG.ftag.master_tag["xchgbgm"] = xchgbgm;
+
+  const playse = {
+    vital: ["storage"],
+    pm: {},
+    start: function (pm) {
+      TG.ftag.nextOrder();
+    }
+  }
+  TG.ftag.master_tag["playse"] = playse;
+
+  const fadeinse = {
+    vital: ["storage", "time"],
+    pm: {},
+    start: function (pm) {
+      TG.ftag.nextOrder();
+    }
+  }
+  TG.ftag.master_tag["fadeinse"] = fadeinse;
+
+  const wbgm = {
+    pm: {},
+    start: function () {
+      TG.ftag.nextOrder();
+    }
+  }
+  TG.ftag.master_tag["wbgm"] = wbgm;
+
+  const wse = {
+    pm: {},
+    start: function () {
+      TG.ftag.nextOrder();
+    }    
+  }
+  TG.ftag.master_tag["wse"] = wse;
+
+
 };
 [endscript ]
 [skipstart]
