@@ -158,7 +158,7 @@ export class TyranoPreview {
               const text = data.split("\n");
               text[line!] =
                 text[line!].substring(0, character!) +
-                "\n[s]\n" +
+                "\n[skipstop]\n[l]\n" +
                 text[line!].substring(character!);
               data = text.join("\n");
 

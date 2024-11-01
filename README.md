@@ -1,5 +1,7 @@
 # TyranoScript_syntax
 
+ [【ENGLISH README】](./README_EN.md)
+
 [ティラノスクリプト](https://tyrano.jp/)でのゲーム開発のサポートを行う拡張機能です。
 
 ## 使い方
@@ -238,16 +240,17 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### その場プレビュー機能（β版）
 
-`ctrl + alt + P`でその場プレビューを開くことができます。
+`ctrl + alt + P`で現在カーソル位置のプレビューを開くことができます。
 
 以下の条件でプレビューが開きます。
 
-- 現在開いているファイルの、カーソルに最も近いラベルから処理が開始します。
-- 現在開いているカーソルの位置で処理が停止します。
+- 現在開いているファイルの、カーソルより前の行にある最も近いラベルから処理が開始します。
+- 現在開いているカーソルの位置で処理が停止します。クリックすると処理が再開します。
 - 上記により、ラベル内で定義していない変数などは未定義として扱われてしまいます。
 - そのため、プレビュー時に事前に変数定義や`[chara_new]`タグなどの設定をしたい場合、以下の手順を踏んでください。
   - 任意の.ksファイルに変数定義や`[chara_new]`タグなどの設定を記述する
   - 設定から`TyranoScript syntax.preview.preprocess`にその.ksファイルの絶対パスを入力する
+  - `TyranoScript syntax.preview.preprocess`で設定したファイル内でjumpタグを使わないでください。プレビューが正しく起動しなくなります。
   - 以下はその例です。
   ```preview_init.ks
   ;その場プレビューで事前に定義するキャラ、変数
@@ -264,14 +267,21 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
   ;yamato
   [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
   
+  [call storage="macro_define.ks"]
+
+  [if exp="tf.TYRANO_SYNTAX_PREVIEW==true"]
+    ;メッセージウィンドウの設定
+    [position layer="message0" left=160 top=500 width=1000 height=200 page=fore visible=true]
+  [endif]
+  
   ;変数の初期化
   [iscript ]
     f.hoge=0;
     f.fuga="piyo"
   [endscript ]
   ```
-
-
+- `tf.TYRANO_SYNTAX_PREVIEW = true`が事前に定義されています。「ラベル開始直後に`position`タグがないけどその場プレビューでメッセージ表示させたい！」等といった場合に`if`タグなどで必要な処理を記述してください。
+- BGM,SEは再生されません。
 
 > [!NOTE]
 > `TyranoScript syntax.preview.preprocess`はプレビューを開いたときに一度だけ更新されます。<br>
