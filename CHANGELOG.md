@@ -6,7 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [1.0.0]- 2024-11-01
 
-- `ctrl + alt + P`でのプレビュー機能を削除し、その場プレビュー機能（β版）に置き換えました。  
+- `ctrl + alt + P`でのプレビュー機能を削除し、その場プレビュー機能（β版）に置き換えました。[issue#124](https://github.com/orukRed/tyranosyntax/issues/124) [issue#225](https://github.com/orukRed/tyranosyntax/issues/225)
   - 詳細や使い方はREADMEをご確認ください。
 - READMEに英語版を追加しました。
 
