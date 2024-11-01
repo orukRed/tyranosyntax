@@ -21,20 +21,21 @@
   }
 </style>
 <script>
-  console.log('flowchart.html');
+  console.log("flowchart.html");
 
   function generateFlowchart(obj) {
     // フローチャートの定義を開始
     console.log(obj);
-    let graphDefinition = 'graph LR\n';
-    graphDefinition += 'classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n';
+    let graphDefinition = "graph LR\n";
+    graphDefinition +=
+      "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
     graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
     if (!obj) {
       graphDefinition += `a-->b\n`;
     }
     for (key in obj) {
-      const condition = obj[key].condition ? `${obj[key].condition}` : '';
-      console.log('s');
+      const condition = obj[key].condition ? `${obj[key].condition}` : "";
+      console.log("s");
       //storageもtargetもある場合
       if (obj[key].storage && obj[key].target) {
         const fileName = `${obj[key].storage}_${obj[key].target}`;
@@ -43,7 +44,6 @@
       //storageのみある場合
       else if (obj[key].storage) {
         const fileName = `${obj[key].storage}_NONE`;
-        // if()
         graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}[[${fileName}]]:::green\n`;
       }
       //targetのみある場合
@@ -63,8 +63,8 @@
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const scenario = urlParams.get('scenario');
-  console.log('scenario', scenario);
+  const scenario = urlParams.get("scenario");
+  console.log("scenario", scenario);
   let transitionData = undefined;
   // サーバーからデータ処理
   fetch(`/get-transition-data?scenario=${scenario}`)
@@ -74,26 +74,28 @@
       if (data) {
         //プロジェクト名表示
         projectName = data.projectName;
-        document.querySelector('h3').textContent = projectName;
+        document.querySelector("h3").textContent = projectName;
 
         transitionData = data.TransitionData;
         let htmlContent = generateFlowchart(transitionData);
         // HTMLに追加するためのコード
-        const element = document.getElementById('flowchart');
+        const element = document.getElementById("flowchart");
         element.innerHTML += htmlContent;
         // mermaidを初期化
         mermaid.run();
       } else {
-        console.log('transitionData is not found');
+        console.log("transitionData is not found");
       }
     })
-    .catch((error) => console.error('Error:', error));
+    .catch((error) => console.error("Error:", error));
 </script>
 
 <body>
   <h3></h3>
   <div id="flowchart"></div>
   <div class="back-link-container">
-    <a href="http://localhost:3200/flowchart-list.html" class="back-link">シナリオ一覧に戻る</a>
+    <a href="http://localhost:3200/flowchart-list.html" class="back-link"
+      >シナリオ一覧に戻る</a
+    >
   </div>
 </body>

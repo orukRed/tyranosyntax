@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
@@ -38,6 +39,28 @@ export class Parser {
     // 外部からtyrano_parser.jsを呼び出すのでなく、パーサー処理を移植した物を呼び出す
     // return this.parser.parseScenario(text)["array_s"];
     return this.parseScenario(text)["array_s"];
+  }
+  /**
+   * 引数に入れたカーソル位置とパース済みのデータから、もっとも近いラベルを返却する
+   * @param parsedData パース済みのデータ
+   * @param cursor カーソル位置
+   * @returns カーソル位置よりも前にあるラベル名
+   */
+  public getNearestLabel(
+    parsedData: any,
+    cursor: vscode.Position | undefined,
+  ): string {
+    if (!cursor || !parsedData) {
+      return "";
+    }
+    const filteredData = parsedData.filter(
+      (item: any) => item.name === "label" && item.pm.line < cursor.line,
+    );
+    //filteredDataに入っているデータの中で、もっとも近いものを返却する
+    if (filteredData.length > 0) {
+      return filteredData[filteredData.length - 1].pm.label_name;
+    }
+    return "";
   }
 
   //----------------------------------------------
@@ -429,4 +452,3 @@ export class Parser {
     return result;
   }
 }
-

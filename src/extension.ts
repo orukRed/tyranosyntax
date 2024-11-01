@@ -238,6 +238,13 @@ export async function activate(context: vscode.ExtensionContext) {
               tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
             }
           }
+          //カーソル移動時のイベント登録
+          context.subscriptions.push(
+            vscode.window.onDidChangeTextEditorSelection(async (_e) => {
+           await TyranoPreview.triggerHotReload();
+            }),
+          );
+
           TyranoLogger.print("TyranoScript syntax initialize end");
 
           //エラーポップアップ

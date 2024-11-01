@@ -715,9 +715,6 @@ export class TyranoCompletionItemProvider
       const { name, description } = suggestion;
       try {
         // FIXME: Make the `try`-block smaller[]
-        if (name.indexOf("endreplay") !== -1) {
-          console.log("aaaa");
-        }
         const textLabel = name.toString();
         const comp = new vscode.CompletionItem(textLabel);
         const inputType = vscode.workspace

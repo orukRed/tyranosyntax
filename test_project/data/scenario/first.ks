@@ -1,5 +1,3 @@
-[l][r][p]#[l][r]#[l][r][p]#;一番最初に呼び出されるファイル
-
 [title name="ティラノスクリプト解説"]
 
 [stop_keyconfig]

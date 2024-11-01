@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.0]- 2024-11-01
+
+- `ctrl + alt + P`でのプレビュー機能を削除し、その場プレビュー機能（β版）に置き換えました。  
+  - 詳細や使い方はREADMEをご確認ください。
+- READMEに英語版を追加しました。
+
+
 ## [0.25.3]- 2024-10-16
 
 0.25.2で修正した内容に誤りがあったため修正しました。[issue#221](https://github.com/orukRed/tyranosyntax/issues/221)
