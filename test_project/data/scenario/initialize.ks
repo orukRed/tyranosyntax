@@ -1,4 +1,5 @@
   ;このゲームで登場するキャラクターを宣言
+  ;その場プレビューのテスト用
   ;akane
   [chara_new  name="akane" storage="chara/akane/normal.png" jname="あかね"  ]
   ;キャラクターの表情登録

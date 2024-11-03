@@ -46,23 +46,54 @@ const getNearestLabel = () => {
   nearestLabel = parser.getNearestLabel(parsedText, cursorPosition);
   return nearestLabel;
 };
-const getPreprocess = () => {
+const getPreprocess = async () => {
   try {
-    const filePath = vscode.workspace
+    const relativeFilePath = vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.preview.preprocess")!
       .toString();
-    vscode.workspace.fs.readFile(vscode.Uri.file(filePath)).then((data) => {
-      preprocess = data.toString();
-      console.log(preprocess);
+
+    const projectPath = await infoWs.getProjectPathByFilePath(
+      vscode.window.activeTextEditor?.document.fileName || "",
+    );
+    const relativeFilePathResolved = path.resolve(
+      projectPath + "/data/scenario/",
+      relativeFilePath,
+    );
+    const absoluteFilePath = path.resolve(__dirname, relativeFilePath);
+
+    let preprocess = "";
+
+    // 相対パスでファイルを探す
+    try {
+      const relativeUri = vscode.Uri.file(relativeFilePathResolved);
+      const relativeData = await vscode.workspace.fs.readFile(relativeUri);
+      preprocess = relativeData.toString();
+      console.log("Found file at relative path:", preprocess);
       return preprocess;
-    });
+    } catch (relativeError) {
+      console.log(
+        "Relative path not found, trying absolute path:",
+        relativeError,
+      );
+    }
+
+    // 絶対パスでファイルを探す
+    try {
+      const absoluteUri = vscode.Uri.file(absoluteFilePath);
+      const absoluteData = await vscode.workspace.fs.readFile(absoluteUri);
+      preprocess = absoluteData.toString();
+      console.log("Found file at absolute path:", preprocess);
+      return preprocess;
+    } catch (absoluteError) {
+      console.log("Absolute path not found:", absoluteError);
+    }
   } catch (error) {
     console.log(error);
   }
   return "";
 };
-preprocess = getPreprocess();
+preprocess = "";
 
 /**
  * その場プレビュー機能を提供するクラス
@@ -109,7 +140,7 @@ export class TyranoPreview {
         const folderPath = InformationExtension.path + path.sep + "preview";
         scenarioName = await getScenarioName();
         nearestLabel = getNearestLabel();
-        preprocess = getPreprocess();
+        preprocess = await getPreprocess();
 
         //expressのルーティング
         app.use((req, res, next) => {

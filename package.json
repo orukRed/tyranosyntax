@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -207,7 +207,7 @@
           "TyranoScript syntax.preview.preprocess": {
             "type": "string",
             "default": "/hoge/foo/project/preview-initialize.ks",
-            "description": "その場プレビューで事前に読み込む処理のファイルパス（絶対パス）を指定します。"
+            "description": "その場プレビューで事前に読み込む処理のファイルパス（scenarioフォルダから始まる相対パス、もしくは絶対パス）を指定します。"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",
