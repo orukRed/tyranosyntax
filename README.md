@@ -251,7 +251,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - 上記により、ラベル内で定義していない変数などは未定義として扱われてしまいます。
 - そのため、プレビュー時に事前に変数定義や`[chara_new]`タグなどの設定をしたい場合、以下の手順を踏んでください。
   - 任意の.ksファイルに変数定義や`[chara_new]`タグなどの設定を記述する
-  - 設定から`TyranoScript syntax.preview.preprocess`にその.ksファイルの絶対パスを入力する
+  - 設定から`TyranoScript syntax.preview.preprocess`にその.ksファイルのscenarioフォルダから始まる相対パス、もしくは絶対パスを入力する
   - `TyranoScript syntax.preview.preprocess`で設定したファイル内でjumpタグを使わないでください。プレビューが正しく起動しなくなります。
   - 以下はその例です。
   ```preview_init.ks
