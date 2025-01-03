@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.2.0]- 2025-01-03
+
+- jsonファイルを最新のものにしました。（wait_preloadタグの追加）
+
 ## [1.1.0]- 2024-11-03
 
 - その場プレビューのpreprocessファイルを相対パスでも指定できるようにしました。[issue#230](https://github.com/orukRed/tyranosyntax/issues/230)
