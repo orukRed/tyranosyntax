@@ -7873,6 +7873,20 @@
         ],
         "sample": ""
     },
+    "wait_preload": {
+        "name": "wait_preload",
+        "summary": "素材ファイルの事前読み込みの完了待機",
+        "category": "変数・JS操作・ファイル読込",
+        "description": "[preload]タグをwait=falseで利用した後、何かの演出を挟んだ後、全てのpreloadが終わるのを待機します。",
+        "parameters": [
+            {
+                "name": "cond",
+                "required": false,
+                "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
+            }
+        ],
+        "sample": ";preloadで複数の画像をwait=falseで読み込みます\n[preload storage=\"data/fgimage/girl.jpg\" wait=\"false\"]\n[preload storage=\"data/fgimage/haruko.jpg\" wait=\"false\"]\n;読み込んでいる間に別のアニメーションをします\n[quake2 time=\"1000\" wait=\"true\"]\n;まだ終わっていない場合は終わるまで待機します\n[wait_preload]"
+    },
     "wbgm": {
         "name": "wbgm",
         "summary": "BGMの再生完了を待つ",

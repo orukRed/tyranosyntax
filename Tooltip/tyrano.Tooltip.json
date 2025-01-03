@@ -6072,6 +6072,26 @@
             ""
         ]
     },
+    "wait_preload": {
+        "prefix": "wait_preload",
+        "body": [
+            "[wait_preload cond=\"\"]"
+        ],
+        "description": [
+            "[preload]タグをwait=falseで利用した後、何かの演出を挟んだ後、全てのpreloadが終わるのを待機します。",
+            "[パラメータ]",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ";preloadで複数の画像をwait=falseで読み込みます",
+            "[preload storage=\"data/fgimage/girl.jpg\" wait=\"false\"]",
+            "[preload storage=\"data/fgimage/haruko.jpg\" wait=\"false\"]",
+            ";読み込んでいる間に別のアニメーションをします",
+            "[quake2 time=\"1000\" wait=\"true\"]",
+            ";まだ終わっていない場合は終わるまで待機します",
+            "[wait_preload]"
+        ]
+    },
     "wbgm": {
         "prefix": "wbgm",
         "body": [
