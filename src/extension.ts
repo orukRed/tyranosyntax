@@ -2,6 +2,13 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
+import { workspace, ExtensionContext } from 'vscode';
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  ServerOptions,
+  TransportKind
+} from 'vscode-languageclient/node';
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
 import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
@@ -19,7 +26,47 @@ const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
-export async function activate(context: vscode.ExtensionContext) {
+
+let client: LanguageClient;
+
+export function activate(context: ExtensionContext) {
+  // サーバーモジュールのパス
+  const serverModule = context.asAbsolutePath(
+    path.join('out', 'server', 'server.js')
+  );
+
+  // サーバーのデバッグオプション
+  const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+
+  // サーバーオプションの設定
+  const serverOptions: ServerOptions = {
+    run: { module: serverModule, transport: TransportKind.ipc },
+    debug: {
+      module: serverModule,
+      transport: TransportKind.ipc,
+      options: debugOptions
+    }
+  };
+
+  // クライアントオプションの設定
+  const clientOptions: LanguageClientOptions = {
+    documentSelector: [{ scheme: 'file', language: 'tyrano' }],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+    }
+  };
+
+  // クライアントの作成と起動
+  client = new LanguageClient(
+    'tyranoLanguageServer',
+    'TyranoScript Language Server',
+    serverOptions,
+    clientOptions
+  );
+
+  // 言語サーバーの開始
+  client.start();
+
   const run = async () => {
     await vscode.window.withProgress(
       {
@@ -292,7 +339,10 @@ export async function tmpDiagnostic() {
   TyranoLogger.print("manual diagnostic end");
 }
 
-export function deactivate() {
-  return undefined;
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined;
+  }
+  return client.stop();
 }
 
