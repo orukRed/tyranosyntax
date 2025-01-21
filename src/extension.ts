@@ -40,12 +40,16 @@ export function activate(context: ExtensionContext) {
 
   // サーバーオプションの設定
   const serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
+    run: {
+      module: serverModule,
+      transport: TransportKind.ipc,
+      options: { execArgv: [] },
+    },
     debug: {
       module: serverModule,
       transport: TransportKind.ipc,
-      options: debugOptions
-    }
+      options: debugOptions,
+    },
   };
 
   // クライアントオプションの設定
