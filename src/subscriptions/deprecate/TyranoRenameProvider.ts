@@ -1,8 +1,9 @@
+//XXX:未使用 LSPでの実装にしたかったけど、いったんvscode-apiでの実装にする
 import * as vscode from "vscode";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { WorkspaceEdit, Position, Range } from "vscode-languageserver/node";
 
-export class TyranoRenameProvider implements vscode.RenameProvider {
+export class TyranoRenameProvider {
   constructor() {}
 
   /**
@@ -12,13 +13,7 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
    * @param position カーソル位置
    * @returns リネーム可能な場合は範囲を、不可能な場合はnullを返します
    */
-  prepareRename(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-  ): vscode.ProviderResult<
-    vscode.Range | { range: vscode.Range; placeholder: string }
-  > {
+  prepareRename(document: TextDocument, position: Position): Range | null {
     const text = document.getText();
     const offset = document.offsetAt(position);
     const wordRegex = /[a-zA-Z0-9_$.]+/g;
@@ -48,10 +43,10 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
           (isMacroName && currentLine.includes(`name="${word}"`)) ||
           currentLine.includes(`name='${word}'`)
         ) {
-          return new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[0].length),
-          );
+          return {
+            start: document.positionAt(match.index),
+            end: document.positionAt(match.index + match[0].length),
+          };
         }
         break;
       }
@@ -70,12 +65,13 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
    * @return A workspace edit or null/undefined if the rename cannot be performed.
    */
   provideRenameEdits(
-    document: vscode.TextDocument,
-    position: vscode.Position,
+    document: TextDocument,
+    position: Position,
     newName: string,
-    token: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.WorkspaceEdit> {
-    const workspaceEdit = new vscode.WorkspaceEdit();
+  ): WorkspaceEdit {
+    const workspaceEdit: WorkspaceEdit = {
+      changes: {},
+    };
 
     // カーソル位置の単語を取得
     const text = document.getText();
@@ -101,6 +97,7 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
         break;
       }
     }
+
     if (!targetWord) {
       return workspaceEdit;
     }
@@ -120,6 +117,9 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
       for (const pattern of macroPatterns) {
         let macroMatch;
         while ((macroMatch = pattern.exec(text)) !== null) {
+          if (!workspaceEdit.changes![document.uri]) {
+            workspaceEdit.changes![document.uri] = [];
+          }
           // マクロ定義の場合は name="..." の中のマクロ名部分だけを置換
           const matchStart = pattern.toString().includes("name")
             ? macroMatch.index + macroMatch[0].indexOf(targetWord)
@@ -128,14 +128,13 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
             ? targetWord.length
             : targetWord.length;
 
-          workspaceEdit.replace(
-            document.uri,
-            new vscode.Range(
-              document.positionAt(matchStart),
-              document.positionAt(matchStart + matchLength),
-            ),
-            newName,
-          );
+          workspaceEdit.changes![document.uri].push({
+            range: {
+              start: document.positionAt(matchStart),
+              end: document.positionAt(matchStart + matchLength),
+            },
+            newText: newName,
+          });
         }
       }
       return workspaceEdit;
@@ -156,14 +155,16 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
       const matchedPrefix = match[1] || "";
       // プレフィックスが同じ場合のみ変更
       if (matchedPrefix === prefix) {
-        workspaceEdit.replace(
-          document.uri,
-          new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[0].length),
-          ),
-          newName,
-        );
+        if (!workspaceEdit.changes![document.uri]) {
+          workspaceEdit.changes![document.uri] = [];
+        }
+        workspaceEdit.changes![document.uri].push({
+          range: {
+            start: document.positionAt(match.index),
+            end: document.positionAt(match.index + match[0].length),
+          },
+          newText: newName,
+        });
       }
     }
 

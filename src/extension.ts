@@ -22,6 +22,7 @@ import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
 import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
+import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -30,46 +31,46 @@ export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  // サーバーモジュールのパス
-  const serverModule = context.asAbsolutePath(
-    path.join('out', 'server', 'server.js')
-  );
+  // // サーバーモジュールのパス
+  // const serverModule = context.asAbsolutePath(
+  //   path.join('out', 'server', 'server.js')
+  // );
 
-  // サーバーのデバッグオプション
-  const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+  // // サーバーのデバッグオプション
+  // const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
-  // サーバーオプションの設定
-  const serverOptions: ServerOptions = {
-    run: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: { execArgv: [] },
-    },
-    debug: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: debugOptions,
-    },
-  };
+  // // サーバーオプションの設定
+  // const serverOptions: ServerOptions = {
+  //   run: {
+  //     module: serverModule,
+  //     transport: TransportKind.ipc,
+  //     options: { execArgv: [] },
+  //   },
+  //   debug: {
+  //     module: serverModule,
+  //     transport: TransportKind.ipc,
+  //     options: debugOptions,
+  //   },
+  // };
 
-  // クライアントオプションの設定
-  const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: 'file', language: 'tyrano' }],
-    synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
-    }
-  };
+  // // クライアントオプションの設定
+  // const clientOptions: LanguageClientOptions = {
+  //   documentSelector: [{ scheme: 'file', language: 'tyrano' }],
+  //   synchronize: {
+  //     fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+  //   }
+  // };
 
-  // クライアントの作成と起動
-  client = new LanguageClient(
-    'tyranoLanguageServer',
-    'TyranoScript Language Server',
-    serverOptions,
-    clientOptions
-  );
+  // // クライアントの作成と起動
+  // client = new LanguageClient(
+  //   'tyranoLanguageServer',
+  //   'TyranoScript Language Server',
+  //   serverOptions,
+  //   clientOptions
+  // );
 
-  // 言語サーバーの開始
-  client.start();
+  // // 言語サーバーの開始
+  // client.start();
 
   const run = async () => {
     await vscode.window.withProgress(
@@ -174,6 +175,14 @@ export function activate(context: ExtensionContext) {
                 new TyranoDefinitionProvider(),
               ),
             ); //定義元への移動
+            //renameproviderの追加
+            const renameProvider = new TyranoRenameProvider();
+            context.subscriptions.push(
+              vscode.languages.registerRenameProvider(
+                TYRANO_MODE,
+                renameProvider,
+              ),
+            );
             // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
             // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
 
@@ -292,7 +301,7 @@ export function activate(context: ExtensionContext) {
           //カーソル移動時のイベント登録
           context.subscriptions.push(
             vscode.window.onDidChangeTextEditorSelection(async (_e) => {
-           await TyranoPreview.triggerHotReload();
+              await TyranoPreview.triggerHotReload();
             }),
           );
 
