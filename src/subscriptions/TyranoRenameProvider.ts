@@ -24,7 +24,24 @@ export class TyranoRenameProvider {
         const word = match[0];
 
         // TyranoScript変数（f.、sf.、tf.で始まる）かどうかをチェック
-        if (/^(f\.|sf\.|tf\.)?[a-zA-Z0-9_$]+$/.test(word)) {
+        // マクロ定義のname属性かどうかをチェック
+        const lineStart = text.lastIndexOf("\n", match.index) + 1;
+        const lineEnd = text.indexOf("\n", match.index);
+        const currentLine = text.substring(
+          lineStart,
+          lineEnd !== -1 ? lineEnd : text.length,
+        );
+        const isMacroName = /(@macro|\[macro)\s+name\s*=\s*["'].*["']/.test(
+          currentLine,
+        );
+
+        // TyranoScript変数（f.、sf.、tf.で始まる）またはマクロ名の場合のみリネーム可能
+        if (
+          /^(f\.|sf\.|tf\.)?[a-zA-Z0-9_$]+$/.test(word) ||
+          isMacroName ||
+          (isMacroName && currentLine.includes(`name="${word}"`)) ||
+          currentLine.includes(`name='${word}'`)
+        ) {
           return {
             start: document.positionAt(match.index),
             end: document.positionAt(match.index + match[0].length),
@@ -62,15 +79,64 @@ export class TyranoRenameProvider {
     const wordRegex = /[a-zA-Z0-9_$.]+/g;
     let match;
     let targetWord = "";
+    let isMacroName = false;
 
     while ((match = wordRegex.exec(text)) !== null) {
       if (match.index <= offset && offset <= match.index + match[0].length) {
         targetWord = match[0];
+        // マクロ定義のname属性かどうかをチェック
+        const lineStart = text.lastIndexOf("\n", match.index) + 1;
+        const lineEnd = text.indexOf("\n", match.index);
+        const currentLine = text.substring(
+          lineStart,
+          lineEnd !== -1 ? lineEnd : text.length,
+        );
+        isMacroName = /(@macro|\[macro)\s+name\s*=\s*["'].*["']/.test(
+          currentLine,
+        );
         break;
       }
     }
 
     if (!targetWord) {
+      return workspaceEdit;
+    }
+
+    if (isMacroName) {
+      // マクロ名の場合は、マクロ定義とマクロ呼び出しの両方を検索して置換
+      const macroPatterns = [
+        // マクロ定義のパターン
+        new RegExp(
+          `(@macro|\\[macro)\\s+name\\s*=\\s*["']${targetWord}["']`,
+          "g",
+        ),
+        // マクロ呼び出しのパターン
+        new RegExp(`\\[${targetWord}\\]`, "g"),
+      ];
+
+      for (const pattern of macroPatterns) {
+        let macroMatch;
+        while ((macroMatch = pattern.exec(text)) !== null) {
+          if (!workspaceEdit.changes![document.uri]) {
+            workspaceEdit.changes![document.uri] = [];
+          }
+          // マクロ定義の場合は name="..." の中のマクロ名部分だけを置換
+          const matchStart = pattern.toString().includes("name")
+            ? macroMatch.index + macroMatch[0].indexOf(targetWord)
+            : macroMatch.index + 1; // マクロ呼び出しの場合は [ の次の文字から
+          const matchLength = pattern.toString().includes("name")
+            ? targetWord.length
+            : targetWord.length;
+
+          workspaceEdit.changes![document.uri].push({
+            range: {
+              start: document.positionAt(matchStart),
+              end: document.positionAt(matchStart + matchLength),
+            },
+            newText: newName,
+          });
+        }
+      }
       return workspaceEdit;
     }
 
