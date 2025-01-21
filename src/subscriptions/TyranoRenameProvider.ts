@@ -23,22 +23,50 @@ export class TyranoRenameProvider {
       changes: {},
     };
 
-    // 同じドキュメント内の同じ文字列を全て置換
+    // カーソル位置の単語を取得
     const text = document.getText();
-    const pattern = new RegExp(position.toString(), "g");
+    const offset = document.offsetAt(position);
+    const wordRegex = /[a-zA-Z0-9_$.]+/g;
     let match;
+    let targetWord = "";
 
-    while ((match = pattern.exec(text)) !== null) {
-      if (!workspaceEdit.changes![document.uri]) {
-        workspaceEdit.changes![document.uri] = [];
+    while ((match = wordRegex.exec(text)) !== null) {
+      if (match.index <= offset && offset <= match.index + match[0].length) {
+        targetWord = match[0];
+        break;
       }
-      workspaceEdit.changes![document.uri].push({
-        range: {
-          start: document.positionAt(match.index),
-          end: document.positionAt(match.index + match[0].length),
-        },
-        newText: newName,
-      });
+    }
+
+    if (!targetWord) {
+      return workspaceEdit;
+    }
+
+    // プレフィックスとベース名を分離
+    const prefixMatch = targetWord.match(/^(f\.|sf\.|tf\.)?(.+)$/);
+    if (!prefixMatch) {
+      return workspaceEdit;
+    }
+
+    const [, prefix = "", baseName] = prefixMatch;
+
+    // 同じベース名を持つ変数を検索して置換
+    const searchPattern = new RegExp(`(f\\.|sf\\.|tf\\.)?${baseName}`, "g");
+
+    while ((match = searchPattern.exec(text)) !== null) {
+      const matchedPrefix = match[1] || "";
+      // プレフィックスが同じ場合のみ変更
+      if (matchedPrefix === prefix) {
+        if (!workspaceEdit.changes![document.uri]) {
+          workspaceEdit.changes![document.uri] = [];
+        }
+        workspaceEdit.changes![document.uri].push({
+          range: {
+            start: document.positionAt(match.index),
+            end: document.positionAt(match.index + match[0].length),
+          },
+          newText: newName,
+        });
+      }
     }
 
     return workspaceEdit;
