@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import { TextDocument } from "vscode-languageserver-textdocument";
+import { WorkspaceEdit, Position } from "vscode-languageserver/node";
 
 export class TyranoRenameProvider {
   constructor() {}
@@ -9,22 +11,36 @@ export class TyranoRenameProvider {
    *
    * @param document The document in which the command was invoked.
    * @param position The position at which the command was invoked.
-   * @param newName The new name of the symbol. If the given name is not valid, the provider must return a rejected promise.
-   * @param token A cancellation token.
-   * @return A workspace edit or a thenable that resolves to such. The lack of a result can be
-   * signaled by returning `undefined` or `null`.
+   * @param newName The new name of the symbol.
+   * @return A workspace edit or null/undefined if the rename cannot be performed.
    */
   provideRenameEdits(
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    document: vscode.TextDocument,
-    position: vscode.Position,
+    document: TextDocument,
+    position: Position,
     newName: string,
-    token: vscode.CancellationToken,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
-  ): vscode.WorkspaceEdit | null | undefined {
-    // console.log("provideRenameEdits");
-    // console.log(`document:${document.fileName}\nposition:${position.line}\nnewName:${newName}\ntoken:${token}\n`);
+  ): WorkspaceEdit {
+    const workspaceEdit: WorkspaceEdit = {
+      changes: {},
+    };
 
-    return null;
+    // 同じドキュメント内の同じ文字列を全て置換
+    const text = document.getText();
+    const pattern = new RegExp(position.toString(), "g");
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+      if (!workspaceEdit.changes![document.uri]) {
+        workspaceEdit.changes![document.uri] = [];
+      }
+      workspaceEdit.changes![document.uri].push({
+        range: {
+          start: document.positionAt(match.index),
+          end: document.positionAt(match.index + match[0].length),
+        },
+        newText: newName,
+      });
+    }
+
+    return workspaceEdit;
   }
 }
