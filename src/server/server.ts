@@ -7,7 +7,8 @@ import {
   InitializeResult,
   RenameParams,
   WorkspaceEdit,
-} from 'vscode-languageserver/node';
+  PrepareRenameParams,
+} from "vscode-languageserver/node";
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { TyranoRenameProvider } from "../subscriptions/TyranoRenameProvider";
@@ -25,7 +26,9 @@ connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      renameProvider: true,
+      renameProvider: {
+        prepareProvider: true,
+      },
       // 他の機能もここで宣言できます
     },
   };
@@ -44,6 +47,16 @@ connection.onRenameRequest((params: RenameParams): WorkspaceEdit => {
     params.position,
     params.newName,
   );
+});
+
+// prepareRenameハンドラーの追加
+connection.onPrepareRename((params: PrepareRenameParams) => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) {
+    return null;
+  }
+
+  return renameProvider.prepareRename(document, params.position);
 });
 
 // Listen on the text document manager and connection
