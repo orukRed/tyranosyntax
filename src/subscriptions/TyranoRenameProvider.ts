@@ -204,6 +204,10 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
 
     const { targetWord, isMacroName } = wordInfo;
 
+    if (targetWord.startsWith("tf.")) {
+      //tf変数ならワークスペース全体への適用はしない
+      return workspaceEdit;
+    }
     // ワークスペース内のすべての.ksファイルを取得
     const ksFiles = await vscode.workspace.findFiles("**/*.ks");
 
