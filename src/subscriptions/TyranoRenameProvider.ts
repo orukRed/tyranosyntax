@@ -25,6 +25,18 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
     const wordRegex = /[a-zA-Z0-9_$.]+/g;
     let match;
 
+    // カーソル位置の行を取得
+    const lineText = document.lineAt(position.line).text.trim();
+
+    //TODO:    リネーム不可な処理の追加、テストコード追加
+    // コメント行（「*」または「;」で始まる行）の場合はリネーム不可
+    if (lineText.startsWith("*")) {
+      throw new Error("ラベルはリネーム不可です");
+    }
+    if (lineText.startsWith(";")) {
+      throw new Error("コメントはリネーム不可です");
+    }
+
     // カーソル位置の単語を検索
     while ((match = wordRegex.exec(text)) !== null) {
       if (match.index <= offset && offset <= match.index + match[0].length) {
@@ -58,7 +70,7 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
       }
     }
 
-    return null;
+    throw new Error("選択箇所はリネーム不可です");
   }
 
   /**
