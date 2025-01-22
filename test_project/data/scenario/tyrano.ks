@@ -3,7 +3,8 @@
 
 ;背景変更マクロ　storage と time を指定する
 [macro name="back"]
-
+[back ]
+@back
 ;@layopt layer=message0 visible=false
 [backlay]
 [image layer=base page=back storage=%storage]
@@ -33,7 +34,7 @@
 ;;;;;;;;;;;;セーブ関係
 
 ;save情報を取得、ptextを継承する
-
+;あ
 [macro name="saveinfo"]
 
 [iscript]
@@ -92,7 +93,8 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 
 
 [endscript]
-f.a=12;
+tf.hoge=12;
+f.hoge=14;
 [cg_image_button]
 ;CGモードのボタンを表示するためのマクロ
 [macro name="cg_image_button"]

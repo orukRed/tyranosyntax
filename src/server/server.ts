@@ -16,7 +16,7 @@ import {
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { TyranoRenameProvider } from "../subscriptions/deprecate/TyranoRenameProvider";
+import { TyranoRenameProvider } from "../subscriptions/deprecate/__TyranoRenameProvider";
 import * as fs from "fs";
 import * as path from "path";
 import { workspace } from "vscode";

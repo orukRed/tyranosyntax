@@ -10,7 +10,7 @@
 
   ;yamato
   [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
-  
+
   [if exp="tf.TYRANO_SYNTAX_PREVIEW==true"]
 
     [cm  ]
@@ -50,7 +50,7 @@
     ;yamato
     [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
   [endif]
-  
+
   ;変数の初期化
   [iscript ]
     f.hoge=0;
