@@ -119,9 +119,9 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
         `(@macro|\\[macro)\\s+name\\s*=\\s*["']${targetWord}["']`,
         "g",
       ),
-      // new RegExp(`\\[${targetWord}\\]`, "g"),
-      new RegExp(`\\[${targetWord}`, "g"),
-      new RegExp(`@${targetWord}`, "g"),
+      // マクロ呼び出しのパターンをより厳密に指定
+      new RegExp(`\\[${targetWord}(\\s|\\])`, "g"), // マクロ呼び出し時は空白、]、=が続く場合のみマッチ
+      new RegExp(`@${targetWord}(\\s|$)`, "g"), // @での呼び出し時は空白か行末が続く場合のみマッチ
     ];
 
     for (const pattern of macroPatterns) {
