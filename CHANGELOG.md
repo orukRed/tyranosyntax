@@ -4,6 +4,15 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.0]- 2025-01-22
+
+- 変数、マクロのリネーム機能を実装しました。[issue#57](https://github.com/orukRed/tyranosyntax/issues/57)
+
+F2でリネームできます。リネームできるものは以下です。
+
+- 変数
+- マクロ
+
 ## [1.2.0]- 2025-01-03
 
 - jsonファイルを最新のものにしました。（wait_preloadタグの追加）
@@ -135,7 +144,7 @@ f.hoge = {
   },
   piyo:[1,2,3],
   fuga:["a","b","c"]
-};  
+};
 ```
 
 ## [0.22.1]- 2024-07-01
@@ -200,9 +209,9 @@ playbgmのstorageパラメータのインテリセンスを出したとき、sou
 
 ## [0.19.6]- 2023-10-15
 
-- プロジェクト読み込み失敗したときに、エラー通知を出すようにしました。  
-本拡張機能はティラノスクリプト内のindex.htmlがあるフォルダを、vscodeのフォルダーを開く機能で開くこと前提のつくりとなっているためです。  
-通知が出るのは以下の場合です。  
+- プロジェクト読み込み失敗したときに、エラー通知を出すようにしました。
+本拡張機能はティラノスクリプト内のindex.htmlがあるフォルダを、vscodeのフォルダーを開く機能で開くこと前提のつくりとなっているためです。
+通知が出るのは以下の場合です。
   - index.htmlがあるフォルダをvscodeで開き、初期設定完了したとき
   - index.htmlがあるフォルダをvscodeで開き、初期設定失敗した際
   - 初期設定完了後、index.htmlがあるフォルダを開いていないとき
@@ -638,5 +647,5 @@ playbgmのstorageパラメータのインテリセンスを出したとき、sou
 
 ## [0.0.1]
 
-シンタックスハイライト追加  
+シンタックスハイライト追加
 スニペット追加

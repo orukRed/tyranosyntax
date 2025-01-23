@@ -44,8 +44,17 @@
 @jump target=&tf.target_page
 
 *page_0
-[cg_image_button graphic="rouka.jpg,room.jpg,title.png" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="room.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
+;動作確認用
+tf.hoge=12;
+[iscript ]
+  f.hoge=13;
+[endscript ]
+[emb exp="f.hoge=14" ]
+[eval exp="f.hoge=15" ]
+mp.hoge=12
+cg_image_button
+[cg_image_button「「「 graphic="rouka.jpg,room.jpg,title.png" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button「「「 graphic="room.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
 
 @jump target="*common"
 
