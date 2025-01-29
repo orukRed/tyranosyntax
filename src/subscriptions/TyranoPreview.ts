@@ -193,6 +193,44 @@ export class TyranoPreview {
                 text[line!].substring(character!);
               data = text.join("\n");
 
+              //lineとcharacterを参考に、そこより前に存在する最も近い[er][cm][ct][p]タグのいずれかが存在する箇所を取得する
+              const parser: Parser = Parser.getInstance();
+              const parsedText = parser.parseText(data);
+              //parsedTextに存在するlineが,変数lineより後ろのものを取り除く
+              const parsedTextFiltered = parsedText.filter((value: any) => {
+                return value.line < line!;
+              });
+              //後ろからforでまわして、parsedTextFiltered[i].nameが[er][cm][ct]のいずれかだったら、そのlineを取得してbreak
+              let clearTagLine = -1;
+              for (let i = parsedTextFiltered.length - 1; i >= 0; i--) {
+                if (
+                  parsedTextFiltered[i].name === "er" ||
+                  parsedTextFiltered[i].name === "cm" ||
+                  parsedTextFiltered[i].name === "ct" ||
+                  parsedTextFiltered[i].name === "p"
+                ) {
+                  clearTagLine = parsedTextFiltered[i].line;
+                  break;
+                }
+              }
+              if (clearTagLine !== -1) {
+                //cmタグがあった前の行に、空っぽにしたtextタグを再度戻すタグを追加する
+                //FIXME:iscriptやendscriptを認識する処理も消えてるから読み込まれていない？
+                const text = data.split("\n");
+                text[clearTagLine] =
+                  text[clearTagLine] +
+                  `
+                \n
+                [iscript]
+                  tf.tyrano_preview_skip=false;                 
+                [endscript]
+                `;
+                data = text.join("\n");
+              }
+
+              //デバッグ用
+              const a = parser.parseText(data);
+              console.log(data);
               // ファイルオブジェクトを作成
               const fileObject = {
                 content: data,

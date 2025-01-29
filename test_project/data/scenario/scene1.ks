@@ -57,7 +57,7 @@
 誰だ！？[p]
 
 ;キャラクター登場
-[chara_show  name="akane"  ]
+[chara_show  name="akane" ]
 #?
 こんにちは。[p]
 私の名前はあかね。[p]

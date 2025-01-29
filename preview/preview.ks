@@ -179,152 +179,30 @@
   TG.ftag.master_tag["wse"] = wse;
 
 
-  const text_tag_bak = TG.ftag.master_tag["text"];
-  const new_text_tag = {
-    //初期値
-    pm: {
-        val: "",
-        backlog: "add" /*バックログ用の文字列。改行するかどうか。add join */,
-    },
+  //const text_tag_bak = TG.ftag.master_tag["text"];
 
-
-    default_message_config: {
-        ch_speed_in_click: "1",
-        effect_speed_in_click: "100ms",
-        edge_overlap_text: "true",
-        speech_bracket_float: "false",
-        speech_margin_left: "false",
-        kerning: "false",
-        line_spacing: "",
-        letter_spacing: "",
-        control_line_break: "false",
-        control_line_break_chars: "、。）」』】,.)]",
-    },
-  
-    getMessageConfig: function (key) {
-    },
-
-    buildIScript: function (pm) {
-        this.kag.ftag.nextOrder();
-    },
-  
-    buildHTML: function (pm) {
-        this.kag.ftag.nextOrder();
-    },
- 
-    setMessageInnerStyle: function (j_inner_message) {
-    },
-
-    autoInsertPageBreak: function (j_inner_message, j_outer_message, is_vertical) {
-
-    },    
-
-    showMessage: function (message_str, is_vertical) {
-    },
-
-    pushTextToBackLog: function (chara_name, message_str) {
-    },
-
-    speechMessage: function (message_str) {
-    },
-
-    setCurrentSpanStyle: function (j_span, chara_name) {
-
-    },
-
-    manageAlreadyRead: function (j_span) {
-  
-    },
-
-    buildMessageHTML: function (message_str, should_use_inline_block = true) {
-        let message_html = "";
-        return message_html;
-    },
-
-    getEscapeChar: function (message_str) {
-        // 999まで見れば大丈夫だろ…
-        for (let i = 34; i < 999; i++) {
-            const c = String.fromCharCode(i);
-            if (!message_str.includes(c)) {
-                return c;
-            }
-        }
-        return "∅";
-    },
-
-    buildTextShadowChar: function (c, edge_str, is_visible = false) {
-        let char_html = "<span>";
-        return char_html + `</span>`;
-    },
-
-    buildTextStrokeChar: function (c, edge_str, is_visible = false) {
-        let char_html = "<span>";
-
-        return char_html + `</span>`;
-    },
-
-    adjustFukiSize: function (j_msg_inner, chara_jname) {
-       
-    },
-
-    adjustCharaFukiSize: function (j_msg_inner, chara_name, chara_obj) {
-       
-    },
-
-    adjustOthersFukiSize: function (j_msg_inner) {
-     
-    },
-
-    makeOneCharVisible: function (j_char_span) {
- 
-    },
-
-    makeAllCharsVisible: function (j_char_span_children) {
-
-    },
-
-    addOneChar: function (char_index, j_char_span_children, j_message_span, j_msg_inner) {
-
-    },
-
-    checkClickInterrupt: function (j_msg_inner) {
-    
-    },
-    finishAddingChars: function () {
-     
-    },
-
-    addChars: function (j_message_span, j_msg_inner, is_vertical) {
-    
-    },
-
-
-    setReverseIndent: function (j_msg_inner, j_children) {
-   
-    },
-
-    controlLineBreak: function (j_char_children, is_vertical) {
-   
-    },
-
-    setFukiStyle: function (j_outer_message, chara_fuki) {
-     
-    },
-
-    startLipSyncWithText() {
-    },
-
-    stopLipSyncWithText() {
-    },
-
-    start: function (pm) {
-      TG.ftag.nextOrder();
-    }
-  }
-  TG.ftag.master_tag["text"] = new_text_tag;
+  //const new_text_tag = TG.ftag.master_tag["text"];
+  //TG.ftag.master_tag["text"] = new_text_tag;
 
   //適当なとこで以下を実行してあげる
   //TG.ftag.master_tag["text"] = text_tag_bak
+
+  //textタグのstartだけ上書きすれば行けると思ったけどうまくいかない
+  let _start=tyrano.plugin.kag.tag.text.start;
+  tyrano.plugin.kag.tag.text.start = function(pm){
+    if (this.kag.stat.is_script == true) {
+        tyrano.plugin.kag.tag.text.buildIScript(pm);
+        return;
+    }    
+
+    if(TYRANO.kag.variable.tf._speedSkip==true){
+        TYRANO.kag.ftag.nextOrder();
+        return;
+    }
+  };
+
+  tf.tyrano_preview_skip = true;
+
 
 };
 [endscript ]
