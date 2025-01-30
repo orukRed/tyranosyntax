@@ -218,7 +218,7 @@ export class TyranoPreview {
               const parsedTextFiltered = parsedText.filter((value: any) => {
                 return value.line < line!;
               });
-              //後ろからforでまわして、parsedTextFiltered[i].nameが[er][cm][ct]のいずれかだったら、そのlineを取得してbreak
+              //後ろからforでまわして、parsedTextFiltered[i].nameが[er][cm][ct][p]のいずれかだったら、そのlineを取得してbreak
               let clearTagLine = -1;
               for (let i = parsedTextFiltered.length - 1; i >= 0; i--) {
                 if (
