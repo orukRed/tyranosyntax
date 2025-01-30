@@ -292,8 +292,10 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
     f.fuga="piyo"
   [endscript ]
   ```
+
 - `tf.TYRANO_SYNTAX_PREVIEW = true`が事前に定義されています。「ラベル開始直後に`position`タグがないけどその場プレビューでメッセージ表示させたい！」等といった場合に`if`タグなどで必要な処理を記述してください。
-- BGM,SEは再生されません。
+- カーソル位置より前に存在するBGM,SEは再生されません。
+  - ただし、カーソル位置より後ろのBGM,SEは再生されます。
 
 > [!NOTE]
 > `TyranoScript syntax.preview.preprocess`はプレビューを開いたときに一度だけ更新されます。<br>

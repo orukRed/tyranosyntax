@@ -4,12 +4,14 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [1.3.0]- 2025-02-1
+## [1.3.0]- 2025-01-31
 
 - その場プレビューの修正を行いました。[issue#229](https://github.com/orukRed/tyranosyntax/issues/229)
   - 特定のタグが高速化されない問題を修正しました。
   - その場プレビュー中に音楽が再生されない問題を修正しました。
     - プレビュー中の画面をクリック後、playbgmなどがある場合に音楽が再生されるようになりました。（カーソルより前の位置にあるplaybgmなどは再生されません）
+  - パフォーマンスを向上させました。
+    - カーソル位置に来るまで高速スキップをしていますが、その間文字を表示させないようにしてカーソル位置にたどり着くまでの速度を上げています。
 
 
 ## [1.3.0]- 2025-01-22
