@@ -92,13 +92,10 @@
 
   //playbgmを改造して、クリック待ちにならないようにする
   const _playbgm = TYRANO.kag.tag.playbgm;
-  var _kag = tyrano.plugin.kag.ftag.master_tag.playbgm.kag;
   TYRANO.kag.tag.playbgm = $.extend(true, {}, _playbgm, {
     waitClick: function (pm) {
       const that = TYRANO;
-      let audio_obj = TYRANO.kag.tmp.map_se[pm.buf];
       //本来の処理
-      // return;
       // _playbgm.waitClick.apply(TYRANO, [pm]);
       that.kag.ftag.nextOrder();
     },
@@ -106,68 +103,33 @@
 
   TYRANO.kag.ftag.master_tag.playbgm = TYRANO.kag.tag.playbgm;
   TYRANO.kag.ftag.master_tag.playbgm.kag = TYRANO.kag;
-})();
-(function () {
-  // tyrano.kag.tmp.ready_audio = true;
-  // TYRANO.kag.tmp.ready_audio = true;
+
+  //TODO:うまくいかないのでコメントアウト
+  //textタグを上書きする
+  // const _text = TYRANO.kag.tag.text;
+  // TYRANO.kag.tag.text = $.extend(true, {}, _text, {
+  //   start: function (pm) {
+  //     const that = TYRANO;
+  //     if (
+  //       TYRANO.kag.stat.is_script == false &&
+  //       TYRANO.kag.variable.tf.is_preview_skip == true
+  //     ) {
+  //       that.kag.ftag.nextOrder();
+  //       return;
+  //     }
+  //     //本来の処理
+  //     // _text.start.bind(TYRANO)(pm);
+  //     _text.start.apply(TYRANO, [pm]);
+  //   },
+  // });
+  // TYRANO.kag.ftag.master_tag.text = TYRANO.kag.tag.text;
+  // TYRANO.kag.ftag.master_tag.text.kag = TYRANO.kag;
 })();
 //音楽系のタグを上書きする
 //今は処理止まりそうなところのみ。他も必要に応じて追加する
 //kag.tmp.ready_audioを強制的にtrueにするだけでもいいかも？
 
 //-----------------------------------------
-//-----------------------------------------
-//-----------------------------------------
-//textタグを上書きする
-//TODO:うまくいかなかったのでコメントアウト
-//const text_tag_bak = TG.ftag.master_tag["text"];
-//const new_text_tag = TG.ftag.master_tag["text"];
-//TG.ftag.master_tag["text"] = new_text_tag;
-//適当なとこで以下を実行してあげる
-//TG.ftag.master_tag["text"] = text_tag_bak
-//textタグのstartだけ上書きすれば行けると思ったけどうまくいかない
-//正しく上書きされていないっぽい？
-// TYRANO.kag.variable.tf.tyrano_preview_skip = true;
-// var temp = tyrano.plugin.kag.tag.text;
-// var _kag = tyrano.plugin.kag.ftag.master_tag.text.kag;
-// tyrano.plugin.kag.tag.text = $.extend(true, {}, temp, {
-//   start: function () {
-//     var that = TYRANO;
-//     var _pm = pm;
-//     var that = TYRANO;
-//     if (
-//       TYRANO.kag.variable.tf.tyrano_preview_skip == true &&
-//       TYRANO.kag.stat.is_script == false
-//     ) {
-//       console.log("cccccccccc");
-//       TYRANO.kag.ftag.nextOrder();
-//       return;
-//     }
-//     if (
-//       TYRANO.kag.variable.tf.tyrano_preview_skip == true &&
-//       TYRANO.kag.stat.is_script == true
-//     ) {
-//       console.log("aaaaaaaaaaa");
-//       temp.start.apply(TYRANO, arguments);
-//       return;
-//     } else {
-//       console.log("bbbbbbbbbb");
-//       TYRANO.kag.ftag.nextOrder();
-//       return;
-//     }
-//   }.bind(TYRANO),
-//   buildIScript: function (pm) {
-//     var that = TYRANO;
-//     var _pm = pm;
-//     temp.buildIScript.apply(TYRANO, arguments);
-//   },
-// });
-// // tyrano.plugin.kag.tag.text = TYRANO.kag.tag.text;
-// // tyrano.plugin.kag.tag.text.kag = TYRANO.kag;
-// // TYRANO.kag.ftag.master_tag.text = TYRANO.kag.tag.text;
-// // TYRANO.kag.ftag.master_tag.text.kag = TYRANO.kag;
-// // tyrano.plugin.kag.ftag.master_tag.text = tyrano.plugin.kag.tag.text;
-// // tyrano.plugin.kag.ftag.master_tag.text.kag = _kag;
 //参考
 //https://note.com/skt_order/n/n99b8e3ee6ac5
 //https://note.com/skt_order/n/n4a856b2015b8

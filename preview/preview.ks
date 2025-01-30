@@ -10,6 +10,7 @@
 [iscript]
   tf._speedSkip = parseInt(mp.speed || 1)
   tf.TYRANO_SYNTAX_PREVIEW = true;//一応プレビュー中かどうかのフラグを立てておく
+  tf.is_preview_skip=false;
   TYRANO.kag.config.skipSpeed = 1;
   TYRANO.kag.config.skipEffectIgnore=true;
   TYRANO.kag.config.chSpee=1;

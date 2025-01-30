@@ -240,7 +240,7 @@ export class TyranoPreview {
                   `
                 \n                
                 [iscript]
-                  tf.tyrano_preview_skip=false;                 
+                  tf.is_preview_skip=false;                 
                 [endscript]
                 `;
                 data = text.join("\n");
