@@ -173,6 +173,15 @@ export class TyranoPreview {
               // ファイルの内容をレスポンスとして送信
               res.send(fileObject.content);
             });
+          } else if (req.path === "/preview_js.js") {
+            const filePath = folderPath + path.sep + "preview_js.js";
+            fs.readFile(filePath, "utf8", (err, data) => {
+              if (err) {
+                return next(err);
+              }
+              res.type("application/javascript");
+              res.send(data);
+            });
           }
           //activeFilePathからprojectPathを切り取った値とreq.pathが一致した場合、そのファイルを返す
           else if (req.path === "/data/scenario/" + scenarioName) {
@@ -181,7 +190,7 @@ export class TyranoPreview {
               if (err) {
                 return next(err);
               }
-              //現在のカーソル位置に[s]タグを挿入する
+              //現在のカーソル位置に[l]タグを挿入する
               const activeEditor = vscode.window.activeTextEditor;
               const cursorPosition = activeEditor?.selection.active;
               const line = cursorPosition?.line;
@@ -189,10 +198,19 @@ export class TyranoPreview {
               const text = data.split("\n");
               text[line!] =
                 text[line!].substring(0, character!) +
-                "\n[skipstop]\n[l]\n" +
+                `\n
+                [skipstop]\n
+                [l]\n
+                [iscript]
+                  TYRANO.kag.config.defaultBgmVolume = tf.defaultBgmVolume;
+                  TYRANO.kag.config.defaultSeVolume = tf.defaultSeVolume;
+                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;                
+                [endscript]
+                ` +
                 text[line!].substring(character!);
               data = text.join("\n");
 
+              //TODO:一時的に[text]タグを無効化して高速化を図る処理 まだ実装途中
               //lineとcharacterを参考に、そこより前に存在する最も近い[er][cm][ct][p]タグのいずれかが存在する箇所を取得する
               const parser: Parser = Parser.getInstance();
               const parsedText = parser.parseText(data);
@@ -220,7 +238,7 @@ export class TyranoPreview {
                 text[clearTagLine] =
                   text[clearTagLine] +
                   `
-                \n
+                \n                
                 [iscript]
                   tf.tyrano_preview_skip=false;                 
                 [endscript]

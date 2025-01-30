@@ -4,6 +4,14 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.0]- 2025-02-1
+
+- その場プレビューの修正を行いました。[issue#229](https://github.com/orukRed/tyranosyntax/issues/229)
+  - 特定のタグが高速化されない問題を修正しました。
+  - その場プレビュー中に音楽が再生されない問題を修正しました。
+    - プレビュー中の画面をクリック後、playbgmなどを使用していた場合音楽が再生されるようになります。
+
+
 ## [1.3.0]- 2025-01-22
 
 - 変数、マクロのリネーム機能を実装しました。[issue#57](https://github.com/orukRed/tyranosyntax/issues/57)

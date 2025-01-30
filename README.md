@@ -379,6 +379,18 @@ Only Japanese and English are supported.
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
+## ライセンス/クレジット
+
+本拡張機能は以下のライブラリを使用しています。
+（以下、敬称略）
+
+### 爆速スキッププラグイン
+
+製作者：さくた
+サークル：さくさくぷんた
+X（旧twitter）：@skt_tyrano
+HP：https://skskpnt.app
+
 ## 免責事項
 
 本ツールを利用したことによって損害・不利益・事故等が
