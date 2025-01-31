@@ -173,6 +173,15 @@ export class TyranoPreview {
               // ファイルの内容をレスポンスとして送信
               res.send(fileObject.content);
             });
+          } else if (req.path === "/preview_js.js") {
+            const filePath = folderPath + path.sep + "preview_js.js";
+            fs.readFile(filePath, "utf8", (err, data) => {
+              if (err) {
+                return next(err);
+              }
+              res.type("application/javascript");
+              res.send(data);
+            });
           }
           //activeFilePathからprojectPathを切り取った値とreq.pathが一致した場合、そのファイルを返す
           else if (req.path === "/data/scenario/" + scenarioName) {
@@ -181,7 +190,7 @@ export class TyranoPreview {
               if (err) {
                 return next(err);
               }
-              //現在のカーソル位置に[s]タグを挿入する
+              //現在のカーソル位置に[l]タグを挿入する
               const activeEditor = vscode.window.activeTextEditor;
               const cursorPosition = activeEditor?.selection.active;
               const line = cursorPosition?.line;
@@ -189,10 +198,57 @@ export class TyranoPreview {
               const text = data.split("\n");
               text[line!] =
                 text[line!].substring(0, character!) +
-                "\n[skipstop]\n[l]\n" +
+                `\n
+                [skipstop]\n
+                [l]\n
+                [iscript]
+                  TYRANO.kag.config.defaultBgmVolume = tf.defaultBgmVolume;
+                  TYRANO.kag.config.defaultSeVolume = tf.defaultSeVolume;
+                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;                
+                [endscript]
+                ` +
                 text[line!].substring(character!);
               data = text.join("\n");
 
+              //TODO:一時的に[text]タグを無効化して高速化を図る処理 まだ実装途中
+              //lineとcharacterを参考に、そこより前に存在する最も近い[er][cm][ct][p]タグのいずれかが存在する箇所を取得する
+              const parser: Parser = Parser.getInstance();
+              const parsedText = parser.parseText(data);
+              //parsedTextに存在するlineが,変数lineより後ろのものを取り除く
+              const parsedTextFiltered = parsedText.filter((value: any) => {
+                return value.line < line!;
+              });
+              //後ろからforでまわして、parsedTextFiltered[i].nameが[er][cm][ct][p]のいずれかだったら、そのlineを取得してbreak
+              let clearTagLine = -1;
+              for (let i = parsedTextFiltered.length - 1; i >= 0; i--) {
+                if (
+                  parsedTextFiltered[i].name === "er" ||
+                  parsedTextFiltered[i].name === "cm" ||
+                  parsedTextFiltered[i].name === "ct" ||
+                  parsedTextFiltered[i].name === "p"
+                ) {
+                  clearTagLine = parsedTextFiltered[i].line;
+                  break;
+                }
+              }
+              if (clearTagLine !== -1) {
+                //cmタグがあった前の行に、空っぽにしたtextタグを再度戻すタグを追加する
+                //FIXME:iscriptやendscriptを認識する処理も消えてるから読み込まれていない？
+                const text = data.split("\n");
+                text[clearTagLine] =
+                  text[clearTagLine] +
+                  `
+                \n                
+                [iscript]
+                  tf.is_preview_skip=false;                 
+                [endscript]
+                `;
+                data = text.join("\n");
+              }
+
+              //デバッグ用
+              const a = parser.parseText(data);
+              console.log(data);
               // ファイルオブジェクトを作成
               const fileObject = {
                 content: data,
