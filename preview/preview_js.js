@@ -9,7 +9,8 @@
    * 変数定義
    */
   let tagName = "";
-  const SKIP_SPEED = TYRANO.kag.variable.tf._speedSkip;
+  // const SKIP_SPEED = TYRANO.kag.variable.tf._speedSkip;
+  const SKIP_SPEED = 1;
 
   //一時変数消しておく
   delete TYRANO.kag.variable.tf._speedSkip;
@@ -31,7 +32,7 @@
   ];
 
   //除外タグリスト
-  const excludeList = ["configdelay"];
+  const excludeList = ["configdelay", "chara_layer", "chara_part"];
 
   /**
    * 関数定義
