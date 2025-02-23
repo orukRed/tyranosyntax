@@ -195,9 +195,9 @@ export class TyranoPreview {
               const cursorPosition = activeEditor?.selection.active;
               const line = cursorPosition?.line;
               const character = cursorPosition?.character;
-              const text = data.split("\n");
-              text[line!] =
-                text[line!].substring(0, character!) +
+              const scenarioText = data.split("\n");
+              scenarioText[line!] =
+                scenarioText[line!].substring(0, character!) +
                 `\n
                 [skipstop]\n
                 [l]\n
@@ -207,10 +207,9 @@ export class TyranoPreview {
                   TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;                
                 [endscript]
                 ` +
-                text[line!].substring(character!);
-              data = text.join("\n");
+                scenarioText[line!].substring(character!);
+              data = scenarioText.join("\n");
 
-              //TODO:一時的に[text]タグを無効化して高速化を図る処理 まだ実装途中
               //lineとcharacterを参考に、そこより前に存在する最も近い[er][cm][ct][p]タグのいずれかが存在する箇所を取得する
               const parser: Parser = Parser.getInstance();
               const parsedText = parser.parseText(data);
@@ -219,7 +218,17 @@ export class TyranoPreview {
                 return value.line < line!;
               });
               //後ろからforでまわして、parsedTextFiltered[i].nameが[er][cm][ct][p]のいずれかだったら、そのlineを取得してbreak
-              let clearTagLine = -1;
+
+              //初期値として、ラベル名が${nearestLabel}の行を取得
+              //これによりラベル以降にcmタグなどがなくてもtf.is_preview_skip=false;を入れることができる
+              const labelLine = parsedText.find((value: any) => {
+                return (
+                  value.name === "label" && value.pm.label_name === nearestLabel
+                );
+              })?.pm.line;
+
+              let clearTagLine = labelLine;
+
               for (let i = parsedTextFiltered.length - 1; i >= 0; i--) {
                 if (
                   parsedTextFiltered[i].name === "er" ||
@@ -231,24 +240,18 @@ export class TyranoPreview {
                   break;
                 }
               }
-              if (clearTagLine !== -1) {
-                //cmタグがあった前の行に、空っぽにしたtextタグを再度戻すタグを追加する
-                //FIXME:iscriptやendscriptを認識する処理も消えてるから読み込まれていない？
-                const text = data.split("\n");
-                text[clearTagLine] =
-                  text[clearTagLine] +
-                  `
-                \n                
+              //cmタグがあった前の行に、空っぽにしたtextタグを再度戻すタグを追加する
+              const modifiedScenarioLines = data.split("\n");
+              modifiedScenarioLines[clearTagLine] =
+                modifiedScenarioLines[clearTagLine] +
+                `
+                \n
                 [iscript]
-                  tf.is_preview_skip=false;                 
+                  tf.is_preview_skip=false;
                 [endscript]
                 `;
-                data = text.join("\n");
-              }
+              data = modifiedScenarioLines.join("\n");
 
-              //デバッグ用
-              const a = parser.parseText(data);
-              console.log(data);
               // ファイルオブジェクトを作成
               const fileObject = {
                 content: data,

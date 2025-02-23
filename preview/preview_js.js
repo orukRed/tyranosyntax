@@ -85,7 +85,9 @@
       }
       if (!pm[key]) {
         //空パラメータ
-        delete pm[key];
+        //何故かこれをコメントアウトすると、大きめの画像に対してchara_showしたときでもchara_topが正しく適用される？
+        //暫定的な対応としてコメントアウト
+        // delete pm[key];
       }
     });
     return pm;
