@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.3]- 2025-02-23
+
+- その場プレビューで画像ファイルが大きい場合にchara_showタグが正しく動作しないことがあったため暫定的な対応を行いました。
+- [cm][p]などがないファイルに対してその場プレビューをしたときの挙動を修正しました。[issue#241](https://github.com/orukRed/tyranosyntax/issues/241)
+
+
 ## [1.3.2]- 2025-02-13
 
 - その場プレビューにてchara_partで止まる不具合があったため、暫定的な対応を行いました。[issue#242](https://github.com/orukRed/tyranosyntax/issues/242)
