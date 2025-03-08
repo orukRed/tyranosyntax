@@ -109,23 +109,22 @@ export function activate(context: ExtensionContext) {
           TyranoLogger.print("TyranoCompletionItemProvider activate");
 
           //ショートカットコマンドの登録
-          const ctbs = new TyranoCreateTagByShortcutKey();
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.shiftEnter",
-              ctbs.KeyPushShiftEnter,
+              TyranoCreateTagByShortcutKey.KeyPushShiftEnter,
             ),
           );
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.ctrlEnter",
-              ctbs.KeyPushCtrlEnter,
+              TyranoCreateTagByShortcutKey.KeyPushCtrlEnter,
             ),
           );
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.altEnter",
-              ctbs.KeyPushAltEnter,
+              TyranoCreateTagByShortcutKey.KeyPushAltEnter,
             ),
           );
           TyranoLogger.print("TyranoCreateTagByShortcutKey activate");

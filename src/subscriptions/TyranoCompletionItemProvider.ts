@@ -29,7 +29,14 @@ export class TyranoCompletionItemProvider
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
   public constructor() {}
-
+  private static readonly JUMP_TAG = [
+    "jump",
+    "call",
+    "link",
+    "button",
+    "glink",
+    "clickable",
+  ];
   private getVariableName(variableValue0: string): string {
     let variableName = "";
     try {
@@ -108,6 +115,8 @@ export class TyranoCompletionItemProvider
           : undefined; //今見てるタグの名前
       const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g"); //今見てるタグの値を取得
       const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/; //変数の正規表現
+      const labelRegExp = /^\s*\*/; //*から始まる行
+
       const regExpResult = leftSideText?.match(regExp2); //「hoge="」を取得できる
       const lineParamName = regExpResult?.[0]
         .replace('"', "")
@@ -141,6 +150,10 @@ export class TyranoCompletionItemProvider
       //カーソルの左隣の文字取得
       if (typeof leftSideText === "string" && /\s*#.*$/.test(leftSideText)) {
         return await this.completionNameParameter(projectPath);
+      }
+      //ラベルから始まる行へのインテリセンス
+      else if (labelRegExp.test(lineText)) {
+        return this.completionLabel2(projectPath);
       } else if (variableValue) {
         const variableKind = variableValue[0].split(".")[0].replace("&", "");
         const variableName = this.getVariableName(variableValue[0]);
@@ -259,6 +272,73 @@ export class TyranoCompletionItemProvider
       );
       TyranoLogger.printStackTrace(error);
     }
+  }
+
+  /**
+   * ラベルへの補完（*から始まる行）
+   * @param projectPath
+   */
+  completionLabel2(
+    projectPath: string,
+  ):
+    | vscode.CompletionItem[]
+    | vscode.CompletionList<vscode.CompletionItem>
+    | PromiseLike<
+        | vscode.CompletionItem[]
+        | vscode.CompletionList<vscode.CompletionItem>
+        | null
+        | undefined
+      >
+    | null
+    | undefined {
+    //現在のファイルでjump, call, button等のタグのcallパラメータで指定されているラベルを取得
+    const parser: Parser = Parser.getInstance();
+    const parsedData = parser.parseText(
+      vscode.window.activeTextEditor?.document.getText()!,
+    );
+
+    const labelList = new Set<string>();
+    const usingLabelList = new Set<string>();
+    //現在のファイル名取得
+    const currentFileName = vscode.window.activeTextEditor?.document.fileName;
+    //プロジェクトパス取得
+
+    parsedData.forEach((data: any) => {
+      if (TyranoCompletionItemProvider.JUMP_TAG.includes(data.name)) {
+        // data.pm.storageにこのファイル以外が指定されているならスキップ
+        const dataPath = projectPath + "/data/scenario/" + data.pm.storage;
+        //dataPathとcurrentFileNameが同じパスであるかを確認
+        const isSamePath = this.infoWs.isSamePath(dataPath, currentFileName!);
+
+        if (!data.pm.storage || isSamePath) {
+          labelList.add(data.pm.target);
+        }
+      }
+      if (data.name === "label") {
+        // data.pm.storageにこのファイル以外が指定されているならスキップ
+        const dataPath = projectPath + "/data/scenario/" + data.pm.storage;
+        //dataPathとcurrentFileNameが同じパスであるかを確認
+        const isSamePath = this.infoWs.isSamePath(dataPath, currentFileName!);
+
+        if (!data.pm.storage || isSamePath) {
+          usingLabelList.add(data.pm.name);
+        }
+      }
+    });
+    
+    //labelListの中から、usingLabelListに存在しないものだけを取得
+    const retCompletions: vscode.CompletionItem[] = [];
+    labelList.forEach((label) => {
+      if (!usingLabelList.has(label)) {
+        const comp = new vscode.CompletionItem(label);
+        comp.kind = vscode.CompletionItemKind.Interface;
+        //labelから*を抜いた値を取得
+        const labelName = label.replace(/^\*/, "");
+        comp.insertText = labelName;
+        retCompletions.push(comp);
+      }
+    });
+    return retCompletions;
   }
 
   /**
@@ -405,7 +485,7 @@ export class TyranoCompletionItemProvider
     return completions;
   }
   /**
-   * ラベルへのインテリセンス
+   * ラベルへのインテリセンス（jumpタグのtargetで指定する値）
    * @param projectPath
    * @param storage storageパラメータで指定した値
    */
