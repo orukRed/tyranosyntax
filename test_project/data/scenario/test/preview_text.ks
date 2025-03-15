@@ -50,9 +50,8 @@
 tf.test_top = 100;
 tf.test_left = 200;
 [endscript ]
-
+*
 #
-
 
 ;chara_showのテストです
 chara_showのテストです。[p]

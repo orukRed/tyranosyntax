@@ -29,5 +29,3 @@ suite("TyranoCompletionItemProvider.provideCompletionItems", () => {
   test("異常系 completionTag", () => {});
   test("異常系 completionParameter", () => {});
 });
-
-

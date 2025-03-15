@@ -5,7 +5,7 @@ export class TyranoCreateTagByShortcutKey {
    * shift + Enterで実行されるコマンド
    * @returns true:正常終了 else:異常終了
    */
-  KeyPushShiftEnter(): boolean {
+  public static KeyPushShiftEnter(): boolean {
     const text: string | undefined = vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.keyboard.shift + enter");
@@ -34,7 +34,7 @@ export class TyranoCreateTagByShortcutKey {
    * ctrl + Enter(cmd + enter)で実行されるコマンド
    * @returns true:正常終了 else:異常終了
    */
-  KeyPushCtrlEnter(): boolean {
+  public static KeyPushCtrlEnter(): boolean {
     const text: string | undefined = vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.keyboard.ctrl + enter(cmd + enter)");
@@ -63,7 +63,7 @@ export class TyranoCreateTagByShortcutKey {
    * alt + Enter(option + enter)で実行されるコマンド
    * @returns true:正常終了 else:異常終了
    */
-  KeyPushAltEnter(): boolean {
+  public static KeyPushAltEnter(): boolean {
     const text: string | undefined = vscode.workspace
       .getConfiguration()
       .get("TyranoScript syntax.keyboard.alt + enter(option + enter)");
