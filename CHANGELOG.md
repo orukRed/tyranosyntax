@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.4.0]- 2025-3-xx
+
+- ラベルから始まる行へでタグ補完できるようにしました。
+- 
+
 ## [1.3.3]- 2025-02-23
 
 - その場プレビューで画像ファイルが大きい場合にchara_showタグが正しく動作しないことがあったため暫定的な対応を行いました。

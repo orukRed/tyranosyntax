@@ -23,9 +23,7 @@ type SuggestionsByTag = {
   };
 };
 
-export class TyranoCompletionItemProvider
-  implements vscode.CompletionItemProvider
-{
+export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
   public constructor() {}
@@ -291,7 +289,6 @@ export class TyranoCompletionItemProvider
       >
     | null
     | undefined {
-    //現在のファイルでjump, call, button等のタグのcallパラメータで指定されているラベルを取得
     const parser: Parser = Parser.getInstance();
     const parsedData = parser.parseText(
       vscode.window.activeTextEditor?.document.getText()!,
@@ -325,7 +322,10 @@ export class TyranoCompletionItemProvider
         }
       }
     });
-    
+
+
+
+
     //labelListの中から、usingLabelListに存在しないものだけを取得
     const retCompletions: vscode.CompletionItem[] = [];
     labelList.forEach((label) => {
@@ -339,6 +339,58 @@ export class TyranoCompletionItemProvider
       }
     });
     return retCompletions;
+
+    return null;
+
+    //FIXME:リファクタリング必要現在のコードだと他ファイルでtarget定義した時が無理
+    // //現在のファイルでjump, call, button等のタグのcallパラメータで指定されているラベルを取得
+    // const parser: Parser = Parser.getInstance();
+    // const parsedData = parser.parseText(
+    //   vscode.window.activeTextEditor?.document.getText()!,
+    // );
+
+    // const labelList = new Set<string>();
+    // const usingLabelList = new Set<string>();
+    // //現在のファイル名取得
+    // const currentFileName = vscode.window.activeTextEditor?.document.fileName;
+    // //プロジェクトパス取得
+
+    // parsedData.forEach((data: any) => {
+    //   if (TyranoCompletionItemProvider.JUMP_TAG.includes(data.name)) {
+    //     // data.pm.storageにこのファイル以外が指定されているならスキップ
+    //     const dataPath = projectPath + "/data/scenario/" + data.pm.storage;
+    //     //dataPathとcurrentFileNameが同じパスであるかを確認
+    //     const isSamePath = this.infoWs.isSamePath(dataPath, currentFileName!);
+
+    //     if (!data.pm.storage || isSamePath) {
+    //       labelList.add(data.pm.target);
+    //     }
+    //   }
+    //   if (data.name === "label") {
+    //     // data.pm.storageにこのファイル以外が指定されているならスキップ
+    //     const dataPath = projectPath + "/data/scenario/" + data.pm.storage;
+    //     //dataPathとcurrentFileNameが同じパスであるかを確認
+    //     const isSamePath = this.infoWs.isSamePath(dataPath, currentFileName!);
+
+    //     if (!data.pm.storage || isSamePath) {
+    //       usingLabelList.add(data.pm.name);
+    //     }
+    //   }
+    // });
+
+    // //labelListの中から、usingLabelListに存在しないものだけを取得
+    // const retCompletions: vscode.CompletionItem[] = [];
+    // labelList.forEach((label) => {
+    //   if (!usingLabelList.has(label)) {
+    //     const comp = new vscode.CompletionItem(label);
+    //     comp.kind = vscode.CompletionItemKind.Interface;
+    //     //labelから*を抜いた値を取得
+    //     const labelName = label.replace(/^\*/, "");
+    //     comp.insertText = labelName;
+    //     retCompletions.push(comp);
+    //   }
+    // });
+    // return retCompletions;
   }
 
   /**
