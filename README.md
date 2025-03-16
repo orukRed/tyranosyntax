@@ -381,6 +381,12 @@ Only Japanese and English are supported.
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
+## アイコン提供
+
+（敬称略）
+アポ（@apo490）
+
+
 ## ライセンス/クレジット
 
 本拡張機能は以下のライブラリを使用しています。

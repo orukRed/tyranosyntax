@@ -25,7 +25,7 @@
     "3d_anim": {
         "prefix": "3d_anim",
         "body": [
-            "[3d_anim name=\"\" pos=\"\" rot=\"\" scale=\"\" time=\"\" wait=\"\" lookat=\"\" effect=\"\" cond=\"\"]"
+            "[3d_anim name=\"\" pos=\"\" rot=\"\" scale=\"\" time=\"\" wait=\"\" relative=\"\" loop=\"\" direction=\"\" lookat=\"\" effect=\"\" cond=\"\"]"
         ],
         "description": [
             "シーン上の3Dオブジェクトをアニメーションさせることができます。",
@@ -42,11 +42,17 @@
             "    アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。",
             "  wait:",
             "    アニメーションの完了を待つか否か。true or false デフォルトはtrueです。",
+            "  relative:",
+            "    true or false を指定します。デフォルトはfalse。trueにすると相対座標指定になります。",
+            "  loop:",
+            "    アニメーションのループ回数を指定します。trueを指定すると永久にループします。",
+            "  direction:",
+            "    「alternate」「inifinite」「reverse」 を指定します。デフォルトは「alternate」ループの仕方が指定できます。",
             "  lookat:",
-            "    ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。",
+            "    cameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。",
             "  effect:",
             "    変化のエフェクトを指定します。指定できる文字列は以下の種類です",
-            "    jswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
+            "    swing｜linear｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
@@ -83,7 +89,7 @@
             "  name[必須]:",
             "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
             "  texture:",
-            "    表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます",
+            "    表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適用することもできます",
             "  color:",
             "    色を指定できます。0xRRGGBB 形式で指定します。",
             "  width:",
@@ -166,34 +172,6 @@
             "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
         ]
     },
-    "3d_clone": {
-        "prefix": "3d_clone",
-        "body": [
-            "[3d_clone name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" cond=\"\"]"
-        ],
-        "description": [
-            "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
-            "[パラメータ]",
-            "  name[必須]:",
-            "    3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください",
-            "  time:",
-            "    表示させるまでの時間をミリ秒で指定します。デフォルトは500",
-            "  wait:",
-            "    表示の完了を待つか否か。デフォルトはtrue。",
-            "  pos:",
-            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
-            "  rot:",
-            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
-            "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
-            "  cond:",
-            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
-            "[サンプルコード]",
-            ";3Dイメージ",
-            "[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] ",
-            "[3d_show name=\"myimg\" ]"
-        ]
-    },
     "3d_close": {
         "prefix": "3d_close",
         "body": [
@@ -208,6 +186,43 @@
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
             ""
+        ]
+    },
+    "3d_cylinder_new": {
+        "prefix": "3d_cylinder_new",
+        "body": [
+            "[3d_cylinder_new name=\"\" texture=\"\" color=\"\" pos=\"\" rot=\"\" scale=\"\" segment=\"\" width=\"\" height=\"\" side=\"\" tonemap=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "円柱の3Dモデルを定義します",
+            "[パラメータ]",
+            "  name[必須]:",
+            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
+            "  texture:",
+            "    球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。",
+            "  color:",
+            "    色を指定できます。0xRRGGBB 形式で指定します。",
+            "  pos:",
+            "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
+            "  rot:",
+            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
+            "  scale:",
+            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
+            "  segment:",
+            "    円の細かさを指定します。数値が増えるほど円に近くなります。デフォルトは10",
+            "  width:",
+            "    円柱の横幅を指定します。デフォルトは10",
+            "  height:",
+            "    円柱の高さを指定します。デフォルトは20",
+            "  side:",
+            "    テクスチャをどの面に適用するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront",
+            "  tonemap:",
+            "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            "[3d_cylinder_new name=\"tama\" ]",
+            "[3d_show name=tama pos=\"365,145,0\" rot=\"0.92,-4.3,0\" scale=\"0.77,0.77,0.77\" time=2000]"
         ]
     },
     "3d_debug": {
@@ -618,7 +633,7 @@
     "3d_init": {
         "prefix": "3d_init",
         "body": [
-            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\" debug_option=\"\" cond=\"\"]"
+            "[3d_init layer=\"\" camera=\"\" near=\"\" far=\"\" material_type=\"\" ambient_light=\"\" directional_light=\"\" antialias=\"\" debug_option=\"\" cond=\"\"]"
         ],
         "description": [
             "3D関連の機能を使用するために必要な宣言です。",
@@ -633,6 +648,14 @@
             "    カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１",
             "  far:",
             "    カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000",
+            "  material_type:",
+            "    シーンで利用するマテリアルの性質を指定します。デフォルトはbasic。basic（軽量だが光の表現無効）lambert（光の表現可能）standard（光の表現に加えて反射やメタリックにも対応）",
+            "  ambient_light:",
+            "    環境光の強さを数字で指定します。すべての面に均等に当たる光です。デフォルトは1",
+            "  directional_light:",
+            "    特定の方向から放射される光の強さ。太陽の光をイメージするとわかりやすい。デフォルトは0",
+            "  antialias:",
+            "    アンチエイリアスの設定。true or false を指定します。デフォルトはtrue",
             "  debug_option:",
             "    自分のいるポジション座標を画面に表示するか否か",
             "  cond:",
@@ -664,7 +687,7 @@
             "  tonemap:",
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
             "  motion:",
-            "    ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。",
+            "    ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適用されます。noneを指定するとアニメーションは適用されません",
             "  folder:",
             "    ファイルの配置フォルダを変更できます。",
             "  cond:",
@@ -744,7 +767,7 @@
     "3d_show": {
         "prefix": "3d_show",
         "body": [
-            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" group=\"\" group_uuid=\"\" force_sprite=\"\" visible=\"\" cond=\"\"]"
+            "[3d_show name=\"\" time=\"\" wait=\"\" pos=\"\" rot=\"\" scale=\"\" group=\"\" group_uuid=\"\" force_sprite=\"\" scene_add=\"\" visible=\"\" cond=\"\"]"
         ],
         "description": [
             "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
@@ -767,6 +790,8 @@
             "    シーン中でuuidを指定してグループの直下に追加することが可能です",
             "  force_sprite:",
             "    該当オブジェクトは強制的にスプライトグループに格納されます。",
+            "  scene_add:",
+            "    デフォルトfalse ここがtrueの場合はsceneに直接追加される",
             "  visible:",
             "    true or false を指定。初期状態で非表示状態でシーンに追加したい場合はfalseを指定。",
             "  cond:",
@@ -780,30 +805,25 @@
     "3d_sound": {
         "prefix": "3d_sound",
         "body": [
-            "[3d_sound name=\"\" text=\"\" pos=\"\" rot=\"\" scale=\"\" size=\"\" sprite=\"\" cond=\"\"]"
+            "[3d_sound name=\"\" target_name=\"\" pos=\"\" loop=\"\" volume=\"\" cond=\"\"]"
         ],
         "description": [
-            "3D空間にテキストを表示できます。",
+            "3D空間に音を配置することができます。",
             "[パラメータ]",
             "  name:",
-            "    3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。",
-            "  text:",
-            "    表示するテキスト文字列を指定します",
+            "    オブジェクト名。この名前をつかって表示・非表示などの制御を行います。",
+            "  target_name:",
+            "    このオブジェクトがある場所で鳴らします。",
             "  pos:",
             "    3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。",
-            "  rot:",
-            "    3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。",
-            "  scale:",
-            "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
-            "  size:",
-            "    フォントサイズ。デフォルトは42",
-            "  sprite:",
-            "    true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse",
+            "  loop:",
+            "    trueを指定すると繰り返し鳴らします。デフォルトはtrue",
+            "  volume:",
+            "    音量を指定できます。0〜1",
             "  cond:",
             "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
             "[サンプルコード]",
-            "[3d_new_text name=\"text1\" text=\"あああ\" ]",
-            "[3d_show name=\"text1\"]"
+            ""
         ]
     },
     "3d_sphere_new": {
@@ -833,7 +853,7 @@
             "  height:",
             "    球体の高さを指定します。デフォルトは30",
             "  side:",
-            "    テクスチャをどの面に適応するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront",
+            "    テクスチャをどの面に適用するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront",
             "  tonemap:",
             "    トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。",
             "  cond:",
@@ -876,7 +896,7 @@
     "3d_text_new": {
         "prefix": "3d_text_new",
         "body": [
-            "[3d_text_new name=\"\" text=\"\" pos=\"\" rot=\"\" scale=\"\" size=\"\" sprite=\"\" cond=\"\"]"
+            "[3d_text_new name=\"\" text=\"\" pos=\"\" rot=\"\" scale=\"\" size=\"\" color=\"\" face=\"\" sprite=\"\" cond=\"\"]"
         ],
         "description": [
             "3D空間にテキストを表示できます。",
@@ -893,6 +913,10 @@
             "    3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。",
             "  size:",
             "    フォントサイズ。デフォルトは42",
+            "  color:",
+            "    色を指定できます。0xRRGGBB 形式で指定します。",
+            "  face:",
+            "    フォントの種類を指定できます",
             "  sprite:",
             "    true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse",
             "  cond:",
@@ -4847,6 +4871,46 @@
             "",
             ";自由に引数を渡すことも可能",
             "[plugin name=\"my_plugin\" font_color=\"black\" arg2=\"aaaaaa\" ]"
+        ]
+    },
+    "popopo": {
+        "prefix": "popopo",
+        "body": [
+            "[popopo type=\"\" volume=\"\" time=\"\" tailtime=\"\" frequency=\"\" octave=\"\" samplerate=\"\" buf=\"\" storage=\"\" mode=\"\" noplaychars=\"\" interval=\"\" chara=\"\" cond=\"\"]"
+        ],
+        "description": [
+            "テキストに合わせてポポポという電子音を流すことができます。",
+            "[パラメータ]",
+            "  type:",
+            "    7つのキーワードsine/square/sawtooth/triangle/noise/file/noneのいずれかで指定します。順に、正弦波/矩形波/のこぎり波/三角波/ホワイトノイズ/音声ファイル再生/再生しない、を意味します。",
+            "  volume:",
+            "    音の大きさ。0～100の数値またはキーワードdefaultで指定します。defaultを指定すると、コンフィグのSE効果音量を参照します。",
+            "  time:",
+            "    ポポポ音の長さをミリ秒で指定します。typeがfileの場合は無意味。デフォルトは20。",
+            "  tailtime:",
+            "    ポポポ音のフェードアウト時間をミリ秒で指定します。typeがfileの場合は無意味。デフォルトは30。",
+            "  frequency:",
+            "    ポポポ音の音程。A/A+/B/B+/C/C+/D/D+/E/E+/F/F+/G/G+のいずれかのキーワードで指定します。それぞれラ/ラ♯/……/ソ/ソ♯を意味します。なお、typeがfileあるいはtypeがnoiseの場合は無意味。",
+            "  octave:",
+            "    音(オクターブ)の高さを整数で指定します。デフォルトは0。1増減させるごとに隣のオクターブに移動します。typeがfileあるいはtypeがnoiseの場合は無意味。",
+            "  samplerate:",
+            "    ポポポ音のサンプルレート。typeがnoiseの場合のみ機能します。初期値は44000。3000以上、192000以下でなければなりません。",
+            "  buf:",
+            "    typeがfileの場合のみ機能します。再生するスロットを整数で指定します。",
+            "  storage:",
+            "    type=fileの場合のみ機能します。再生する音声ファイル名を指定します。",
+            "  mode:",
+            "    everyone/intervalのどちらかのキーワードで指定します。順に、ポポポ音を文字毎に鳴らす/文字に関係なく一定の間隔で鳴らす、を意味します。デフォルトはeveryone。",
+            "  noplaychars:",
+            "    modeがeveryoneの場合のみ機能します。ポポポ音を鳴らさない文字を指定できます。デフォルトは\"…・、。「」（）　 \"。",
+            "  interval:",
+            "    modeがintervalの場合のみ機能します。ポポポ音を鳴らす間隔をミリ秒で指定します。デフォルトは80。",
+            "  chara:",
+            "    キャラクター名を指定できます。このキャラクターが話しているときだけ、ポポポ音を適用できます。",
+            "  cond:",
+            "    JS式を記述して、その結果が真の場合のみタグが実行されます。",
+            "[サンプルコード]",
+            ""
         ]
     },
     "position": {

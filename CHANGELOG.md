@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.4]- 2025-03-16
+
+- v601dで追加されたタグに対応しました。
+
 ## [1.3.3]- 2025-02-23
 
 - その場プレビューで画像ファイルが大きい場合にchara_showタグが正しく動作しないことがあったため暫定的な対応を行いました。

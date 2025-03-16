@@ -60,14 +60,29 @@
                 "description": "アニメーションの完了を待つか否か。true or false デフォルトはtrueです。"
             },
             {
+                "name": "relative",
+                "required": false,
+                "description": "true or false を指定します。デフォルトはfalse。trueにすると相対座標指定になります。"
+            },
+            {
+                "name": "loop",
+                "required": false,
+                "description": "アニメーションのループ回数を指定します。trueを指定すると永久にループします。"
+            },
+            {
+                "name": "direction",
+                "required": false,
+                "description": "「alternate」「inifinite」「reverse」 を指定します。デフォルトは「alternate」ループの仕方が指定できます。"
+            },
+            {
                 "name": "lookat",
                 "required": false,
-                "description": "ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。"
+                "description": "cameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。"
             },
             {
                 "name": "effect",
                 "required": false,
-                "description": "変化のエフェクトを指定します。指定できる文字列は以下の種類です\njswing｜def｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce"
+                "description": "変化のエフェクトを指定します。指定できる文字列は以下の種類です\nswing｜linear｜easeInQuad｜easeOutQuad｜easeInOutQuad｜easeInCubic｜easeOutCubic｜easeInOutCubic｜easeInQuart｜easeOutQuart｜easeInOutQuart｜easeInQuint｜easeOutQuint｜easeInOutQuint｜easeInSine｜easeOutSine｜easeInOutSine｜easeInExpo｜easeOutExpo｜easeInOutExpo｜easeInCirc｜easeOutCirc｜easeInOutCirc｜easeInElastic｜easeOutElastic｜easeInOutElastic｜easeInBack｜easeOutBack｜easeInOutBack｜easeInBounce｜easeOutBounce｜easeInOutBounce"
             },
             {
                 "name": "cond",
@@ -115,7 +130,7 @@
             {
                 "name": "texture",
                 "required": false,
-                "description": "表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます"
+                "description": "表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適用することもできます"
             },
             {
                 "name": "color",
@@ -227,26 +242,40 @@
         ],
         "sample": "time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。"
     },
-    "3d_clone": {
-        "name": "3d_clone",
-        "summary": "3Dオブジェクト表示",
+    "3d_close": {
+        "name": "3d_close",
+        "summary": "3Dシーン削除",
         "category": "3D関連",
-        "description": "定義した3Dオブジェクトを実際にゲーム画面に登場させます。",
+        "description": "3Dシーンをすべて削除します。\nこのタグを使用すると3D系の機能は全て使えなくなります。\nもう一度使用する場合は[3d_init]タグを通過させてください。",
+        "parameters": [
+            {
+                "name": "cond",
+                "required": false,
+                "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
+            }
+        ],
+        "sample": ""
+    },
+    "3d_cylinder_new": {
+        "name": "3d_cylinder_new",
+        "summary": "3Dモデル(円柱)",
+        "category": "3D関連",
+        "description": "円柱の3Dモデルを定義します",
         "parameters": [
             {
                 "name": "name",
                 "required": true,
-                "description": "3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください"
+                "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。"
             },
             {
-                "name": "time",
+                "name": "texture",
                 "required": false,
-                "description": "表示させるまでの時間をミリ秒で指定します。デフォルトは500"
+                "description": "球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。"
             },
             {
-                "name": "wait",
+                "name": "color",
                 "required": false,
-                "description": "表示の完了を待つか否か。デフォルトはtrue。"
+                "description": "色を指定できます。0xRRGGBB 形式で指定します。"
             },
             {
                 "name": "pos",
@@ -264,26 +293,37 @@
                 "description": "3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。"
             },
             {
-                "name": "cond",
+                "name": "segment",
                 "required": false,
-                "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
-            }
-        ],
-        "sample": ";3Dイメージ\n[3d_image_new name=\"myimg\" texture=\"room.jpg\" width=200 doubleside=true ] \n[3d_show name=\"myimg\" ]"
-    },
-    "3d_close": {
-        "name": "3d_close",
-        "summary": "3Dシーン削除",
-        "category": "3D関連",
-        "description": "3Dシーンをすべて削除します。\nこのタグを使用すると3D系の機能は全て使えなくなります。\nもう一度使用する場合は[3d_init]タグを通過させてください。",
-        "parameters": [
+                "description": "円の細かさを指定します。数値が増えるほど円に近くなります。デフォルトは10"
+            },
+            {
+                "name": "width",
+                "required": false,
+                "description": "円柱の横幅を指定します。デフォルトは10"
+            },
+            {
+                "name": "height",
+                "required": false,
+                "description": "円柱の高さを指定します。デフォルトは20"
+            },
+            {
+                "name": "side",
+                "required": false,
+                "description": "テクスチャをどの面に適用するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront"
+            },
+            {
+                "name": "tonemap",
+                "required": false,
+                "description": "トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。"
+            },
             {
                 "name": "cond",
                 "required": false,
                 "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
             }
         ],
-        "sample": ""
+        "sample": "[3d_cylinder_new name=\"tama\" ]\n[3d_show name=tama pos=\"365,145,0\" rot=\"0.92,-4.3,0\" scale=\"0.77,0.77,0.77\" time=2000]"
     },
     "3d_debug": {
         "name": "3d_debug",
@@ -741,6 +781,26 @@
                 "description": "カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000"
             },
             {
+                "name": "material_type",
+                "required": false,
+                "description": "シーンで利用するマテリアルの性質を指定します。デフォルトはbasic。basic（軽量だが光の表現無効）lambert（光の表現可能）standard（光の表現に加えて反射やメタリックにも対応）"
+            },
+            {
+                "name": "ambient_light",
+                "required": false,
+                "description": "環境光の強さを数字で指定します。すべての面に均等に当たる光です。デフォルトは1"
+            },
+            {
+                "name": "directional_light",
+                "required": false,
+                "description": "特定の方向から放射される光の強さ。太陽の光をイメージするとわかりやすい。デフォルトは0"
+            },
+            {
+                "name": "antialias",
+                "required": false,
+                "description": "アンチエイリアスの設定。true or false を指定します。デフォルトはtrue"
+            },
+            {
                 "name": "debug_option",
                 "required": false,
                 "description": "自分のいるポジション座標を画面に表示するか否か"
@@ -792,7 +852,7 @@
             {
                 "name": "motion",
                 "required": false,
-                "description": "ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。"
+                "description": "ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適用されます。noneを指定するとアニメーションは適用されません"
             },
             {
                 "name": "folder",
@@ -931,6 +991,11 @@
                 "description": "該当オブジェクトは強制的にスプライトグループに格納されます。"
             },
             {
+                "name": "scene_add",
+                "required": false,
+                "description": "デフォルトfalse ここがtrueの場合はsceneに直接追加される"
+            },
+            {
                 "name": "visible",
                 "required": false,
                 "description": "true or false を指定。初期状態で非表示状態でシーンに追加したい場合はfalseを指定。"
@@ -945,19 +1010,19 @@
     },
     "3d_sound": {
         "name": "3d_sound",
-        "summary": "3Dテキスト",
+        "summary": "3Dサウンド",
         "category": "3D関連",
-        "description": "3D空間にテキストを表示できます。",
+        "description": "3D空間に音を配置することができます。",
         "parameters": [
             {
                 "name": "name",
                 "required": false,
-                "description": "3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。"
+                "description": "オブジェクト名。この名前をつかって表示・非表示などの制御を行います。"
             },
             {
-                "name": "text",
+                "name": "target_name",
                 "required": false,
-                "description": "表示するテキスト文字列を指定します"
+                "description": "このオブジェクトがある場所で鳴らします。"
             },
             {
                 "name": "pos",
@@ -965,24 +1030,14 @@
                 "description": "3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。"
             },
             {
-                "name": "rot",
+                "name": "loop",
                 "required": false,
-                "description": "3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。"
+                "description": "trueを指定すると繰り返し鳴らします。デフォルトはtrue"
             },
             {
-                "name": "scale",
+                "name": "volume",
                 "required": false,
-                "description": "3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。"
-            },
-            {
-                "name": "size",
-                "required": false,
-                "description": "フォントサイズ。デフォルトは42"
-            },
-            {
-                "name": "sprite",
-                "required": false,
-                "description": "true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse"
+                "description": "音量を指定できます。0〜1"
             },
             {
                 "name": "cond",
@@ -990,7 +1045,7 @@
                 "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
             }
         ],
-        "sample": "[3d_new_text name=\"text1\" text=\"あああ\" ]\n[3d_show name=\"text1\"]"
+        "sample": ""
     },
     "3d_sphere_new": {
         "name": "3d_sphere_new",
@@ -1046,7 +1101,7 @@
             {
                 "name": "side",
                 "required": false,
-                "description": "テクスチャをどの面に適応するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront"
+                "description": "テクスチャをどの面に適用するかを指定できます。front(前面) back（背面）double（両面）。デフォルトはfront"
             },
             {
                 "name": "tonemap",
@@ -1145,6 +1200,16 @@
                 "name": "size",
                 "required": false,
                 "description": "フォントサイズ。デフォルトは42"
+            },
+            {
+                "name": "color",
+                "required": false,
+                "description": "色を指定できます。0xRRGGBB 形式で指定します。"
+            },
+            {
+                "name": "face",
+                "required": false,
+                "description": "フォントの種類を指定できます"
             },
             {
                 "name": "sprite",
@@ -6410,6 +6475,85 @@
             }
         ],
         "sample": ";プラグイン my_plugin を読み込み\n[plugin name=\"my_plugin\" ]\n;↑ data/others/plugin/my_plugin/init.ks にジャンプしているよ\n\n;自由に引数を渡すことも可能\n[plugin name=\"my_plugin\" font_color=\"black\" arg2=\"aaaaaa\" ]"
+    },
+    "popopo": {
+        "name": "popopo",
+        "summary": "ポポポ音再生",
+        "category": "オーディオ",
+        "description": "テキストに合わせてポポポという電子音を流すことができます。",
+        "parameters": [
+            {
+                "name": "type",
+                "required": false,
+                "description": "7つのキーワードsine/square/sawtooth/triangle/noise/file/noneのいずれかで指定します。順に、正弦波/矩形波/のこぎり波/三角波/ホワイトノイズ/音声ファイル再生/再生しない、を意味します。"
+            },
+            {
+                "name": "volume",
+                "required": false,
+                "description": "音の大きさ。0～100の数値またはキーワードdefaultで指定します。defaultを指定すると、コンフィグのSE効果音量を参照します。"
+            },
+            {
+                "name": "time",
+                "required": false,
+                "description": "ポポポ音の長さをミリ秒で指定します。typeがfileの場合は無意味。デフォルトは20。"
+            },
+            {
+                "name": "tailtime",
+                "required": false,
+                "description": "ポポポ音のフェードアウト時間をミリ秒で指定します。typeがfileの場合は無意味。デフォルトは30。"
+            },
+            {
+                "name": "frequency",
+                "required": false,
+                "description": "ポポポ音の音程。A/A+/B/B+/C/C+/D/D+/E/E+/F/F+/G/G+のいずれかのキーワードで指定します。それぞれラ/ラ♯/……/ソ/ソ♯を意味します。なお、typeがfileあるいはtypeがnoiseの場合は無意味。"
+            },
+            {
+                "name": "octave",
+                "required": false,
+                "description": "音(オクターブ)の高さを整数で指定します。デフォルトは0。1増減させるごとに隣のオクターブに移動します。typeがfileあるいはtypeがnoiseの場合は無意味。"
+            },
+            {
+                "name": "samplerate",
+                "required": false,
+                "description": "ポポポ音のサンプルレート。typeがnoiseの場合のみ機能します。初期値は44000。3000以上、192000以下でなければなりません。"
+            },
+            {
+                "name": "buf",
+                "required": false,
+                "description": "typeがfileの場合のみ機能します。再生するスロットを整数で指定します。"
+            },
+            {
+                "name": "storage",
+                "required": false,
+                "description": "type=fileの場合のみ機能します。再生する音声ファイル名を指定します。"
+            },
+            {
+                "name": "mode",
+                "required": false,
+                "description": "everyone/intervalのどちらかのキーワードで指定します。順に、ポポポ音を文字毎に鳴らす/文字に関係なく一定の間隔で鳴らす、を意味します。デフォルトはeveryone。"
+            },
+            {
+                "name": "noplaychars",
+                "required": false,
+                "description": "modeがeveryoneの場合のみ機能します。ポポポ音を鳴らさない文字を指定できます。デフォルトは\"…・、。「」（）　 \"。"
+            },
+            {
+                "name": "interval",
+                "required": false,
+                "description": "modeがintervalの場合のみ機能します。ポポポ音を鳴らす間隔をミリ秒で指定します。デフォルトは80。"
+            },
+            {
+                "name": "chara",
+                "required": false,
+                "description": "キャラクター名を指定できます。このキャラクターが話しているときだけ、ポポポ音を適用できます。"
+            },
+            {
+                "name": "cond",
+                "required": false,
+                "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
+            }
+        ],
+        "sample": ""
     },
     "position": {
         "name": "position",
