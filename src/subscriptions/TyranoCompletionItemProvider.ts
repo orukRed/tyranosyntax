@@ -29,6 +29,12 @@ export class TyranoCompletionItemProvider
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
   public constructor() {}
+  private tagParams: {
+    [s: string]: { [s: string]: { type: string[]; path: string } };
+  } = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tag.parameter")!;
+
 
   private getVariableName(variableValue0: string): string {
     let variableName = "";
@@ -93,11 +99,6 @@ export class TyranoCompletionItemProvider
       const parsedData = this.parser.parseText(lineText);
       const tagIndex = this.parser.getIndex(parsedData, position.character);
 
-      const tagParams: {
-        [s: string]: { [s: string]: { type: string[]; path: string } };
-      } = await vscode.workspace
-        .getConfiguration()
-        .get("TyranoScript syntax.tag.parameter")!;
       const leftSideText =
         parsedData[tagIndex] !== undefined
           ? lineText.substring(parsedData[tagIndex]["column"], cursor)
@@ -115,7 +116,7 @@ export class TyranoCompletionItemProvider
         .trim(); //今見てるパラメータの名前
       const paramInfo =
         (lineParamName !== undefined &&
-          tagParams?.[lineTagName]?.[lineParamName]) ||
+          this.tagParams?.[lineTagName]?.[lineParamName]) ||
         undefined; //今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
       const variableValue = variableRegExp.exec(leftSideText!);
       const characterOperationTagList = [

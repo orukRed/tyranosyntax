@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.4.0]- 2025-03-25
+
+- playbgmタグなどでstorageパラメータに指定したファイルが存在しない場合、エラーとして扱うようにしました。[issue#248]
+
 ## [1.3.4]- 2025-03-16
 
 - v601dで追加されたタグに対応しました。
@@ -13,11 +17,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - その場プレビューで画像ファイルが大きい場合にchara_showタグが正しく動作しないことがあったため暫定的な対応を行いました。
 - [cm][p]などがないファイルに対してその場プレビューをしたときの挙動を修正しました。[issue#241](https://github.com/orukRed/tyranosyntax/issues/241)
 
-
 ## [1.3.2]- 2025-02-13
 
 - その場プレビューにてchara_partで止まる不具合があったため、暫定的な対応を行いました。[issue#242](https://github.com/orukRed/tyranosyntax/issues/242)
-
 
 ## [1.3.1]- 2025-01-31
 
@@ -27,7 +29,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
     - プレビュー中の画面をクリック後、playbgmなどがある場合に音楽が再生されるようになりました。（カーソルより前の位置にあるplaybgmなどは再生されません）
   - パフォーマンスを向上させました。
     - カーソル位置に来るまで高速スキップをしていますが、その間文字を表示させないようにしてカーソル位置にたどり着くまでの速度を上げています。
-
 
 ## [1.3.0]- 2025-01-22
 
@@ -51,7 +52,6 @@ F2でリネームできます。リネームできるものは以下です。
 - `ctrl + alt + P`でのプレビュー機能を削除し、その場プレビュー機能（β版）に置き換えました。[issue#124](https://github.com/orukRed/tyranosyntax/issues/124) [issue#225](https://github.com/orukRed/tyranosyntax/issues/225)
   - 詳細や使い方はREADMEをご確認ください。
 - READMEに英語版を追加しました。
-
 
 ## [0.25.3]- 2024-10-16
 
