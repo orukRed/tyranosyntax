@@ -7,6 +7,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [1.4.0]- 2025-03-25
 
 - playbgmタグなどでstorageパラメータに指定したファイルが存在しない場合、エラーとして扱うようにしました。[issue#248]
+※ storageパラメータでファイルを指定するタグにのみ検出します。また、マクロやプラグインなどで追加したタグでは検出しません。
 
 ## [1.3.4]- 2025-03-16
 

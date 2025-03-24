@@ -211,6 +211,16 @@ export class TyranoDiagnostic {
       this.tagParams[tagName].storage.path === "data/image"
     ) {
       resourceFolder = this.infoWs.DATA_IMAGE;
+    }else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/fgimage"
+    ) {
+      resourceFolder = this.infoWs.DATA_FGIMAGE
+    } else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/bgimage"
+    ) {
+      resourceFolder = this.infoWs.DATA_BGIMAGE;
     } else if (
       this.tagParams[tagName].storage &&
       this.tagParams[tagName].storage.path === "data/bgm"

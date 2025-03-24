@@ -15,7 +15,7 @@ suite("TyranoCreateTagByShortcutKey.KeyPushShiftEnter関数", () => {
     const excepted = true;
 
     //実行
-    const actual = ctby.KeyPushShiftEnter();
+    const actual = TyranoCreateTagByShortcutKey.KeyPushShiftEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);
@@ -31,7 +31,7 @@ suite("TyranoCreateTagByShortcutKey.KeyPushCtrlEnter関数", () => {
     const excepted = true;
 
     //実行
-    const actual = ctby.KeyPushCtrlEnter();
+    const actual = TyranoCreateTagByShortcutKey.KeyPushCtrlEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);
@@ -47,7 +47,7 @@ suite("TyranoCreateTagByShortcutKey.KeyPushAltEnter関数", () => {
     const excepted = true;
 
     //実行
-    const actual = ctby.KeyPushAltEnter();
+    const actual = TyranoCreateTagByShortcutKey.KeyPushAltEnter();
 
     //アサート
     assert.strictEqual(actual, excepted);

@@ -565,6 +565,14 @@
                   "path": "data/image"
                 }
               },
+              "graph": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
               "dialog_config_ok": {
                 "img": {
                   "type": [
