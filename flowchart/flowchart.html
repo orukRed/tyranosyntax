@@ -19,6 +19,23 @@
   .back-link:hover {
     background-color: #0056b3;
   }
+
+  .zoom-control {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  #zoom-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  #flowchart {
+    transform-origin: center top;
+    transition: transform 0.3s ease;
+  }
 </style>
 <script>
   console.log("flowchart.html");
@@ -29,10 +46,13 @@
     let graphDefinition = "graph LR\n";
     graphDefinition +=
       "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
-    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
-    if (!obj) {
-      graphDefinition += `a-->b\n`;
+    if (!obj || obj.length === 0) {
+      graphDefinition += `subgraph "\`**このファイルから他のラベル、シナリオへの遷移はありません**\`"\n`;
+      graphDefinition += `end\n`;
+      return `<pre class="mermaid">${graphDefinition}</pre>`;
     }
+    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
+
     for (key in obj) {
       const condition = obj[key].condition ? `${obj[key].condition}` : "";
       console.log("s");
@@ -62,6 +82,12 @@
     return `<pre class="mermaid">${graphDefinition}</pre>`;
   }
 
+  function updateZoom() {
+    const zoomLevel = document.getElementById("zoom-select").value;
+    const scale = parseInt(zoomLevel) / 100;
+    document.getElementById("flowchart").style.transform = `scale(${scale})`;
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const scenario = urlParams.get("scenario");
   console.log("scenario", scenario);
@@ -77,12 +103,17 @@
         document.querySelector("h3").textContent = projectName;
 
         transitionData = data.TransitionData;
-        let htmlContent = generateFlowchart(transitionData);
+
+        const htmlContent = generateFlowchart(transitionData);
         // HTMLに追加するためのコード
         const element = document.getElementById("flowchart");
         element.innerHTML += htmlContent;
         // mermaidを初期化
         mermaid.run();
+        // ズーム機能の初期化
+        document
+          .getElementById("zoom-select")
+          .addEventListener("change", updateZoom);
       } else {
         console.log("transitionData is not found");
       }
@@ -92,6 +123,16 @@
 
 <body>
   <h3></h3>
+  <div class="zoom-control">
+    <label for="zoom-select">拡大率: </label>
+    <select id="zoom-select">
+      <option value="100">100%</option>
+      <option value="200">200%</option>
+      <option value="300">300%</option>
+      <option value="400">400%</option>
+      <option value="500">500%</option>
+    </select>
+  </div>
   <div id="flowchart"></div>
   <div class="back-link-container">
     <a href="http://localhost:3200/flowchart-list.html" class="back-link"
