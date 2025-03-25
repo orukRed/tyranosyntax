@@ -4,7 +4,6 @@ import { InformationWorkSpace as workspace } from "../InformationWorkSpace";
 import { TyranoLogger } from "../TyranoLogger";
 import { Parser } from "../Parser";
 
-
 export class TyranoDiagnostic {
   public static diagnosticCollection: vscode.DiagnosticCollection =
     vscode.languages.createDiagnosticCollection("tyranoDiagnostic");
@@ -24,7 +23,7 @@ export class TyranoDiagnostic {
   private readonly undefinedMacro = "undefinedMacro";
   private readonly missingScenariosAndLabels = "missingScenariosAndLabels";
   private readonly jumpAndCallInIfStatement = "jumpAndCallInIfStatement";
-
+  private readonly existResource = "existResource";
   //パーサー
   private readonly JUMP_TAG = [
     "jump",
@@ -34,6 +33,12 @@ export class TyranoDiagnostic {
     "glink",
     "clickable",
   ];
+
+  private tagParams: {
+    [s: string]: { [s: string]: { type: string[]; path: string } };
+  } = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tag.parameter")!;
 
   //基本タグを取得
 
@@ -137,15 +142,153 @@ export class TyranoDiagnostic {
       );
     }
 
-    //これから診断機能はここのfor文に追加していく
-    // for(){
+    //その他の診断機能
+    //診断項目ごとにfor文作ってると処理速度が壊滅的な遅さになるのでここに書く
+    for (const [_filePath, scenarioDocument] of this.infoWs.scenarioFileMap) {
+      //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
+      const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(
+        scenarioDocument.fileName,
+      );
+      if (diagnosticProjectPath !== projectPathOfDiagFile) {
+        continue;
+      }
 
-    // }
+      const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
+      const diagnostics: vscode.Diagnostic[] = [];
 
+      for (const data of parsedData) {
+        //early return
+        if (data["name"] === "comment") {
+          continue;
+        }
+        // ファイルリソースの存在チェックを別メソッドで実行
+        await this.detectionMissingResources(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
+
+        //TODO:今後もし診断項目が増えた場合はここに追加
+      }
+      diagnosticArray.push([scenarioDocument.uri, diagnostics]);
+    }
     //診断結果をセット
+
     TyranoLogger.print(`diagnostic set`);
     TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
     TyranoLogger.print("diagnostic end");
+  }
+
+  /**
+   * storageで指定したリソースが存在しているかどうかを診断します
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async detectionMissingResources(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.existResource)) {
+      return;
+    }
+
+    const storage = data["pm"]["storage"];
+    const tagName = data["name"];
+
+    if (!this.tagParams[tagName] || !storage) {
+      return;
+    }
+
+    // リソースタイプ（フォルダ）の判定
+    let resourceFolder = "";
+    if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/image"
+    ) {
+      resourceFolder = this.infoWs.DATA_IMAGE;
+    }else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/fgimage"
+    ) {
+      resourceFolder = this.infoWs.DATA_FGIMAGE
+    } else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/bgimage"
+    ) {
+      resourceFolder = this.infoWs.DATA_BGIMAGE;
+    } else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/bgm"
+    ) {
+      resourceFolder = this.infoWs.DATA_BGM;
+    } else if (
+      this.tagParams[tagName].storage &&
+      this.tagParams[tagName].storage.path === "data/sound"
+    ) {
+      resourceFolder = this.infoWs.DATA_SOUND;
+    }
+
+    // リソースフォルダが特定できた場合のみチェック
+    if (resourceFolder) {
+      // リソースパスの構築
+      const resourcePath = [
+        projectPathOfDiagFile,
+        this.infoWs.DATA_DIRECTORY,
+        resourceFolder + this.infoWs.pathDelimiter,
+        storage,
+      ].join("");
+
+      // ファイルの存在をチェック
+      try {
+        await vscode.workspace.fs.stat(vscode.Uri.file(resourcePath));
+        // ファイルが存在する場合は何もしない
+      } catch (error) {
+        // ファイルが存在しない場合
+        const range = this.getStorageParameterRange(data, scenarioDocument);
+        const diag = new vscode.Diagnostic(
+          range,
+          `リソースファイル "${storage}" が見つかりません。`,
+          vscode.DiagnosticSeverity.Error,
+        );
+        diagnostics.push(diag);
+      }
+    }
+  }
+
+  /**
+   * storageパラメータの範囲を取得します
+   */
+  private getStorageParameterRange(
+    data: any,
+    document: vscode.TextDocument,
+  ): vscode.Range {
+    const line = document.lineAt(data["line"]);
+    const lineText = line.text;
+    const storageValue = data["pm"]["storage"];
+
+    // storage="値" の位置を探す
+    const storageParamStart = lineText.indexOf(`storage="${storageValue}"`);
+    if (storageParamStart >= 0) {
+      return new vscode.Range(
+        data["line"],
+        storageParamStart + 9, // "storage="の後
+        data["line"],
+        storageParamStart + 9 + storageValue.length,
+      );
+    }
+
+    // 見つからない場合はタグ全体を範囲とする
+    return new vscode.Range(
+      data["line"],
+      line.firstNonWhitespaceCharacterIndex,
+      data["line"],
+      line.text.length,
+    );
   }
 
   /**
@@ -500,8 +643,3 @@ export class TyranoDiagnostic {
     return typeof value === "boolean" ? value : false;
   }
 }
-
-
-
-
-
