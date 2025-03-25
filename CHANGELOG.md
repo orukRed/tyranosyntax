@@ -4,9 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.5.0]- 2025-03-26
+
+- フローチャート機能の挙動を変更しました。
+- フローチャート図を500%まで拡大できるようにしました。[issue#250](https://github.com/orukRed/tyranosyntax/issues/250)
+- 特定のシナリオファイルでフローチャートが表示されない問題を修正しました。
+- jump系のタグが存在しない場合に何も表示されなかったのを、遷移先がない旨を表示するように変更しました。
+
 ## [1.4.0]- 2025-03-25
 
-- playbgmタグなどでstorageパラメータに指定したファイルが存在しない場合、エラーとして扱うようにしました。[issue#248]
+- playbgmタグなどでstorageパラメータに指定したファイルが存在しない場合、エラーとして扱うようにしました。[issue#248](https://github.com/orukRed/tyranosyntax/issues/248)
 ※ storageパラメータでファイルを指定するタグにのみ検出します。また、マクロやプラグインなどで追加したタグでは検出しません。
 
 ## [1.3.4]- 2025-03-16
