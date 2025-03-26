@@ -19,6 +19,23 @@
   .back-link:hover {
     background-color: #0056b3;
   }
+
+  .zoom-control {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  #zoom-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  #flowchart {
+    transform-origin: center top;
+    transition: transform 0.3s ease;
+  }
 </style>
 <script>
   console.log("flowchart.html");
@@ -29,29 +46,53 @@
     let graphDefinition = "graph LR\n";
     graphDefinition +=
       "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
-    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
-    if (!obj) {
-      graphDefinition += `a-->b\n`;
+    if (!obj || obj.length === 0) {
+      graphDefinition += `subgraph "\`**このファイルから他のラベル、シナリオへの遷移はありません**\`"\n`;
+      graphDefinition += `end\n`;
+      return `<pre class="mermaid">${graphDefinition}</pre>`;
     }
+    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
+
+    // ノードの重複を防ぐための追跡用オブジェクト
+    const addedNodes = {};
+
     for (key in obj) {
       const condition = obj[key].condition ? `${obj[key].condition}` : "";
       console.log("s");
+
+      const currentLabel = obj[key].currentLabel;
+      // 一意のノードIDを作成
+      const nodeId = `node_${currentLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+      // 未追加のノードだけ追加
+      if (!addedNodes[nodeId]) {
+        addedNodes[nodeId] = true;
+      }
+
       //storageもtargetもある場合
       if (obj[key].storage && obj[key].target) {
         const fileName = `${obj[key].storage}_${obj[key].target}`;
-        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}[[${fileName}]]:::green\n`;
+        const fileId = `file_${obj[key].storage}_${obj[key].target}`.replace(
+          /[^a-zA-Z0-9]/g,
+          "_",
+        );
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
       }
       //storageのみある場合
       else if (obj[key].storage) {
         const fileName = `${obj[key].storage}_NONE`;
-        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}[[${fileName}]]:::green\n`;
+        const fileId = `file_${obj[key].storage}_NONE`.replace(
+          /[^a-zA-Z0-9]/g,
+          "_",
+        );
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
       }
       //targetのみある場合
       else if (obj[key].target) {
-        const fileName = `${obj[key].target}`;
-        graphDefinition += `${obj[key].currentLabel} --${condition}--> ${fileName}\n`;
+        const targetLabel = obj[key].target;
+        const targetId = `node_${targetLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${targetId}["${targetLabel}"]\n`;
       }
-
       //storageもtargetも指定しない場合はなにも追加しない
       else if (!obj[key].storage && !obj[key].target) {
       }
@@ -60,6 +101,12 @@
     console.log(graphDefinition);
     // HTMLに描画するためのmermaidの定義を返す
     return `<pre class="mermaid">${graphDefinition}</pre>`;
+  }
+
+  function updateZoom() {
+    const zoomLevel = document.getElementById("zoom-select").value;
+    const scale = parseInt(zoomLevel) / 100;
+    document.getElementById("flowchart").style.transform = `scale(${scale})`;
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -77,12 +124,17 @@
         document.querySelector("h3").textContent = projectName;
 
         transitionData = data.TransitionData;
-        let htmlContent = generateFlowchart(transitionData);
+
+        const htmlContent = generateFlowchart(transitionData);
         // HTMLに追加するためのコード
         const element = document.getElementById("flowchart");
         element.innerHTML += htmlContent;
         // mermaidを初期化
         mermaid.run();
+        // ズーム機能の初期化
+        document
+          .getElementById("zoom-select")
+          .addEventListener("change", updateZoom);
       } else {
         console.log("transitionData is not found");
       }
@@ -92,6 +144,16 @@
 
 <body>
   <h3></h3>
+  <div class="zoom-control">
+    <label for="zoom-select">拡大率: </label>
+    <select id="zoom-select">
+      <option value="100">100%</option>
+      <option value="200">200%</option>
+      <option value="300">300%</option>
+      <option value="400">400%</option>
+      <option value="500">500%</option>
+    </select>
+  </div>
   <div id="flowchart"></div>
   <div class="back-link-container">
     <a href="http://localhost:3200/flowchart-list.html" class="back-link"
