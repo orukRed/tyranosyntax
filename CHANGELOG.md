@@ -4,6 +4,14 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.5.1]- 2025-03-26
+
+- 1.4.0でリリースしたstorageパラメータへのエラー検出の不具合を修正しました。[issue#255](https://github.com/orukRed/tyranosyntax/issues/255)
+  - &から始まる値（変数）の場合にはエラーを出さないようにしました
+  - %から始まる値（マクロで渡した値）の場合にはエラーを出さないようにしました
+  - storageにnoneを指定した場合にはエラーを出さないようにしました（chara_layerなどでの指定用）
+  - imageタグでfolderを指定している場合、ファイルが存在するにもかかわらずエラーが出てしまう場合があったので修正しました。
+
 ## [1.5.0]- 2025-03-26
 
 - フローチャート機能の挙動を変更しました。

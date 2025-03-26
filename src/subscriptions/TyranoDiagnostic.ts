@@ -200,7 +200,15 @@ export class TyranoDiagnostic {
     const storage = data["pm"]["storage"];
     const tagName = data["name"];
 
-    if (!this.tagParams[tagName] || !storage) {
+    //tagNameが定義されていない、もしくはstorageが空、
+    //もしくはstorageパラメータの先頭が&,もしくは%なら、storageがnoneならエラーとしては扱わない
+    if (
+      !this.tagParams[tagName] ||
+      !storage ||
+      this.isExistPercentAtBeginning(storage) ||
+      this.isExistAmpersandAtBeginning(storage) ||
+      storage === "none"
+    ) {
       return;
     }
 
@@ -211,11 +219,11 @@ export class TyranoDiagnostic {
       this.tagParams[tagName].storage.path === "data/image"
     ) {
       resourceFolder = this.infoWs.DATA_IMAGE;
-    }else if (
+    } else if (
       this.tagParams[tagName].storage &&
       this.tagParams[tagName].storage.path === "data/fgimage"
     ) {
-      resourceFolder = this.infoWs.DATA_FGIMAGE
+      resourceFolder = this.infoWs.DATA_FGIMAGE;
     } else if (
       this.tagParams[tagName].storage &&
       this.tagParams[tagName].storage.path === "data/bgimage"
@@ -231,6 +239,10 @@ export class TyranoDiagnostic {
       this.tagParams[tagName].storage.path === "data/sound"
     ) {
       resourceFolder = this.infoWs.DATA_SOUND;
+    }
+    //タグ名がimageで、folderに値が指定されているならresourceFolderがdata/${folder}になる
+    if (tagName === "image" && data["pm"]["folder"]) {
+      resourceFolder = `${this.infoWs.pathDelimiter}${data["pm"]["folder"]}`;
     }
 
     // リソースフォルダが特定できた場合のみチェック
@@ -255,6 +267,7 @@ export class TyranoDiagnostic {
           `リソースファイル "${storage}" が見つかりません。`,
           vscode.DiagnosticSeverity.Error,
         );
+        console.log(resourcePath);
         diagnostics.push(diag);
       }
     }
