@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -904,6 +904,10 @@
       {
         "command": "tyrano.altEnter",
         "title": "print altEnter"
+      },
+      {
+        "command": "tyrano.addRAndP",
+        "title": "Add [r] and [p]"
       },
       {
         "command": "tyrano.diagnostic",
