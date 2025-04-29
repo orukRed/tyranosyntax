@@ -708,8 +708,8 @@ export class TyranoDiagnostic {
     if (/^\d/.test(labelName)) {
       const diag = new vscode.Diagnostic(
         range,
-        `ラベル名 "${labelName}" は数字から始まっています。英字またはアンダースコアで始めてください。`,
-        vscode.DiagnosticSeverity.Error,
+        `ラベル名 "${labelName}" は数字から始まっており、非推奨の可能性があります。`,
+        vscode.DiagnosticSeverity.Warning,
       );
       diagnostics.push(diag);
       return; // 重複エラーを避けるため早期リターン
@@ -719,8 +719,8 @@ export class TyranoDiagnostic {
     if (/\s/.test(labelName)) {
       const diag = new vscode.Diagnostic(
         range,
-        `ラベル名 "${labelName}" に空白文字が含まれています。空白文字は使用できません。`,
-        vscode.DiagnosticSeverity.Error,
+        `ラベル名 "${labelName}" に空白文字が含まれています。空白文字は非推奨です。`,
+        vscode.DiagnosticSeverity.Warning,
       );
       diagnostics.push(diag);
       return; // 重複エラーを避けるため早期リターン
@@ -739,8 +739,8 @@ export class TyranoDiagnostic {
       } else {
         const diag = new vscode.Diagnostic(
           range,
-          `ラベル名 "${labelName}" に使用できない文字が含まれています。半角英数字とアンダースコアのみ使用可能です。`,
-          vscode.DiagnosticSeverity.Error,
+          `ラベル名 "${labelName}" に使用できない文字が含まれてる可能性があります。半角英数字とアンダースコアのみ使用可能です。`,
+          vscode.DiagnosticSeverity.Warning,
         );
         diagnostics.push(diag);
       }
