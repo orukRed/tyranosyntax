@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.6.1]- 2025-04-29
+
+- 1.6.0で追加したエラーについて、実際はジャンプできる場合もあることを確認できたので警告へと変更しました。
+
 ## [1.6.0]- 2025-04-29
 
 - ラベルの書式が正しくない場合にエラー/警告を出すようにしました。
