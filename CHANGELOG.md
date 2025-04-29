@@ -4,14 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [1.6.0]- 2025-04-26
+## [1.6.0]- 2025-04-29
 
-- `addRAndP`コマンドを追加しました。
- 実行すると、以下の条件で[r]タグと[p]タグを追加します。
-  - 行が空でなく、`@`、`[`、`;`、`#`、`*`で始まらない行のみ処理にのみ追加
-  - 「次の行が空行ではない」なら文末に[r]をつける
-  - 「次の行が空行」なら文末に[p]をつける
-
+- ラベルの書式が正しくない場合にエラー/警告を出すようにしました。
+  - ラベル名が数字から始まる、空白交じり、アンダースコア以外の記号を使用している場合にエラーを￥として扱います。
+  - 日本語などの２バイト文字を使用している場合は警告として扱います。
 
 ## [1.5.1]- 2025-03-26
 

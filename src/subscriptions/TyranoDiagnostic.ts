@@ -24,6 +24,7 @@ export class TyranoDiagnostic {
   private readonly missingScenariosAndLabels = "missingScenariosAndLabels";
   private readonly jumpAndCallInIfStatement = "jumpAndCallInIfStatement";
   private readonly existResource = "existResource";
+  private readonly labelName = "labelName";
   //パーサー
   private readonly JUMP_TAG = [
     "jump",
@@ -170,6 +171,14 @@ export class TyranoDiagnostic {
         );
 
         //TODO:今後もし診断項目が増えた場合はここに追加
+
+        //ラベル名のチェック
+        await this.checkLabelName(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
       }
       diagnosticArray.push([scenarioDocument.uri, diagnostics]);
     }
@@ -654,5 +663,87 @@ export class TyranoDiagnostic {
   private isExecuteDiagnostic(key: string): boolean {
     const value = this.executeDiagnostic[key];
     return typeof value === "boolean" ? value : false;
+  }
+
+  /**
+   * ラベル名（*label_name）のバリデーションを行います
+   * - エラー: ラベル名が数字から始まる、空白文字を含む、使用不可能な文字を含む
+   * - 警告: ラベル名に2バイト文字を使用している
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async checkLabelName(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.labelName)) {
+      return;
+    }
+
+    // ラベルタグでない場合は何もしない
+    if (data["name"] !== "label") {
+      return;
+    }
+
+    const labelName = data["pm"]["label_name"];
+    if (!labelName) {
+      return;
+    }
+
+    // ラベル名の範囲を取得
+    const range = new vscode.Range(
+      new vscode.Position(data["pm"]["line"], 0),
+      new vscode.Position(
+        data["pm"]["line"],
+        data["pm"]["label_name"].length + 1,
+      ),
+    );
+
+    // エラーチェック
+    // 1. ラベル名が数字から始まる
+    if (/^\d/.test(labelName)) {
+      const diag = new vscode.Diagnostic(
+        range,
+        `ラベル名 "${labelName}" は数字から始まっています。英字またはアンダースコアで始めてください。`,
+        vscode.DiagnosticSeverity.Error,
+      );
+      diagnostics.push(diag);
+      return; // 重複エラーを避けるため早期リターン
+    }
+
+    // 2. ラベル名に空白文字が存在している
+    if (/\s/.test(labelName)) {
+      const diag = new vscode.Diagnostic(
+        range,
+        `ラベル名 "${labelName}" に空白文字が含まれています。空白文字は使用できません。`,
+        vscode.DiagnosticSeverity.Error,
+      );
+      diagnostics.push(diag);
+      return; // 重複エラーを避けるため早期リターン
+    }
+
+    // 3. 使用できるのは半角英数字とアンダースコアのみ
+    if (!/^[a-zA-Z0-9_]+$/.test(labelName)) {
+      // 2バイト文字チェックは別途行うので、2バイト文字がある場合は警告だけにする
+      if (/[^\x01-\x7E]/.test(labelName)) {
+        const diag = new vscode.Diagnostic(
+          range,
+          `ラベル名 "${labelName}" に日本語などの2バイト文字が含まれています。半角英数字とアンダースコアの使用を推奨します。`,
+          vscode.DiagnosticSeverity.Warning,
+        );
+        diagnostics.push(diag);
+      } else {
+        const diag = new vscode.Diagnostic(
+          range,
+          `ラベル名 "${labelName}" に使用できない文字が含まれています。半角英数字とアンダースコアのみ使用可能です。`,
+          vscode.DiagnosticSeverity.Error,
+        );
+        diagnostics.push(diag);
+      }
+    }
   }
 }

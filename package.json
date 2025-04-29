@@ -203,7 +203,8 @@
               "undefinedMacro": true,
               "missingScenariosAndLabels": true,
               "jumpAndCallInIfStatement": true,
-              "existResource": true
+              "existResource": true,
+              "labelName": true
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },

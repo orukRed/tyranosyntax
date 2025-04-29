@@ -201,8 +201,10 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - ジャンプ系（"jump", "call", "link", "button", "glink", "clickable"）タグにてstorage,targetで指定した先が存在するかどうかの検出
 - ジャンプ系タグのstorage,targetに変数を使用する場合、先頭に&があるかどうかの検出(&がない場合エラー)
 - 使用しているタグがプロジェクトに存在するかの検出
+- 使用している画像、音声などのリソースがプロジェクトに存在するかの検出
+- ラベル名が正しいかどうかの検出
 
-不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を変更してください。
+f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を変更してください。
 
 以下のように定義されていますので、不要なキーの値をfalseに変更しvscodeを再起動することで診断機能をOFFにできます。
 
