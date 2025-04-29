@@ -212,7 +212,9 @@ f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を
   "TyranoScript syntax.execute.diagnostic": {
     "undefinedMacro": true,
     "missingScenariosAndLabels": true,
-    "jumpAndCallInIfStatement": true
+    "jumpAndCallInIfStatement": true,
+    "existResource": true,
+    "labelName": true
   }
 ```
 
