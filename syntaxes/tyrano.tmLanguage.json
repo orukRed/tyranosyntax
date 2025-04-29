@@ -209,8 +209,8 @@
     },
     "tyrano_labels": {
       "name": "constant.language.tyrano",
-      "comment": "ラベル表示に使う",
-      "match": "^\\s*\\*[\\w]+"
+      "comment": "ラベル表示に使う - 数字から始まるラベル名はハイライトしない",
+      "match": "^\\s*\\*[a-zA-Z_][\\w]*"
     },
     "tyrano_labels_in_tag": {
       "name": "constant.language.tyrano",

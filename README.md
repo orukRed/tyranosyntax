@@ -201,8 +201,10 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - ジャンプ系（"jump", "call", "link", "button", "glink", "clickable"）タグにてstorage,targetで指定した先が存在するかどうかの検出
 - ジャンプ系タグのstorage,targetに変数を使用する場合、先頭に&があるかどうかの検出(&がない場合エラー)
 - 使用しているタグがプロジェクトに存在するかの検出
+- 使用している画像、音声などのリソースがプロジェクトに存在するかの検出
+- ラベル名が正しいかどうかの検出
 
-不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を変更してください。
+f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を変更してください。
 
 以下のように定義されていますので、不要なキーの値をfalseに変更しvscodeを再起動することで診断機能をOFFにできます。
 
@@ -210,7 +212,9 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
   "TyranoScript syntax.execute.diagnostic": {
     "undefinedMacro": true,
     "missingScenariosAndLabels": true,
-    "jumpAndCallInIfStatement": true
+    "jumpAndCallInIfStatement": true,
+    "existResource": true,
+    "labelName": true
   }
 ```
 
@@ -386,7 +390,6 @@ Only Japanese and English are supported.
 （敬称略）
 アポ（@apo490）
 
-
 ## ライセンス/クレジット
 
 本拡張機能は以下のライブラリを使用しています。
@@ -398,6 +401,30 @@ Only Japanese and English are supported.
 サークル：さくさくぷんた
 X（旧twitter）：@skt_tyrano
 HP：https://skskpnt.app
+
+### mermaid-js
+
+The MIT License (MIT)
+
+Copyright (c) 2014 - 2022 Knut Sveidqvist
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ## 免責事項
 

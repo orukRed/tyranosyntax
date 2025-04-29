@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.6.0]- 2025-04-29
+
+- ラベルの書式が正しくない場合にエラー/警告を出すようにしました。
+  - ラベル名が数字から始まる、空白交じり、アンダースコア以外の記号を使用している場合にエラーとして扱います。
+  - 日本語などの２バイト文字を使用している場合は警告として扱います。
+
 ## [1.5.1]- 2025-03-26
 
 - 1.4.0でリリースしたstorageパラメータへのエラー検出の不具合を修正しました。[issue#255](https://github.com/orukRed/tyranosyntax/issues/255)

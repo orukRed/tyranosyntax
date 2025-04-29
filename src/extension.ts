@@ -2,13 +2,13 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind
-} from 'vscode-languageclient/node';
+  TransportKind,
+} from "vscode-languageclient/node";
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
 import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
@@ -23,6 +23,7 @@ import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
+import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -129,6 +130,16 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
+
+          // [r][p]を追加するコマンドの登録
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.addRAndP",
+              TyranoAddRAndPCommand.execute,
+            ),
+          );
+          TyranoLogger.print("TyranoAddRAndPCommand activate");
+
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.preview",
@@ -358,4 +369,3 @@ export function deactivate(): Thenable<void> | undefined {
   }
   return client.stop();
 }
-
