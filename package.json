@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -212,6 +212,11 @@
             "type": "string",
             "default": "/hoge/foo/project/preview-initialize.ks",
             "description": "その場プレビューで事前に読み込む処理のファイルパス（scenarioフォルダから始まる相対パス、もしくは絶対パス）を指定します。"
+          },
+          "TyranoScript syntax.logger.enabled": {
+            "type": "boolean",
+            "default": "false",
+            "description": "エラーなどが発生した場合、出力ウィンドウにログを出力します。（動作が重い場合、こちらのチェックを外すことで改善される可能性があります。）"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",

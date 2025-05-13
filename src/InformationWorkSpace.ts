@@ -273,65 +273,69 @@ export class InformationWorkSpace {
       absoluteScenarioFilePath,
     );
     await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
+    try {
+      traverse(parsedData, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        enter: (path: any) => {
+          try {
+            //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
+            if (
+              path != null &&
+              path.parentPath != null &&
+              path.parentPath.type === "AssignmentExpression" &&
+              (reg2.test(path.parentPath.toString()) ||
+                reg3.test(path.parentPath.toString()))
+            ) {
+              const macroName: string = path.toString().split(".")[4]; //MacroNameの部分を抽出
+              if (macroName != undefined && macroName != null) {
+                let description = path.parentPath.parentPath
+                  .toString()
+                  .replace(";", "")
+                  .replace(path.parentPath.toString(), "");
+                description = description
+                  .replaceAll("/", "")
+                  .replaceAll("*", "")
+                  .replaceAll(" ", "")
+                  .replaceAll("\t", "");
 
-    traverse(parsedData, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      enter: (path: any) => {
-        try {
-          //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
-          if (
-            path != null &&
-            path.parentPath != null &&
-            path.parentPath.type === "AssignmentExpression" &&
-            (reg2.test(path.parentPath.toString()) ||
-              reg3.test(path.parentPath.toString()))
-          ) {
-            const macroName: string = path.toString().split(".")[4]; //MacroNameの部分を抽出
-            if (macroName != undefined && macroName != null) {
-              let description = path.parentPath.parentPath
-                .toString()
-                .replace(";", "")
-                .replace(path.parentPath.toString(), "");
-              description = description
-                .replaceAll("/", "")
-                .replaceAll("*", "")
-                .replaceAll(" ", "")
-                .replaceAll("\t", "");
-
-              const macroData: DefineMacroData = new DefineMacroData(
-                macroName,
-                new vscode.Location(
-                  vscode.Uri.file(absoluteScenarioFilePath),
-                  new vscode.Position(
-                    path.node.loc.start.line,
-                    path.node.loc.start.column,
-                  ),
-                ),
-                absoluteScenarioFilePath,
-                description,
-              );
-              macroData.parameter.push(
-                new MacroParameterData("parameter", false, "description"),
-              ); //TODO:パーサーでパラメータの情報読み込んで追加する
-              this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
-              //suggetionsに登録されてない場合のみ追加
-              if (
-                !Object.prototype.hasOwnProperty.call(
-                  this._suggestions.get(projectPath)!,
+                const macroData: DefineMacroData = new DefineMacroData(
                   macroName,
-                )
-              ) {
-                this._suggestions.get(projectPath)![macroName] =
-                  macroData.parseToJsonObject();
+                  new vscode.Location(
+                    vscode.Uri.file(absoluteScenarioFilePath),
+                    new vscode.Position(
+                      path.node?.loc?.start?.line ?? 0,
+                      path.node?.loc?.start?.column ?? 0,
+                    ),
+                  ),
+                  absoluteScenarioFilePath,
+                  description,
+                );
+                macroData.parameter.push(
+                  new MacroParameterData("parameter", false, "description"),
+                ); //TODO:パーサーでパラメータの情報読み込んで追加する
+                this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
+                //suggetionsに登録されてない場合のみ追加
+                if (
+                  !Object.prototype.hasOwnProperty.call(
+                    this._suggestions.get(projectPath)!,
+                    macroName,
+                  )
+                ) {
+                  this._suggestions.get(projectPath)![macroName] =
+                    macroData.parseToJsonObject();
+                }
               }
             }
+          } catch (error) {
+            TyranoLogger.printStackTrace(error);
+            // エラーを記録するだけで処理は続行
           }
-        } catch (_error) {
-          //例外発生するのは許容？
-          // console.log(error);
-        }
-      },
-    });
+        },
+      });
+    } catch (error) {
+      TyranoLogger.printStackTrace(error);
+      // traverseでエラーが発生しても処理を続行
+    }
   }
 
   /**
@@ -351,33 +355,33 @@ export class InformationWorkSpace {
         return type;
     }
   }
-
   private getNestedObject(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     property: any,
     absoluteScenarioFilePath: string,
   ): VariableData[] {
     const nestedObjects: VariableData[] = [];
-    if (property.type === "ObjectExpression") {
+    if (property?.type === "ObjectExpression") {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      property.properties.forEach((prop: any) => {
-        if (prop.key && prop.key.type === "Identifier") {
+      property.properties?.forEach((prop: any) => {
+        if (prop?.key && prop.key.type === "Identifier") {
           const name = prop.key.name;
+          // オプショナルチェインとデフォルト値を使用
           const value =
-            prop.value.type === "ObjectExpression"
+            prop.value?.type === "ObjectExpression"
               ? undefined
-              : prop.value.value;
-          const type = this.typeConverter(prop.value.type);
+              : prop.value?.value;
+          const type = this.typeConverter(prop.value?.type ?? "");
           const variableData = new VariableData(name, value, undefined, type);
           const location = new vscode.Location(
             vscode.Uri.file(absoluteScenarioFilePath),
             new vscode.Position(
-              property.loc.start.column!,
-              property.loc.start.column!,
+              property?.loc?.start?.column ?? 0,
+              property?.loc?.start?.column ?? 0,
             ),
           );
           variableData.addLocation(location);
-          if (prop.value.type === "ObjectExpression") {
+          if (prop?.value?.type === "ObjectExpression") {
             variableData.nestVariableData = this.getNestedObject(
               prop.value,
               absoluteScenarioFilePath,
@@ -420,73 +424,97 @@ export class InformationWorkSpace {
       errorRecovery: true,
       allowSuperOutsideMethod: true,
     });
-
     const that = this; // この行を追加
     const typeConverter = this.typeConverter;
     let keyName = "";
-    traverse(ast, {
-      enter: (_path) => {},
-      MemberExpression(path) {
-        const left = path.node;
-        if (
-          left.object.type === "Identifier" &&
-          variablePrefixList.includes(left.object.name)
-        ) {
-          if (left.property.type === "Identifier") {
-            // 'f.' をキー名の先頭に追加してプロパティ名を取得
-            const variableName = left.property.name;
-            const type = typeConverter(left.property.type);
-            const variableData = new VariableData(
-              variableName,
-              undefined,
-              left.object.name,
-              type,
-            );
-            if (path.node.loc?.start) {
-              const location = new vscode.Location(
-                vscode.Uri.file(absoluteScenarioFilePath),
-                new vscode.Position(
-                  path.node.loc.start.line,
-                  path.node.loc.start.column,
-                ),
-              );
-              variableData.addLocation(location);
-              keyName = variableName;
-              that.variableMap
-                .get(projectPath)
-                ?.set(variableName, variableData);
-            }
-          }
-        }
-      },
-      ObjectExpression: (path) => {
-        const nowObject: VariableData | undefined = that.variableMap
-          .get(projectPath)
-          ?.get(keyName);
-        if (nowObject) {
-          path.node.properties.forEach((property) => {
+    try {
+      traverse(ast, {
+        enter: (_path) => {},
+        MemberExpression(path) {
+          try {
+            const left = path.node;
             if (
-              property.type === "ObjectMethod" ||
-              property.type === "ObjectProperty"
+              left?.object?.type === "Identifier" &&
+              variablePrefixList.includes(left.object.name)
             ) {
-              if (property.key.type === "Identifier") {
-                const nestedObjects: VariableData[] = this.getNestedObject(
-                  path.node,
-                  absoluteScenarioFilePath,
+              if (left?.property?.type === "Identifier") {
+                // 'f.' をキー名の先頭に追加してプロパティ名を取得
+                const variableName = left.property.name;
+                const type = typeConverter(left.property.type);
+                const variableData = new VariableData(
+                  variableName,
+                  undefined,
+                  left.object.name,
+                  type,
                 );
-                if (nowObject.nestVariableData.length <= 0) {
-                  nowObject.nestVariableData = nestedObjects;
-                  that.variableMap.get(projectPath)?.set(keyName, nowObject);
+                if (path.node?.loc?.start) {
+                  const location = new vscode.Location(
+                    vscode.Uri.file(absoluteScenarioFilePath),
+                    new vscode.Position(
+                      path.node.loc.start.line,
+                      path.node.loc.start.column,
+                    ),
+                  );
+                  variableData.addLocation(location);
+                  keyName = variableName;
+                  that.variableMap
+                    .get(projectPath)
+                    ?.set(variableName, variableData);
                 }
               }
-            } else {
-              // SpreadElementの場合の処理
-              console.log("SpreadElementはkeyプロパティを持ちません。");
             }
-          });
-        }
-      },
-    });
+          } catch (error) {
+            TyranoLogger.printStackTrace(error);
+            // エラーを記録するだけで処理は続行
+          }
+        },
+        ObjectExpression: (path) => {
+          try {
+            const nowObject: VariableData | undefined = that.variableMap
+              .get(projectPath)
+              ?.get(keyName);
+            if (nowObject) {
+              path.node?.properties?.forEach((property) => {
+                try {
+                  if (
+                    property?.type === "ObjectMethod" ||
+                    property?.type === "ObjectProperty"
+                  ) {
+                    if (property?.key?.type === "Identifier") {
+                      const nestedObjects: VariableData[] =
+                        this.getNestedObject(
+                          path.node,
+                          absoluteScenarioFilePath,
+                        );
+                      if (nowObject.nestVariableData.length <= 0) {
+                        nowObject.nestVariableData = nestedObjects;
+                        that.variableMap
+                          .get(projectPath)
+                          ?.set(keyName, nowObject);
+                      }
+                    }
+                  } else {
+                    // SpreadElementの場合の処理
+                    TyranoLogger.print(
+                      "SpreadElementはkeyプロパティを持ちません。",
+                    );
+                  }
+                } catch (error) {
+                  TyranoLogger.printStackTrace(error);
+                  // プロパティ処理でエラーが発生しても次のプロパティを処理
+                }
+              });
+            }
+          } catch (error) {
+            TyranoLogger.printStackTrace(error);
+            // エラーを記録するだけで処理は続行
+          }
+        },
+      });
+    } catch (error) {
+      TyranoLogger.printStackTrace(error);
+      // traverseでエラーが発生しても処理を続行
+    }
   }
 
   public async updateMacroLabelVariableDataMapByKs(
@@ -1008,4 +1036,3 @@ export class InformationWorkSpace {
     this._characterMap = value;
   }
 }
-
