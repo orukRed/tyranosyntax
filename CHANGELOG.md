@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.6.3] 2025-06-01
+
+- タグ定義を更新しました。
+
 ## [1.6.2]- 2025-05-13
 
 - シナリオ内に存在するJavaScriptによっては拡張機能の初期化に失敗してしまう問題への暫定的な対応を行いました。
