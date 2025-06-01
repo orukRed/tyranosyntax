@@ -4538,7 +4538,7 @@
                 "description": "しっぽの幅を指定できます。"
             },
             {
-                "name": "sippo_top",
+                "name": "sippo_height",
                 "required": false,
                 "description": "しっぽの高さを指定できます。"
             },

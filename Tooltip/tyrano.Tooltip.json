@@ -3314,7 +3314,7 @@
     "fuki_chara": {
         "prefix": "fuki_chara",
         "body": [
-            "[fuki_chara name=\"\" left=\"\" top=\"\" sippo=\"\" sippo_left=\"\" sippo_top=\"\" sippo_width=\"\" sippo_top=\"\" max_width=\"\" fix_width=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" radius=\"\" font_color=\"\" font_size=\"\" cond=\"\"]"
+            "[fuki_chara name=\"\" left=\"\" top=\"\" sippo=\"\" sippo_left=\"\" sippo_top=\"\" sippo_width=\"\" sippo_height=\"\" max_width=\"\" fix_width=\"\" color=\"\" border_color=\"\" border_size=\"\" opacity=\"\" radius=\"\" font_color=\"\" font_size=\"\" cond=\"\"]"
         ],
         "description": [
             "ふきだしのデザインをキャラクターごとに設定できます。",
@@ -3333,7 +3333,7 @@
             "    ふきだしの位置がleftかrightの場合、しっぽを表示する上端からの位置を指定できます。",
             "  sippo_width:",
             "    しっぽの幅を指定できます。",
-            "  sippo_top:",
+            "  sippo_height:",
             "    しっぽの高さを指定できます。",
             "  max_width:",
             "    ふきだしのサイズは自動的に調整されますが、その際の横幅の上限サイズを指定できます。",
