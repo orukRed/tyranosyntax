@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.6.3",
+  "version": "1.7.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -37,9 +37,6 @@
     "watch-web": "webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map"
   },
-  "activationEvents": [
-    "onLanguage:tyrano"
-  ],
   "contributes": {
     "languages": [
       {
@@ -122,6 +119,24 @@
             "type": "boolean",
             "default": true,
             "description": "/**/で囲んだ処理をアウトラインに表示させないようにします。\n現在β版の機能のため、/*や*/のある行にタグを配置すると正しく表示されない可能性があります。\n例：/*comment*/[p]、[p]/*comment*/、[p]/*、*/[p]"
+          },
+          "TyranoScript syntax.outline.comment": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "TODO",
+              "FIXME",
+              "NOTE",
+              "BUG",
+              "HACK",
+              "♦",
+              "■",
+              "●",
+              "○"
+            ],
+            "description": "アウトラインに表示するコメント文字列の配列"
           },
           "TyranoScript syntax.autoDiagnostic.isEnabled": {
             "type": "boolean",

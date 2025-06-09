@@ -4,6 +4,23 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.7.0] 2025-06-12
+
+- 特定の文字列から始まるコメントアウト行もアウトラインに表示されるようになりました。
+`;`でコメントアウトした行で、`TyranoScript syntax.outline.comment`で定義した文字列のいずれかが先頭の場合アウトラインに表示されます。
+
+なお、デフォルトで定義された文字列は以下です。
+
+- TODO
+- FIXME
+- NOTE
+- BUG
+- HACK
+- ♦
+- ■
+- ●
+- ○
+
 ## [1.6.3] 2025-06-01
 
 - タグ定義を更新しました。
