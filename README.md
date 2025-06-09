@@ -165,6 +165,8 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 
 ### アウトライン表示(Outline)
 
+#### タグや変数のアウトライン表示
+
 ![](src/readme_img/outline.png)
 
 ラベルや変数、一部のタグがアウトラインビューに表示されます。
@@ -189,6 +191,32 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - loadjsタグ
 - htmlタグ
 - endhtmlタグ
+
+#### コメントのアウトライン表示
+
+![](src/readme_img/outline_comment.png)
+
+`;`でコメントアウトした行で、`TyranoScript syntax.outline.comment`で定義した文字列のいずれかが先頭の場合アウトラインに表示されます。
+
+```tyrano
+;■ここにマクロ群の定義
+[macro name="test"]
+[endmacro]
+```
+
+なお、デフォルトで定義された文字列は以下です。必要に応じて設定から編集してください。
+
+- TODO
+- FIXME
+- NOTE
+- BUG
+- HACK
+- ♦
+- ■
+- ●
+- ○
+
+
 
 ### 診断機能(Diagnostics)
 

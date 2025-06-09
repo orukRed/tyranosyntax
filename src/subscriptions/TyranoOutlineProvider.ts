@@ -36,6 +36,18 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
 
       //コメント中ならアウトラインとして表示しない
       if (line.text.startsWith(";") || commentFlag) {
+        //isAddCommentOutLineだけはコメント中でも表示させたい。
+        //FIXME:暫定的な書き方なのでもっと良い書き方があるはず
+        if (this.isAddCommentOutLine(line.text)) {
+          const symbol = new vscode.DocumentSymbol(
+            line.text.replace(";", "").trim(),
+            "Comment",
+            vscode.SymbolKind.Enum,
+            line.range,
+            line.range,
+          );
+          symbols.push(symbol);
+        }
         continue;
       }
 
@@ -62,14 +74,24 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
           line.range,
         );
         symbols.push(symbol);
-      }
-
-      //ラベルをアウトラインに表示
+      } //ラベルをアウトラインに表示
       if (this.isAddLabelOutLine(line.text)) {
         const symbol = new vscode.DocumentSymbol(
           line.text,
           "Component",
           vscode.SymbolKind.Function,
+          line.range,
+          line.range,
+        );
+        symbols.push(symbol);
+      }
+
+      //コメントをアウトラインに表示
+      if (this.isAddCommentOutLine(line.text)) {
+        const symbol = new vscode.DocumentSymbol(
+          line.text.replace(";", "").trim(),
+          "Comment",
+          vscode.SymbolKind.Enum,
           line.range,
           line.range,
         );
@@ -115,7 +137,6 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
     }
     return false;
   }
-
   /**
    * 引数で渡した文字列に、アウトライン表示するラベルが含まれているかを判定します。
    * @param text その行の文字列
@@ -129,5 +150,30 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
       return true;
     }
     return false;
+  }
+
+  /**
+   * 引数で渡した文字列に、アウトライン表示するコメントが含まれているかを判定します。
+   * @param text その行の文字列
+   * @returns アウトライン表示するコメントが含まれているならtrue,そうでないならfalse
+   */
+  private isAddCommentOutLine(text: string): boolean {
+    const commentStrings: string[] | undefined = vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.outline.comment");
+    if (!commentStrings || commentStrings.length === 0) {
+      return false;
+    }
+
+    // 特定のコメント文字列をチェック
+    // 書式: {任意の数の空白};{任意の数の空白}{コメント文字列}
+    const semicolonCommentMatch = commentStrings.some((commentString) => {
+      const regex = new RegExp(
+        `^\\s*;\\s*${commentString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      );
+      return regex.test(text);
+    });
+
+    return semicolonCommentMatch;
   }
 }
