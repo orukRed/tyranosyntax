@@ -18,10 +18,10 @@
   "version": "1.7.0",
   "engines": {
     "vscode": "^1.79.1"
-  },
-  "categories": [
+  },  "categories": [
     "Programming Languages"
   ],
+  "activationEvents": [],
   "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
