@@ -33,14 +33,17 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
           commentFlag = false;
         }
       }
-
       //コメント中ならアウトラインとして表示しない
-      if (line.text.startsWith(";") || commentFlag) {
+      if (
+        line.text.startsWith(";") ||
+        line.text.trimStart().startsWith("//") ||
+        commentFlag
+      ) {
         //isAddCommentOutLineだけはコメント中でも表示させたい。
         //FIXME:暫定的な書き方なのでもっと良い書き方があるはず
         if (this.isAddCommentOutLine(line.text)) {
           const symbol = new vscode.DocumentSymbol(
-            line.text.replace(";", "").trim(),
+            this.getCommentText(line.text),
             "Comment",
             vscode.SymbolKind.Enum,
             line.range,
@@ -85,11 +88,10 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
         );
         symbols.push(symbol);
       }
-
       //コメントをアウトラインに表示
       if (this.isAddCommentOutLine(line.text)) {
         const symbol = new vscode.DocumentSymbol(
-          line.text.replace(";", "").trim(),
+          this.getCommentText(line.text),
           "Comment",
           vscode.SymbolKind.Enum,
           line.range,
@@ -151,7 +153,6 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
     }
     return false;
   }
-
   /**
    * 引数で渡した文字列に、アウトライン表示するコメントが含まれているかを判定します。
    * @param text その行の文字列
@@ -167,13 +168,34 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
 
     // 特定のコメント文字列をチェック
     // 書式: {任意の数の空白};{任意の数の空白}{コメント文字列}
-    const semicolonCommentMatch = commentStrings.some((commentString) => {
-      const regex = new RegExp(
+    // または: {任意の数の空白}//{任意の数の空白}{コメント文字列}
+    const commentMatch = commentStrings.some((commentString) => {
+      const semicolonRegex = new RegExp(
         `^\\s*;\\s*${commentString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
       );
-      return regex.test(text);
+      const slashRegex = new RegExp(
+        `^\\s*//\\s*${commentString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      );
+      return semicolonRegex.test(text) || slashRegex.test(text);
     });
 
-    return semicolonCommentMatch;
+    return commentMatch;
+  }
+
+  /**
+   * コメント行からコメント記号を除去してコメントテキストを取得します。
+   * @param text コメント行の文字列
+   * @returns コメント記号を除去したテキスト
+   */
+  private getCommentText(text: string): string {
+    // ";" で始まるコメントの場合
+    if (text.includes(";")) {
+      return text.replace(";", "").trim();
+    }
+    // "//" で始まるコメントの場合
+    if (text.includes("//")) {
+      return text.replace("//", "").trim();
+    }
+    return text.trim();
   }
 }
