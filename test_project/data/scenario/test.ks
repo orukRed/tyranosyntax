@@ -27,3 +27,13 @@
 ;■
 ;●
 ;○
+
+//TODO
+//FIXME
+//NOTE: TEST
+//BUG
+//HACK
+//♦
+//■
+//●
+//○
