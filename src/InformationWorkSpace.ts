@@ -602,6 +602,7 @@ export class InformationWorkSpace {
                   scenarioData.uri,
                   new vscode.Position(await data["line"], await data["column"]),
                 ),
+                "" + description + "\n",
               ),
             );
         } else if ((await data["name"]) === "eval") {

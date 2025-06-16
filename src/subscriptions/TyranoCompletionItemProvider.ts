@@ -439,6 +439,9 @@ export class TyranoCompletionItemProvider
             const comp = new vscode.CompletionItem(value.name);
             comp.kind = vscode.CompletionItemKind.Interface;
             comp.insertText = "*" + value.name;
+            comp.documentation = new vscode.MarkdownString(
+              `${value.description}`,
+            );
             completions.push(comp);
           }
         });

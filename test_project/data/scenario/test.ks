@@ -47,6 +47,8 @@
 
 @macro name="test1"
 @endmacro
- 
+
+@jump target="" 
+
 
 @charaset
