@@ -17,6 +17,7 @@ import traverse from "@babel/traverse";
 import { CharacterData } from "./defineData/CharacterData";
 import { CharacterFaceData } from "./defineData/CharacterFaceData";
 import { CharacterLayerData } from "./defineData/CharacterLayerData";
+import * as crypto from "crypto";
 
 /**
  * ワークスペースディレクトリとか、data/フォルダの中にある素材情報とか。
@@ -313,7 +314,9 @@ export class InformationWorkSpace {
                 macroData.parameter.push(
                   new MacroParameterData("parameter", false, "description"),
                 ); //TODO:パーサーでパラメータの情報読み込んで追加する
-                this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
+                this.defineMacroMap
+                  .get(projectPath)
+                  ?.set(crypto.randomUUID(), macroData);
                 //suggetionsに登録されてない場合のみ追加
                 if (
                   !Object.prototype.hasOwnProperty.call(
@@ -569,7 +572,9 @@ export class InformationWorkSpace {
             description,
           );
           const macroName: string = await data["pm"]["name"];
-          this.defineMacroMap.get(projectPath)?.set(macroName, macroData);
+          this.defineMacroMap
+            .get(projectPath)
+            ?.set(crypto.randomUUID(), macroData);
           //suggetionsに登録されてない場合のみ追加
           if (
             !Object.prototype.hasOwnProperty.call(
@@ -806,7 +811,16 @@ export class InformationWorkSpace {
 
     this.defineMacroMap.get(projectPath)?.forEach((value, _key) => {
       if (value.filePath == filePath) {
-        this.defineMacroMap.get(projectPath)?.delete(value.macroName);
+        //DefineMacroData.nameにvalue.macroNameと同じ値が存在するdefineMacroMap.get(projectPath)を取得して、それを削除する
+        this.defineMacroMap.set(
+          projectPath,
+          new Map(
+            Array.from(this.defineMacroMap.get(projectPath) || []).filter(
+              ([k, v]) => v.macroName != value.macroName,
+            ),
+          ),
+        );
+
         deleteTagList.push(value.macroName);
       }
     });

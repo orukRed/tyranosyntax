@@ -33,9 +33,16 @@ export class TyranoDefinitionProvider {
     );
     const tagIndex = this.parser.getIndex(parsedData, position.character);
     //カーソル位置のマクロのMapデータ取得
-    const retMacroData = this.infoWs.defineMacroMap
-      .get(projectPath)
-      ?.get(parsedData[tagIndex]["name"]);
+    const macroName = parsedData[tagIndex]["name"];
+    const projectMacros = this.infoWs.defineMacroMap.get(projectPath);
+    if (!projectMacros) {
+      return null;
+    }
+
+    // MapをArrayに変換してマクロ名で検索
+    const retMacroData = Array.from(projectMacros.values()).find(
+      (macro) => macro.macroName == macroName
+    );
 
     return retMacroData?.location;
   }
