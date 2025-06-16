@@ -231,6 +231,7 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 - 使用しているタグがプロジェクトに存在するかの検出
 - 使用している画像、音声などのリソースがプロジェクトに存在するかの検出
 - ラベル名が正しいかどうかの検出
+- マクロの重複定義の検出
 
 f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を変更してください。
 
@@ -242,7 +243,9 @@ f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を
     "missingScenariosAndLabels": true,
     "jumpAndCallInIfStatement": true,
     "existResource": true,
-    "labelName": true
+    "labelName": true,
+    "macroDuplicate": true
+
   }
 ```
 

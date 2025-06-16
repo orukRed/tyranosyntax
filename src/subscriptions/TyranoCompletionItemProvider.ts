@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { InformationWorkSpace } from "../InformationWorkSpace";
-import path from "path";
+import path, { parse } from "path";
 import { Parser } from "../Parser";
 import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
 import { VariableData } from "../defineData/VariableData";
@@ -34,7 +34,6 @@ export class TyranoCompletionItemProvider
   } = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.tag.parameter")!;
-
 
   private getVariableName(variableValue0: string): string {
     let variableName = "";
@@ -233,10 +232,11 @@ export class TyranoCompletionItemProvider
         );
       } else if (
         parsedData === undefined ||
-        parsedData[tagIndex] === undefined
+        parsedData[tagIndex] === undefined ||
+        !parsedData[tagIndex]["name"]
       ) {
         //空行orテキストならタグの予測変換を出す
-        return this.completionTag(projectPath);
+        return this.completionTag(projectPath, document, position);
       } else {
         //タグの中ならタグのパラメータの予測変換を出す
         const isTagSentence =
@@ -250,7 +250,7 @@ export class TyranoCompletionItemProvider
             nameParamValue,
           );
         } else {
-          return this.completionTag(projectPath);
+          return this.completionTag(projectPath, document, position);
         }
       }
     } catch (error) {
@@ -439,6 +439,9 @@ export class TyranoCompletionItemProvider
             const comp = new vscode.CompletionItem(value.name);
             comp.kind = vscode.CompletionItemKind.Interface;
             comp.insertText = "*" + value.name;
+            comp.documentation = new vscode.MarkdownString(
+              `${value.description}`,
+            );
             completions.push(comp);
           }
         });
@@ -694,12 +697,13 @@ export class TyranoCompletionItemProvider
     }
     return completions;
   }
-
   /**
    * タグの予測変換
    */
   private async completionTag(
     projectPath: string,
+    document: vscode.TextDocument,
+    position: vscode.Position,
   ): Promise<
     | vscode.CompletionItem[]
     | vscode.CompletionList<vscode.CompletionItem>
@@ -711,6 +715,19 @@ export class TyranoCompletionItemProvider
       projectPath,
     ) as SuggestionsMiniumByTag; // FIXME: Don't use type assertion
 
+    // 現在の行の内容を取得
+    const lineText = document.lineAt(position.line).text;
+    const beforeCursor = lineText.substring(0, position.character);
+
+    // @が存在するかチェック
+    const hasAtSymbol = beforeCursor.includes("@");
+
+    // [と]の間にいるかチェック
+    const lastOpenBracket = beforeCursor.lastIndexOf("[");
+    const lastCloseBracket = beforeCursor.lastIndexOf("]");
+    const isInsideBrackets =
+      lastOpenBracket > lastCloseBracket && lastOpenBracket !== -1;
+
     for (const suggestion of Object.values(suggestionsByTag)) {
       if (!suggestion.name) continue;
       const { name, description } = suggestion;
@@ -721,9 +738,22 @@ export class TyranoCompletionItemProvider
         const inputType = vscode.workspace
           .getConfiguration()
           .get("TyranoScript syntax.completionTag.inputType");
-        comp.insertText = new vscode.SnippetString(
-          inputType === "@" ? `@${textLabel} $0` : `[${textLabel} $0]`,
-        );
+
+        // insertTextを動的に決定
+        let insertText: string;
+        if (hasAtSymbol) {
+          // @が存在する行なら、insertTextを@なしにする
+          insertText = `${textLabel} $0`;
+        } else if (isInsideBrackets) {
+          // [と]の間でcompletionTagをした場合、insertTextから[と]を無しにする
+          insertText = `${textLabel} $0`;
+        } else {
+          // 通常の場合
+          insertText =
+            inputType === "@" ? `@${textLabel} $0` : `[${textLabel} $0]`;
+        }
+
+        comp.insertText = new vscode.SnippetString(insertText);
         comp.documentation = new vscode.MarkdownString(description);
         comp.kind = vscode.CompletionItemKind.Class;
         comp.command = {

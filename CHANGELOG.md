@@ -4,6 +4,14 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.8.0] 2025-06-20
+
+- タグ補完の挙動を修正しました。
+  - `@`の存在する行、もしくは`[`と`]`の間のカーソル位置でタグ補完を行えるようにしました。
+- 重複したマクロへの診断機能を追加しました。
+  - マクロの定義が複数存在する場合、診断機能でエラーとして扱います。
+- ラベルの上にコメントアウトがある場合、ラベルへの補完でコメントが表示されるようになりました。
+
 ## [1.7.1] 2025-06-11
 
 ver1.7.0で追加した、以下の機能を修正しました。

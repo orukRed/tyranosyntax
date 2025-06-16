@@ -25,6 +25,8 @@ export class TyranoDiagnostic {
   private readonly jumpAndCallInIfStatement = "jumpAndCallInIfStatement";
   private readonly existResource = "existResource";
   private readonly labelName = "labelName";
+  private readonly macroDuplicate = "macroDuplicate";
+
   //パーサー
   private readonly JUMP_TAG = [
     "jump",
@@ -143,8 +145,12 @@ export class TyranoDiagnostic {
       );
     }
 
-    //その他の診断機能
+    //-----------------------------------------
+    //■その他の診断機能
     //診断項目ごとにfor文作ってると処理速度が壊滅的な遅さになるのでここに書く
+    //-----------------------------------------
+
+    //プロジェクトのシナリオファイルを一つずつ診断
     for (const [_filePath, scenarioDocument] of this.infoWs.scenarioFileMap) {
       //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
       const projectPathOfDiagFile = await this.infoWs.getProjectPathByFilePath(
@@ -157,11 +163,24 @@ export class TyranoDiagnostic {
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
       const diagnostics: vscode.Diagnostic[] = [];
 
+      //-----------------------------------------
+      //■ファイルに対しての診断はここ
+      //-----------------------------------------
+
+      //マクロの重複チェック
+      await this.checkMacroDuplicate(
+        diagnostics,
+        projectPathOfDiagFile,
+        scenarioDocument,
+      );
+
       for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
         }
+
+        //TODO:今後もし行に対しての診断項目が増えた場合はここに追加
         // ファイルリソースの存在チェックを別メソッドで実行
         await this.detectionMissingResources(
           data,
@@ -169,9 +188,6 @@ export class TyranoDiagnostic {
           projectPathOfDiagFile,
           diagnostics,
         );
-
-        //TODO:今後もし診断項目が増えた場合はここに追加
-
         //ラベル名のチェック
         await this.checkLabelName(
           data,
@@ -745,5 +761,66 @@ export class TyranoDiagnostic {
         diagnostics.push(diag);
       }
     }
+  }
+
+  private async checkMacroDuplicate(
+    diagnostics: vscode.Diagnostic[],
+    projectPath: string,
+    scenarioDocument: vscode.TextDocument,
+  ): Promise<void> {
+    // マクロの重複チェックを実行するかどうか
+    if (!this.isExecuteDiagnostic(this.macroDuplicate)) {
+      return;
+    }
+
+    //現在のプロジェクトのマクロデータ取得
+    const defineMacroMap = this.infoWs.defineMacroMap.get(projectPath);
+    if (!defineMacroMap) {
+      return; // マクロが定義されていない場合は何もしない
+    }
+
+    // macro.macroNameのリストを取得
+    const hoge = Array.from(defineMacroMap.values());
+
+    //hogeから、macroNameに重複があるもののみを取得
+    // 1. 各 name の出現回数を数える。
+    // 2. 出現回数が1回より多い name を特定。
+    // 3. 元のリストをフィルタリングして、特定された name を持つオブジェクトのみを抽出。
+    const macroNameCounts: Record<string, number> = {};
+    for (const item of hoge) {
+      macroNameCounts[item.macroName] =
+        (macroNameCounts[item.macroName] || 0) + 1;
+    }
+    const duplicateMacroNames = Object.keys(macroNameCounts).filter(
+      (name) => macroNameCounts[name] > 1,
+    );
+    const piyo = hoge.filter((item) =>
+      duplicateMacroNames.includes(item.macroName),
+    );
+
+    //piyoから、scenarioDocument.fileNameが同じものでフィルタリング
+    const fuga = piyo.filter(
+      (macro) => macro.location?.uri.fsPath === scenarioDocument.fileName,
+    );
+
+    for (const macro of fuga) {
+      if (macro.location) {
+        const end = new vscode.Position(
+          macro.location.range.start.line,
+          macro.location.range.end.character +
+            macro.macroName.length +
+            `macro name="${macro.macroName}"`.length,
+        );
+        const range = new vscode.Range(macro.location.range.start, end);
+        const diag = new vscode.Diagnostic(
+          range,
+          `マクロ名 "${macro.macroName}" が重複しています。同じ名前のマクロが他の箇所で定義されています。`,
+          vscode.DiagnosticSeverity.Warning,
+        );
+        diagnostics.push(diag);
+      }
+    }
+
+    return;
   }
 }

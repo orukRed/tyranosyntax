@@ -16,7 +16,7 @@
 ;日本語などの2バイト文字は警告
 ;非推奨なのでハイライトもしません
 *ラベル④
-
+ 
 
 ;TODO
  ;FIXME
@@ -37,3 +37,18 @@
 //■
 //●
 //○
+
+;重複マクロの警告確認
+@macro name="test1"
+@endmacro
+
+@macro name="test1"
+@endmacro
+
+@macro name="test1"
+@endmacro
+
+@jump target="" 
+
+
+@charaset
