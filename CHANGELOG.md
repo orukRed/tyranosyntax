@@ -6,6 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [1.8.1] 2025-07-xx
 
+- `TyranoScript syntax.parser.read_plugin`がfalseの時にも`others/plugin`フォルダに対して診断が行われていたのを、診断しないように修正しました。
 - マクロのdocstring作成時に`[`や`]`がある場合にdocstringが正しく表示されないを修正しました。[issue#270](https://github.com/orukRed/tyranosyntax/issues/270)
 - 複数行コメントアウトした行もラベルとされてしまうことのある不具合を修正しました。[issue#271](https://github.com/orukRed/tyranosyntax/issues/271)
 

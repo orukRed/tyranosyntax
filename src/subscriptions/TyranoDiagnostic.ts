@@ -1,3 +1,6 @@
+/* eslint-disable no-control-regex */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { InformationWorkSpace as workspace } from "../InformationWorkSpace";
@@ -157,6 +160,15 @@ export class TyranoDiagnostic {
         scenarioDocument.fileName,
       );
       if (diagnosticProjectPath !== projectPathOfDiagFile) {
+        continue;
+      }
+      //skipしてOKならcontinueする
+      if (
+        this.infoWs.isSkipParse(
+          scenarioDocument.fileName,
+          projectPathOfDiagFile,
+        )
+      ) {
         continue;
       }
 
@@ -347,6 +359,10 @@ export class TyranoDiagnostic {
       if (projectPath !== projectPathOfDiagFile) {
         continue;
       }
+      //skipしてOKならcontinueする
+      if (this.infoWs.isSkipParse(scenarioDocument.fileName, projectPath)) {
+        continue;
+      }
 
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
       const diagnostics: vscode.Diagnostic[] = [];
@@ -398,6 +414,10 @@ export class TyranoDiagnostic {
       );
       //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
       if (projectPath !== projectPathOfDiagFile) {
+        continue;
+      }
+      //skipしてOKならcontinueする
+      if (this.infoWs.isSkipParse(scenarioDocument.fileName, projectPath)) {
         continue;
       }
 
@@ -611,6 +631,10 @@ export class TyranoDiagnostic {
       );
       //診断中のプロジェクトフォルダと、診断対象のファイルのプロジェクトが一致しないならcontinue
       if (projectPath !== projectPathOfDiagFile) {
+        continue;
+      }
+      //skipしてOKならcontinueする
+      if (this.infoWs.isSkipParse(scenarioDocument.fileName, projectPath)) {
         continue;
       }
 

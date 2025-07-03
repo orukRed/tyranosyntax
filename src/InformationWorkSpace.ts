@@ -817,7 +817,7 @@ export class InformationWorkSpace {
           projectPath,
           new Map(
             Array.from(this.defineMacroMap.get(projectPath) || []).filter(
-              ([k, v]) => v.macroName != value.macroName,
+              ([_k, v]) => v.macroName != value.macroName,
             ),
           ),
         );
@@ -988,18 +988,24 @@ export class InformationWorkSpace {
     return path.resolve(relativePath);
   }
 
-  private isSkipParse(filePath: string, directory: string): boolean {
-    if (!this.isParsePluginFolder) {
-      const pluginFolder = path.resolve(directory + "/data/others/plugin");
-
-      const normalizedFilePath = path.resolve(filePath);
-      const normalizedFolderPath = path.resolve(pluginFolder);
-
-      // ファイルパスがフォルダパスで始まっているかを判定
-      const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
-      return ret;
+  /**
+   * others/pluginフォルダ内のファイルパスならtrueを返す。
+   * @param filePath
+   * @param directory
+   * @returns boolean
+   */
+  public isSkipParse(filePath: string, directory: string): boolean {
+    if (this.isParsePluginFolder) {
+      return false;
     }
-    return false;
+    const pluginFolder = path.resolve(directory + "/data/others/plugin");
+
+    const normalizedFilePath = path.resolve(filePath);
+    const normalizedFolderPath = path.resolve(pluginFolder);
+
+    // ファイルパスがフォルダパスで始まっているかを判定
+    const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
+    return ret;
   }
 
   public get scriptFileMap(): Map<string, string> {

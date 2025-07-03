@@ -105,8 +105,7 @@
     "sourceMap": true,
     "rootDir": "src",
     "ignoreDeprecations": "5.0", //↓のがts5.0移行で無効になったので、エラーを出さないようにする
-    "noImplicitAny": false, /*str[1]など、添字にマジックナンバーを許可する*/
-    //"strict": false
+    "suppressImplicitAnyIndexErrors": true /*str[1]など、添字にマジックナンバーを許可する*/
   },
   "exclude": [
     "webpack.config.js",
