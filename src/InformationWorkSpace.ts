@@ -989,17 +989,17 @@ export class InformationWorkSpace {
   }
 
   private isSkipParse(filePath: string, directory: string): boolean {
-    if (this.isParsePluginFolder) {
-      return false;
+    if (!this.isParsePluginFolder) {
+      const pluginFolder = path.resolve(directory + "/data/others/plugin");
+
+      const normalizedFilePath = path.resolve(filePath);
+      const normalizedFolderPath = path.resolve(pluginFolder);
+
+      // ファイルパスがフォルダパスで始まっているかを判定
+      const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
+      return ret;
     }
-    const pluginFolder = path.resolve(directory + "/data/others/plugin");
-
-    const normalizedFilePath = path.resolve(filePath);
-    const normalizedFolderPath = path.resolve(pluginFolder);
-
-    // ファイルパスがフォルダパスで始まっているかを判定
-    const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
-    return ret;
+    return false;
   }
 
   public get scriptFileMap(): Map<string, string> {
