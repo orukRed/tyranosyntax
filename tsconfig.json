@@ -76,7 +76,7 @@
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
 
     /* Type Checking */
-    "strict": true /* Enable all strict type-checking options. */,
+    "strict": false /* Enable all strict type-checking options. */,
     // "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
@@ -106,7 +106,7 @@
     "rootDir": "src",
     "ignoreDeprecations": "5.0", //↓のがts5.0移行で無効になったので、エラーを出さないようにする
     "noImplicitAny": false, /*str[1]など、添字にマジックナンバーを許可する*/
-    "strict": false
+    //"strict": false
   },
   "exclude": [
     "webpack.config.js",
