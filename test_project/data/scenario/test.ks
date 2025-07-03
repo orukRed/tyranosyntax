@@ -49,6 +49,11 @@
 @endmacro
 
 
+;issue-270
+;マクロ用のコメント[test]で呼び出してください
+@macro name="test_issue270"
+@endmacro 
+
 
 ; issue271
 @iscript 
@@ -66,5 +71,4 @@
 */
 
 
-
-
+@charaset
