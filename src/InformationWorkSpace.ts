@@ -817,7 +817,7 @@ export class InformationWorkSpace {
           projectPath,
           new Map(
             Array.from(this.defineMacroMap.get(projectPath) || []).filter(
-              ([k, v]) => v.macroName != value.macroName,
+              ([_k, v]) => v.macroName != value.macroName,
             ),
           ),
         );
@@ -988,7 +988,13 @@ export class InformationWorkSpace {
     return path.resolve(relativePath);
   }
 
-  private isSkipParse(filePath: string, directory: string): boolean {
+  /**
+   * others/pluginフォルダ内のファイルパスならtrueを返す。
+   * @param filePath
+   * @param directory
+   * @returns boolean
+   */
+  public isSkipParse(filePath: string, directory: string): boolean {
     if (this.isParsePluginFolder) {
       return false;
     }

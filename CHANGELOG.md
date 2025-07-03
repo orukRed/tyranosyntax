@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.8.1] 2025-07-05
+
+- `macro`タグでパラメータのができない問題を修正しました。[issue#276](https://github.com/orukRed/tyranosyntax/issues/276)
+- `TyranoScript syntax.parser.read_plugin`がfalseの時にも`others/plugin`フォルダに対して診断が行われていたのを、診断しないように修正しました。
+- マクロのdocstring作成時に`[`や`]`がある場合にdocstringが正しく表示されないを修正しました。[issue#270](https://github.com/orukRed/tyranosyntax/issues/270)
+- 複数行コメントアウトした行もラベルとされてしまうことのある不具合を修正しました。[issue#271](https://github.com/orukRed/tyranosyntax/issues/271)
+
 ## [1.8.0] 2025-06-20
 
 - タグ補完の挙動を修正しました。
