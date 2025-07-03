@@ -705,6 +705,11 @@ export class TyranoDiagnostic {
       return;
     }
 
+    // コメント中のラベルは診断対象外
+    if (data["pm"]["is_in_comment"] === true) {
+      return;
+    }
+
     const labelName = data["pm"]["label_name"];
     if (!labelName) {
       return;

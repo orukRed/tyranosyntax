@@ -94,7 +94,7 @@ export class Parser {
       //コメントの場合は無視する
       if (flag_comment === true && line_str === "*/") {
         flag_comment = false;
-      } else if (line_str === "/*") {
+      } else if (line_str === "/*" || line_str.startsWith("/**")) {
         flag_comment = true;
         // } else if (flag_comment == true || first_char === ";") {
       } else if (first_char === "#") {
@@ -140,6 +140,7 @@ export class Parser {
             index: array_s.length,
             label_name: label_key,
             val: label_val,
+            is_in_comment: flag_comment, // コメント中かどうかの情報を追加
           },
           val: label_val,
         };
