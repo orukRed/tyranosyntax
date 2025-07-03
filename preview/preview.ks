@@ -23,6 +23,7 @@
   TYRANO.kag.config.defaultSeVolume = 0;
   TYRANO.kag.config.defaultMovieVolume = 0;
   // プレビューモードでは強制的にwebstorageを使用 (ブラウザ環境のため)
+  // Fix for issue #239: when configSave="file", preview fails because require('fs') is not available in browser
   TYRANO.kag.config.configSave = "webstorage";
 //プレビュー中にアラートが出ないように上書きする
   const originalAlert = window.alert;

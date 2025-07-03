@@ -25,7 +25,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Read the libs.js file
-const libsPath = path.join(__dirname, 'test_project', 'tyrano', 'libs.js');
+const libsPath = path.join(__dirname, '..', 'test_project', 'tyrano', 'libs.js');
 const libsContent = fs.readFileSync(libsPath, 'utf8');
 
 // Extract the storage functions
