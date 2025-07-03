@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { InformationWorkSpace } from "../InformationWorkSpace";
-import path, { parse } from "path";
+import path from "path";
 import { Parser } from "../Parser";
 import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
 import { VariableData } from "../defineData/VariableData";
@@ -99,7 +99,10 @@ export class TyranoCompletionItemProvider
 
       const leftSideText =
         parsedData[tagIndex] !== undefined
-          ? lineText.substring(parsedData[tagIndex]["column"], position.character)
+          ? lineText.substring(
+              parsedData[tagIndex]["column"],
+              position.character,
+            )
           : undefined;
       const lineTagName =
         parsedData[tagIndex] !== undefined
@@ -651,12 +654,11 @@ export class TyranoCompletionItemProvider
       projectPath,
       nameParamValue,
     );
-
     //item:{}で囲ったタグの番号。0,1,2,3...
     //name:そのまんま。middle.jsonを見て。
     //item2:タグのパラメータ。0,1,2,3...って順に。
     for (const item in suggestions) {
-      const tagName = suggestions[item]["name"].toString(); //タグ名。jumpとかpとかimageとか。
+      const tagName = suggestions[item]["name"]?.toString(); //タグ名。jumpとかpとかimageとか。
       if (selectedTag === tagName) {
         //nameの値によって、追加するパラメータを変更する。
         //chara_partタグなら特別にCharacterDataに存在するpartの値を追加する。
