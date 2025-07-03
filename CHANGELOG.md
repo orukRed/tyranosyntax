@@ -6,6 +6,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [1.8.1] 2025-07-xx
 
+- 複数行コメントアウトした行もラベルとされてしまうことのある不具合を修正しました。[issue#271](https://github.com/orukRed/tyranosyntax/issues/271)
+
 ## [1.8.0] 2025-06-20
 
 - タグ補完の挙動を修正しました。
