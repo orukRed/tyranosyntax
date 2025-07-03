@@ -94,7 +94,6 @@ export class Parser {
       //コメントの場合は無視する
       if (flag_comment === true && line_str === "*/") {
         flag_comment = false;
-        continue;
       } else if (line_str === "/*" || line_str.startsWith("/**")) {
         flag_comment = true;
         continue;

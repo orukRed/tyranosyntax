@@ -48,7 +48,23 @@
 @macro name="test1"
 @endmacro
 
-@jump target="" 
 
 
-@charaset
+; issue271
+@iscript 
+/*
+*
+* hoge  　　あああ
+*/
+@endscript 
+
+/**
+*
+* hoge  　　あああ
+*
+*
+*/
+
+
+
+
