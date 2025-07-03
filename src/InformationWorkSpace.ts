@@ -528,10 +528,7 @@ export class InformationWorkSpace {
     const projectPath = await this.getProjectPathByFilePath(
       absoluteScenarioFilePath,
     );
-    //others/pluginの中に入っているファイルならreturn
-    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
-      return;
-    }
+
     if (scenarioData != undefined) {
       const parsedData = this.parser.parseText(scenarioData.getText()); //構文解析
       this.labelMap.set(absoluteScenarioFilePath, new Array<LabelData>());
@@ -547,6 +544,7 @@ export class InformationWorkSpace {
       const deleteTagList = await this.spliceMacroDataMapByFilePath(
         absoluteScenarioFilePath,
       );
+
       await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
       await this.spliceCharacterMapByFilePath(absoluteScenarioFilePath);
       await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);

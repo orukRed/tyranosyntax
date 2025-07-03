@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.8.2] 2025-07-05
+
+- `TyranoScript syntax.parser.read_plugin`がfalseの場合にプラグインの中で定義したマクロでもエラーが出てしまう問題を修正しました。
+  - これに伴い、`TyranoScript syntax.parser.read_plugin`がfalseの時には`others/plugin`フォルダのksファイルのみは読み込むようにしています。（マクロ定義などを使えるようにするため）
+
 ## [1.8.1] 2025-07-05
 
 - `macro`タグでパラメータのができない問題を修正しました。[issue#276](https://github.com/orukRed/tyranosyntax/issues/276)
