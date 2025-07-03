@@ -92,7 +92,6 @@ export class TyranoCompletionItemProvider
       const projectPath = await this.infoWs.getProjectPathByFilePath(
         document.fileName,
       );
-      const cursor = vscode.window.activeTextEditor?.selection.active.character;
       //カーソル付近のタグデータを取得
       const lineText = document.lineAt(position.line).text;
       const parsedData = this.parser.parseText(lineText);
@@ -100,7 +99,7 @@ export class TyranoCompletionItemProvider
 
       const leftSideText =
         parsedData[tagIndex] !== undefined
-          ? lineText.substring(parsedData[tagIndex]["column"], cursor)
+          ? lineText.substring(parsedData[tagIndex]["column"], position.character)
           : undefined;
       const lineTagName =
         parsedData[tagIndex] !== undefined
