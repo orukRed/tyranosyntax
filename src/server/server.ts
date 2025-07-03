@@ -11,15 +11,12 @@ import {
   RenameParams,
   WorkspaceEdit,
   PrepareRenameParams,
-  TextDocumentIdentifier,
-  URI,
 } from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { TyranoRenameProvider } from "../subscriptions/deprecate/__TyranoRenameProvider";
 import * as fs from "fs";
 import * as path from "path";
-import { workspace } from "vscode";
 
 // Create a connection for the server
 const connection = createConnection(ProposedFeatures.all);
@@ -30,7 +27,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 // Create rename provider instance
 const renameProvider = new TyranoRenameProvider();
 
-connection.onInitialize((params: InitializeParams) => {
+connection.onInitialize((_params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,

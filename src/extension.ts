@@ -2,12 +2,9 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import { workspace, ExtensionContext } from "vscode";
+import { ExtensionContext } from "vscode";
 import {
   LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind,
 } from "vscode-languageclient/node";
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
@@ -110,7 +107,7 @@ export function activate(context: ExtensionContext) {
           TyranoLogger.print("TyranoCompletionItemProvider activate");
 
           //ショートカットコマンドの登録
-          const ctbs = new TyranoCreateTagByShortcutKey();
+          const _ctbs = new TyranoCreateTagByShortcutKey();
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.shiftEnter",
