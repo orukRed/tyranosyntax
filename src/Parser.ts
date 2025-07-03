@@ -190,7 +190,7 @@ export class Parser {
           var c = array_char[j];
 
           if (flag_tag === true) {
-            if (c === "]" && this.flag_script == false) {
+            if (c === "]" && this.flag_script == false && first_char !== ";") {
               num_kakko--;
 
               if (num_kakko == 0) {
@@ -203,7 +203,7 @@ export class Parser {
               } else {
                 tag_str += c;
               }
-            } else if (c === "[" && this.flag_script == false) {
+            } else if (c === "[" && this.flag_script == false && first_char !== ";") {
               num_kakko++;
               tag_str += c;
             } else {
@@ -212,7 +212,8 @@ export class Parser {
           } else if (
             flag_tag === false &&
             c === "[" &&
-            this.flag_script == false
+            this.flag_script == false &&
+            first_char !== ";"
           ) {
             num_kakko++;
             column = j;
