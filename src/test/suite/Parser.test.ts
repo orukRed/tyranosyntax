@@ -91,4 +91,15 @@ suite("Parser.parseText", () => {
     const result = parser.parseText(text);
     assert.strictEqual(result.length, 0);
   });
+
+  test("複数行コメント内の行はラベルとして認識されない", () => {
+    const parser = Parser.getInstance();
+    const text = "/*\n *\n * hoge 変数その1\n */\n*real_label\nテキスト";
+    const result = parser.parseText(text);
+    const labelTags = result.filter((item: any) => item.name === "label");
+    // 複数行コメント内の行はラベルとして認識されないため、real_labelのみが検出される
+    assert.strictEqual(labelTags.length, 1);
+    assert.strictEqual(labelTags[0].pm.label_name, "real_label");
+    assert.strictEqual(labelTags[0].pm.line, 4);
+  });
 });
