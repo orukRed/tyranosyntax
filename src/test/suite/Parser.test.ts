@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as assert from "assert";
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from "vscode";
-import { InformationWorkSpace } from "../../InformationWorkSpace";
-import path from "path";
+// import { InformationWorkSpace } from "../../InformationWorkSpace";
+// import path from "path";
 import { Parser } from "../../Parser";
 // import * as myExtension from '../../extension';
 
@@ -92,6 +93,37 @@ suite("Parser.parseText", () => {
     assert.strictEqual(result.length, 0);
   });
 
+  test("コメント内のブラケット文字が正しく解析される", () => {
+    const parser = Parser.getInstance();
+    const text = "; 呼び出すには[hoge]と記述してください\n[macro name=\"hogehoge\"]\n[endmacro]";
+    const result = parser.parseText(text);
+    
+    // コメント行が単一のコメントとして解析されることを確認
+    const commentEntry = result.find((item: any) => item.name === "comment" && item.pm && item.pm.val);
+    assert.ok(commentEntry, "コメントエントリが見つからない");
+    assert.strictEqual(commentEntry.pm.val, "; 呼び出すには[hoge]と記述してください");
+    
+    // マクロタグが正しく解析されることを確認
+    const macroEntry = result.find((item: any) => item.name === "macro");
+    assert.ok(macroEntry, "マクロエントリが見つからない");
+    assert.strictEqual(macroEntry.pm.name, "hogehoge");
+  });
+
+  test("複数のブラケット文字を含むコメントが正しく解析される", () => {
+    const parser = Parser.getInstance();
+    const text = "; コメント内に[複数]の[タグ]のような文字があります\n[macro name=\"multiple_brackets\"]\n[endmacro]";
+    const result = parser.parseText(text);
+    
+    // コメント行が単一のコメントとして解析されることを確認
+    const commentEntry = result.find((item: any) => item.name === "comment" && item.pm && item.pm.val);
+    assert.ok(commentEntry, "コメントエントリが見つからない");
+    assert.strictEqual(commentEntry.pm.val, "; コメント内に[複数]の[タグ]のような文字があります");
+    
+    // マクロタグが正しく解析されることを確認
+    const macroEntry = result.find((item: any) => item.name === "macro");
+    assert.ok(macroEntry, "マクロエントリが見つからない");
+    assert.strictEqual(macroEntry.pm.name, "multiple_brackets");
+  });
   test("複数行コメント内の行はラベルとして認識されない", () => {
     const parser = Parser.getInstance();
     const text = "/*\n *\n * hoge 変数その1\n */\n*real_label\nテキスト";
