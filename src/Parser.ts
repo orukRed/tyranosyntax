@@ -96,10 +96,7 @@ export class Parser {
         flag_comment = false;
       } else if (line_str === "/*" || line_str.startsWith("/**")) {
         flag_comment = true;
-        continue;
-      } else if (flag_comment === true || first_char === ";") {
-        //コメント中、もしくは;から始まる行はスキップ
-        continue;
+        // } else if (flag_comment == true || first_char === ";") {
       } else if (first_char === "#") {
         var tmp_line = line_str.replace("#", "").trim();
         var chara_name = "";
@@ -143,6 +140,7 @@ export class Parser {
             index: array_s.length,
             label_name: label_key,
             val: label_val,
+            is_in_comment: flag_comment, // コメント中かどうかの情報を追加
           },
           val: label_val,
         };
@@ -245,7 +243,7 @@ export class Parser {
 
         if (text != "") {
           var nameParam = "text";
-          if (first_char === ";") {
+          if (flag_comment == true || first_char === ";") {
             nameParam = "comment";
             // text = text.replaceAll(";", "");
           }
@@ -352,7 +350,7 @@ export class Parser {
     var array = str.split(" ");
 
     //タグの名前 [xxx
-    if (first_char === ";") {
+    if (flag_comment == true || first_char === ";") {
       obj.name = "comment";
     } else {
       obj.name = array[0].trim();
