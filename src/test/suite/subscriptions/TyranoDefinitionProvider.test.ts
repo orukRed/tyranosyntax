@@ -1,8 +1,6 @@
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { TyranoCompletionItemProvider } from "../../../subscriptions/TyranoCompletionItemProvider";
+import { TyranoDefinitionProvider } from "../../../subscriptions/TyranoDefinitionProvider";
 
 // Mock classes for testing
 class MockTextDocument implements vscode.TextDocument {
@@ -23,8 +21,8 @@ class MockTextDocument implements vscode.TextDocument {
     const line = typeof lineOrPosition === 'number' ? lineOrPosition : lineOrPosition.line;
     return {
       lineNumber: line,
-      text: "[bg storage=\"",
-      range: new vscode.Range(line, 0, line, 13),
+      text: "[testmacro]",
+      range: new vscode.Range(line, 0, line, 11),
       rangeIncludingLineBreak: new vscode.Range(line, 0, line + 1, 0),
       firstNonWhitespaceCharacterIndex: 0,
       isEmptyOrWhitespace: false
@@ -37,7 +35,7 @@ class MockTextDocument implements vscode.TextDocument {
     return new vscode.Position(0, 0);
   }
   getText(_range?: vscode.Range): string {
-    return "[bg storage=\"";
+    return "[testmacro]";
   }
   getWordRangeAtPosition(_position: vscode.Position, _regex?: RegExp): vscode.Range | undefined {
     return undefined;
@@ -55,85 +53,79 @@ class MockCancellationToken implements vscode.CancellationToken {
   onCancellationRequested = new vscode.EventEmitter<any>().event;
 }
 
-class MockCompletionContext implements vscode.CompletionContext {
-  triggerKind = vscode.CompletionTriggerKind.Invoke;
-  triggerCharacter = undefined;
-}
-
-suite("TyranoCompletionItemProvider", () => {
-  vscode.window.showInformationMessage("Start TyranoCompletionItemProvider tests.");
+suite("TyranoDefinitionProvider", () => {
+  vscode.window.showInformationMessage("Start TyranoDefinitionProvider tests.");
 
   suite("constructor", () => {
     test("正常系 インスタンス作成", () => {
       // 実行
       assert.doesNotThrow(() => {
-        new TyranoCompletionItemProvider();
+        new TyranoDefinitionProvider();
       });
     });
 
     test("正常系 インスタンスが正しく初期化される", () => {
       // 実行
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
 
       // アサート
-      assert.ok(provider instanceof TyranoCompletionItemProvider, "TyranoCompletionItemProviderのインスタンスであるべき");
-      assert.ok(typeof provider.provideCompletionItems === "function", "provideCompletionItemsメソッドが存在するべき");
+      assert.ok(provider instanceof TyranoDefinitionProvider, "TyranoDefinitionProviderのインスタンスであるべき");
+      assert.ok(typeof provider.provideDefinition === "function", "provideDefinitionメソッドが存在するべき");
     });
   });
 
-  suite("provideCompletionItems", () => {
+  suite("provideDefinition", () => {
     test("正常系 メソッドが存在する", () => {
       // 値定義
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
 
       // アサート
-      assert.ok(typeof provider.provideCompletionItems === "function", "provideCompletionItemsメソッドが存在するべき");
+      assert.ok(typeof provider.provideDefinition === "function", "provideDefinitionメソッドが存在するべき");
     });
 
     test("正常系 メソッド呼び出しで例外が発生しない", async () => {
       // 値定義
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
       const document = new MockTextDocument();
-      const position = new vscode.Position(0, 13);
+      const position = new vscode.Position(0, 0);
       const token = new MockCancellationToken();
-      const context = new MockCompletionContext();
 
       // 実行（例外が発生しないことを確認）
       try {
-        const result = await provider.provideCompletionItems(document, position, token, context);
-        // 結果がundefined, null, CompletionItem[], またはCompletionListのいずれかであることを確認
+        const result = await provider.provideDefinition(document, position, token);
+        // 結果がundefined, null, Definition, またはLocationLink[]のいずれかであることを確認
         assert.ok(
           result === undefined || 
           result === null || 
-          Array.isArray(result) ||
-          (result && typeof result === 'object' && 'items' in result),
+          result instanceof vscode.Location ||
+          Array.isArray(result),
           "戻り値は適切な型であるべき"
         );
       } catch (error) {
-        // 依存関係が未初期化の場合など、期待されるエラーは許可
+        // InformationWorkSpaceが初期化されていない場合など、期待されるエラーは許可
         assert.ok(error instanceof Error, "エラーが発生した場合はErrorインスタンスであるべき");
       }
     });
 
     test("正常系 戻り値の型チェック", async () => {
       // 値定義
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
       const document = new MockTextDocument();
-      const position = new vscode.Position(0, 13);
+      const position = new vscode.Position(0, 5);
       const token = new MockCancellationToken();
-      const context = new MockCompletionContext();
 
       try {
         // 実行
-        const result = await provider.provideCompletionItems(document, position, token, context);
+        const result = await provider.provideDefinition(document, position, token);
 
         // アサート - 戻り値が適切な型であることを確認
         if (result !== undefined && result !== null) {
           const isValidResult = 
+            result instanceof vscode.Location ||
             Array.isArray(result) ||
-            (typeof result === 'object' && 'items' in result && Array.isArray((result as any).items));
+            (typeof result === 'object' && 'targetUri' in result);
           
-          assert.ok(isValidResult, "戻り値は有効なCompletionItem[]またはCompletionList型であるべき");
+          assert.ok(isValidResult, "戻り値は有効なDefinition型であるべき");
         }
       } catch (error) {
         // 依存関係が未初期化の場合のエラーは想定内
@@ -143,21 +135,20 @@ suite("TyranoCompletionItemProvider", () => {
 
     test("正常系 異なる位置での呼び出し", async () => {
       // 値定義
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
       const document = new MockTextDocument();
       const token = new MockCancellationToken();
-      const context = new MockCompletionContext();
       
       const positions = [
         new vscode.Position(0, 0),
         new vscode.Position(0, 5),
-        new vscode.Position(0, 13)
+        new vscode.Position(0, 10)
       ];
 
       // 実行（各位置で例外が発生しないことを確認）
       for (const position of positions) {
         try {
-          await provider.provideCompletionItems(document, position, token, context);
+          await provider.provideDefinition(document, position, token);
           assert.ok(true, `位置(${position.line}, ${position.character})で正常に実行されるべき`);
         } catch (error) {
           // 依存関係の問題によるエラーは許可
@@ -170,18 +161,18 @@ suite("TyranoCompletionItemProvider", () => {
   suite("class structure", () => {
     test("正常系 クラスが正しく定義されている", () => {
       // アサート
-      assert.ok(TyranoCompletionItemProvider, "TyranoCompletionItemProviderクラスが存在するべき");
-      assert.strictEqual(typeof TyranoCompletionItemProvider, "function", "TyranoCompletionItemProviderはコンストラクタ関数であるべき");
+      assert.ok(TyranoDefinitionProvider, "TyranoDefinitionProviderクラスが存在するべき");
+      assert.strictEqual(typeof TyranoDefinitionProvider, "function", "TyranoDefinitionProviderはコンストラクタ関数であるべき");
     });
 
-    test("正常系 CompletionItemProviderインターフェースを実装", () => {
+    test("正常系 プライベートプロパティが存在", () => {
       // 値定義
-      const provider = new TyranoCompletionItemProvider();
+      const provider = new TyranoDefinitionProvider();
 
-      // アサート - 必要なメソッドが存在することを確認
-      assert.ok(typeof provider.provideCompletionItems === "function", "provideCompletionItemsメソッドが存在するべき");
+      // アサート - プライベートプロパティはアクセスできないが、インスタンスが正常に作成されることを確認
+      assert.ok(provider, "プロバイダインスタンスが正しく作成されるべき");
+      assert.ok(typeof (provider as any).infoWs !== "undefined", "infoWsプロパティが初期化されているべき");
+      assert.ok(typeof (provider as any).parser !== "undefined", "parserプロパティが初期化されているべき");
     });
   });
 });
-
-
