@@ -94,8 +94,10 @@ export class Parser {
       //コメントの場合は無視する
       if (flag_comment === true && line_str === "*/") {
         flag_comment = false;
-      } else if (line_str === "/*") {
+        continue;
+      } else if (line_str === "/*" || line_str.startsWith("/**")) {
         flag_comment = true;
+        continue;
       } else if (flag_comment === true || first_char === ";") {
         //コメント中、もしくは;から始まる行はスキップ
         continue;
