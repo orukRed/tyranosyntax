@@ -204,7 +204,8 @@ export class TyranoPreview {
                 [iscript]
                   TYRANO.kag.config.defaultBgmVolume = tf.defaultBgmVolume;
                   TYRANO.kag.config.defaultSeVolume = tf.defaultSeVolume;
-                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;                
+                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;
+                  TYRANO.kag.config.configSave = tf.defaultConfigSave;                
                 [endscript]
                 ` +
                 scenarioText[line!].substring(character!);

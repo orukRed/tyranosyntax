@@ -18,9 +18,12 @@
   tf.defaultBgmVolume = TYRANO.kag.config.defaultBgmVolume;
   tf.defaultSeVolume = TYRANO.kag.config.defaultSeVolume;
   tf.defaultMovieVolume = TYRANO.kag.config.defaultMovieVolume;
+  tf.defaultConfigSave = TYRANO.kag.config.configSave;
   TYRANO.kag.config.defaultBgmVolume = 0;
   TYRANO.kag.config.defaultSeVolume = 0;
   TYRANO.kag.config.defaultMovieVolume = 0;
+  // プレビューモードでは強制的にwebstorageを使用 (ブラウザ環境のため)
+  TYRANO.kag.config.configSave = "webstorage";
 //プレビュー中にアラートが出ないように上書きする
   const originalAlert = window.alert;
   // カスタムalert関数を定義
