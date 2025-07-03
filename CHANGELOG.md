@@ -4,6 +4,8 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.8.1] 2025-07-xx
+
 ## [1.8.0] 2025-06-20
 
 - タグ補完の挙動を修正しました。
