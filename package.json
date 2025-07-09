@@ -239,6 +239,18 @@
             "type": "object",
             "default": {
               "position": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
                 "frame": {
                   "type": [
                     "image"
@@ -257,6 +269,13 @@
                   "values": [
                     "true",
                     "false"
+                  ]
+                }
+              },
+              "fuki_start": {
+                "layer": {
+                  "type": [
+                    "layer"
                   ]
                 }
               },
@@ -423,6 +442,11 @@
                 }
               },
               "chara_show": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "storage": {
                   "type": [
                     "image"
@@ -644,6 +668,11 @@
                 }
               },
               "xanim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "svg": {
                   "type": [
                     "svg"
@@ -1075,6 +1104,18 @@
                 }
               },
               "ptext": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
                 "vertical": {
                   "type": "enum",
                   "values": [
@@ -1185,6 +1226,11 @@
                 }
               },
               "current": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "page": {
                   "type": "enum",
                   "values": [
@@ -1194,6 +1240,11 @@
                 }
               },
               "layopt": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "visible": {
                   "type": "enum",
                   "values": [
@@ -1202,7 +1253,47 @@
                   ]
                 }
               },
+              "freeimage": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "free": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "filter": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "backlay": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
               "mtext": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
                 "vertical": {
                   "type": "enum",
                   "values": [
@@ -1299,6 +1390,27 @@
                   ]
                 }
               },
+              "chara_hide": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "anim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "kanim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
               "skipstart": {
                 "mode": {
                   "type": "enum",
@@ -1318,6 +1430,11 @@
                 }
               },
               "trans": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "method": {
                   "type": "enum",
                   "values": [
