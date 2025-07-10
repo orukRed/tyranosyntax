@@ -1,0 +1,7 @@
+# https://prettier.io
+
+.git
+node_modules/
+package-lock.json
+
+out/

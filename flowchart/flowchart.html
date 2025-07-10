@@ -1,0 +1,190 @@
+<!-- フローチャート表示ファイル -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+<style>
+  .back-link-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .back-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .back-link:hover {
+    background-color: #0056b3;
+  }
+
+  .zoom-control {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  #zoom-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  .flowchart-container {
+    overflow: auto;
+    max-height: 80vh;
+    border: 1px solid #eee;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  #flowchart {
+    transform-origin: left top;
+    transition: transform 0.3s ease;
+    min-height: 100px;
+    padding-bottom: 50px;
+    padding-right: 50px;
+  }
+</style>
+<script>
+  console.log("flowchart.html");
+
+  function generateFlowchart(obj) {
+    // フローチャートの定義を開始
+    console.log(obj);
+    let graphDefinition = "graph LR\n";
+    graphDefinition +=
+      "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
+    if (!obj || obj.length === 0) {
+      graphDefinition += `subgraph "\`**このファイルから他のラベル、シナリオへの遷移はありません**\`"\n`;
+      graphDefinition += `end\n`;
+      return `<pre class="mermaid">${graphDefinition}</pre>`;
+    }
+    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
+
+    // ノードの重複を防ぐための追跡用オブジェクト
+    const addedNodes = {};
+
+    for (key in obj) {
+      const condition = obj[key].condition ? `${obj[key].condition}` : "";
+      console.log("s");
+
+      const currentLabel = obj[key].currentLabel;
+      // 一意のノードIDを作成
+      const nodeId = `node_${currentLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
+      // 未追加のノードだけ追加
+      if (!addedNodes[nodeId]) {
+        addedNodes[nodeId] = true;
+      }
+
+      //storageもtargetもある場合
+      if (obj[key].storage && obj[key].target) {
+        const fileName = `${obj[key].storage}_${obj[key].target}`;
+        const fileId = `file_${obj[key].storage}_${obj[key].target}`.replace(
+          /[^a-zA-Z0-9]/g,
+          "_",
+        );
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
+      }
+      //storageのみある場合
+      else if (obj[key].storage) {
+        const fileName = `${obj[key].storage}_NONE`;
+        const fileId = `file_${obj[key].storage}_NONE`.replace(
+          /[^a-zA-Z0-9]/g,
+          "_",
+        );
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
+      }
+      //targetのみある場合
+      else if (obj[key].target) {
+        const targetLabel = obj[key].target;
+        const targetId = `node_${targetLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
+        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${targetId}["${targetLabel}"]\n`;
+      }
+      //storageもtargetも指定しない場合はなにも追加しない
+      else if (!obj[key].storage && !obj[key].target) {
+      }
+    }
+    graphDefinition += `end\n`;
+    console.log(graphDefinition);
+    // HTMLに描画するためのmermaidの定義を返す
+    return `<pre class="mermaid">${graphDefinition}</pre>`;
+  }
+
+  function updateZoom() {
+    const zoomLevel = document.getElementById("zoom-select").value;
+    const scale = parseInt(zoomLevel) / 100;
+    document.getElementById("flowchart").style.transform = `scale(${scale})`;
+
+    // 拡大率に応じてコンテナのサイズを調整
+    const flowchartContainer = document.querySelector(".flowchart-container");
+    if (scale > 1) {
+      flowchartContainer.style.height = `${Math.min(80, 40 * scale)}vh`;
+    } else {
+      flowchartContainer.style.height = "80vh";
+    }
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const scenario = urlParams.get("scenario");
+  console.log("scenario", scenario);
+  let transitionData = undefined;
+  // サーバーからデータ処理
+  fetch(`/get-transition-data?scenario=${scenario}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(`call get-transition-data?scenario=${scenario}`);
+      if (data) {
+        //プロジェクト名表示
+        projectName = data.projectName;
+        document.querySelector("h3").textContent = projectName;
+
+        transitionData = data.TransitionData;
+
+        const htmlContent = generateFlowchart(transitionData);
+        // HTMLに追加するためのコード
+        const element = document.getElementById("flowchart");
+        element.innerHTML += htmlContent;
+        // mermaidを初期化
+        mermaid.run();
+        // ズーム機能の初期化
+        document
+          .getElementById("zoom-select")
+          .addEventListener("change", updateZoom);
+      } else {
+        console.log("transitionData is not found");
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+</script>
+
+<body>
+  <h3></h3>
+  <div class="zoom-control">
+    <label for="zoom-select">拡大率: </label>
+    <select id="zoom-select">
+      <option value="100">100%</option>
+      <option value="150">150%</option>      
+      <option value="200">200%</option>
+      <option value="250">250%</option>
+      <option value="300">300%</option>
+      <option value="350">350%</option> 
+      <option value="400">400%</option>
+      <option value="450">450%</option>
+      <option value="500">500%</option>
+    
+
+    </select>
+  </div>
+  <div class="flowchart-container">
+    <div id="flowchart"></div>
+  </div>
+  <div class="back-link-container">
+    <a href="http://localhost:3200/flowchart-list.html" class="back-link"
+      >シナリオ一覧に戻る</a
+    >
+  </div>
+</body>
