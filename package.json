@@ -1,0 +1,1029 @@
+{
+  "name": "tyranosyntax",
+  "displayName": "TyranoScript syntax",
+  "description": "Provides TyranoScript Adventure Game syntax for Visual Studio Code",
+  "publisher": "orukred-tyranosyntax",
+  "keywords": [
+    "ティラノスクリプト",
+    "ゲーム",
+    "ADV",
+    "ノベル",
+    "KAG"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orukRed/tyranosyntax"
+  },
+  "icon": "images/icon.png",
+  "version": "1.8.2",
+  "engines": {
+    "vscode": "^1.79.1"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
+  "main": "./out/extension.js",
+  "browser": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "node ./out/test/runTest.js",
+    "vscode:prepublish-web": "npm run package-web",
+    "compile-web": "webpack",
+    "watch-web": "webpack --watch",
+    "package-web": "webpack --mode production --devtool hidden-source-map"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "tyrano",
+        "aliases": [
+          "tyranoscript",
+          "tyrano"
+        ],
+        "extensions": [
+          ".ks"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tyrano",
+        "scopeName": "source.ks",
+        "path": "./syntaxes/tyrano.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.js": "html",
+          "meta.embedded.block.html": "html"
+        }
+      }
+    ],
+    "configuration": [
+      {
+        "title": "TyranoScript syntax",
+        "properties": {
+          "TyranoScript syntax.keyboard.shift + enter": {
+            "type": "string",
+            "default": "[l][r]",
+            "description": "キーボードのshift + enterを押下した際に入力される文字を設定します。"
+          },
+          "TyranoScript syntax.keyboard.ctrl + enter(cmd + enter)": {
+            "type": "string",
+            "default": "[p]",
+            "description": "キーボードのctrl + enter(macではcmd + enter)を押下した際に入力される文字を設定します。"
+          },
+          "TyranoScript syntax.keyboard.alt + enter(option + enter)": {
+            "type": "string",
+            "default": "#",
+            "description": "キーボードのalt + enter(macではoption + enter)を押下した際に入力される文字を設定します。"
+          },
+          "TyranoScript syntax.outline.tag": {
+            "type": "array",
+            "default": [
+              "if",
+              "elsif",
+              "else",
+              "endif",
+              "ignore",
+              "endignore",
+              "jump",
+              "call",
+              "button",
+              "link",
+              "iscript",
+              "endscript",
+              "loadjs",
+              "html",
+              "endhtml"
+            ],
+            "description": "アウトラインで表示されるタグを設定します。"
+          },
+          "TyranoScript syntax.completionTag.inputType": {
+            "type": "string",
+            "default": "[ ]",
+            "description": "タグの予測変換をする時に、@から始まるタグか[ ]で囲むタグかを選択します。\nただし、現在のカーソルより左に[ ]や@がある場合にはこのオプションは無視され、[ ]で囲んだタグとして予測変換されます。",
+            "enum": [
+              "[ ]",
+              "@"
+            ],
+            "enumDescriptions": [
+              "タグの予測変換をするとき、[ ]で囲んだタグを出力します。",
+              "タグの予測変換をするとき、@から始まるタグを出力します。"
+            ]
+          },
+          "TyranoScript syntax.outline.blockComment": {
+            "type": "boolean",
+            "default": true,
+            "description": "/**/で囲んだ処理をアウトラインに表示させないようにします。\n現在β版の機能のため、/*や*/のある行にタグを配置すると正しく表示されない可能性があります。\n例：/*comment*/[p]、[p]/*comment*/、[p]/*、*/[p]"
+          },
+          "TyranoScript syntax.outline.comment": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "TODO",
+              "FIXME",
+              "NOTE",
+              "BUG",
+              "HACK",
+              "♦",
+              "■",
+              "●",
+              "○"
+            ],
+            "description": "アウトラインに表示するコメント文字列の配列"
+          },
+          "TyranoScript syntax.autoDiagnostic.isEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "診断機能をONにします。診断機能によりvscodeの動作が重くなる場合は、OFFにしていただくと改善される可能性があります。"
+          },
+          "TyranoScript syntax.language": {
+            "type": "string",
+            "enum": [
+              "default",
+              "ja",
+              "en"
+            ],
+            "default": "default",
+            "description": "タグホバー、補完で表示される言語を選択します。"
+          },
+          "TyranoScript syntax.resource.extension": {
+            "type": "object",
+            "default": {
+              "image": [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".gif",
+                ".bmp",
+                ".svg"
+              ],
+              "svg": [
+                ".svg"
+              ],
+              "3d": [
+                ".gltf",
+                ".obj"
+              ],
+              "sound": [
+                ".mp3",
+                ".wav",
+                ".ogg",
+                ".m4a"
+              ],
+              "scenario": [
+                ".ks"
+              ],
+              "script": [
+                ".js",
+                ".tjs"
+              ],
+              "html": [
+                ".html"
+              ],
+              "css": [
+                ".css"
+              ],
+              "text": [
+                ".json",
+                ".txt",
+                ".csv"
+              ],
+              "video": [
+                ".mp4",
+                ".webm"
+              ]
+            },
+            "description": "インテリセンスに使うリソースファイルの拡張子を設定します。"
+          },
+          "TyranoScript syntax.plugin.parameter": {
+            "type": "object",
+            "default": {},
+            "description": "追加でタグ補完したいものを設定します"
+          },
+          "TyranoScript syntax.parser.read_plugin": {
+            "type": "boolean",
+            "default": false,
+            "description": "others/pluginフォルダの中を構文解析するかどうかを選択します。（falseを推奨）"
+          },
+          "TyranoScript syntax.execute.diagnostic": {
+            "type": "object",
+            "default": {
+              "undefinedMacro": true,
+              "missingScenariosAndLabels": true,
+              "jumpAndCallInIfStatement": true,
+              "existResource": true,
+              "labelName": true,
+              "macroDuplicate": true
+            },
+            "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
+          },
+          "TyranoScript syntax.preview.preprocess": {
+            "type": "string",
+            "default": "/hoge/foo/project/preview-initialize.ks",
+            "description": "その場プレビューで事前に読み込む処理のファイルパス（scenarioフォルダから始まる相対パス、もしくは絶対パス）を指定します。"
+          },
+          "TyranoScript syntax.logger.enabled": {
+            "type": "boolean",
+            "default": "false",
+            "description": "エラーなどが発生した場合、出力ウィンドウにログを出力します。（動作が重い場合、こちらのチェックを外すことで改善される可能性があります。）"
+          },
+          "TyranoScript syntax.tag.parameter": {
+            "type": "object",
+            "default": {
+              "position": {
+                "frame": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "jump": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "link": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "button": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "autoimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "skipimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "glink": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                },
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "clickable": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "chara_new": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_show": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_mod": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_face": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "chara_layer": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "image": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/fgimage"
+                }
+              },
+              "bg": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "bg2": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "layermode": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "layermode_movie": {
+                "video": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "movie": {
+                "storage": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "bgmovie": {
+                "storage": {
+                  "type": [
+                    "video"
+                  ],
+                  "path": "data/video"
+                }
+              },
+              "mask": {
+                "graphic": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "xanim": {
+                "svg": {
+                  "type": [
+                    "svg"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "dialog": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "glyph": {
+                "line": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "tyrano/images/system"
+                }
+              },
+              "body": {
+                "bgimage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "cursor": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "sysview": {
+                "storage": {
+                  "type": [
+                    "html"
+                  ],
+                  "path": "./"
+                }
+              },
+              "save_img": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/bgimage"
+                }
+              },
+              "set_resizecall": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "label": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "dialog_config": {
+                "boximg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "graph": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "dialog_config_ok": {
+                "img": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "dialog_config_ng": {
+                "img": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "activeimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "clickimg": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "enterse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "leavese": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                },
+                "clickse": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "mode_effect": {
+                "skip": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "auto": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "stop": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "holdskip": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "holdstop": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                },
+                "all": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "web": {
+                "url": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/image"
+                }
+              },
+              "call": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "sleepgame": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "loadjs": {
+                "storage": {
+                  "type": [
+                    "script"
+                  ],
+                  "path": "data/others"
+                }
+              },
+              "preload": {
+                "storage": {
+                  "type": [
+                    "image",
+                    "3d",
+                    "sound",
+                    "video"
+                  ],
+                  "path": ""
+                }
+              },
+              "unload": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "plugin": {
+                "name": {
+                  "type": [
+                    "macro"
+                  ],
+                  "path": "data/others/plugin"
+                }
+              },
+              "loadcss": {
+                "file": {
+                  "type": [
+                    "css"
+                  ],
+                  "path": "./"
+                }
+              },
+              "playbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/bgm"
+                }
+              },
+              "fadeinbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/bgm"
+                }
+              },
+              "xchgbgm": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/bgm"
+                }
+              },
+              "playse": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "fadeinse": {
+                "storage": {
+                  "type": [
+                    "sound"
+                  ],
+                  "path": "data/sound"
+                }
+              },
+              "3d_model_new": {
+                "storage": {
+                  "type": [
+                    "3d"
+                  ],
+                  "path": "data/others/3d/model"
+                }
+              },
+              "3d_sphere_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "3d_sprite_new": {
+                "storage": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/sprite"
+                }
+              },
+              "3d_event": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              },
+              "3d_box_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "3d_image_new": {
+                "texture": {
+                  "type": [
+                    "image"
+                  ],
+                  "path": "data/others/3d/texture"
+                }
+              },
+              "qr_define": {
+                "storage": {
+                  "type": [
+                    "scenario"
+                  ],
+                  "path": "data/scenario"
+                },
+                "target": {
+                  "type": [
+                    "label"
+                  ],
+                  "path": ""
+                }
+              }
+            },
+            "description": "インテリセンスやファイルジャンプ等に使うタグ情報です。"
+          }
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "tyrano.shiftEnter",
+        "title": "print shiftEnter"
+      },
+      {
+        "command": "tyrano.ctrlEnter",
+        "title": "print ctrlEnter"
+      },
+      {
+        "command": "tyrano.altEnter",
+        "title": "print altEnter"
+      },
+      {
+        "command": "tyrano.addRAndP",
+        "title": "Add [r] and [p]"
+      },
+      {
+        "command": "tyrano.diagnostic",
+        "title": "tyrano.diagnostic"
+      },
+      {
+        "command": "tyrano.jumpToDestination",
+        "title": "tyrano.jumpToDestination"
+      },
+      {
+        "command": "tyrano.preview",
+        "title": "tyrano.preview"
+      },
+      {
+        "command": "tyrano.flowchart",
+        "title": "tyrano.flowchart"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "tyrano.shiftEnter",
+        "key": "shift+enter",
+        "win": "shift+enter",
+        "mac": "shift+enter",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.ctrlEnter",
+        "key": "ctrl+enter",
+        "win": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.altEnter",
+        "win": "alt+enter",
+        "mac": "option+enter",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.jumpToDestination",
+        "win": "alt+j",
+        "mac": "option+j",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.preview",
+        "win": "ctrl+alt+p",
+        "mac": "command+option+p",
+        "when": "editorLangId == tyrano"
+      },
+      {
+        "command": "tyrano.flowchart",
+        "win": "ctrl+alt+f",
+        "mac": "command+option+f",
+        "when": "editorLangId == tyrano"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.6.0",
+    "@types/babel__traverse": "^7.20.6",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/express": "^4.17.21",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^17.0.45",
+    "@types/vscode": "^1.79.1",
+    "@types/ws": "^8.5.12",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-sonarjs": "^1.0.4",
+    "glob": "^8.1.0",
+    "globals": "^15.8.0",
+    "mocha": "^9.2.2",
+    "prettier": "^3.3.2",
+    "typescript": "^5.1.5",
+    "typescript-eslint": "^7.15.0",
+    "vscode-test": "^1.5.0",
+    "webpack": "^5.88.0"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.24.6",
+    "@babel/traverse": "^7.24.6",
+    "@vscode/vsce": "^2.19.0",
+    "express": "^4.18.2",
+    "jquery": "^3.7.0",
+    "jsdom": "^22.1.0",
+    "npm-check-updates": "^16.10.13",
+    "vscode-languageclient": "^8.1.0",
+    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver-textdocument": "^1.0.8"
+  }
+}

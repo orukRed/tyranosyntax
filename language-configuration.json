@@ -1,0 +1,63 @@
+{
+  "comments": {
+    // symbol used for single line comment. Remove this entry if your language does not support line comments
+    "lineComment": ";",
+    // symbols used for start and end a block comment. Remove this entry if your language does not support block comments
+    "blockComment": ["/*", "*/"]
+  },
+  // symbols used as brackets
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+    //自動インデントとかやりたいけど勝手にコーディング規約のようなものを決めていいのだろうか……？
+    //勝手にハイライトされてしまうので何かしらで修正必要
+    // ["nowait","endnowait"],
+    // ["skipstart","skipstop"],
+    // ["autostart","autostop"],
+    // ["nolog","endnolog"],
+    // ["link","endlink"],
+    // ["vibrate","vibrate_stop"],
+    // ["keyframe","endkeyframe"],
+    // ["kanim","stop_kanim"],
+    // ["xanim","stop_xanim"],
+    // ["html","endhtml"],
+    // ["if","endif"],
+    // ["elseif",""],
+    // ["else",""],
+    // ["macro","endmacro"],
+    // ["ignore","endignore"],
+    // ["iscript","endscript"],
+    // ["vostart","vostop"],
+    // ["speak_on","speak_off"],
+    // ["3d_event_start","3d_event_stop"],
+    // ["3d_anim","3d_anim_stop"],
+    // ["3d_gyro","3d_gyro_stop"],
+    // ["bgcamera","stop_bgcamera"],
+  ],
+  // symbols that are auto closed when typing
+  "autoClosingPairs": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["\"", "\""],
+    ["'", "'"],
+    ["/*", "*/"]
+  ],
+  // symbols that can be used to surround a selection
+  "surroundingPairs": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["\"", "\""],
+    ["'", "'"],
+    ["/*", "*/"]
+  ],
+  "wordPattern": "[a-zA-Z0-9_/\\.]+",
+  "folding": {
+    "markers": {
+      "start": "^\\s*;+\\s*region\\b",
+      "end": "^\\s*;+\\s*endregion\\b"
+    }
+  }
+}
