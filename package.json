@@ -239,11 +239,44 @@
             "type": "object",
             "default": {
               "position": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
                 "frame": {
                   "type": [
                     "image"
                   ],
                   "path": "data/image"
+                },
+                "vertical": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "visible": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                }
+              },
+              "fuki_start": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
                 }
               },
               "jump": {
@@ -409,11 +442,47 @@
                 }
               },
               "chara_show": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "storage": {
                   "type": [
                     "image"
                   ],
                   "path": "data/fgimage"
+                },
+                "method": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "lightSpeedIn",
+                    "rotateIn",
+                    "rotateInDownLeft",
+                    "rotateInDownRight",
+                    "rotateInUpLeft",
+                    "rotateInUpRight",
+                    "zoomIn",
+                    "zoomInDown",
+                    "zoomInLeft",
+                    "zoomInRight",
+                    "zoomInUp",
+                    "bounceIn",
+                    "bounceInDown",
+                    "bounceInLeft",
+                    "bounceInRight",
+                    "bounceInUp",
+                    "slideInDown",
+                    "slideInLeft",
+                    "slideInRight",
+                    "slideInUp",
+                    "crossfade"
+                  ]
                 }
               },
               "chara_mod": {
@@ -454,6 +523,37 @@
                     "image"
                   ],
                   "path": "data/bgimage"
+                },
+                "method": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "lightSpeedIn",
+                    "rotateIn",
+                    "rotateInDownLeft",
+                    "rotateInDownRight",
+                    "rotateInUpLeft",
+                    "rotateInUpRight",
+                    "zoomIn",
+                    "zoomInDown",
+                    "zoomInLeft",
+                    "zoomInRight",
+                    "zoomInUp",
+                    "bounceIn",
+                    "bounceInDown",
+                    "bounceInLeft",
+                    "bounceInRight",
+                    "bounceInUp",
+                    "slideInDown",
+                    "slideInLeft",
+                    "slideInRight",
+                    "slideInUp",
+                    "crossfade"
+                  ]
                 }
               },
               "bg2": {
@@ -462,6 +562,37 @@
                     "image"
                   ],
                   "path": "data/bgimage"
+                },
+                "method": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "lightSpeedIn",
+                    "rotateIn",
+                    "rotateInDownLeft",
+                    "rotateInDownRight",
+                    "rotateInUpLeft",
+                    "rotateInUpRight",
+                    "zoomIn",
+                    "zoomInDown",
+                    "zoomInLeft",
+                    "zoomInRight",
+                    "zoomInUp",
+                    "bounceIn",
+                    "bounceInDown",
+                    "bounceInLeft",
+                    "bounceInRight",
+                    "bounceInUp",
+                    "slideInDown",
+                    "slideInLeft",
+                    "slideInRight",
+                    "slideInUp",
+                    "crossfade"
+                  ]
                 }
               },
               "layermode": {
@@ -470,6 +601,38 @@
                     "image"
                   ],
                   "path": "data/image"
+                },
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "normal",
+                    "add",
+                    "sub",
+                    "mul",
+                    "screen",
+                    "overlay",
+                    "darken",
+                    "lighten",
+                    "dodge",
+                    "burn",
+                    "hardlight",
+                    "softlight",
+                    "difference",
+                    "exclusion",
+                    "hue",
+                    "saturation",
+                    "color",
+                    "luminosity",
+                    "invert",
+                    "color_dodge",
+                    "color_burn",
+                    "vivid_light",
+                    "linear_light",
+                    "pin_light",
+                    "hard_mix",
+                    "lighter_color",
+                    "darker_color"
+                  ]
                 }
               },
               "layermode_movie": {
@@ -505,6 +668,11 @@
                 }
               },
               "xanim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
                 "svg": {
                   "type": [
                     "svg"
@@ -524,6 +692,13 @@
                     "label"
                   ],
                   "path": ""
+                },
+                "type": {
+                  "type": "enum",
+                  "values": [
+                    "ok",
+                    "okcancel"
+                  ]
                 }
               },
               "glyph": {
@@ -877,6 +1052,14 @@
                     "label"
                   ],
                   "path": ""
+                },
+                "type": {
+                  "type": "enum",
+                  "values": [
+                    "click",
+                    "enter",
+                    "leave"
+                  ]
                 }
               },
               "3d_box_new": {
@@ -907,6 +1090,381 @@
                     "label"
                   ],
                   "path": ""
+                }
+              },
+              "fuki_chara": {
+                "sippo": {
+                  "type": "enum",
+                  "values": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ]
+                }
+              },
+              "ptext": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
+                "vertical": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "align": {
+                  "type": "enum",
+                  "values": [
+                    "left",
+                    "center",
+                    "right"
+                  ]
+                }
+              },
+              "font": {
+                "bold": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "italic": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "edge_method": {
+                  "type": "enum",
+                  "values": [
+                    "shadow",
+                    "filter"
+                  ]
+                },
+                "effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "bounceIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "puffIn",
+                    "rollIn",
+                    "rotateIn",
+                    "slideIn",
+                    "vanishIn",
+                    "zoomIn"
+                  ]
+                }
+              },
+              "deffont": {
+                "bold": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "italic": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "edge_method": {
+                  "type": "enum",
+                  "values": [
+                    "shadow",
+                    "filter"
+                  ]
+                }
+              },
+              "message_config": {
+                "edge_overlap_text": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "speech_bracket_float": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "kerning": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "control_line_break": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                }
+              },
+              "current": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                }
+              },
+              "layopt": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "visible": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                }
+              },
+              "freeimage": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "free": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "filter": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "backlay": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "mtext": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "page": {
+                  "type": "enum",
+                  "values": [
+                    "fore",
+                    "back"
+                  ]
+                },
+                "vertical": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "align": {
+                  "type": "enum",
+                  "values": [
+                    "left",
+                    "center",
+                    "right"
+                  ]
+                },
+                "fadeout": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "wait": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "in_sync": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "in_shuffle": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "in_reverse": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "out_sync": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "out_shuffle": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "out_reverse": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "in_effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn"
+                  ]
+                },
+                "out_effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeOut"
+                  ]
+                }
+              },
+              "chara_move": {
+                "effect": {
+                  "type": "enum",
+                  "values": [
+                    "linear",
+                    "easeIn",
+                    "easeOut",
+                    "easeInOut",
+                    "jswing"
+                  ]
+                }
+              },
+              "chara_hide": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "anim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "kanim": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                }
+              },
+              "skipstart": {
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "read",
+                    "all"
+                  ]
+                }
+              },
+              "autostart": {
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "read",
+                    "all"
+                  ]
+                }
+              },
+              "trans": {
+                "layer": {
+                  "type": [
+                    "layer"
+                  ]
+                },
+                "method": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "lightSpeedIn",
+                    "rotateIn",
+                    "rotateInDownLeft",
+                    "rotateInDownRight",
+                    "rotateInUpLeft",
+                    "rotateInUpRight",
+                    "zoomIn",
+                    "zoomInDown",
+                    "zoomInLeft",
+                    "zoomInRight",
+                    "zoomInUp",
+                    "bounceIn",
+                    "bounceInDown",
+                    "bounceInLeft",
+                    "bounceInRight",
+                    "bounceInUp",
+                    "slideInDown",
+                    "slideInLeft",
+                    "slideInRight",
+                    "slideInUp",
+                    "crossfade"
+                  ]
                 }
               }
             },
