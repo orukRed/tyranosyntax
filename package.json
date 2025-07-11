@@ -439,6 +439,13 @@
                     "image"
                   ],
                   "path": "data/fgimage"
+                },
+                "reflect": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
                 }
               },
               "chara_show": {
@@ -452,37 +459,6 @@
                     "image"
                   ],
                   "path": "data/fgimage"
-                },
-                "method": {
-                  "type": "enum",
-                  "values": [
-                    "fadeIn",
-                    "fadeInDown",
-                    "fadeInLeft",
-                    "fadeInRight",
-                    "fadeInUp",
-                    "lightSpeedIn",
-                    "rotateIn",
-                    "rotateInDownLeft",
-                    "rotateInDownRight",
-                    "rotateInUpLeft",
-                    "rotateInUpRight",
-                    "zoomIn",
-                    "zoomInDown",
-                    "zoomInLeft",
-                    "zoomInRight",
-                    "zoomInUp",
-                    "bounceIn",
-                    "bounceInDown",
-                    "bounceInLeft",
-                    "bounceInRight",
-                    "bounceInUp",
-                    "slideInDown",
-                    "slideInLeft",
-                    "slideInRight",
-                    "slideInUp",
-                    "crossfade"
-                  ]
                 }
               },
               "chara_mod": {
@@ -665,6 +641,140 @@
                     "image"
                   ],
                   "path": "data/image"
+                },
+                "effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeIn",
+                    "fadeInDown",
+                    "fadeInDownBig",
+                    "fadeInLeft",
+                    "fadeInLeftBig",
+                    "fadeInRight",
+                    "fadeInRightBig",
+                    "fadeInUp",
+                    "fadeInUpBig",
+                    "flipInX",
+                    "flipInY",
+                    "lightSpeedIn",
+                    "rotateIn",
+                    "rotateInDownLeft",
+                    "rotateInDownRight",
+                    "rotateInUpLeft",
+                    "rotateInUpRight",
+                    "zoomIn",
+                    "zoomInDown",
+                    "zoomInLeft",
+                    "zoomInRight",
+                    "zoomInUp",
+                    "slideInDown",
+                    "slideInLeft",
+                    "slideInRight",
+                    "slideInUp",
+                    "bounceIn",
+                    "bounceInDown",
+                    "bounceInLeft",
+                    "bounceInRight",
+                    "bounceInUp"
+                  ]
+                }
+              },
+              "mask_off": {
+                "effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeOut",
+                    "fadeOutDownBig",
+                    "fadeOutLeftBig",
+                    "fadeOutRightBig",
+                    "fadeOutUpBig",
+                    "flipOutX",
+                    "flipOutY",
+                    "lightSpeedOut",
+                    "rotateOut",
+                    "rotateOutDownLeft",
+                    "rotateOutDownRight",
+                    "rotateOutUpLeft",
+                    "rotateOutUpRight",
+                    "zoomOut",
+                    "zoomOutDown",
+                    "zoomOutLeft",
+                    "zoomOutRight",
+                    "zoomOutUp",
+                    "slideOutDown",
+                    "slideOutLeft",
+                    "slideOutRight",
+                    "slideOutUp",
+                    "bounceOut",
+                    "bounceOutDown",
+                    "bounceOutLeft",
+                    "bounceOutRight",
+                    "bounceOutUp"
+                  ]
+                }
+              },
+              "camera": {
+                "ease_type": {
+                  "type": "enum",
+                  "values": [
+                    "ease",
+                    "linear",
+                    "ease-in",
+                    "ease-out",
+                    "ease-in-out"
+                  ]
+                }
+              },
+              "qr_config": {
+                "qrcode": {
+                  "type": "enum",
+                  "values": [
+                    "jump",
+                    "web",
+                    "define",
+                    "all",
+                    "off"
+                  ]
+                }
+              },
+              "bgcamera": {
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "front",
+                    "back"
+                  ]
+                },
+                "fit": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "qrcode": {
+                  "type": "enum",
+                  "values": [
+                    "jump",
+                    "web",
+                    "define",
+                    "all",
+                    "off"
+                  ]
+                },
+                "debug": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "audio": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
                 }
               },
               "xanim": {
@@ -1368,13 +1478,35 @@
                 "in_effect": {
                   "type": "enum",
                   "values": [
-                    "fadeIn"
+                    "fadeIn",
+                    "bounceIn",
+                    "fadeInDown",
+                    "fadeInLeft",
+                    "fadeInRight",
+                    "fadeInUp",
+                    "puffIn",
+                    "rollIn",
+                    "rotateIn",
+                    "slideIn",
+                    "vanishIn",
+                    "zoomIn"
                   ]
                 },
                 "out_effect": {
                   "type": "enum",
                   "values": [
-                    "fadeOut"
+                    "fadeOut",
+                    "bounceOut",
+                    "fadeOutDown",
+                    "fadeOutLeft",
+                    "fadeOutRight",
+                    "fadeOutUp",
+                    "puffOut",
+                    "rollOut",
+                    "rotateOut",
+                    "slideOut",
+                    "vanishOut",
+                    "zoomOut"
                   ]
                 }
               },
@@ -1464,6 +1596,108 @@
                     "slideInRight",
                     "slideInUp",
                     "crossfade"
+                  ]
+                }
+              },
+              "lang_set": {
+                "name": {
+                  "type": "enum",
+                  "values": [
+                    "default",
+                    "en"
+                  ]
+                }
+              },
+              "speak_on": {
+                "cancel": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                }
+              },
+              "edit": {
+                "autocomplete": {
+                  "type": "enum",
+                  "values": [
+                    "true",
+                    "false"
+                  ]
+                }
+              },
+              "3d_gyro": {
+                "mode": {
+                  "type": "enum",
+                  "values": [
+                    "position",
+                    "rotation"
+                  ]
+                }
+              },
+              "glink_config": {
+                "select_effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeOut",
+                    "fadeOutDownBig",
+                    "fadeOutLeftBig",
+                    "fadeOutRightBig",
+                    "fadeOutUpBig",
+                    "flipOutX",
+                    "flipOutY",
+                    "lightSpeedOut",
+                    "rotateOut",
+                    "rotateOutDownLeft",
+                    "rotateOutDownRight",
+                    "rotateOutUpLeft",
+                    "rotateOutUpRight",
+                    "zoomOut",
+                    "zoomOutDown",
+                    "zoomOutLeft",
+                    "zoomOutRight",
+                    "zoomOutUp",
+                    "slideOutDown",
+                    "slideOutLeft",
+                    "slideOutRight",
+                    "slideOutUp",
+                    "bounceOut",
+                    "bounceOutDown",
+                    "bounceOutLeft",
+                    "bounceOutRight",
+                    "bounceOutUp"
+                  ]
+                },
+                "reject_effect": {
+                  "type": "enum",
+                  "values": [
+                    "fadeOut",
+                    "fadeOutDownBig",
+                    "fadeOutLeftBig",
+                    "fadeOutRightBig",
+                    "fadeOutUpBig",
+                    "flipOutX",
+                    "flipOutY",
+                    "lightSpeedOut",
+                    "rotateOut",
+                    "rotateOutDownLeft",
+                    "rotateOutDownRight",
+                    "rotateOutUpLeft",
+                    "rotateOutUpRight",
+                    "zoomOut",
+                    "zoomOutDown",
+                    "zoomOutLeft",
+                    "zoomOutRight",
+                    "zoomOutUp",
+                    "slideOutDown",
+                    "slideOutLeft",
+                    "slideOutRight",
+                    "slideOutUp",
+                    "bounceOut",
+                    "bounceOutDown",
+                    "bounceOutLeft",
+                    "bounceOutRight",
+                    "bounceOutUp"
                   ]
                 }
               }
