@@ -4,6 +4,7 @@ import path from "path";
 import { Parser } from "../Parser";
 import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
 import { VariableData } from "../defineData/VariableData";
+import * as fs from "fs";
 
 type SuggestionsMiniumByTag = {
   [tag: string]: {
@@ -23,6 +24,12 @@ type SuggestionsByTag = {
   };
 };
 
+type TagParameterConfig = {
+  type: string | string[];
+  path?: string;
+  values?: string[];
+};
+
 export class TyranoCompletionItemProvider
   implements vscode.CompletionItemProvider
 {
@@ -30,7 +37,7 @@ export class TyranoCompletionItemProvider
   private parser = Parser.getInstance();
   public constructor() {}
   private tagParams: {
-    [s: string]: { [s: string]: { type: string[]; path: string } };
+    [s: string]: { [s: string]: TagParameterConfig };
   } = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.tag.parameter")!;
@@ -230,7 +237,8 @@ export class TyranoCompletionItemProvider
         return await this.completionResource(
           projectPath,
           paramInfo.type,
-          projectPath + this.infoWs.pathDelimiter + paramInfo.path,
+          projectPath + this.infoWs.pathDelimiter + (paramInfo.path || ""),
+          paramInfo,
         );
       } else if (
         parsedData === undefined ||
@@ -551,15 +559,16 @@ export class TyranoCompletionItemProvider
   }
 
   /**
-   * ファイルの予測変換
+   * ファイルなどのリソースや、pageパラメータやlayerパラメータなどの列挙定数の予測変換
    * @param projectPath
    * @param requireResourceType
    * @param referencePath そのタグの参照するディレクトリのパス。例えば、bgタグならbgimageフォルダのパス
    */
   private async completionResource(
     projectPath: string,
-    requireResourceType: string[],
+    requireResourceType: string | string[],
     referencePath: string,
+    paramConfig?: TagParameterConfig,
   ): Promise<
     | vscode.CompletionItem[]
     | vscode.CompletionList<vscode.CompletionItem>
@@ -568,10 +577,60 @@ export class TyranoCompletionItemProvider
   > {
     const completions: vscode.CompletionItem[] = [];
 
+    // typeを配列に正規化
+    const typeArray = Array.isArray(requireResourceType)
+      ? requireResourceType
+      : [requireResourceType];
+
+    // enumタイプの処理
+    if (typeArray.includes("enum") && paramConfig?.values) {
+      paramConfig.values.forEach((value) => {
+        const comp = new vscode.CompletionItem({
+          label: value,
+          // description: `Enum value: ${value}`,
+          // detail: "Predefined enum value",
+        });
+        comp.kind = vscode.CompletionItemKind.Enum;
+        comp.insertText = value;
+        completions.push(comp);
+      });
+    }
+
+    // layerタイプの処理
+    if (typeArray.includes("layer")) {
+      const configValues = await this.getConfigValues(projectPath);
+
+      // 0からnumCharacterLayersまでの数値を追加
+      for (let i = 0; i <= configValues.numCharacterLayers; i++) {
+        const comp = new vscode.CompletionItem({
+          label: i.toString(),
+          // description: `Character layer ${i}`,
+          // detail: "Character layer number",
+        });
+        comp.kind = vscode.CompletionItemKind.Value;
+        comp.insertText = i.toString();
+        completions.push(comp);
+      }
+
+      // message0からmessage{numMessageLayers}までを追加
+      for (let i = 0; i <= configValues.numMessageLayers; i++) {
+        const messageLayer = `message${i}`;
+        const comp = new vscode.CompletionItem({
+          label: messageLayer,
+          // description: `Message layer ${i}`,
+          // detail: "Message layer name",
+        });
+        comp.kind = vscode.CompletionItemKind.Value;
+        comp.insertText = messageLayer;
+        completions.push(comp);
+      }
+    }
+
+    // 既存のリソースファイル処理（image, scenario等）
     this.infoWs.resourceFileMap.forEach((resourcesMap, key) => {
       if (projectPath === key) {
         resourcesMap.forEach((resource) => {
-          if (requireResourceType.includes(resource.resourceType)) {
+          if (typeArray.includes(resource.resourceType)) {
             const comp = new vscode.CompletionItem({
               label: resource.filePath
                 .replace(
@@ -797,6 +856,64 @@ export class TyranoCompletionItemProvider
       );
       TyranoLogger.printStackTrace(error);
       return [];
+    }
+  }
+
+  /**
+   * プロジェクトの構成値を取得します。
+   * @param projectPath プロジェクトのパス。
+   * @returns numCharacterLayersとnumMessageLayersの値を含むオブジェクト。
+   * 構成ファイルが存在しない場合、デフォルト値を返します。
+   */
+  private async getConfigValues(
+    projectPath: string,
+  ): Promise<{ numCharacterLayers: number; numMessageLayers: number }> {
+    const configPath = path.join(projectPath, "data", "system", "Config.tjs");
+    const defaultValues = { numCharacterLayers: 3, numMessageLayers: 2 };
+
+    try {
+      if (!fs.existsSync(configPath)) {
+        return defaultValues;
+      }
+
+      const configContent = fs.readFileSync(configPath, "utf-8");
+      const numCharacterLayers =
+        this.extractConfigValue(configContent, "numCharacterLayers") ??
+        defaultValues.numCharacterLayers;
+      const numMessageLayers =
+        this.extractConfigValue(configContent, "numMessageLayers") ??
+        defaultValues.numMessageLayers;
+
+      return { numCharacterLayers, numMessageLayers };
+    } catch (error) {
+      TyranoLogger.print(
+        `${this.getConfigValues.name} failed: ${error}`,
+        ErrorLevel.ERROR,
+      );
+      return defaultValues;
+    }
+  }
+
+  /**
+   * コンテンツから構成値を抽出します。
+   * @param content 内部で検索するコンテンツ。
+   * @param paramName 抽出するパラメーターの名前。
+   * @returns 抽出された値またはnullが見つからない場合。
+   */
+  private extractConfigValue(
+    content: string,
+    paramName: string,
+  ): number | null {
+    try {
+      const regex = new RegExp(`;\\s*${paramName}\\s*=\\s*(\\d+)\\s*;`, "m");
+      const match = content.match(regex);
+      return match ? parseInt(match[1], 10) : null;
+    } catch (error) {
+      TyranoLogger.print(
+        `${this.extractConfigValue.name} failed for ${paramName}: ${error}`,
+        ErrorLevel.ERROR,
+      );
+      return null;
     }
   }
 }
