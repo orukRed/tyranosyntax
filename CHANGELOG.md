@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.9.0] 2025-07-12
+
+- タグの補完機能を修正しました。
+  - layerパラメータで補完を行う際、メッセージレイヤを指定できるようにしました。
+  - true/falseの補完を行う際、`true`と`false`の両方が補完候補に表示されるようにしました。
+  - その他パラメータごと固有の文字列（bgタグのmethodパラメータで指定できるfadeInなど）を補完候補に表示できるようにしました。
+
 ## [1.8.2] 2025-07-05
 
 - `TyranoScript syntax.parser.read_plugin`がfalseの場合にプラグインの中で定義したマクロでもエラーが出てしまう問題を修正しました。
