@@ -59,5 +59,35 @@
       "start": "^\\s*;+\\s*region\\b",
       "end": "^\\s*;+\\s*endregion\\b"
     }
-  }
+  },
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*\\/\\*.*\\*\\/\\s*$",
+      "action": {
+        "indent": "none"
+      }
+    },
+    {
+      "beforeText": "^\\s*\\/\\*[^\\*]*$",
+      "afterText": "^\\s*\\*\\/$",
+      "action": {
+        "indent": "indentOutdent",
+        "appendText": " * "
+      }
+    },
+    {
+      "beforeText": "^\\s*\\/\\*[^\\*]*$",
+      "action": {
+        "indent": "none",
+        "appendText": " * "
+      }
+    },
+    {
+      "beforeText": "^\\s*\\*.*$",
+      "action": {
+        "indent": "none",
+        "appendText": "* "
+      }
+    }
+  ]
 }
