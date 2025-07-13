@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.10.0] 2025-xx-xx
+
+- 複数行コメントアウトの自動フォーマット機能を追加しました。[issue#279](https://github.com/orukRed/tyranosyntax/issues/279)
+  - `/**` の後でEnterキーを押すと、自動的に閉じ用の`/*`と次の行に ` * ` が挿入されるようになりました。
+
+
 ## [1.9.0] 2025-07-12
 
 - タグの補完機能を修正しました。
