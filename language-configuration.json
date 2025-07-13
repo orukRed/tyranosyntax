@@ -42,7 +42,8 @@
     ["(", ")"],
     ["\"", "\""],
     ["'", "'"],
-    ["/*", "*/"]
+    ["/*", "*/"],
+    ["/**", " */"]
   ],
   // symbols that can be used to surround a selection
   "surroundingPairs": [
@@ -51,7 +52,8 @@
     ["(", ")"],
     ["\"", "\""],
     ["'", "'"],
-    ["/*", "*/"]
+    ["/*", "*/"],
+    ["/**", " */"]
   ],
   "wordPattern": "[a-zA-Z0-9_/\\.]+",
   "folding": {
@@ -68,10 +70,25 @@
       }
     },
     {
+      "beforeText": "^\\s*\\/\\*\\*[^\\*]*$",
+      "afterText": "^\\s*\\*\\/$",
+      "action": {
+        "indent": "indentOutdent",
+        "appendText": " * "
+      }
+    },
+    {
       "beforeText": "^\\s*\\/\\*[^\\*]*$",
       "afterText": "^\\s*\\*\\/$",
       "action": {
         "indent": "indentOutdent",
+        "appendText": " * "
+      }
+    },
+    {
+      "beforeText": "^\\s*\\/\\*\\*[^\\*]*$",
+      "action": {
+        "indent": "none",
         "appendText": " * "
       }
     },
@@ -83,7 +100,7 @@
       }
     },
     {
-      "beforeText": "^\\s*\\*.*$",
+      "beforeText": "^\\s*\\*[^\\*].*$",
       "action": {
         "indent": "none",
         "appendText": "* "
