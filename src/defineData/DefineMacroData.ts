@@ -22,19 +22,13 @@ export class DefineMacroData {
 
   /**
    * マクロで定義したパラメータを入れる用のメソッド
-   * //FIXME: 現在マクロのパラメータの補完はsetting.jsonで定義しており、このメソッドは使われていない。
-   * そのため空のオブジェクトを返す実装となっている。将来的にどうするか要検討すること。
    */
-  private parseParametersToJsonObject(): object {
-    const obj = {};
-    this._parameter.forEach((parameter) => {
-      Object.assign(this._parameter, {
-        name: parameter.name,
-        required: parameter.required,
-        description: parameter.description,
-      });
-    });
-    return obj;
+  private parseParametersToJsonObject(): object[] {
+    return this._parameter.map((parameter) => ({
+      name: parameter.name,
+      required: parameter.required,
+      description: parameter.description,
+    }));
   }
 
   /**
@@ -68,4 +62,3 @@ export class DefineMacroData {
     return this._parameter;
   }
 }
-
