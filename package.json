@@ -32,7 +32,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "node ./out/test/runTest.js",
+    "test": "vscode-test",
     "vscode:prepublish-web": "npm run package-web",
     "compile-web": "webpack",
     "watch-web": "webpack --watch",
