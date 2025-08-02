@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as path from "path";
@@ -11,6 +10,7 @@ import { MacroParameterData } from "./defineData/MacroParameterData";
 import { Parser } from "./Parser";
 import { InformationExtension } from "./InformationExtension";
 import { TransitionData } from "./defineData/TransitionData";
+import { MacroParameterExtractor } from "./MacroParameterExtractor";
 
 import * as babel from "@babel/parser";
 import traverse from "@babel/traverse";
@@ -427,7 +427,8 @@ export class InformationWorkSpace {
       errorRecovery: true,
       allowSuperOutsideMethod: true,
     });
-    const that = this; // この行を追加
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this; // traverse内でthisコンテキストが変わるため
     const typeConverter = this.typeConverter;
     let keyName = "";
     try {
@@ -549,6 +550,8 @@ export class InformationWorkSpace {
       await this.spliceCharacterMapByFilePath(absoluteScenarioFilePath);
       await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
       let currentLabel = "NONE";
+      let isMacro: boolean = false; //macrio-endmacro間であるかを判定
+      let macroData: DefineMacroData | null = null; // 現在処理中のマクロデータ
       for (const data of parsedData) {
         //iscript-endscript間のテキストを取得。
         if (isIscript && data["name"] === "text") {
@@ -558,10 +561,26 @@ export class InformationWorkSpace {
               ?.lineAt(data["line"]).text + "\n";
         }
 
+        if (isMacro) {
+          // マクロ内でパラメータを検索
+          const extractor: MacroParameterExtractor =
+            new MacroParameterExtractor();
+          extractor.extractMacroParameters(
+            data,
+            macroData,
+            this.scenarioFileMap,
+            this.suggestions,
+            projectPath,
+          );
+        }
+
         //各種タグの場合
         if ((await data["name"]) === "macro") {
-          const macroData: DefineMacroData = new DefineMacroData(
-            await data["pm"]["name"],
+          isMacro = true; //macro-endmacro間であることを判定
+
+          const macroName: string = await data["pm"]["name"];
+          macroData = new DefineMacroData(
+            macroName,
             new vscode.Location(
               scenarioData.uri,
               new vscode.Position(await data["line"], await data["column"]),
@@ -569,20 +588,6 @@ export class InformationWorkSpace {
             absoluteScenarioFilePath,
             description,
           );
-          const macroName: string = await data["pm"]["name"];
-          this.defineMacroMap
-            .get(projectPath)
-            ?.set(crypto.randomUUID(), macroData);
-          //suggetionsに登録されてない場合のみ追加
-          if (
-            !Object.prototype.hasOwnProperty.call(
-              this._suggestions.get(projectPath)!,
-              macroName,
-            )
-          ) {
-            this._suggestions.get(projectPath)![await data["pm"]["name"]] =
-              macroData.parseToJsonObject();
-          }
         } else if ((await data["name"]) === "label") {
           //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
           if ((await data["pm"]["label_name"]) !== "/") {
@@ -702,6 +707,26 @@ export class InformationWorkSpace {
         } else if ((await data["name"]) === "endscript") {
           isIscript = false; //行を保存するモード終わり
           this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
+        } else if ((await data["name"]) === "endmacro") {
+
+          if (isMacro) {
+            // マクロデータをdefineMacroMapに登録
+            this.defineMacroMap
+              .get(projectPath)
+              ?.set(crypto.randomUUID(), macroData);
+            //suggetionsに登録されてない場合のみ追加
+            if (
+              !Object.prototype.hasOwnProperty.call(
+                this._suggestions.get(projectPath)!,
+                macroData.macroName,
+              )
+            ) {
+              this._suggestions.get(projectPath)![macroData.macroName] =
+                macroData.parseToJsonObject();
+            }
+          }
+          isMacro = false; //macro-endmacro間であることを判定
+          macroData = null; // マクロデータをリセット
         }
 
         //マクロ定義のdescription挿入
