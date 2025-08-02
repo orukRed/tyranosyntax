@@ -248,8 +248,9 @@ suite("CharacterData", () => {
         ),
       );
       const part = "mouth";
-      const file1 = "/test1.ks";
-      const file2 = "/test2.ks";
+      // OSに依存しないパス作成
+      const file1 = vscode.Uri.file("/test1.ks").fsPath;
+      const file2 = vscode.Uri.file("/test2.ks").fsPath;
       const layer1 = new CharacterLayerData(
         "test",
         part,
@@ -276,8 +277,7 @@ suite("CharacterData", () => {
       characterData.deleteLayerByFilePath(file1);
 
       // アサート
-      assert.strictEqual(characterData.layer.get(part)?.length, 2); // 削除機能が動作しない場合の実際の動作
-      // assert.strictEqual(characterData.layer.get(part)?.[0], layer2);
+      assert.strictEqual(characterData.layer.get(part)?.length, 1); // 削除が成功した場合の正しい期待値
     });
   });
 
