@@ -30,6 +30,19 @@
   },
   "eslint.ignoreUntitled": true,
   "eslint.lintTask.enable": true,
+  "mochaExplorer.files": "out/test/**/*.test.js",
+  "mochaExplorer.require": "source-map-support/register",
+  "mochaExplorer.watch": "out/**/*.js",
+  "mochaExplorer.launcherScript": "node_modules/mocha-explorer-launcher-scripts/vscode-test",
+  "mochaExplorer.autoload": false,
+  "mochaExplorer.ipcRole": "server",
+  "mochaExplorer.env": {
+    "VSCODE_VERSION": "stable",
+    "ELECTRON_RUN_AS_NODE": null
+  },
+  "mochaExplorer.ui": "tdd",
+  "mochaExplorer.timeout": 10000,
+  "mochaExplorer.debuggerConfig": "Debug Mocha Tests",
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#661c00",
     "activityBar.background": "#661c00",
