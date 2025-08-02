@@ -569,7 +569,15 @@ export class InformationWorkSpace {
             absoluteScenarioFilePath,
             description,
           );
+          
           const macroName: string = await data["pm"]["name"];
+          
+          // Check if there's existing plugin configuration for this macro
+          const existingPluginConfig = this.pluginTags[macroName];
+          
+          // Analyze and set parameters from macro content
+          macroData.analyzeAndSetParameters(scenarioData.getText(), existingPluginConfig);
+          
           this.defineMacroMap
             .get(projectPath)
             ?.set(crypto.randomUUID(), macroData);

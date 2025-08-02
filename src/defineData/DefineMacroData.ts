@@ -1,5 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as vscode from "vscode";
 import { MacroParameterData } from "./MacroParameterData";
+import { MacroParameterAnalyzer } from "./MacroParameterAnalyzer";
+
+interface ParameterConfig {
+  required?: boolean;
+  description?: string;
+}
+
+interface PluginConfig {
+  parameters?: Record<string, ParameterConfig>;
+}
 
 export class DefineMacroData {
   private _macroName: string = ""; //マクロ名。[hoge]などのhoge部分。
@@ -22,17 +33,16 @@ export class DefineMacroData {
 
   /**
    * マクロで定義したパラメータを入れる用のメソッド
-   * //FIXME: 現在マクロのパラメータの補完はsetting.jsonで定義しており、このメソッドは使われていない。
-   * そのため空のオブジェクトを返す実装となっている。将来的にどうするか要検討すること。
+   * 自動検出されたパラメータと手動で設定されたパラメータを統合します
    */
-  private parseParametersToJsonObject(): object {
-    const obj = {};
+  private parseParametersToJsonObject(): Record<string, Record<string, any>> {
+    const obj: Record<string, Record<string, any>> = {};
     this._parameter.forEach((parameter) => {
-      Object.assign(this._parameter, {
+      obj[parameter.name] = {
         name: parameter.name,
         required: parameter.required,
         description: parameter.description,
-      });
+      };
     });
     return obj;
   }
@@ -64,8 +74,46 @@ export class DefineMacroData {
   public set description(value: string) {
     this._description = value;
   }
+  /**
+   * Analyzes macro content and automatically sets parameters based on detected patterns
+   * @param fileContent The full file content containing the macro
+   * @param existingPluginConfig Optional existing plugin configuration for this macro
+   */
+  public analyzeAndSetParameters(fileContent: string, existingPluginConfig?: PluginConfig): void {
+    const macroContent = MacroParameterAnalyzer.extractMacroContent(fileContent, this._macroName);
+    const detectedParams = MacroParameterAnalyzer.analyzeParameters(macroContent);
+    
+    // First, add manually configured parameters if they exist
+    if (existingPluginConfig && existingPluginConfig.parameters) {
+      for (const [paramName, paramConfig] of Object.entries(existingPluginConfig.parameters)) {
+        this._parameter.push(new MacroParameterData(
+          paramName,
+          paramConfig.required || false,
+          paramConfig.description || "Manually configured parameter"
+        ));
+      }
+    }
+    
+    // Then add auto-detected parameters that aren't already manually configured
+    const existingParamNames = new Set(this._parameter.map(p => p.name));
+    
+    for (const paramName of detectedParams) {
+      if (!existingParamNames.has(paramName)) {
+        this._parameter.push(new MacroParameterData(
+          paramName,
+          false, // Auto-detected parameters are not required by default
+          `Auto-detected parameter from macro content`
+        ));
+      }
+    }
+  }
+
   public get parameter(): MacroParameterData[] {
     return this._parameter;
+  }
+
+  public set parameter(value: MacroParameterData[]) {
+    this._parameter = value;
   }
 }
 
