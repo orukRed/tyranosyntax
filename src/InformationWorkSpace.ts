@@ -576,18 +576,21 @@ export class InformationWorkSpace {
 
         //各種タグの場合
         if ((await data["name"]) === "macro") {
-          isMacro = true; //macro-endmacro間であることを判定
-
           const macroName: string = await data["pm"]["name"];
-          macroData = new DefineMacroData(
-            macroName,
-            new vscode.Location(
-              scenarioData.uri,
-              new vscode.Position(await data["line"], await data["column"]),
-            ),
-            absoluteScenarioFilePath,
-            description,
-          );
+
+          //TyranoScript syntax.plugin.parameterに存在しない名前の場合のみ実行
+          if (!this.pluginTags[macroName]) {
+            isMacro = true; //macro-endmacro間であることを判定
+            macroData = new DefineMacroData(
+              macroName,
+              new vscode.Location(
+                scenarioData.uri,
+                new vscode.Position(await data["line"], await data["column"]),
+              ),
+              absoluteScenarioFilePath,
+              description,
+            );
+          }
         } else if ((await data["name"]) === "label") {
           //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
           if ((await data["pm"]["label_name"]) !== "/") {
@@ -708,7 +711,6 @@ export class InformationWorkSpace {
           isIscript = false; //行を保存するモード終わり
           this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
         } else if ((await data["name"]) === "endmacro") {
-
           if (isMacro) {
             // マクロデータをdefineMacroMapに登録
             this.defineMacroMap

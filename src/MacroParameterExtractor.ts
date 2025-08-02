@@ -3,7 +3,9 @@ import { MacroParameterData } from "./defineData/MacroParameterData";
 import * as vscode from "vscode";
 
 /**
- * マクロ内で使用されるパラメータを抽出するクラス
+ * macroタグで定義した自作マクロ内で使用されるパラメータを抽出するクラス
+ * mpや%で定義されたパラメータを抽出し、DefineMacroDataに追加します。
+ * また、*パラメータがある場合は、利用可能なタグパラメータ（*が付いているタグで使われていないパラメータ）を抽出してDefineMacroDataに追加します。
  */
 export class MacroParameterExtractor {
   private static readonly MP_REGEX = /mp\.([a-zA-Z0-9_]+)/g;
@@ -95,7 +97,7 @@ export class MacroParameterExtractor {
         const parameterData = new MacroParameterData(
           parameterName,
           false, // mpパラメータは必須ではない
-          `マクロパラメータ: ${parameterName}`,
+          `mpパラメータ: ${parameterName}`,
         );
         macroData.parameter.push(parameterData);
       }
@@ -130,8 +132,8 @@ export class MacroParameterExtractor {
       if (!existingParam) {
         // 新しいパラメータとして追加
         const description = defaultValue
-          ? `マクロパラメータ: ${parameterName} (デフォルト値: ${defaultValue})`
-          : `マクロパラメータ: ${parameterName}`;
+          ? `%パラメータ: ${parameterName} (デフォルト値: ${defaultValue})`
+          : `%パラメータ: ${parameterName}`;
 
         const parameterData = new MacroParameterData(
           parameterName,
@@ -144,17 +146,16 @@ export class MacroParameterExtractor {
   }
 
   /**
-   * *パラメータが含まれているかチェック
+   * *キーが含まれているかチェック
    * @param data パースされたデータ
-   * @returns *パラメータが存在するか
+   * @returns *キーが存在するか
    */
   private hasAsteriskParameter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ): boolean {
-    return data["pm"] && data["pm"]["*"] !== undefined;
+    return data["pm"] && "*" in data["pm"];
   }
-
   /**
    * *パラメータから利用可能なタグパラメータを抽出
    * @param data パースされたデータ
@@ -198,7 +199,7 @@ export class MacroParameterExtractor {
       const parameterData = new MacroParameterData(
         paramName,
         false, // *パラメータは必須ではない
-        `*から自動抽出されたパラメータ: ${paramName}`,
+        `マクロ内で使用している${tagDefinition.name}タグの*から自動抽出されたパラメータ: ${paramName}`,
       );
       macroData.parameter.push(parameterData);
     });
