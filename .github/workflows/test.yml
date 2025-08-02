@@ -1,11 +1,6 @@
 name: Extension Tests
 
-on:
-  push:
-    branches: [master, develop]
-  pull_request:
-    branches: [master]
-
+on: [pull_request]
 jobs:
   test:
     runs-on: ${{ matrix.os }}
