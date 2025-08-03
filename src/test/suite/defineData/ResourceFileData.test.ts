@@ -13,6 +13,7 @@
     });typescript-eslint/no-explicit-any */
 import * as assert from "assert";
 import { ResourceFileData } from "../../../defineData/ResourceFileData";
+import { InformationWorkSpace } from "../../../InformationWorkSpace";
 
 suite("ResourceFileData", () => {
   suite("constructor", () => {
@@ -20,7 +21,9 @@ suite("ResourceFileData", () => {
 
     test("正常系 Windowsパス区切り文字", () => {
       // 値定義
-      const filePath = "\\data\\bgimage\\background.jpg";
+      const infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
+
+      const filePath = `${infoWs.pathDelimiter}data${infoWs.pathDelimiter}bgimage${infoWs.pathDelimiter}background.jpg`;
       const resourceType = "image";
 
       // 実行

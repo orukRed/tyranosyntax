@@ -1,0 +1,52 @@
+name: Extension Tests
+
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build extension
+        run: npm run compile
+
+      - name: Run Extension Tests (Linux)
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: npx vscode-test
+          working-directory: ./
+        if: runner.os == 'Linux'
+
+      - name: Run Extension Tests (Windows/macOS)
+        run: npx vscode-test
+        if: runner.os != 'Linux'
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.node-version }}
+          path: |
+            test-results/
+            coverage/
+          retention-days: 30
