@@ -7,7 +7,7 @@ module.exports = defineConfig([
     label: "unitTests",
     files: "out/test/**/*.test.js",
     version: "insiders",
-    workspaceFolder: "./sampleWorkspace",
+    workspaceFolder: "./test_project",
     mocha: {
       ui: "tdd",
       timeout: 20000,
