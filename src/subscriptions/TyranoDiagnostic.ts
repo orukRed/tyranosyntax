@@ -377,7 +377,7 @@ export class TyranoDiagnostic {
             .lineAt(data["line"])
             .text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
           const tagLastIndex =
-            tagFirstIndex + this.sumStringLengthsInObject(data["pm"]); // 該当行からタグの定義場所(終了位置)探す
+            tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
 
           const range = new vscode.Range(
             data["line"],

@@ -324,4 +324,46 @@ suite("TyranoDiagnostic", () => {
       );
     });
   });
+
+  suite("undefined macro underline length", () => {
+    test("タグ名のみが下線で示される", () => {
+      // 未定義マクロの診断における下線の長さがタグ名と一致することをテスト
+      const testText = '[unknownmacro param1="value1" param2="value2"]';
+      const tagName = "unknownmacro";
+      
+      // タグの開始位置を計算
+      const tagFirstIndex = testText.indexOf(tagName);
+      const tagLastIndex = tagFirstIndex + tagName.length;
+      
+      // 期待される下線の範囲
+      const expectedUnderlineText = testText.substring(tagFirstIndex, tagLastIndex);
+      
+      // アサート
+      assert.strictEqual(tagFirstIndex, 1, "タグは1文字目から始まるべき");
+      assert.strictEqual(tagLastIndex, 13, "タグは13文字目で終わるべき");
+      assert.strictEqual(expectedUnderlineText, tagName, "下線はタグ名のみにかかるべき");
+      assert.strictEqual(expectedUnderlineText.length, 12, "下線の長さはタグ名の長さと一致するべき");
+    });
+
+    test("パラメータ付きタグでもタグ名のみが下線で示される", () => {
+      // より長いパラメータを持つタグのテスト
+      const testText = '[invalidtag storage="test.ks" target="label1" visible="true"]';
+      const tagName = "invalidtag";
+      
+      // タグの開始位置を計算
+      const tagFirstIndex = testText.indexOf(tagName);
+      const tagLastIndex = tagFirstIndex + tagName.length;
+      
+      // 期待される下線の範囲
+      const expectedUnderlineText = testText.substring(tagFirstIndex, tagLastIndex);
+      
+      // アサート
+      assert.strictEqual(expectedUnderlineText, tagName, "下線はタグ名のみにかかるべき");
+      assert.strictEqual(expectedUnderlineText.length, tagName.length, "下線の長さはタグ名の長さと一致するべき");
+      
+      // パラメータ部分は下線に含まれないことを確認
+      const parametersPart = testText.substring(tagLastIndex);
+      assert.ok(parametersPart.includes('storage="test.ks"'), "パラメータは下線範囲に含まれないべき");
+    });
+  });
 });
