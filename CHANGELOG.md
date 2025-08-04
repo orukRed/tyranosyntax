@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.10.1] 2025-08-05
+
+- 未定義のタグのエラーの波線が短くなっている問題を修正しました。[issue#307](https://github.com/orukRed/tyranosyntax/issues/307)
+
 ## [1.10.0] 2025-08-03
 
 - 複数行コメントアウトの自動フォーマット機能を追加しました。[issue#279](https://github.com/orukRed/tyranosyntax/issues/279)
