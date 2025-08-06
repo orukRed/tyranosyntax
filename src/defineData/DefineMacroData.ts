@@ -28,6 +28,7 @@ export class DefineMacroData {
       name: parameter.name,
       required: parameter.required,
       description: parameter.description,
+      detail: parameter.detail,
     }));
   }
 

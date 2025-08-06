@@ -98,6 +98,7 @@ export class MacroParameterExtractor {
           parameterName,
           false, // mpパラメータは必須ではない
           `mpパラメータ: ${parameterName}`,
+          "(mp)",
         );
         macroData.parameter.push(parameterData);
       }
@@ -139,6 +140,7 @@ export class MacroParameterExtractor {
           parameterName,
           false, // %パラメータは必須ではない（デフォルト値があるため）
           description,
+          "(%)",
         );
         macroData.parameter.push(parameterData);
       }
@@ -200,6 +202,7 @@ export class MacroParameterExtractor {
         paramName,
         false, // *パラメータは必須ではない
         `マクロ内で使用している${tagDefinition.name}タグの*から自動抽出されたパラメータ: ${paramName}`,
+        `(${tagDefinition.name} *)`,
       );
       macroData.parameter.push(parameterData);
     });
