@@ -205,7 +205,7 @@ export class TyranoPreview {
                 [iscript]
                   TYRANO.kag.config.defaultBgmVolume = tf.defaultBgmVolume;
                   TYRANO.kag.config.defaultSeVolume = tf.defaultSeVolume;
-                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;                
+                  TYRANO.kag.config.defaultMovieVolume = tf.defaultMovieVolume;
                 [endscript]
                 ` +
                 scenarioText[line!].substring(character!);
@@ -336,11 +336,30 @@ export class TyranoPreview {
     });
   }
 
-  private static getIndex(
-    _projectPath: string,
-    _extensionPath: string,
-  ): string {
-    return `
+  private static getIndex(projectPath: string, _extensionPath: string): string {
+    try {
+      // プロジェクトのindex.htmlファイルのパスを構築
+      const indexHtmlPath = path.join(projectPath, "index.html");
+
+      // index.htmlファイルを読み込み
+      const htmlContent = fs.readFileSync(indexHtmlPath, "utf8");
+
+      // first_scenario_fileのinputタグのvalueを置き換える
+      let modifiedHtml = htmlContent.replace(
+        /(<input[^>]*id=["']first_scenario_file["'][^>]*value=["'])[^"']*(['"][^>]*>)/,
+        "$1./../../preview.ks$2",
+      );
+      // コメントアウトされているfirst_scenario_fileを有効化して値を設定
+      modifiedHtml = modifiedHtml.replace(
+        /<!--\s*(<input[^>]*id=["']first_scenario_file["'][^>]*value=["'])[^"']*(['"][^>]*>)\s*-->/,
+        "$1./../../preview.ks$2",
+      );
+      return modifiedHtml;
+    } catch (error) {
+      console.error("Failed to read index.html:", error);
+
+      // フォールバック: デフォルトのHTMLを返す
+      return `
 <!DOCTYPE html>
 <html>
     <head>
@@ -358,7 +377,7 @@ export class TyranoPreview {
             try {
                 window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
             } catch (e) {
-              console.log(e); 
+              console.log(e);
             }
         </script>
         <!-- web socketでリロード -->
@@ -373,8 +392,6 @@ export class TyranoPreview {
                 }
             };
         </script>
-
-
 
         <!-- jQuery Plugins -->
         <script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>
@@ -410,7 +427,7 @@ export class TyranoPreview {
         <script src="./tyrano/plugins/kag/kag.menu.js"></script>
         <script src="./tyrano/plugins/kag/kag.parser.js"></script>
         <script src="./tyrano/plugins/kag/kag.rider.js"></script>
-        <script src="./tyrano/plugins/kag/kag.studio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.studio_v6.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_audio.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_camera.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_ext.js"></script>
@@ -429,7 +446,7 @@ export class TyranoPreview {
         <script src="./tyrano/libs/jsQR.js"></script>
         <script src="./tyrano/libs/anime.min.js"></script>
         <script src="./tyrano/libs/lz-string.min.js"></script>
-        
+
     </head>
 
     <body onselectstart="return false" onContextmenu="return false" ontouchmove="event.preventDefault()">
@@ -457,9 +474,10 @@ export class TyranoPreview {
             <br />
             <button data-remodal-action="cancel" id="remodal-cancel" class="remodal-cancel">Cancel</button>
             <button data-remodal-action="confirm" id="remodal-confirm" class="remodal-confirm">OK</button>
-        </div>  
+        </div>
     </body>
 </html>
 `;
+    }
   }
 }
