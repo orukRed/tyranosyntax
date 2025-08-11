@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.10.2] 2025-08-11
+
+- ティラノv6以降でその場プレビューが起動していない [issue#310](https://github.com/orukRed/tyranosyntax/issues/310)
+
 ## [1.10.1] 2025-08-05
 
 - 未定義のタグのエラーの波線が短くなっている問題を修正しました。[issue#307](https://github.com/orukRed/tyranosyntax/issues/307)
