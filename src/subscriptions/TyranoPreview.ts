@@ -272,11 +272,7 @@ export class TyranoPreview {
 
         // プレビュー用のAPI
         app.get("/preview", (_req, res) => {
-          const dynamicHtml = TyranoPreview.getIndex(
-            projectPath,
-            InformationExtension.path! + `/preview`,
-          );
-          res.send(dynamicHtml);
+          res.send(TyranoPreview.getIndex(projectPath));
         });
         TyranoPreview.serverInstance = app.listen(3100, () => {
           open(`http://localhost:3100/preview`);
@@ -336,29 +332,51 @@ export class TyranoPreview {
     });
   }
 
-  private static getIndex(projectPath: string, _extensionPath: string): string {
+  private static getIndex(projectPath: string): string {
     try {
-      // プロジェクトのindex.htmlファイルのパスを構築
       const indexHtmlPath = path.join(projectPath, "index.html");
 
       // index.htmlファイルを読み込み
-      const htmlContent = fs.readFileSync(indexHtmlPath, "utf8");
+      let htmlContent = fs.readFileSync(indexHtmlPath, "utf8");
 
       // first_scenario_fileのinputタグのvalueを置き換える
-      let modifiedHtml = htmlContent.replace(
+      htmlContent = htmlContent.replace(
         /(<input[^>]*id=["']first_scenario_file["'][^>]*value=["'])[^"']*(['"][^>]*>)/,
         "$1./../../preview.ks$2",
       );
+
       // コメントアウトされているfirst_scenario_fileを有効化して値を設定
-      modifiedHtml = modifiedHtml.replace(
+      htmlContent = htmlContent.replace(
         /<!--\s*(<input[^>]*id=["']first_scenario_file["'][^>]*value=["'])[^"']*(['"][^>]*>)\s*-->/,
         "$1./../../preview.ks$2",
       );
-      return modifiedHtml;
-    } catch (error) {
-      console.error("Failed to read index.html:", error);
 
-      // フォールバック: デフォルトのHTMLを返す
+      // WebSocketのリロード機能を追加（まだ存在しない場合）
+      if (!htmlContent.includes('new WebSocket("ws://localhost:8100")')) {
+        const webSocketScript = `
+          <!-- web socketでリロード -->
+          <script>
+              const ws = new WebSocket("ws://localhost:8100");
+              ws.onopen = () => {
+                  console.log("WebSocket connection established");
+              };
+              ws.onmessage = (event) => {
+                  if (event.data === "reload") {
+                      location.reload();
+                  }
+              };
+          </script>`;
+
+        // </head>タグの直前にWebSocketスクリプトを挿入
+        htmlContent = htmlContent.replace(
+          "</head>",
+          webSocketScript + "\n    </head>",
+        );
+      }
+
+      return htmlContent;
+    } catch (error) {
+      console.log("Error reading index.html:", error);
       return `
 <!DOCTYPE html>
 <html>
