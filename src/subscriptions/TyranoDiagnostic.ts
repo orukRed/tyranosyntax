@@ -29,6 +29,7 @@ export class TyranoDiagnostic {
   private readonly existResource = "existResource";
   private readonly labelName = "labelName";
   private readonly macroDuplicate = "macroDuplicate";
+  private readonly undefinedParameter = "undefinedParameter";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -202,6 +203,13 @@ export class TyranoDiagnostic {
         );
         //ラベル名のチェック
         await this.checkLabelName(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
+        //存在しないパラメータのチェック
+        await this.detectionUndefinedParameter(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
@@ -851,5 +859,113 @@ export class TyranoDiagnostic {
     }
 
     return;
+  }
+
+  /**
+   * タグに存在しないパラメータが指定されているかを検出します
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async detectionUndefinedParameter(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.undefinedParameter)) {
+      return;
+    }
+
+    // タグ名を取得
+    const tagName = data["name"];
+    
+    // パラメータオブジェクトを取得
+    const tagParameters = data["pm"];
+    if (!tagParameters || typeof tagParameters !== "object") {
+      return;
+    }
+
+    // suggestions から該当タグの定義を取得
+    const suggestions = this.infoWs.suggestions.get(projectPathOfDiagFile);
+    if (!suggestions || !suggestions[tagName]) {
+      return; // タグ定義が見つからない場合はスキップ（別の診断でキャッチされる）
+    }
+
+    const tagDefinition = suggestions[tagName];
+    if (!tagDefinition.parameters || !Array.isArray(tagDefinition.parameters)) {
+      return; // パラメータ定義がない場合はスキップ
+    }
+
+    // 定義されたパラメータ名の配列を作成
+    const validParameterNames = tagDefinition.parameters.map((param: any) => param.name);
+
+    // タグのパラメータをチェック
+    for (const paramName in tagParameters) {
+      // 内部的なパラメータ（line, column など）はスキップ
+      if (paramName === "line" || paramName === "column" || paramName === "is_in_comment") {
+        continue;
+      }
+
+      // パラメータが定義されているかチェック
+      if (!validParameterNames.includes(paramName)) {
+        // パラメータの位置を特定
+        const range = this.getParameterRange(paramName, tagParameters[paramName], data, scenarioDocument);
+        
+        const diag = new vscode.Diagnostic(
+          range,
+          `パラメータ "${paramName}" はタグ "${tagName}" に定義されていません。`,
+          vscode.DiagnosticSeverity.Error,
+        );
+        diagnostics.push(diag);
+      }
+    }
+  }
+
+  /**
+   * パラメータの範囲を取得します
+   * @param paramName パラメータ名
+   * @param paramValue パラメータ値
+   * @param data パース済みのタグデータ
+   * @param document ドキュメント
+   */
+  private getParameterRange(
+    paramName: string,
+    paramValue: string,
+    data: any,
+    document: vscode.TextDocument,
+  ): vscode.Range {
+    const line = document.lineAt(data["line"]);
+    const lineText = line.text;
+
+    // パラメータの検索パターン（paramName="value" または paramName=value）
+    const patterns = [
+      new RegExp(`\\b${paramName}\\s*=\\s*"[^"]*"`), // paramName="value"
+      new RegExp(`\\b${paramName}\\s*=\\s*'[^']*'`), // paramName='value'
+      new RegExp(`\\b${paramName}\\s*=\\s*[^\\s\\]]+`), // paramName=value (引用符なし)
+    ];
+
+    for (const pattern of patterns) {
+      const match = lineText.match(pattern);
+      if (match && match.index !== undefined) {
+        const startPos = match.index;
+        const endPos = startPos + match[0].length;
+        return new vscode.Range(
+          data["line"],
+          startPos,
+          data["line"],
+          endPos,
+        );
+      }
+    }
+
+    // パラメータが見つからない場合はタグ全体を範囲とする
+    return new vscode.Range(
+      data["line"],
+      line.firstNonWhitespaceCharacterIndex,
+      data["line"],
+      line.text.length,
+    );
   }
 }
