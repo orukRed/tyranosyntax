@@ -42,6 +42,7 @@ window.tyrano_lang = {
         missing_endmacro: "[macro] のあとに [endmacro] が見つかりません。または、[macro] 内のタグの数が多すぎます。",
         missing_endignore: "[ignore] のあとに [endignore] が見つかりません。または、[ignore] 内の数が多すぎます。",
         missing_parameter: "タグ「{ tag }」にパラメーター「{ param }」は必須です。",
+        missing_space_between_parameters: "パラメータ間に半角スペースがありません。パラメータ間は半角スペースで区切ってください。",
         if_and_endif_do_not_match: "[if] と [endif] の数が一致しません。",
         unsupported_extensions: "「{ ext }」はサポートしていないファイル形式です。",
         undefined_keyconfig:
