@@ -328,8 +328,6 @@ tyrano.plugin.kag.parser = {
         var param_value = ""; // パラメータバリュー記憶用
         var end_char_of_param_value = ""; // パラメータバリューの記述終了を検出する文字(クォート3種か空白)
         var keepSpaceConfig = that.kag.config.KeepSpaceInParameterValue;
-        var has_completed_parameter = false; // パラメータが完成したかどうかのフラグ
-        var needs_space_before_next_param = false; // 次のパラメータの前にスペースが必要かどうかのフラグ
 
         // パラメータが確定したときの処理を共通化
         function makeParam() {
@@ -373,7 +371,6 @@ tyrano.plugin.kag.parser = {
                         // 空白に遭遇！
                         if (param_name === "") {
                             // パラメータキーになにも入っていないならパラメータキー検出モードを継続
-                            needs_space_before_next_param = false; // スペースが見つかったのでフラグをリセット
                         } else {
                             // パラメータキーになにか入っている場合はイコール検出モードに遷移
                             scanning_state = SCANNING_EQUAL;
@@ -383,14 +380,8 @@ tyrano.plugin.kag.parser = {
                         // 開始クォート検出モードに遷移
                         scanning_state = SCANNING_START_QUOT;
                     } else {
-                        // パラメータ名に足す前に、スペースが必要なのにスペースがなかったかチェック
-                        if (needs_space_before_next_param && param_name === "") {
-                            // パラメータが完成した後に新しいパラメータが始まったが、スペースがない
-                            that.kag.error("missing_space_between_parameters");
-                            return obj;
-                        }
+                        // パラメータ名に足す
                         param_name += c;
-                        needs_space_before_next_param = false; // パラメータ名が始まったのでフラグをリセット
                     }
                     break;
                 case SCANNING_EQUAL:
@@ -413,11 +404,8 @@ tyrano.plugin.kag.parser = {
                         // s から始まるパラメータキーを検出するモードに遷移する
                         // (パラメータ全渡しの * エンティティもこれで対応できる)
                         obj.pm[param_name] = "";
-                        has_completed_parameter = true;
-                        needs_space_before_next_param = true;
                         param_name = c;
                         scanning_state = SCANNING_PARAM_NAME;
-                        needs_space_before_next_param = false; // 新しいパラメータ名が始まったのでリセット
                     }
                     break;
                 case SCANNING_START_QUOT:
@@ -453,17 +441,7 @@ tyrano.plugin.kag.parser = {
                             makeParam();
                             param_name = "";
                             param_value = "";
-                            // スペースで区切られたパラメータの場合は、スペースがすでに区切り文字として機能している
-                            // クォートで区切られたパラメータの場合は、次のパラメータの前にスペースが必要
-                            if (end_char_of_param_value === " ") {
-                                // スペース区切りの場合はスペースがすでに提供されている
-                                needs_space_before_next_param = false;
-                            } else {
-                                // クォート区切りの場合は次のパラメータの前にスペースが必要
-                                needs_space_before_next_param = true;
-                            }
                             end_char_of_param_value = "";
-                            has_completed_parameter = true;
                             scanning_state = SCANNING_PARAM_NAME;
                         }
                     } else {
