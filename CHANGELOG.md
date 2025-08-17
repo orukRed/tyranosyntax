@@ -4,6 +4,9 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.11.0] 2025-xx-xx
+- `macro`タグで定義したマクロでの補完の際に、補完候補の一覧からmp,%,*いずれのパラメータかわかるようになりました。
+
 ## [1.10.3] 2025-08-12
 
 - その場プレビューでカーソル移動時にリロードされなくなる問題の修正

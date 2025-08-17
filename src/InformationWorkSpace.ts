@@ -206,18 +206,24 @@ export class InformationWorkSpace {
     }
 
     // 指定したファイルパスの中のファイルのうち、index.htmlがあるディレクトリを返却。
-    const listFiles = (dir: string): string[] =>
-      fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
-        dirent.name === ".git"
-          ? [] // .git ディレクトリを無視
-          : dirent.isFile()
-            ? [`${dir}${this.pathDelimiter}${dirent.name}`]
-                .filter((_file) => dirent.name === "index.html")
-                .map((str) =>
-                  str.replace(this.pathDelimiter + "index.html", ""),
-                )
-            : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
-      );
+    const listFiles = (dir: string): string[] => {
+      try {
+        return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
+          dirent.name === ".git"
+            ? [] // .git ディレクトリを無視
+            : dirent.isFile()
+              ? [`${dir}${this.pathDelimiter}${dirent.name}`]
+                  .filter((_file) => dirent.name === "index.html")
+                  .map((str) =>
+                    str.replace(this.pathDelimiter + "index.html", ""),
+                  )
+              : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
+        );
+      } catch (_error) {
+        // ディレクトリアクセスに失敗した場合は空配列を返す
+        return [];
+      }
+    };
 
     const ret = listFiles(this.getWorkspaceRootPath());
 
@@ -950,19 +956,25 @@ export class InformationWorkSpace {
     }
 
     //指定したファイルパスの中のファイルのうち、permissionExtensionの中に入ってる拡張子のファイルパスのみを取得
-    const listFiles = (dir: string): string[] =>
-      fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
-        dirent.name === ".git"
-          ? [] // .git ディレクトリを無視
-          : dirent.isFile()
-            ? [`${dir}${this.pathDelimiter}${dirent.name}`].filter((file) => {
-                if (permissionExtension.length <= 0) {
-                  return file;
-                }
-                return permissionExtension.includes(path.extname(file));
-              })
-            : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
-      );
+    const listFiles = (dir: string): string[] => {
+      try {
+        return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
+          dirent.name === ".git"
+            ? [] // .git ディレクトリを無視
+            : dirent.isFile()
+              ? [`${dir}${this.pathDelimiter}${dirent.name}`].filter((file) => {
+                  if (permissionExtension.length <= 0) {
+                    return file;
+                  }
+                  return permissionExtension.includes(path.extname(file));
+                })
+              : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
+        );
+      } catch (_error) {
+        // ディレクトリアクセスに失敗した場合は空配列を返す
+        return [];
+      }
+    };
     let ret = listFiles(projectRootPath); //絶対パスで取得
 
     //相対パスに変換
@@ -991,7 +1003,12 @@ export class InformationWorkSpace {
       //filePathに存在するpathDelimiiter以降の文字列を削除
       filePath = filePath.substring(0, delimiterIndex);
       //フォルダ検索
-      searchDir = fs.readdirSync(filePath, "utf-8");
+      try {
+        searchDir = fs.readdirSync(filePath, "utf-8");
+      } catch (_error) {
+        // ディレクトリが存在しない場合は空文字を返す
+        return "";
+      }
       //index.htmlが見つからないならループ
     } while (searchDir.filter((e) => e === "index.html").length <= 0);
     return filePath;
