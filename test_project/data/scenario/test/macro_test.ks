@@ -14,7 +14,7 @@
   こんな風にマクロを作ります
   [resetfont]
 @endmacro
-
+@bg cross="" cond="" method="" position=""
 
 ;*が存在するタグの場合、未使用のパラメータすべてがマクロのパラメータになってるかどうかのテスト
 ;例の場合はtime,method,childrenパラメータが補完として出る）

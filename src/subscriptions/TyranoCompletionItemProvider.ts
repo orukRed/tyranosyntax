@@ -31,9 +31,7 @@ type TagParameterConfig = {
   values?: string[];
 };
 
-export class TyranoCompletionItemProvider
-  implements vscode.CompletionItemProvider
-{
+export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
   public constructor() {}
@@ -259,6 +257,8 @@ export class TyranoCompletionItemProvider
             parsedData[tagIndex]["pm"],
             projectPath,
             nameParamValue,
+            document,
+            position,
           );
         } else {
           return this.completionTag(projectPath, document, position);
@@ -699,6 +699,8 @@ export class TyranoCompletionItemProvider
     parameters: object,
     projectPath: string,
     nameParamValue: string,
+    document: vscode.TextDocument,
+    position: vscode.Position,
   ): Promise<
     | vscode.CompletionItem[]
     | vscode.CompletionList<vscode.CompletionItem>
@@ -706,6 +708,15 @@ export class TyranoCompletionItemProvider
     | undefined
   > {
     const completions: vscode.CompletionItem[] = [];
+
+    // カーソルの左隣と右隣の文字を取得
+    const lineText = document.lineAt(position.line).text;
+    const charBeforeCursor =
+      position.character > 0 ? lineText.charAt(position.character - 1) : "";
+    const charAfterCursor =
+      position.character < lineText.length
+        ? lineText.charAt(position.character)
+        : "";
 
     const suggestions = structuredClone(
       this.infoWs.suggestions.get(projectPath),
@@ -746,8 +757,12 @@ export class TyranoCompletionItemProvider
               description: "",
               detail: detailText,
             });
+
+            // カーソルの左隣がダブルクォーテーション、または右隣に任意の文字がある場合は半角スペースを追加
+            const spacePrefix = charBeforeCursor === '"' ? " " : "";
+            const spaceSuffix = charAfterCursor !== "" ? " " : "";
             comp.insertText = new vscode.SnippetString(
-              item2["name"] + '="$0" ',
+              spacePrefix + item2["name"] + '="$0"' + spaceSuffix,
             );
             comp.documentation = new vscode.MarkdownString(
               item2["description"],
