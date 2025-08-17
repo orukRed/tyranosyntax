@@ -317,7 +317,7 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 
 [cm]
 よし、再生するよ。[l]
-@playbgm time="3000" storage=music.ogg loop=true
+; @playbgm time="3000" storage=music.ogg loop=true
 徐々にフェードインしながら再生することもできるんだ[l][cm]
 
 @jump target="*common_bgm"
@@ -387,7 +387,7 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 [cm]
 @layopt layer=message0 visible=true
 @layopt layer=fix visible=true;
-[font color-"red"]
+; [font color-"red"]
 「ティラノビルダー」
 [resetfont]
 という無料の開発ツールもあります。[p]

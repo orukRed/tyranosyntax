@@ -29,6 +29,7 @@ export class TyranoDiagnostic {
   private readonly existResource = "existResource";
   private readonly labelName = "labelName";
   private readonly macroDuplicate = "macroDuplicate";
+  private readonly undefinedParameter = "undefinedParameter";
   private readonly parameterSpacing = "parameterSpacing";
 
   //パーサー
@@ -215,6 +216,7 @@ export class TyranoDiagnostic {
           projectPathOfDiagFile,
           diagnostics,
         );
+
       }
       diagnosticArray.push([scenarioDocument.uri, diagnostics]);
     }
@@ -384,8 +386,7 @@ export class TyranoDiagnostic {
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
-          const tagLastIndex =
-            tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
+          const tagLastIndex = tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
 
           const range = new vscode.Range(
             data["line"],
@@ -879,34 +880,34 @@ export class TyranoDiagnostic {
     }
 
     const documentText = scenarioDocument.getText();
-    const lines = documentText.split('\n');
+    const lines = documentText.split("\n");
 
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
       const line = lines[lineNumber];
-      
+
       // パラメータ間のスペース不足パターンを直接検出
       // "value"param= または 'value'param= または `value`param= の形式
       const missingSpacePatterns = [
-        /"([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g,  // "value"param=
-        /'([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g,  // 'value'param=
-        /`([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g   // `value`param=
+        /"([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // "value"param=
+        /'([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // 'value'param=
+        /`([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // `value`param=
       ];
 
       for (const pattern of missingSpacePatterns) {
         let match;
         while ((match = pattern.exec(line)) !== null) {
           // パラメータ名を取得（=を除く）
-          const paramName = match[1].replace(/\s*=/, '');
-          
+          const paramName = match[1].replace(/\s*=/, "");
+
           // エラー位置を特定
           const errorStartIndex = match.index;
           const range = new vscode.Range(
             lineNumber,
             errorStartIndex,
             lineNumber,
-            errorStartIndex + paramName.length
+            errorStartIndex + paramName.length,
           );
-          
+
           const diag = new vscode.Diagnostic(
             range,
             "パラメータ間に半角スペースがありません。パラメータ間は半角スペースで区切ってください。",
@@ -914,7 +915,7 @@ export class TyranoDiagnostic {
           );
           diagnostics.push(diag);
         }
-        
+
         // regex lastIndex をリセット
         pattern.lastIndex = 0;
       }
