@@ -384,8 +384,7 @@ export class TyranoDiagnostic {
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
-          const tagLastIndex =
-            tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
+          const tagLastIndex = tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
 
           const range = new vscode.Range(
             data["line"],
@@ -880,7 +879,7 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
-    
+
     // パラメータオブジェクトを取得
     const tagParameters = data["pm"];
     if (!tagParameters || typeof tagParameters !== "object") {
@@ -899,20 +898,36 @@ export class TyranoDiagnostic {
     }
 
     // 定義されたパラメータ名の配列を作成
-    const validParameterNames = tagDefinition.parameters.map((param: any) => param.name);
+    const validParameterNames = tagDefinition.parameters.map(
+      (param: any) => param.name,
+    );
 
     // タグのパラメータをチェック
     for (const paramName in tagParameters) {
+      // ワイルドカードパラメータ（*）はスキップ
+      if (paramName === "*") {
+        continue;
+      }
+
       // 内部的なパラメータ（line, column など）はスキップ
-      if (paramName === "line" || paramName === "column" || paramName === "is_in_comment") {
+      if (
+        paramName === "line" ||
+        paramName === "column" ||
+        paramName === "is_in_comment"
+      ) {
         continue;
       }
 
       // パラメータが定義されているかチェック
       if (!validParameterNames.includes(paramName)) {
         // パラメータの位置を特定
-        const range = this.getParameterRange(paramName, tagParameters[paramName], data, scenarioDocument);
-        
+        const range = this.getParameterRange(
+          paramName,
+          tagParameters[paramName],
+          data,
+          scenarioDocument,
+        );
+
         const diag = new vscode.Diagnostic(
           range,
           `パラメータ "${paramName}" はタグ "${tagName}" に定義されていません。`,
@@ -921,6 +936,15 @@ export class TyranoDiagnostic {
         diagnostics.push(diag);
       }
     }
+  }
+
+  /**
+   * 正規表現で使用する文字列をエスケープします
+   * @param string エスケープする文字列
+   * @returns エスケープされた文字列
+   */
+  private escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   /**
@@ -936,36 +960,39 @@ export class TyranoDiagnostic {
     data: any,
     document: vscode.TextDocument,
   ): vscode.Range {
-    const line = document.lineAt(data["line"]);
-    const lineText = line.text;
+    try {
+      const line = document.lineAt(data["line"]);
+      const lineText = line.text;
 
-    // パラメータの検索パターン（paramName="value" または paramName=value）
-    const patterns = [
-      new RegExp(`\\b${paramName}\\s*=\\s*"[^"]*"`), // paramName="value"
-      new RegExp(`\\b${paramName}\\s*=\\s*'[^']*'`), // paramName='value'
-      new RegExp(`\\b${paramName}\\s*=\\s*[^\\s\\]]+`), // paramName=value (引用符なし)
-    ];
+      // パラメータ名をエスケープして正規表現の特殊文字を無効化
+      const escapedParamName = this.escapeRegExp(paramName);
 
-    for (const pattern of patterns) {
-      const match = lineText.match(pattern);
-      if (match && match.index !== undefined) {
-        const startPos = match.index;
-        const endPos = startPos + match[0].length;
-        return new vscode.Range(
-          data["line"],
-          startPos,
-          data["line"],
-          endPos,
-        );
+      // パラメータの検索パターン（paramName="value" または paramName=value）
+      const patterns = [
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*"[^"]*"`), // paramName="value"
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*'[^']*'`), // paramName='value'
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*[^\\s\\]]+`), // paramName=value (引用符なし)
+      ];
+
+      for (const pattern of patterns) {
+        const match = lineText.match(pattern);
+        if (match && match.index !== undefined) {
+          const startPos = match.index;
+          const endPos = startPos + match[0].length;
+          return new vscode.Range(data["line"], startPos, data["line"], endPos);
+        }
       }
-    }
 
-    // パラメータが見つからない場合はタグ全体を範囲とする
-    return new vscode.Range(
-      data["line"],
-      line.firstNonWhitespaceCharacterIndex,
-      data["line"],
-      line.text.length,
-    );
+      // パラメータが見つからない場合はタグ全体を範囲とする
+      return new vscode.Range(
+        data["line"],
+        line.firstNonWhitespaceCharacterIndex,
+        data["line"],
+        line.text.length,
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    return new vscode.Range(data["line"], 1, data["line"], 2);
   }
 }

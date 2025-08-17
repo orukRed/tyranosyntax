@@ -62,7 +62,7 @@ chara_showのテストです。[p]
 
 ;chara_partのテストです
 chara_partのテストです。[p]
-[chara_part name="test_preview" icon="exist"  ]
+[chara_part name="test_preview"  ]
 期待値：立ち絵が切り替わること[p]
 
 ; bgm関連のテストです。

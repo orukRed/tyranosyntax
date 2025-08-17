@@ -35,8 +35,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
-[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=260 y=130 width=160 height=140 folder="bgimage" ]
+; [replay_image_button name="replay1" graphic="cat.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+; [replay_image_button name="replay2" graphic="toile.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=260 y=130 width=160 height=140 folder="bgimage" ]
 
 
 @jump target ="*common"
