@@ -30,6 +30,7 @@ export class TyranoDiagnostic {
   private readonly labelName = "labelName";
   private readonly macroDuplicate = "macroDuplicate";
   private readonly undefinedParameter = "undefinedParameter";
+  private readonly parameterSpacing = "parameterSpacing";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -187,11 +188,25 @@ export class TyranoDiagnostic {
         scenarioDocument,
       );
 
+      //パラメータ間のスペーシングチェック
+      await this.checkParameterSpacing(
+        diagnostics,
+        projectPathOfDiagFile,
+        scenarioDocument,
+      );
+
       for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
         }
+        //存在しないパラメータのチェック
+        await this.detectionUndefinedParameter(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
 
         //TODO:今後もし行に対しての診断項目が増えた場合はここに追加
         // ファイルリソースの存在チェックを別メソッドで実行
@@ -203,13 +218,6 @@ export class TyranoDiagnostic {
         );
         //ラベル名のチェック
         await this.checkLabelName(
-          data,
-          scenarioDocument,
-          projectPathOfDiagFile,
-          diagnostics,
-        );
-        //存在しないパラメータのチェック
-        await this.detectionUndefinedParameter(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
@@ -858,6 +866,66 @@ export class TyranoDiagnostic {
     }
 
     return;
+  }
+
+  /**
+   * TyranoScriptタグのパラメータ間のスペーシングを検証します
+   * パラメータ間に適切なスペースがない場合に診断エラーを報告します
+   * @param diagnostics 診断結果を格納する配列
+   * @param projectPath 診断対象ファイルのプロジェクトパス
+   * @param scenarioDocument 診断対象のドキュメント
+   */
+  private async checkParameterSpacing(
+    diagnostics: vscode.Diagnostic[],
+    projectPath: string,
+    scenarioDocument: vscode.TextDocument,
+  ): Promise<void> {
+    // パラメータスペーシングチェックを実行するかどうか
+    if (!this.isExecuteDiagnostic(this.parameterSpacing)) {
+      return;
+    }
+
+    const documentText = scenarioDocument.getText();
+    const lines = documentText.split("\n");
+
+    for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+      const line = lines[lineNumber];
+
+      // パラメータ間のスペース不足パターンを直接検出
+      // "value"param= または 'value'param= または `value`param= の形式
+      const missingSpacePatterns = [
+        /"([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // "value"param=
+        /'([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // 'value'param=
+        /`([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // `value`param=
+      ];
+
+      for (const pattern of missingSpacePatterns) {
+        let match;
+        while ((match = pattern.exec(line)) !== null) {
+          // パラメータ名を取得（=を除く）
+          const paramName = match[1].replace(/\s*=/, "");
+
+          // エラー位置を特定
+          const errorStartIndex = match.index;
+          const range = new vscode.Range(
+            lineNumber,
+            errorStartIndex,
+            lineNumber,
+            errorStartIndex + paramName.length,
+          );
+
+          const diag = new vscode.Diagnostic(
+            range,
+            "パラメータ間に半角スペースがありません。パラメータ間は半角スペースで区切ってください。",
+            vscode.DiagnosticSeverity.Error,
+          );
+          diagnostics.push(diag);
+        }
+
+        // regex lastIndex をリセット
+        pattern.lastIndex = 0;
+      }
+    }
   }
 
   /**

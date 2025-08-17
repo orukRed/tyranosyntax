@@ -222,7 +222,8 @@
               "existResource": true,
               "labelName": true,
               "macroDuplicate": true,
-              "undefinedParameter": true
+              "undefinedParameter": true,
+              "parameterSpacing": true
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },

@@ -244,8 +244,9 @@ f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を
     "jumpAndCallInIfStatement": true,
     "existResource": true,
     "labelName": true,
-    "macroDuplicate": true
-
+    "macroDuplicate": true,
+    "undefinedParameter": true,
+    "parameterSpacing": true
   }
 ```
 

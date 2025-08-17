@@ -330,14 +330,14 @@ suite("TyranoDiagnostic", () => {
       // 未定義マクロの診断における下線の長さがタグ名と一致することをテスト
       const testText = '[unknownmacro param1="value1" param2="value2"]';
       const tagName = "unknownmacro";
-      
+
       // タグの開始位置を計算
       const tagFirstIndex = testText.indexOf(tagName);
       const tagLastIndex = tagFirstIndex + tagName.length;
-      
+
       // 期待される下線の範囲
       const expectedUnderlineText = testText.substring(tagFirstIndex, tagLastIndex);
-      
+
       // アサート
       assert.strictEqual(tagFirstIndex, 1, "タグは1文字目から始まるべき");
       assert.strictEqual(tagLastIndex, 13, "タグは13文字目で終わるべき");
@@ -349,121 +349,141 @@ suite("TyranoDiagnostic", () => {
       // より長いパラメータを持つタグのテスト
       const testText = '[invalidtag storage="test.ks" target="label1" visible="true"]';
       const tagName = "invalidtag";
-      
+
       // タグの開始位置を計算
       const tagFirstIndex = testText.indexOf(tagName);
       const tagLastIndex = tagFirstIndex + tagName.length;
-      
+
       // 期待される下線の範囲
       const expectedUnderlineText = testText.substring(tagFirstIndex, tagLastIndex);
-      
+
       // アサート
       assert.strictEqual(expectedUnderlineText, tagName, "下線はタグ名のみにかかるべき");
       assert.strictEqual(expectedUnderlineText.length, tagName.length, "下線の長さはタグ名の長さと一致するべき");
-      
+
       // パラメータ部分は下線に含まれないことを確認
       const parametersPart = testText.substring(tagLastIndex);
       assert.ok(parametersPart.includes('storage="test.ks"'), "パラメータは下線範囲に含まれないべき");
     });
+
+
   });
+    suite("detectionUndefinedParameter", () => {
+      test("正常系 メソッドが存在する", () => {
+        // 値定義
+        const diagnostic = new TyranoDiagnostic();
 
-  suite("detectionUndefinedParameter", () => {
-    test("正常系 メソッドが存在する", () => {
-      // 値定義
-      const diagnostic = new TyranoDiagnostic();
+        // アサート
+        assert.ok(
+          typeof (diagnostic as any).detectionUndefinedParameter === "function",
+          "detectionUndefinedParameterメソッドが存在するべき",
+        );
+      });
 
-      // アサート
-      assert.ok(
-        typeof (diagnostic as any).detectionUndefinedParameter === "function",
-        "detectionUndefinedParameterメソッドが存在するべき",
-      );
-    });
-
-    test("正常系 存在しないパラメータの検出ロジック", () => {
-      // モックデータの準備
-      const mockData = {
-        name: "jump",
-        pm: {
-          storage: "test.ks",
-          target: "label1",
-          invalidParam: "invalidValue", // 存在しないパラメータ
-          line: 0,
-          column: 0,
-        },
-        line: 0,
-      };
-
-      const mockSuggestions = {
-        jump: {
+      test("正常系 存在しないパラメータの検出ロジック", () => {
+        // モックデータの準備
+        const mockData = {
           name: "jump",
-          description: "Jump to scenario",
-          parameters: [
-            { name: "storage", required: false, description: "Storage file" },
-            { name: "target", required: false, description: "Target label" },
-            { name: "cond", required: false, description: "Condition" },
-          ],
-        },
-      };
-
-      // パラメータチェックのロジックをテスト
-      const tagDefinition = mockSuggestions[mockData.name];
-      const validParameterNames = tagDefinition.parameters.map((param: any) => param.name);
-      
-      // 存在しないパラメータがあることを確認
-      let hasInvalidParam = false;
-      for (const paramName in mockData.pm) {
-        if (paramName === "line" || paramName === "column" || paramName === "is_in_comment") {
-          continue;
-        }
-        if (!validParameterNames.includes(paramName)) {
-          hasInvalidParam = true;
-          assert.strictEqual(paramName, "invalidParam", "invalidParamが検出されるべき");
-        }
-      }
-
-      assert.ok(hasInvalidParam, "存在しないパラメータが検出されるべき");
-    });
-
-    test("正常系 有効なパラメータのみの場合", () => {
-      // モックデータの準備（有効なパラメータのみ）
-      const mockData = {
-        name: "jump",
-        pm: {
-          storage: "test.ks",
-          target: "label1",
+          pm: {
+            storage: "test.ks",
+            target: "label1",
+            invalidParam: "invalidValue", // 存在しないパラメータ
+            line: 0,
+            column: 0,
+          },
           line: 0,
-          column: 0,
-        },
-        line: 0,
-      };
+        };
 
-      const mockSuggestions = {
-        jump: {
+        const mockSuggestions = {
+          jump: {
+            name: "jump",
+            description: "Jump to scenario",
+            parameters: [
+              { name: "storage", required: false, description: "Storage file" },
+              { name: "target", required: false, description: "Target label" },
+              { name: "cond", required: false, description: "Condition" },
+            ],
+          },
+        };
+
+        // パラメータチェックのロジックをテスト
+        const tagDefinition = mockSuggestions[mockData.name];
+        const validParameterNames = tagDefinition.parameters.map(
+          (param: any) => param.name,
+        );
+
+        // 存在しないパラメータがあることを確認
+        let hasInvalidParam = false;
+        for (const paramName in mockData.pm) {
+          if (
+            paramName === "line" ||
+            paramName === "column" ||
+            paramName === "is_in_comment"
+          ) {
+            continue;
+          }
+          if (!validParameterNames.includes(paramName)) {
+            hasInvalidParam = true;
+            assert.strictEqual(
+              paramName,
+              "invalidParam",
+              "invalidParamが検出されるべき",
+            );
+          }
+        }
+
+        assert.ok(hasInvalidParam, "存在しないパラメータが検出されるべき");
+      });
+
+      test("正常系 有効なパラメータのみの場合", () => {
+        // モックデータの準備（有効なパラメータのみ）
+        const mockData = {
           name: "jump",
-          description: "Jump to scenario",
-          parameters: [
-            { name: "storage", required: false, description: "Storage file" },
-            { name: "target", required: false, description: "Target label" },
-          ],
-        },
-      };
+          pm: {
+            storage: "test.ks",
+            target: "label1",
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
 
-      // パラメータチェックのロジックをテスト
-      const tagDefinition = mockSuggestions[mockData.name];
-      const validParameterNames = tagDefinition.parameters.map((param: any) => param.name);
-      
-      // 存在しないパラメータがないことを確認
-      let hasInvalidParam = false;
-      for (const paramName in mockData.pm) {
-        if (paramName === "line" || paramName === "column" || paramName === "is_in_comment") {
-          continue;
-        }
-        if (!validParameterNames.includes(paramName)) {
-          hasInvalidParam = true;
-        }
-      }
+        const mockSuggestions = {
+          jump: {
+            name: "jump",
+            description: "Jump to scenario",
+            parameters: [
+              { name: "storage", required: false, description: "Storage file" },
+              { name: "target", required: false, description: "Target label" },
+            ],
+          },
+        };
 
-      assert.ok(!hasInvalidParam, "有効なパラメータのみの場合はエラーが検出されないべき");
+        // パラメータチェックのロジックをテスト
+        const tagDefinition = mockSuggestions[mockData.name];
+        const validParameterNames = tagDefinition.parameters.map(
+          (param: any) => param.name,
+        );
+
+        // 存在しないパラメータがないことを確認
+        let hasInvalidParam = false;
+        for (const paramName in mockData.pm) {
+          if (
+            paramName === "line" ||
+            paramName === "column" ||
+            paramName === "is_in_comment"
+          ) {
+            continue;
+          }
+          if (!validParameterNames.includes(paramName)) {
+            hasInvalidParam = true;
+          }
+        }
+
+        assert.ok(
+          !hasInvalidParam,
+          "有効なパラメータのみの場合はエラーが検出されないべき",
+        );
+      });
     });
-  });
 });
