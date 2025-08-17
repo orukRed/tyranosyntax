@@ -20,6 +20,7 @@ type SuggestionsByTag = {
       name: string;
       description: string;
       required: boolean;
+      detail?: string;
     }[];
   };
 };
@@ -733,7 +734,13 @@ export class TyranoCompletionItemProvider
         for (const item2 of suggestions[item]["parameters"]) {
           if (!(item2["name"] in parameters)) {
             //タグにないparameterのみインテリセンスに出す
-            const detailText = item2["required"] ? "（必須）" : "";
+            let detailText = "";
+            if (!item2["detail"]) {
+              detailText = item2["required"] ? "（必須）" : "";
+            } else {
+              detailText = item2["detail"];
+            }
+
             const comp = new vscode.CompletionItem({
               label: item2["name"],
               description: "",

@@ -41,9 +41,10 @@ export class MacroParameterExtractor {
 
     // その他のタグでexpパラメータを持つ場合
     if (data["pm"]) {
+      const tagName = data["name"];
       Object.values(data["pm"]).forEach((paramValue: unknown) => {
         if (typeof paramValue === "string") {
-          this.extractParametersFromText(paramValue, macroData);
+          this.extractParametersFromText(paramValue, macroData, tagName);
         }
       });
     }
@@ -59,22 +60,25 @@ export class MacroParameterExtractor {
    * テキストからパラメータを抽出してマクロデータに追加
    * @param text 検索対象のテキスト
    * @param macroData マクロデータ
+   * @param tagName 現在処理中のタグ名（オプション）
    */
   private extractParametersFromText(
     text: string,
     macroData: DefineMacroData,
+    tagName?: string,
   ): void {
     // mp.パラメータの抽出
     this.extractMpParameters(text, macroData);
 
     // %パラメータの抽出
-    this.extractPercentParameters(text, macroData);
+    this.extractPercentParameters(text, macroData, tagName);
   }
 
   /**
    * テキストからmp.パラメータを抽出してマクロデータに追加
    * @param text 検索対象のテキスト
    * @param macroData マクロデータ
+   * @param tagName 現在処理中のタグ名（オプション）
    */
   private extractMpParameters(text: string, macroData: DefineMacroData): void {
     // 正規表現を新しく作成して、グローバルフラグの状態をリセット
@@ -98,6 +102,7 @@ export class MacroParameterExtractor {
           parameterName,
           false, // mpパラメータは必須ではない
           `mpパラメータ: ${parameterName}`,
+          "(mp)",
         );
         macroData.parameter.push(parameterData);
       }
@@ -108,10 +113,12 @@ export class MacroParameterExtractor {
    * テキストから%パラメータを抽出してマクロデータに追加
    * @param text 検索対象のテキスト
    * @param macroData マクロデータ
+   * @param tagName 現在処理中のタグ名（オプション）
    */
   private extractPercentParameters(
     text: string,
     macroData: DefineMacroData,
+    tagName?: string,
   ): void {
     // 正規表現を新しく作成して、グローバルフラグの状態をリセット
     const regex = new RegExp(
@@ -131,14 +138,19 @@ export class MacroParameterExtractor {
 
       if (!existingParam) {
         // 新しいパラメータとして追加
-        const description = defaultValue
+        const baseDescription = defaultValue
           ? `%パラメータ: ${parameterName} (デフォルト値: ${defaultValue})`
           : `%パラメータ: ${parameterName}`;
+
+        const description = tagName
+          ? `${tagName}タグの${baseDescription}`
+          : baseDescription;
 
         const parameterData = new MacroParameterData(
           parameterName,
           false, // %パラメータは必須ではない（デフォルト値があるため）
           description,
+          tagName ? `(${tagName} %)` : "(%)",
         );
         macroData.parameter.push(parameterData);
       }
@@ -200,6 +212,7 @@ export class MacroParameterExtractor {
         paramName,
         false, // *パラメータは必須ではない
         `マクロ内で使用している${tagDefinition.name}タグの*から自動抽出されたパラメータ: ${paramName}`,
+        `(${tagDefinition.name} *)`,
       );
       macroData.parameter.push(parameterData);
     });
