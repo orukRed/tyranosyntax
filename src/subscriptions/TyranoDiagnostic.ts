@@ -29,6 +29,8 @@ export class TyranoDiagnostic {
   private readonly existResource = "existResource";
   private readonly labelName = "labelName";
   private readonly macroDuplicate = "macroDuplicate";
+  private readonly undefinedParameter = "undefinedParameter";
+  private readonly parameterSpacing = "parameterSpacing";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -186,11 +188,25 @@ export class TyranoDiagnostic {
         scenarioDocument,
       );
 
+      //パラメータ間のスペーシングチェック
+      await this.checkParameterSpacing(
+        diagnostics,
+        projectPathOfDiagFile,
+        scenarioDocument,
+      );
+
       for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
         }
+        //存在しないパラメータのチェック
+        await this.detectionUndefinedParameter(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
 
         //TODO:今後もし行に対しての診断項目が増えた場合はここに追加
         // ファイルリソースの存在チェックを別メソッドで実行
@@ -376,8 +392,7 @@ export class TyranoDiagnostic {
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
-          const tagLastIndex =
-            tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
+          const tagLastIndex = tagFirstIndex + data["name"].length; // タグ名の長さのみを使用して終了位置を決定
 
           const range = new vscode.Range(
             data["line"],
@@ -851,5 +866,201 @@ export class TyranoDiagnostic {
     }
 
     return;
+  }
+
+  /**
+   * TyranoScriptタグのパラメータ間のスペーシングを検証します
+   * パラメータ間に適切なスペースがない場合に診断エラーを報告します
+   * @param diagnostics 診断結果を格納する配列
+   * @param projectPath 診断対象ファイルのプロジェクトパス
+   * @param scenarioDocument 診断対象のドキュメント
+   */
+  private async checkParameterSpacing(
+    diagnostics: vscode.Diagnostic[],
+    projectPath: string,
+    scenarioDocument: vscode.TextDocument,
+  ): Promise<void> {
+    // パラメータスペーシングチェックを実行するかどうか
+    if (!this.isExecuteDiagnostic(this.parameterSpacing)) {
+      return;
+    }
+
+    const documentText = scenarioDocument.getText();
+    const lines = documentText.split("\n");
+
+    for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+      const line = lines[lineNumber];
+
+      // パラメータ間のスペース不足パターンを直接検出
+      // "value"param= または 'value'param= または `value`param= の形式
+      const missingSpacePatterns = [
+        /"([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // "value"param=
+        /'([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // 'value'param=
+        /`([a-zA-Z_][a-zA-Z0-9_]*\s*=)/g, // `value`param=
+      ];
+
+      for (const pattern of missingSpacePatterns) {
+        let match;
+        while ((match = pattern.exec(line)) !== null) {
+          // パラメータ名を取得（=を除く）
+          const paramName = match[1].replace(/\s*=/, "");
+
+          // エラー位置を特定
+          const errorStartIndex = match.index;
+          const range = new vscode.Range(
+            lineNumber,
+            errorStartIndex,
+            lineNumber,
+            errorStartIndex + paramName.length,
+          );
+
+          const diag = new vscode.Diagnostic(
+            range,
+            "パラメータ間に半角スペースがありません。パラメータ間は半角スペースで区切ってください。",
+            vscode.DiagnosticSeverity.Error,
+          );
+          diagnostics.push(diag);
+        }
+
+        // regex lastIndex をリセット
+        pattern.lastIndex = 0;
+      }
+    }
+  }
+
+  /**
+   * タグに存在しないパラメータが指定されているかを検出します
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async detectionUndefinedParameter(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.undefinedParameter)) {
+      return;
+    }
+
+    // タグ名を取得
+    const tagName = data["name"];
+
+    // パラメータオブジェクトを取得
+    const tagParameters = data["pm"];
+    if (!tagParameters || typeof tagParameters !== "object") {
+      return;
+    }
+
+    // suggestions から該当タグの定義を取得
+    const suggestions = this.infoWs.suggestions.get(projectPathOfDiagFile);
+    if (!suggestions || !suggestions[tagName]) {
+      return; // タグ定義が見つからない場合はスキップ（別の診断でキャッチされる）
+    }
+
+    const tagDefinition = suggestions[tagName];
+    if (!tagDefinition.parameters || !Array.isArray(tagDefinition.parameters)) {
+      return; // パラメータ定義がない場合はスキップ
+    }
+
+    // 定義されたパラメータ名の配列を作成
+    const validParameterNames = tagDefinition.parameters.map(
+      (param: any) => param.name,
+    );
+
+    // タグのパラメータをチェック
+    for (const paramName in tagParameters) {
+      // ワイルドカードパラメータ（*）はスキップ
+      if (paramName === "*") {
+        continue;
+      }
+
+      // 内部的なパラメータ（line, column など）はスキップ
+      if (
+        paramName === "line" ||
+        paramName === "column" ||
+        paramName === "is_in_comment"
+      ) {
+        continue;
+      }
+
+      // パラメータが定義されているかチェック
+      if (!validParameterNames.includes(paramName)) {
+        // パラメータの位置を特定
+        const range = this.getParameterRange(
+          paramName,
+          tagParameters[paramName],
+          data,
+          scenarioDocument,
+        );
+
+        const diag = new vscode.Diagnostic(
+          range,
+          `パラメータ "${paramName}" はタグ "${tagName}" に定義されていません。`,
+          vscode.DiagnosticSeverity.Error,
+        );
+        diagnostics.push(diag);
+      }
+    }
+  }
+
+  /**
+   * 正規表現で使用する文字列をエスケープします
+   * @param string エスケープする文字列
+   * @returns エスケープされた文字列
+   */
+  private escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  /**
+   * パラメータの範囲を取得します
+   * @param paramName パラメータ名
+   * @param paramValue パラメータ値
+   * @param data パース済みのタグデータ
+   * @param document ドキュメント
+   */
+  private getParameterRange(
+    paramName: string,
+    paramValue: string,
+    data: any,
+    document: vscode.TextDocument,
+  ): vscode.Range {
+    try {
+      const line = document.lineAt(data["line"]);
+      const lineText = line.text;
+
+      // パラメータ名をエスケープして正規表現の特殊文字を無効化
+      const escapedParamName = this.escapeRegExp(paramName);
+
+      // パラメータの検索パターン（paramName="value" または paramName=value）
+      const patterns = [
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*"[^"]*"`), // paramName="value"
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*'[^']*'`), // paramName='value'
+        new RegExp(`\\b${escapedParamName}\\s*=\\s*[^\\s\\]]+`), // paramName=value (引用符なし)
+      ];
+
+      for (const pattern of patterns) {
+        const match = lineText.match(pattern);
+        if (match && match.index !== undefined) {
+          const startPos = match.index;
+          const endPos = startPos + match[0].length;
+          return new vscode.Range(data["line"], startPos, data["line"], endPos);
+        }
+      }
+
+      // パラメータが見つからない場合はタグ全体を範囲とする
+      return new vscode.Range(
+        data["line"],
+        line.firstNonWhitespaceCharacterIndex,
+        data["line"],
+        line.text.length,
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    return new vscode.Range(data["line"], 1, data["line"], 2);
   }
 }

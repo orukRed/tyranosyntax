@@ -1,6 +1,6 @@
 ;issue300
-
 ;mp.の始まる値はマクロのパラメータになってるかどうかのテスト
+@issue300_test1 *
 @macro name="issue300_test1"
   [iscript ]
     f.hoge=mp.your_name
@@ -14,6 +14,7 @@
   こんな風にマクロを作ります
   [resetfont]
 @endmacro
+@bg cross="" cond="" method="" position=""
 
 ;*が存在するタグの場合、未使用のパラメータすべてがマクロのパラメータになってるかどうかのテスト
 ;例の場合はtime,method,childrenパラメータが補完として出る）
@@ -24,4 +25,4 @@
 
 @issue300_test1 your_name=""
 @issue300_test2 color=""
-@issue300_test3 
+@issue300_test3
