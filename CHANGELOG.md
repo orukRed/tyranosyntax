@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.11.1] 2025-08-23
+
+1.11.0で追加した`存在しないパラメータを指定したときにエラーを表示`にて、chara_layerタグでパラメータを追加したpartでエラーが発生してしまう問題を修正しました。
+
+
 ## [1.11.0] 2025-08-19
 
 - `macro`タグで定義したマクロでの補完の際に、補完候補の一覧からmp,%,*いずれのパラメータかわかるようになりました。

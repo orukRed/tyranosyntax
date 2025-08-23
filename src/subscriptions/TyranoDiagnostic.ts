@@ -970,19 +970,39 @@ export class TyranoDiagnostic {
       (param: any) => param.name,
     );
 
+    // condパラメータの場合、なくてもOKとするためにあらかじめ追加しておく
+    validParameterNames.push("cond");
+
+    let charaName = "";
+    // chara_partタグの場合、characterMap._layerのキーに登録されている値も有効なパラメータ名として扱う
+    if (tagName === "chara_part") {
+      charaName = data["pm"]["name"];
+
+      //キャラ定義を取得し、chara_partのnameと一致する物だけに絞る
+      const characterDataArray = this.infoWs.characterMap
+        .get(projectPathOfDiagFile)
+        ?.filter((characterData) => characterData.name === charaName);
+
+      //キャラ定義が存在する場合、layerのキーを有効なパラメータ名として追加
+      if (characterDataArray) {
+        const layerKeys = new Set<string>();
+
+        for (const characterData of characterDataArray) {
+          for (const [, partDataArray] of characterData.layer) {
+            for (const partData of partDataArray) {
+              layerKeys.add(partData.part);
+            }
+          }
+        }
+
+        validParameterNames.push(...layerKeys);
+      }
+    }
+
     // タグのパラメータをチェック
     for (const paramName in tagParameters) {
       // ワイルドカードパラメータ（*）はスキップ
       if (paramName === "*") {
-        continue;
-      }
-
-      // 内部的なパラメータ（line, column など）はスキップ
-      if (
-        paramName === "line" ||
-        paramName === "column" ||
-        paramName === "is_in_comment"
-      ) {
         continue;
       }
 
@@ -996,12 +1016,22 @@ export class TyranoDiagnostic {
           scenarioDocument,
         );
 
-        const diag = new vscode.Diagnostic(
-          range,
-          `パラメータ "${paramName}" はタグ "${tagName}" に定義されていません。`,
-          vscode.DiagnosticSeverity.Error,
-        );
-        diagnostics.push(diag);
+        if (tagName == "chara_part") {
+          const diag = new vscode.Diagnostic(
+            range,
+            `タグ[${tagName}]のキャラ${charaName}には"${paramName}"パラメータが存在しません。chara_showやchara_layerタグを見直してください。`,
+            vscode.DiagnosticSeverity.Error,
+          );
+          diagnostics.push(diag);
+        } else {
+          const diag = new vscode.Diagnostic(
+            range,
+            `タグ[${tagName}]のパラメータ "${paramName}" はタグ "${tagName}" に定義されていません。`,
+            vscode.DiagnosticSeverity.Error,
+          );
+
+          diagnostics.push(diag);
+        }
       }
     }
   }
