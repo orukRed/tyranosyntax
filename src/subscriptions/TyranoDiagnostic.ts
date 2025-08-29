@@ -31,6 +31,7 @@ export class TyranoDiagnostic {
   private readonly macroDuplicate = "macroDuplicate";
   private readonly undefinedParameter = "undefinedParameter";
   private readonly parameterSpacing = "parameterSpacing";
+  private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -202,6 +203,14 @@ export class TyranoDiagnostic {
         }
         //存在しないパラメータのチェック
         await this.detectionUndefinedParameter(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
+
+        //変数で&がないもののチェック
+        await this.detectionMissingAmpersandInVariable(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
@@ -1092,5 +1101,70 @@ export class TyranoDiagnostic {
       console.log(error);
     }
     return new vscode.Range(data["line"], 1, data["line"], 2);
+  }
+
+  /**
+   * パラメータで変数を使用する際に&がない場合にエラーを報告します
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async detectionMissingAmpersandInVariable(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    // 設定で診断が無効になっている場合はスキップ
+    if (!this.isExecuteDiagnostic(this.missingAmpersandInVariable)) {
+      return;
+    }
+
+    const tagName = data["name"];
+    if (!tagName) {
+      return;
+    }
+
+    // パラメータオブジェクトを取得
+    const tagParameters = data["pm"];
+    if (!tagParameters || typeof tagParameters !== "object") {
+      return;
+    }
+
+    // タグのパラメータをチェック
+    for (const paramName in tagParameters) {
+      // expパラメータとcondパラメータは&がなくてもエラーにしない
+      if (paramName === "exp" || paramName === "cond") {
+        continue;
+      }
+
+      const paramValue = tagParameters[paramName];
+      if (typeof paramValue !== "string") {
+        continue;
+      }
+
+      // 値が変数を含むかどうかをチェック
+      if (this.isValueIsIncludeVariable(paramValue)) {
+        // &がない場合はエラー
+        if (!this.isExistAmpersandAtBeginning(paramValue)) {
+          // パラメータの位置を特定
+          const range = this.getParameterRange(
+            paramName,
+            paramValue,
+            data,
+            scenarioDocument,
+          );
+
+          const diag = new vscode.Diagnostic(
+            range,
+            `タグ[${tagName}]のパラメータ"${paramName}"で変数を使用する場合は、値の先頭に&を付ける必要があります。例: ${paramName}="&${paramValue}"`,
+            vscode.DiagnosticSeverity.Error,
+          );
+
+          diagnostics.push(diag);
+        }
+      }
+    }
   }
 }
