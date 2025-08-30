@@ -31,6 +31,7 @@ export class TyranoDiagnostic {
   private readonly macroDuplicate = "macroDuplicate";
   private readonly undefinedParameter = "undefinedParameter";
   private readonly parameterSpacing = "parameterSpacing";
+  private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -202,6 +203,14 @@ export class TyranoDiagnostic {
         }
         //存在しないパラメータのチェック
         await this.detectionUndefinedParameter(
+          data,
+          scenarioDocument,
+          projectPathOfDiagFile,
+          diagnostics,
+        );
+
+        //変数で&がないもののチェック
+        await this.detectionMissingAmpersandInVariable(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
@@ -1092,5 +1101,86 @@ export class TyranoDiagnostic {
       console.log(error);
     }
     return new vscode.Range(data["line"], 1, data["line"], 2);
+  }
+
+  /**
+   * パラメータで変数を使用する際に&がない場合にエラーを報告します
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   */
+  private async detectionMissingAmpersandInVariable(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+  ): Promise<void> {
+    // 設定で診断が無効になっている場合はスキップ
+    if (!this.isExecuteDiagnostic(this.missingAmpersandInVariable)) {
+      return;
+    }
+
+    const tagName = data["name"];
+    // タグ名が存在しない、またはtext/commentの場合はスキップ
+    if (!tagName || tagName === "text" || tagName === "comment") {
+      return;
+    }
+
+    // パラメータオブジェクトを取得
+    const tagParameters = data["pm"];
+    if (!tagParameters || typeof tagParameters !== "object") {
+      return;
+    }
+
+    // タグのパラメータのみをチェック（text/commentは除外済み）
+    for (const paramName in tagParameters) {
+      // exp,cond,preexpパラメータは&がなくてもエラーにしない
+      if (
+        paramName === "exp" ||
+        paramName === "cond" ||
+        paramName === "preexp"
+      ) {
+        continue;
+      }
+
+      //editタグのnameパラメータとdialogタグのnameパラメータはスキップ
+      if (
+        (tagName === "edit" && paramName === "name") ||
+        (tagName === "dialog" && paramName === "name")
+      ) {
+        continue;
+      }
+
+      const paramValue = tagParameters[paramName];
+      if (typeof paramValue !== "string") {
+        continue;
+      }
+
+      // 値が変数を含むかどうかをチェック
+      if (this.isValueIsIncludeVariable(paramValue)) {
+        // &も%もない場合はエラー
+        if (
+          !this.isExistAmpersandAtBeginning(paramValue) &&
+          this.isExistPercentAtBeginning(paramValue) === false
+        ) {
+          // パラメータの位置を特定
+          const range = this.getParameterRange(
+            paramName,
+            paramValue,
+            data,
+            scenarioDocument,
+          );
+
+          const diag = new vscode.Diagnostic(
+            range,
+            `タグ[${tagName}]のパラメータ"${paramName}"で変数を使用する場合は値の先頭に&、もしくはマクロで渡された変数なら%を付ける必要があります。例: ${paramName}="&${paramValue}"`,
+            vscode.DiagnosticSeverity.Warning,
+          );
+
+          diagnostics.push(diag);
+        }
+      }
+    }
   }
 }

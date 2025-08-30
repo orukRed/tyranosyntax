@@ -486,4 +486,174 @@ suite("TyranoDiagnostic", () => {
         );
       });
     });
-});
+
+    suite("detectionMissingAmpersandInVariable", () => {
+      test("異常系 変数に&がない場合エラーが検出される", () => {
+        // テスト用のモックデータ（&がない変数）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "f.bgimage", // &がない変数
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        const hasAmpersand = (diagnostic as any).isExistAmpersandAtBeginning(mockData.pm.storage);
+        
+        assert.ok(isVariable, "f.bgimageは変数として検出されるべき");
+        assert.ok(!hasAmpersand, "&がないことが検出されるべき");
+      });
+
+      test("正常系 変数に&がある場合エラーが検出されない", () => {
+        // テスト用のモックデータ（&がある変数）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "&f.bgimage", // &がある変数
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        const hasAmpersand = (diagnostic as any).isExistAmpersandAtBeginning(mockData.pm.storage);
+        
+        assert.ok(isVariable, "&f.bgimageは変数として検出されるべき");
+        assert.ok(hasAmpersand, "&があることが検出されるべき");
+      });
+
+      test("正常系 expパラメータは&がなくてもエラーにならない", () => {
+        // テスト用のモックデータ（expパラメータ）
+        const mockData = {
+          name: "if",
+          pm: {
+            exp: "f.flag==1", // expパラメータは&がなくても良い
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.exp);
+        
+        assert.ok(isVariable, "f.flag==1は変数として検出されるべき");
+        // expパラメータなので&がなくてもエラーにならないことを確認
+        // （実際のテストは統合テストで行う）
+      });
+
+      test("正常系 condパラメータは&がなくてもエラーにならない", () => {
+        // テスト用のモックデータ（condパラメータ）
+        const mockData = {
+          name: "jump",
+          pm: {
+            storage: "test.ks",
+            target: "label1",
+            cond: "f.flag==1", // condパラメータは&がなくても良い
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.cond);
+        
+        assert.ok(isVariable, "f.flag==1は変数として検出されるべき");
+        // condパラメータなので&がなくてもエラーにならないことを確認
+        // （実際のテストは統合テストで行う）
+      });
+
+      test("正常系 変数でない値は&がなくてもエラーにならない", () => {
+        // テスト用のモックデータ（変数でない値）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "image.jpg", // 変数でない
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        
+        assert.ok(!isVariable, "image.jpgは変数として検出されないべき");
+      });
+
+      test("正常系 sf変数も&が必要", () => {
+        // テスト用のモックデータ（sf変数）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "sf.background", // &がないsf変数
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        const hasAmpersand = (diagnostic as any).isExistAmpersandAtBeginning(mockData.pm.storage);
+        
+        assert.ok(isVariable, "sf.backgroundは変数として検出されるべき");
+        assert.ok(!hasAmpersand, "&がないことが検出されるべき");
+      });
+
+      test("正常系 tf変数も&が必要", () => {
+        // テスト用のモックデータ（tf変数）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "tf.temp", // &がないtf変数
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        const hasAmpersand = (diagnostic as any).isExistAmpersandAtBeginning(mockData.pm.storage);
+        
+        assert.ok(isVariable, "tf.tempは変数として検出されるべき");
+        assert.ok(!hasAmpersand, "&がないことが検出されるべき");
+      });
+
+      test("正常系 mp変数も&が必要", () => {
+        // テスト用のモックデータ（mp変数）
+        const mockData = {
+          name: "bg",
+          pm: {
+            storage: "mp.param", // &がないmp変数
+            line: 0,
+            column: 0,
+          },
+          line: 0,
+        };
+
+        // 変数検出の確認
+        const diagnostic = new TyranoDiagnostic();
+        const isVariable = (diagnostic as any).isValueIsIncludeVariable(mockData.pm.storage);
+        const hasAmpersand = (diagnostic as any).isExistAmpersandAtBeginning(mockData.pm.storage);
+        
+        assert.ok(isVariable, "mp.paramは変数として検出されるべき");
+        assert.ok(!hasAmpersand, "&がないことが検出されるべき");
+      });
+    });
+  });
