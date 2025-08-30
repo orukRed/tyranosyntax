@@ -1122,7 +1122,8 @@ export class TyranoDiagnostic {
     }
 
     const tagName = data["name"];
-    if (!tagName) {
+    // タグ名が存在しない、またはtext/commentの場合はスキップ
+    if (!tagName || tagName === "text" || tagName === "comment") {
       return;
     }
 
@@ -1132,10 +1133,22 @@ export class TyranoDiagnostic {
       return;
     }
 
-    // タグのパラメータをチェック
+    // タグのパラメータのみをチェック（text/commentは除外済み）
     for (const paramName in tagParameters) {
-      // expパラメータとcondパラメータは&がなくてもエラーにしない
-      if (paramName === "exp" || paramName === "cond") {
+      // exp,cond,preexpパラメータは&がなくてもエラーにしない
+      if (
+        paramName === "exp" ||
+        paramName === "cond" ||
+        paramName === "preexp"
+      ) {
+        continue;
+      }
+
+      //editタグのnameパラメータとdialogタグのnameパラメータはスキップ
+      if (
+        (tagName === "edit" && paramName === "name") ||
+        (tagName === "dialog" && paramName === "name")
+      ) {
         continue;
       }
 
@@ -1146,8 +1159,11 @@ export class TyranoDiagnostic {
 
       // 値が変数を含むかどうかをチェック
       if (this.isValueIsIncludeVariable(paramValue)) {
-        // &がない場合はエラー
-        if (!this.isExistAmpersandAtBeginning(paramValue)) {
+        // &も%もない場合はエラー
+        if (
+          !this.isExistAmpersandAtBeginning(paramValue) &&
+          this.isExistPercentAtBeginning(paramValue) === false
+        ) {
           // パラメータの位置を特定
           const range = this.getParameterRange(
             paramName,
@@ -1158,8 +1174,8 @@ export class TyranoDiagnostic {
 
           const diag = new vscode.Diagnostic(
             range,
-            `タグ[${tagName}]のパラメータ"${paramName}"で変数を使用する場合は、値の先頭に&を付ける必要があります。例: ${paramName}="&${paramValue}"`,
-            vscode.DiagnosticSeverity.Error,
+            `タグ[${tagName}]のパラメータ"${paramName}"で変数を使用する場合は値の先頭に&、もしくはマクロで渡された変数なら%を付ける必要があります。例: ${paramName}="&${paramValue}"`,
+            vscode.DiagnosticSeverity.Warning,
           );
 
           diagnostics.push(diag);

@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.12.0] 2025-08-30
+
+- 特定パラメータに変数を用いるとき、&がない場合にはエラーとしたい[issue#318](https://github.com/orukRed/tyranosyntax/issues/318)
+
 ## [1.11.1] 2025-08-23
 
 1.11.0で追加した`存在しないパラメータを指定したときにエラーを表示`にて、chara_layerタグでパラメータを追加したpartでエラーが発生してしまう問題を修正しました。
