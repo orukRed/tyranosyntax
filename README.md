@@ -246,7 +246,8 @@ f不要な場合、設定から`TyranoScript syntax.execute.diagnostic`の値を
     "labelName": true,
     "macroDuplicate": true,
     "undefinedParameter": true,
-    "parameterSpacing": true
+    "parameterSpacing": true,
+    "missingAmpersandInVariable": true
   }
 ```
 
