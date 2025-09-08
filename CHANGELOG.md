@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.12.1] 2025-09-08
+
+- readmeにofuseへのリンクを追加しました。
+
 ## [1.12.0] 2025-08-30
 
 - 特定パラメータに変数を用いるとき、&がない場合にはエラーとしたい[issue#318](https://github.com/orukRed/tyranosyntax/issues/318)
