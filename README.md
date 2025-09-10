@@ -4,6 +4,11 @@
 
 [ティラノスクリプト](https://tyrano.jp/)でのゲーム開発のサポートを行う拡張機能です。
 
+<a href="https://ofuse.me/orukred" target="_blank">
+  <img src="./ofuse_img/letter-fill.png" width="40">
+  <img src="./ofuse_img/logo-blue.png" width="180">
+</a>
+
 ## 使い方
 
 vscodeの`ファイル`→`フォルダーを開く`から、
