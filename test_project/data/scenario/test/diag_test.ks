@@ -25,8 +25,8 @@ sf.global_flag = true
 @emb exp="f.name"
 
 ; タグのパラメータ内での変数使用（エラーになるべき）
-[bg storage="f.background"]
-[image storage="sf.temp_image"]
+[bg cross="f.background" ]
+[image depth="sf.temp_image"]
 
 ; タグのパラメータ内での正しい変数使用（エラーにならないべき）
 [bg storage="&f.background"]

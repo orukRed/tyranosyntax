@@ -9,6 +9,15 @@
   <img src="./ofuse_img/logo-blue.png" width="180">
 </a>
 
+## バグ報告・要望
+
+バグ報告や機能追加の要望お待ちしております！
+以下のいずれかの方法で報告をお願いします。
+
+- [Googleフォームから報告](https://forms.gle/PnWAzHiN8MYKhUrG6)
+- [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
+- [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
+
 ## 使い方
 
 vscodeの`ファイル`→`フォルダーを開く`から、
@@ -413,15 +422,6 @@ Only Japanese and English are supported.
 
 変更点については以下のリンクをご確認ください。
 [CHANGELOG.md](CHANGELOG.md)
-
-## issues
-
-バグ報告や機能追加の要望お待ちしております！
-以下のいずれかの方法で報告をお願いします。
-
-- [Googleフォームから報告](https://forms.gle/PnWAzHiN8MYKhUrG6)
-- [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
-- [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
 ## アイコン提供
 

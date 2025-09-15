@@ -409,11 +409,6 @@ export class TyranoDiagnostic {
         }
         //タグが定義されていない場合
         if (!tyranoTag.includes(data["name"])) {
-          // ティラノビルダー固有のタグの場合はスキップ
-          if (this.tyranoBuilderSkipTags.includes(data["name"])) {
-            continue;
-          }
-          
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]); // 該当行からタグの定義場所(開始位置)探す
@@ -972,6 +967,10 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
+    //ティラノビルダーで定義されているタグ（マクロ）ならスキップ
+    if (this.tyranoBuilderSkipTags.includes(tagName)) {
+      return;
+    }
 
     // パラメータオブジェクトを取得
     const tagParameters = data["pm"];
@@ -1040,7 +1039,6 @@ export class TyranoDiagnostic {
         ) {
           continue;
         }
-        
         // パラメータの位置を特定
         const range = this.getParameterRange(
           paramName,
