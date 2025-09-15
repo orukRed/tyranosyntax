@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -237,6 +237,44 @@
             "type": "boolean",
             "default": "false",
             "description": "エラーなどが発生した場合、出力ウィンドウにログを出力します。（動作が重い場合、こちらのチェックを外すことで改善される可能性があります。）"
+          },
+          "TyranoScript syntax.tyranoBuilder.skipTags": {
+            "type": "array",
+            "default": [
+              "tb_show_message_window",
+              "tb_hide_message_window",
+              "_tb_system_call",
+              "tb_image_show",
+              "tb_image_hide",
+              "tb_ptext_show",
+              "tb_ptext_hide",
+              "tb_eval",
+              "tb_keyconfig",
+              "tb_start_tyrano_code",
+              "_tb_end_tyrano_code",
+              "tb_start_text",
+              "_tb_end_text",
+              "tb_chara_shake",
+              "tb_cg_image_button",
+              "tb_replay_image_button",
+              "tb_replay",
+              "tb_replay_start",
+              "tb_clear_images",
+              "tb_fuki_start",
+              "tb_fuki_stop",
+              "tb_lang_set"
+            ],
+            "description": "ティラノビルダー固有のタグのためスキップ可能なタグのリスト"
+          },
+          "TyranoScript syntax.tyranoBuilder.skipParameters": {
+            "type": "object",
+            "default": {
+              "playbgm": ["time", "fadein"],
+              "stopbgm": ["time", "fadeout"],
+              "playse": ["time", "fadein"],
+              "stopse": ["time", "fadeout"]
+            },
+            "description": "特定のタグに存在するティラノビルダー固有のパラメータのためスキップ可能なパラメータ"
           },
           "TyranoScript syntax.tag.parameter": {
             "type": "object",

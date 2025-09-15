@@ -49,6 +49,17 @@ export class TyranoDiagnostic {
     .getConfiguration()
     .get("TyranoScript syntax.tag.parameter")!;
 
+  //ティラノビルダー固有の設定を取得
+  private tyranoBuilderSkipTags: string[] = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tyranoBuilder.skipTags")!;
+
+  private tyranoBuilderSkipParameters: {
+    [tagName: string]: string[];
+  } = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tyranoBuilder.skipParameters")!;
+
   //基本タグを取得
 
   private _isDiagnosing: boolean = false;
@@ -956,6 +967,10 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
+    //ティラノビルダーで定義されているタグ（マクロ）ならスキップ
+    if (this.tyranoBuilderSkipTags.includes(tagName)) {
+      return;
+    }
 
     // パラメータオブジェクトを取得
     const tagParameters = data["pm"];
@@ -1017,6 +1032,13 @@ export class TyranoDiagnostic {
 
       // パラメータが定義されているかチェック
       if (!validParameterNames.includes(paramName)) {
+        // ティラノビルダー固有のパラメータの場合はスキップ
+        if (
+          this.tyranoBuilderSkipParameters[tagName] &&
+          this.tyranoBuilderSkipParameters[tagName].includes(paramName)
+        ) {
+          continue;
+        }
         // パラメータの位置を特定
         const range = this.getParameterRange(
           paramName,
