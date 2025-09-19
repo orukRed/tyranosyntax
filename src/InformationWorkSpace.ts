@@ -496,12 +496,11 @@ export class InformationWorkSpace {
                           path.node,
                           absoluteScenarioFilePath,
                         );
-                      if (nowObject.nestVariableData.length <= 0) {
-                        nowObject.nestVariableData = nestedObjects;
-                        that.variableMap
-                          .get(projectPath)
-                          ?.set(keyName, nowObject);
-                      }
+                      // Always update the nested variable data to ensure it's current
+                      nowObject.nestVariableData = nestedObjects;
+                      that.variableMap
+                        .get(projectPath)
+                        ?.set(keyName, nowObject);
                     }
                   } else {
                     // SpreadElementの場合の処理

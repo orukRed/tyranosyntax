@@ -621,5 +621,46 @@ suite("TyranoCompletionItemProvider", () => {
         assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
       }
     });
+
+    test("実際のシナリオテスト（f.another.prop2.）", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // テスト用のVariableDataを作成
+      // f.another = { prop1: "value1", prop2: { nested: "deeply" } }
+      // findVariableObjectは"another"を返すので、anotherVariableを直接渡す
+      const nestedVariable = new VariableData("nested", "deeply", undefined, "string");
+      const prop1Variable = new VariableData("prop1", "value1", undefined, "string");
+      const prop2Variable = new VariableData("prop2", undefined, undefined, "object", "", [nestedVariable]);
+      const anotherVariable = new VariableData("another", undefined, undefined, "object", "", [prop1Variable, prop2Variable]);
+
+      // splitVariableはf.another.prop2.を想定（pop()後は["f", "another", "prop2"]になる）
+      const splitVariable = ["f", "another", "prop2"];
+
+      try {
+        const result = await providerAny.completionNestVariable(anotherVariable, splitVariable);
+
+        if (result && Array.isArray(result)) {
+          const labels = result.map((item: any) => item.label);
+          
+          // prop2オブジェクトのプロパティ（nested）が補完候補に含まれることを確認
+          assert.ok(
+            labels.includes("nested"),
+            "nestedが補完候補に含まれるべき",
+          );
+          
+          // 想定している補完候補の数を確認
+          assert.strictEqual(
+            labels.length,
+            1,
+            "補完候補の数は1つであるべき",
+          );
+        } else {
+          assert.fail("f.another.prop2.でも補完候補が返されるべき");
+        }
+      } catch (error) {
+        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
+      }
+    });
   });
 });
