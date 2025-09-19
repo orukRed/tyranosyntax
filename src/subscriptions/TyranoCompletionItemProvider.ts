@@ -482,18 +482,30 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       splitVariable[0] = splitVariable[0].substring(1);
     }
     
-    //f.hogeのようなパターンの場合は、ループで処理する
     if (splitVariable.length < 2) {
       return completions;
     }
     
     let sentence = `${splitVariable[0]}.${splitVariable[1]}`;
 
-    //f.hoge.fooなら以下のようになるので1から始める
-    //0:f
-    //1:hoge
-    //2:foo
-    for (let i = 1; i < splitVariable.length; i++) {
+    // variableObjectは既にfindVariableObjectで見つかった対象のオブジェクト
+    // f.hoge.の場合、variableObjectは"hoge"オブジェクト、splitVariableは["f", "hoge"]
+    if (splitVariable.length === 2) {
+      // 直接variableObjectの子要素を返す
+      variableObject.nestVariableData.forEach((value) => {
+        const comp = new vscode.CompletionItem(`${value.name}`);
+        comp.filterText = `${sentence}.${value.name}`;
+        comp.kind = vscode.CompletionItemKind.Variable;
+        comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
+        comp.detail = `${sentence}.${value.name}`;
+        completions.push(comp);
+      });
+      return completions;
+    }
+
+    // 3階層以上の場合（f.hoge.foo.など）
+    // splitVariable[2]以降をnavigateする
+    for (let i = 2; i < splitVariable.length; i++) {
       const temp = variableObject.nestVariableData.find(
         (value) => value.name === splitVariable[i],
       );

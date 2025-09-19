@@ -513,16 +513,16 @@ suite("TyranoCompletionItemProvider", () => {
 
       // テスト用のVariableDataを作成
       // f.hoge = {foo: "bar", baz: "qux"}
+      // findVariableObjectは"hoge"を返すので、hogeVariableを直接渡す
       const fooVariable = new VariableData("foo", "bar", undefined, "string");
       const bazVariable = new VariableData("baz", "qux", undefined, "string");
       const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable, bazVariable]);
-      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable]);
 
       // splitVariableはf.hoge.を想定（pop()後は["f", "hoge"]になる）
       const splitVariable = ["f", "hoge"];
 
       try {
-        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
+        const result = await providerAny.completionNestVariable(hogeVariable, splitVariable);
 
         if (result && Array.isArray(result)) {
           const labels = result.map((item: any) => item.label);
@@ -551,56 +551,23 @@ suite("TyranoCompletionItemProvider", () => {
       }
     });
 
-    test("ネストレベル1の補完テスト（f.）", async () => {
-      const provider = new TyranoCompletionItemProvider();
-      const providerAny = provider as any;
-
-      // テスト用のVariableDataを作成
-      // f = {hoge: {foo: "bar"}, test: "value"}
-      const fooVariable = new VariableData("foo", "bar", undefined, "string");
-      const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable]);
-      const testVariable = new VariableData("test", "value", undefined, "string");
-      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable, testVariable]);
-
-      // splitVariableはf.を想定（pop()後は["f"]になる）
-      const splitVariable = ["f"];
-
-      try {
-        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
-
-        // splitVariable.length < 2の場合、現在のロジックではreturn completions;が実行される
-        // （空の配列が返される想定）
-        if (result && Array.isArray(result)) {
-          assert.strictEqual(
-            result.length,
-            0,
-            "splitVariable.length < 2の場合は空の配列が返されるべき",
-          );
-        } else {
-          assert.ok(true, "null/undefinedが返されるのも正常");
-        }
-      } catch (error) {
-        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
-      }
-    });
-
     test("深いネストレベルの補完テスト（f.hoge.foo.）", async () => {
       const provider = new TyranoCompletionItemProvider();
       const providerAny = provider as any;
 
       // テスト用のVariableDataを作成
-      // f.hoge.foo = {deep: "value", another: "test"}
+      // f.hoge = {foo: {deep: "value", another: "test"}}
+      // findVariableObjectは"hoge"を返すので、hogeVariableを直接渡す
       const deepVariable = new VariableData("deep", "value", undefined, "string");
       const anotherVariable = new VariableData("another", "test", undefined, "string");
       const fooVariable = new VariableData("foo", undefined, undefined, "object", "", [deepVariable, anotherVariable]);
       const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable]);
-      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable]);
 
       // splitVariableはf.hoge.foo.を想定（pop()後は["f", "hoge", "foo"]になる）
       const splitVariable = ["f", "hoge", "foo"];
 
       try {
-        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
+        const result = await providerAny.completionNestVariable(hogeVariable, splitVariable);
 
         if (result && Array.isArray(result)) {
           const labels = result.map((item: any) => item.label);
@@ -623,6 +590,32 @@ suite("TyranoCompletionItemProvider", () => {
           );
         } else {
           assert.fail("深いネストレベルでも補完候補が返されるべき");
+        }
+      } catch (error) {
+        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
+      }
+    });
+
+    test("ネストレベル1の補完テスト（f.）", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // splitVariableはf.を想定（pop()後は["f"]になる）
+      const splitVariable = ["f"];
+      const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", []);
+
+      try {
+        const result = await providerAny.completionNestVariable(hogeVariable, splitVariable);
+
+        // splitVariable.length < 2の場合、空の配列が返される想定
+        if (result && Array.isArray(result)) {
+          assert.strictEqual(
+            result.length,
+            0,
+            "splitVariable.length < 2の場合は空の配列が返されるべき",
+          );
+        } else {
+          assert.ok(true, "null/undefinedが返されるのも正常");
         }
       } catch (error) {
         assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
