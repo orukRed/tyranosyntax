@@ -27,6 +27,11 @@ import {
   IscriptHoverProvider, 
   IscriptSignatureHelpProvider 
 } from "./subscriptions/IscriptLanguageProvider";
+import { 
+  IscriptLanguageModeProvider,
+  IscriptLanguageModeManager,
+  IscriptJavaScriptFeaturesProvider
+} from "./subscriptions/IscriptLanguageModeProvider";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -118,7 +123,21 @@ export function activate(context: ExtensionContext) {
           const iscriptHoverProvider = new IscriptHoverProvider();
           const iscriptSignatureHelpProvider = new IscriptSignatureHelpProvider();
 
-          // Register JavaScript-style completion provider for iscript blocks
+          // NEW: Language Mode Switching System (similar to HTML with <script> tags)
+          const languageModeProvider = new IscriptLanguageModeProvider();
+          const languageModeManager = new IscriptLanguageModeManager();
+          const jsFeaturesProvider = new IscriptJavaScriptFeaturesProvider(languageModeManager);
+
+          // Register semantic tokens provider for language mode detection
+          context.subscriptions.push(
+            vscode.languages.registerDocumentSemanticTokensProvider(
+              TYRANO_MODE,
+              languageModeProvider,
+              IscriptLanguageModeProvider.getLegend()
+            )
+          );
+
+          // Register original JavaScript-style completion provider for iscript blocks
           context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
               TYRANO_MODE,
@@ -145,6 +164,24 @@ export function activate(context: ExtensionContext) {
             ),
           );
 
+          // Register a custom command to manually toggle language mode
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyranosyntax.toggleLanguageMode",
+              () => {
+                const editor = vscode.window.activeTextEditor;
+                if (editor && editor.document.languageId === "tyrano") {
+                  const currentMode = languageModeManager.getCurrentMode();
+                  const newMode = currentMode === 'javascript' ? 'tyrano' : 'javascript';
+                  
+                  vscode.window.showInformationMessage(
+                    `Language mode switched to: ${newMode === 'javascript' ? 'JavaScript' : 'TyranoScript'}`
+                  );
+                }
+              }
+            )
+          );
+
           // Register a custom comment toggle command for TyranoScript files
           context.subscriptions.push(
             vscode.commands.registerCommand(
@@ -167,6 +204,10 @@ export function activate(context: ExtensionContext) {
               },
             ),
           );
+
+          // Register disposables for cleanup
+          context.subscriptions.push(languageModeManager);
+          context.subscriptions.push(jsFeaturesProvider);
 
           TyranoLogger.print("IscriptLanguageProviders activate");
 
