@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { IscriptDetector } from "./IscriptDetector";
+import { MicrosoftJavaScriptTokens } from "./MicrosoftJavaScriptTokens";
 
 /**
  * Provides JavaScript-style comment toggling for iscript blocks
@@ -97,143 +98,72 @@ export class IscriptCommentProvider {
 }
 
 /**
- * Provides JavaScript-style completion for iscript blocks
+ * Provides JavaScript-style completion for iscript blocks using Microsoft's JavaScript tokens
  */
 export class IscriptCompletionProvider implements vscode.CompletionItemProvider {
   private iscriptDetector: IscriptDetector;
+  private microsoftJsTokens: MicrosoftJavaScriptTokens;
 
   constructor() {
     this.iscriptDetector = IscriptDetector.getInstance();
+    this.microsoftJsTokens = MicrosoftJavaScriptTokens.getInstance();
   }
 
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
-    _context: vscode.CompletionContext,
+    context: vscode.CompletionContext,
   ): Promise<vscode.CompletionItem[]> {
     // Only provide JavaScript completions inside iscript blocks
     if (!this.iscriptDetector.isInsideIscriptBlock(document, position)) {
       return [];
     }
 
-    // Get JavaScript completions by delegating to the JavaScript language service
+    // Get iscript content for Microsoft's language service
     const iscriptContent = this.iscriptDetector.getIscriptContent(document, position);
     if (!iscriptContent) {
       return [];
     }
 
-    // Create a virtual JavaScript document and get completions from it
-    const jsCompletions = await this.getJavaScriptCompletions(document, position, iscriptContent);
-    
-    // Add TyranoScript-specific completions for iscript blocks
-    const tyranoCompletions = this.getTyranoScriptCompletions();
-    
-    return [...jsCompletions, ...tyranoCompletions];
+    try {
+      // Use Microsoft's JavaScript tokens and language service
+      const microsoftCompletions = await this.microsoftJsTokens.getJavaScriptCompletions(
+        document,
+        position,
+        iscriptContent,
+        context
+      );
+
+      // Add context-aware completions for object methods
+      const contextCompletions = this.getContextAwareCompletions(document, position);
+      
+      // Add TyranoScript-specific completions
+      const tyranoCompletions = this.getTyranoScriptCompletions();
+      
+      return [...microsoftCompletions, ...contextCompletions, ...tyranoCompletions];
+    } catch (error) {
+      console.error('Error getting Microsoft JavaScript completions:', error);
+      // Fallback to basic completions
+      return this.getTyranoScriptCompletions();
+    }
   }
 
-  private async getJavaScriptCompletions(
+  private getContextAwareCompletions(
     document: vscode.TextDocument,
-    position: vscode.Position,
-    _iscriptContent: string,
-  ): Promise<vscode.CompletionItem[]> {
-    const completions: vscode.CompletionItem[] = [];
-
-    // Common JavaScript globals and methods
-    const jsGlobals = [
-      { name: 'console', detail: 'Console object for logging' },
-      { name: 'window', detail: 'Window object' },
-      { name: 'document', detail: 'Document object' },
-      { name: 'alert', detail: 'Display alert dialog' },
-      { name: 'setTimeout', detail: 'Execute function after delay' },
-      { name: 'setInterval', detail: 'Execute function repeatedly' },
-      { name: 'clearTimeout', detail: 'Clear timeout' },
-      { name: 'clearInterval', detail: 'Clear interval' },
-      { name: 'JSON', detail: 'JSON utility object' },
-      { name: 'Math', detail: 'Mathematical functions and constants' },
-      { name: 'Date', detail: 'Date constructor' },
-      { name: 'Array', detail: 'Array constructor' },
-      { name: 'Object', detail: 'Object constructor' },
-      { name: 'String', detail: 'String constructor' },
-      { name: 'Number', detail: 'Number constructor' },
-      { name: 'Boolean', detail: 'Boolean constructor' },
-      { name: 'parseInt', detail: 'Parse string to integer' },
-      { name: 'parseFloat', detail: 'Parse string to float' },
-      { name: 'isNaN', detail: 'Check if value is NaN' },
-      { name: 'isFinite', detail: 'Check if value is finite' },
-    ];
-
-    // Get current line to provide context-aware completions
-    const currentLine = document.lineAt(position.line).text;
-    const beforeCursor = currentLine.substring(0, position.character);
-
-    for (const global of jsGlobals) {
-      const item = new vscode.CompletionItem(global.name, vscode.CompletionItemKind.Function);
-      item.detail = global.detail;
-      item.documentation = new vscode.MarkdownString(`**${global.name}**\n\n${global.detail}`);
-      
-      // Add specific snippets for common functions
-      if (global.name === 'console') {
-        item.insertText = new vscode.SnippetString('console.log($1)');
-        item.kind = vscode.CompletionItemKind.Snippet;
-      } else if (global.name === 'setTimeout') {
-        item.insertText = new vscode.SnippetString('setTimeout(function() {\n\t$1\n}, $2)');
-        item.kind = vscode.CompletionItemKind.Snippet;
-      } else if (global.name === 'alert') {
-        item.insertText = new vscode.SnippetString('alert("$1")');
-        item.kind = vscode.CompletionItemKind.Snippet;
-      }
-
-      completions.push(item);
+    position: vscode.Position
+  ): vscode.CompletionItem[] {
+    const line = document.lineAt(position.line).text;
+    const beforeCursor = line.substring(0, position.character);
+    
+    // Check for object method completions (console., Math., JSON., etc.)
+    const objectMatch = beforeCursor.match(/(\w+)\.$/);
+    if (objectMatch) {
+      const objectName = objectMatch[1];
+      return this.microsoftJsTokens.getObjectMethodCompletions(objectName);
     }
 
-    // Add JavaScript keywords
-    const jsKeywords = [
-      'var', 'let', 'const', 'function', 'return', 'if', 'else', 'for', 'while', 
-      'do', 'switch', 'case', 'default', 'break', 'continue', 'try', 'catch', 
-      'finally', 'throw', 'typeof', 'instanceof', 'new', 'this', 'true', 'false', 
-      'null', 'undefined'
-    ];
-
-    for (const keyword of jsKeywords) {
-      const item = new vscode.CompletionItem(keyword, vscode.CompletionItemKind.Keyword);
-      item.detail = `JavaScript keyword: ${keyword}`;
-      completions.push(item);
-    }
-
-    // Context-aware completions
-    if (beforeCursor.includes('console.')) {
-      const consoleMethods = [
-        { name: 'log', snippet: 'log($1)' },
-        { name: 'error', snippet: 'error($1)' },
-        { name: 'warn', snippet: 'warn($1)' },
-        { name: 'info', snippet: 'info($1)' },
-        { name: 'debug', snippet: 'debug($1)' },
-        { name: 'trace', snippet: 'trace($1)' },
-      ];
-
-      for (const method of consoleMethods) {
-        const item = new vscode.CompletionItem(method.name, vscode.CompletionItemKind.Method);
-        item.insertText = new vscode.SnippetString(method.snippet);
-        item.detail = `console.${method.name}()`;
-        completions.push(item);
-      }
-    }
-
-    if (beforeCursor.includes('Math.')) {
-      const mathMethods = [
-        'abs', 'ceil', 'floor', 'round', 'max', 'min', 'random', 'sqrt', 
-        'pow', 'sin', 'cos', 'tan', 'PI', 'E'
-      ];
-
-      for (const method of mathMethods) {
-        const item = new vscode.CompletionItem(method, vscode.CompletionItemKind.Property);
-        item.detail = `Math.${method}`;
-        completions.push(item);
-      }
-    }
-
-    return completions;
+    return [];
   }
 
   private getTyranoScriptCompletions(): vscode.CompletionItem[] {
@@ -241,10 +171,10 @@ export class IscriptCompletionProvider implements vscode.CompletionItemProvider 
 
     // TyranoScript specific variables and functions available in iscript
     const tyranoItems = [
-      { name: 'f', detail: 'TyranoScript game variables', kind: vscode.CompletionItemKind.Variable },
-      { name: 'sf', detail: 'TyranoScript system variables', kind: vscode.CompletionItemKind.Variable },
-      { name: 'tf', detail: 'TyranoScript temporary variables', kind: vscode.CompletionItemKind.Variable },
-      { name: 'mp', detail: 'TyranoScript macro parameters', kind: vscode.CompletionItemKind.Variable },
+      { name: 'f', detail: 'TyranoScript game variables - persistent across saves', kind: vscode.CompletionItemKind.Variable },
+      { name: 'sf', detail: 'TyranoScript system variables - persistent across different games', kind: vscode.CompletionItemKind.Variable },
+      { name: 'tf', detail: 'TyranoScript temporary variables - cleared when script ends', kind: vscode.CompletionItemKind.Variable },
+      { name: 'mp', detail: 'TyranoScript macro parameters - values passed to macros', kind: vscode.CompletionItemKind.Variable },
       { name: 'TYRANO', detail: 'TyranoScript engine object', kind: vscode.CompletionItemKind.Class },
     ];
 
@@ -260,34 +190,56 @@ export class IscriptCompletionProvider implements vscode.CompletionItemProvider 
 }
 
 /**
- * Provides JavaScript-style hover information for iscript blocks
+ * Provides JavaScript-style hover information for iscript blocks using Microsoft's tokens
  */
 export class IscriptHoverProvider implements vscode.HoverProvider {
   private iscriptDetector: IscriptDetector;
+  private microsoftJsTokens: MicrosoftJavaScriptTokens;
 
   constructor() {
     this.iscriptDetector = IscriptDetector.getInstance();
+    this.microsoftJsTokens = MicrosoftJavaScriptTokens.getInstance();
   }
 
-  provideHover(
+  async provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.Hover> {
+  ): Promise<vscode.Hover | null> {
     // Only provide JavaScript hover inside iscript blocks
     if (!this.iscriptDetector.isInsideIscriptBlock(document, position)) {
       return null;
     }
 
+    const iscriptContent = this.iscriptDetector.getIscriptContent(document, position);
+    if (!iscriptContent) {
+      return null;
+    }
+
+    try {
+      // Use Microsoft's JavaScript hover service
+      const microsoftHover = await this.microsoftJsTokens.getJavaScriptHover(
+        document,
+        position,
+        iscriptContent
+      );
+
+      if (microsoftHover) {
+        return microsoftHover;
+      }
+    } catch (error) {
+      console.error('Error getting Microsoft JavaScript hover:', error);
+    }
+
+    // Fallback to basic hover information
     const range = document.getWordRangeAtPosition(position);
     if (!range) {
       return null;
     }
 
     const word = document.getText(range);
+    const hoverInfo = this.getBasicHoverInfo(word);
     
-    // Provide hover information for JavaScript globals and TyranoScript variables
-    const hoverInfo = this.getHoverInfo(word);
     if (hoverInfo) {
       return new vscode.Hover(hoverInfo, range);
     }
@@ -295,17 +247,17 @@ export class IscriptHoverProvider implements vscode.HoverProvider {
     return null;
   }
 
-  private getHoverInfo(word: string): vscode.MarkdownString | null {
+  private getBasicHoverInfo(word: string): vscode.MarkdownString | null {
     const jsHoverMap: { [key: string]: string } = {
-      'console': '**console**: Object that provides access to the debugging console',
-      'alert': '**alert(message)**: Displays an alert dialog with the specified message',
-      'setTimeout': '**setTimeout(callback, delay)**: Executes a function after a specified delay',
-      'setInterval': '**setInterval(callback, interval)**: Repeatedly executes a function at specified intervals',
-      'Math': '**Math**: Object that provides mathematical functions and constants',
-      'JSON': '**JSON**: Object for parsing and stringifying JSON data',
-      'Date': '**Date**: Constructor for creating date objects',
-      'Array': '**Array**: Constructor for creating arrays',
-      'Object': '**Object**: Constructor for creating objects',
+      'console': '**console**: Object that provides access to the debugging console (Microsoft JavaScript)',
+      'alert': '**alert(message)**: Displays an alert dialog with the specified message (Microsoft JavaScript)',
+      'setTimeout': '**setTimeout(callback, delay)**: Executes a function after a specified delay (Microsoft JavaScript)',
+      'setInterval': '**setInterval(callback, interval)**: Repeatedly executes a function at specified intervals (Microsoft JavaScript)',
+      'Math': '**Math**: Object that provides mathematical functions and constants (Microsoft JavaScript)',
+      'JSON': '**JSON**: Object for parsing and stringifying JSON data (Microsoft JavaScript)',
+      'Date': '**Date**: Constructor for creating date objects (Microsoft JavaScript)',
+      'Array': '**Array**: Constructor for creating arrays (Microsoft JavaScript)',
+      'Object': '**Object**: Constructor for creating objects (Microsoft JavaScript)',
       'f': '**f**: TyranoScript game variables - persistent across saves',
       'sf': '**sf**: TyranoScript system variables - persistent across different games',
       'tf': '**tf**: TyranoScript temporary variables - cleared when script ends',
@@ -322,26 +274,57 @@ export class IscriptHoverProvider implements vscode.HoverProvider {
 }
 
 /**
- * Provides JavaScript-style signature help for iscript blocks
+ * Provides JavaScript-style signature help for iscript blocks using Microsoft's tokens
  */
 export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvider {
   private iscriptDetector: IscriptDetector;
+  private microsoftJsTokens: MicrosoftJavaScriptTokens;
 
   constructor() {
     this.iscriptDetector = IscriptDetector.getInstance();
+    this.microsoftJsTokens = MicrosoftJavaScriptTokens.getInstance();
   }
 
-  provideSignatureHelp(
+  async provideSignatureHelp(
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
-    _context: vscode.SignatureHelpContext,
-  ): vscode.ProviderResult<vscode.SignatureHelp> {
+    context: vscode.SignatureHelpContext,
+  ): Promise<vscode.SignatureHelp | null> {
     // Only provide signature help inside iscript blocks
     if (!this.iscriptDetector.isInsideIscriptBlock(document, position)) {
       return null;
     }
 
+    const iscriptContent = this.iscriptDetector.getIscriptContent(document, position);
+    if (!iscriptContent) {
+      return null;
+    }
+
+    try {
+      // Use Microsoft's JavaScript signature help service
+      const microsoftSignatureHelp = await this.microsoftJsTokens.getJavaScriptSignatureHelp(
+        document,
+        position,
+        iscriptContent,
+        context
+      );
+
+      if (microsoftSignatureHelp) {
+        return microsoftSignatureHelp;
+      }
+    } catch (error) {
+      console.error('Error getting Microsoft JavaScript signature help:', error);
+    }
+
+    // Fallback to basic signature help
+    return this.getBasicSignatureHelp(document, position);
+  }
+
+  private getBasicSignatureHelp(
+    document: vscode.TextDocument,
+    position: vscode.Position
+  ): vscode.SignatureHelp | null {
     const line = document.lineAt(position.line).text;
     const beforeCursor = line.substring(0, position.character);
     
@@ -352,7 +335,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
     }
 
     const functionName = match[1];
-    const signatureInfo = this.getSignatureInfo(functionName);
+    const signatureInfo = this.getBasicSignatureInfo(functionName);
     
     if (signatureInfo) {
       const signature = new vscode.SignatureInformation(signatureInfo.label, signatureInfo.documentation);
@@ -364,7 +347,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
       const help = new vscode.SignatureHelp();
       help.signatures = [signature];
       help.activeSignature = 0;
-      help.activeParameter = 0; // Could be improved to detect current parameter
+      help.activeParameter = 0;
       
       return help;
     }
@@ -372,7 +355,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
     return null;
   }
 
-  private getSignatureInfo(functionName: string): { 
+  private getBasicSignatureInfo(functionName: string): { 
     label: string; 
     documentation: string; 
     parameters: Array<{ label: string; documentation: string }> 
@@ -384,14 +367,14 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
     } } = {
       'alert': {
         label: 'alert(message: string): void',
-        documentation: 'Displays an alert dialog with the specified message',
+        documentation: 'Displays an alert dialog with the specified message (Microsoft JavaScript)',
         parameters: [
           { label: 'message', documentation: 'The message to display in the alert dialog' }
         ]
       },
       'setTimeout': {
         label: 'setTimeout(callback: function, delay: number): number',
-        documentation: 'Executes a function after a specified delay in milliseconds',
+        documentation: 'Executes a function after a specified delay in milliseconds (Microsoft JavaScript)',
         parameters: [
           { label: 'callback', documentation: 'The function to execute' },
           { label: 'delay', documentation: 'The delay in milliseconds' }
@@ -399,7 +382,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
       },
       'setInterval': {
         label: 'setInterval(callback: function, interval: number): number',
-        documentation: 'Repeatedly executes a function at specified intervals',
+        documentation: 'Repeatedly executes a function at specified intervals (Microsoft JavaScript)',
         parameters: [
           { label: 'callback', documentation: 'The function to execute' },
           { label: 'interval', documentation: 'The interval in milliseconds' }
@@ -407,7 +390,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
       },
       'parseInt': {
         label: 'parseInt(string: string, radix?: number): number',
-        documentation: 'Parses a string and returns an integer',
+        documentation: 'Parses a string and returns an integer (Microsoft JavaScript)',
         parameters: [
           { label: 'string', documentation: 'The string to parse' },
           { label: 'radix', documentation: 'Optional radix (base) for parsing' }
@@ -415,7 +398,7 @@ export class IscriptSignatureHelpProvider implements vscode.SignatureHelpProvide
       },
       'parseFloat': {
         label: 'parseFloat(string: string): number',
-        documentation: 'Parses a string and returns a floating point number',
+        documentation: 'Parses a string and returns a floating point number (Microsoft JavaScript)',
         parameters: [
           { label: 'string', documentation: 'The string to parse' }
         ]
