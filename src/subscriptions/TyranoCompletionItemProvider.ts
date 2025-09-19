@@ -481,34 +481,19 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
     if (splitVariable[0].startsWith("&")) {
       splitVariable[0] = splitVariable[0].substring(1);
     }
-    let sentence = `${splitVariable[0]}.${splitVariable[1]}`;
-
-    //f.hogeのようなパターンの場合
-    if (splitVariable.length === 2) {
-      // 最後の要素（例：hoge）に対応するネストされたオブジェクトを探す
-      const targetNestVariable = variableObject.nestVariableData.find(
-        (value) => value.name === splitVariable[1]
-      );
-      
-      if (targetNestVariable) {
-        // 見つかったネストオブジェクトの子要素を補完候補として提供
-        targetNestVariable.nestVariableData.forEach((value) => {
-          const comp = new vscode.CompletionItem(`${value.name}`);
-          comp.filterText = `${sentence}.${value.name}`;
-          comp.kind = vscode.CompletionItemKind.Variable;
-          comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
-          comp.detail = `${sentence}.${value.name}`;
-          completions.push(comp);
-        });
-      }
+    
+    //f.hogeのようなパターンの場合は、ループで処理する
+    if (splitVariable.length < 2) {
       return completions;
     }
+    
+    let sentence = `${splitVariable[0]}.${splitVariable[1]}`;
 
     //f.hoge.fooなら以下のようになるので1から始める
     //0:f
     //1:hoge
     //2:foo
-    for (let i = 2; i < splitVariable.length; i++) {
+    for (let i = 1; i < splitVariable.length; i++) {
       const temp = variableObject.nestVariableData.find(
         (value) => value.name === splitVariable[i],
       );

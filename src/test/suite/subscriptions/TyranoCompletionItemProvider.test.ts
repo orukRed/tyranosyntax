@@ -568,16 +568,61 @@ suite("TyranoCompletionItemProvider", () => {
       try {
         const result = await providerAny.completionNestVariable(fVariable, splitVariable);
 
-        // splitVariable.length === 1の場合、現在のロジックではreturn completions;が実行される
+        // splitVariable.length < 2の場合、現在のロジックではreturn completions;が実行される
         // （空の配列が返される想定）
         if (result && Array.isArray(result)) {
           assert.strictEqual(
             result.length,
             0,
-            "splitVariable.length === 1の場合は空の配列が返されるべき",
+            "splitVariable.length < 2の場合は空の配列が返されるべき",
           );
         } else {
           assert.ok(true, "null/undefinedが返されるのも正常");
+        }
+      } catch (error) {
+        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
+      }
+    });
+
+    test("深いネストレベルの補完テスト（f.hoge.foo.）", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // テスト用のVariableDataを作成
+      // f.hoge.foo = {deep: "value", another: "test"}
+      const deepVariable = new VariableData("deep", "value", undefined, "string");
+      const anotherVariable = new VariableData("another", "test", undefined, "string");
+      const fooVariable = new VariableData("foo", undefined, undefined, "object", "", [deepVariable, anotherVariable]);
+      const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable]);
+      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable]);
+
+      // splitVariableはf.hoge.foo.を想定（pop()後は["f", "hoge", "foo"]になる）
+      const splitVariable = ["f", "hoge", "foo"];
+
+      try {
+        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
+
+        if (result && Array.isArray(result)) {
+          const labels = result.map((item: any) => item.label);
+          
+          // fooオブジェクトのプロパティ（deep, another）が補完候補に含まれることを確認
+          assert.ok(
+            labels.includes("deep"),
+            "deepが補完候補に含まれるべき",
+          );
+          assert.ok(
+            labels.includes("another"),
+            "anotherが補完候補に含まれるべき",
+          );
+          
+          // 想定している補完候補の数を確認
+          assert.strictEqual(
+            labels.length,
+            2,
+            "補完候補の数は2つであるべき",
+          );
+        } else {
+          assert.fail("深いネストレベルでも補完候補が返されるべき");
         }
       } catch (error) {
         assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
