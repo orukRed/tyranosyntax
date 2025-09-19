@@ -4,6 +4,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { TyranoCompletionItemProvider } from "../../../subscriptions/TyranoCompletionItemProvider";
+import { VariableData } from "../../../defineData/VariableData";
 // import * as path from "path";
 
 // // 新しく追加した型定義のテスト用
@@ -501,6 +502,85 @@ suite("TyranoCompletionItemProvider", () => {
           error instanceof Error,
           "エラーが発生する場合はErrorインスタンスであるべき",
         );
+      }
+    });
+  });
+
+  suite("completionNestVariable", () => {
+    test("ネストしたオブジェクトの補完テスト", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // テスト用のVariableDataを作成
+      // f.hoge = {foo: "bar", baz: "qux"}
+      const fooVariable = new VariableData("foo", "bar", undefined, "string");
+      const bazVariable = new VariableData("baz", "qux", undefined, "string");
+      const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable, bazVariable]);
+      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable]);
+
+      // splitVariableはf.hoge.を想定（pop()後は["f", "hoge"]になる）
+      const splitVariable = ["f", "hoge"];
+
+      try {
+        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
+
+        if (result && Array.isArray(result)) {
+          const labels = result.map((item: any) => item.label);
+          
+          // hogeオブジェクトのプロパティ（foo, baz）が補完候補に含まれることを確認
+          assert.ok(
+            labels.includes("foo"),
+            "fooが補完候補に含まれるべき",
+          );
+          assert.ok(
+            labels.includes("baz"),
+            "bazが補完候補に含まれるべき",
+          );
+          
+          // 想定している補完候補の数を確認
+          assert.strictEqual(
+            labels.length,
+            2,
+            "補完候補の数は2つであるべき",
+          );
+        } else {
+          assert.fail("補完候補が返されていません");
+        }
+      } catch (error) {
+        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
+      }
+    });
+
+    test("ネストレベル1の補完テスト（f.）", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // テスト用のVariableDataを作成
+      // f = {hoge: {foo: "bar"}, test: "value"}
+      const fooVariable = new VariableData("foo", "bar", undefined, "string");
+      const hogeVariable = new VariableData("hoge", undefined, undefined, "object", "", [fooVariable]);
+      const testVariable = new VariableData("test", "value", undefined, "string");
+      const fVariable = new VariableData("f", undefined, "f", "object", "", [hogeVariable, testVariable]);
+
+      // splitVariableはf.を想定（pop()後は["f"]になる）
+      const splitVariable = ["f"];
+
+      try {
+        const result = await providerAny.completionNestVariable(fVariable, splitVariable);
+
+        // splitVariable.length === 1の場合、現在のロジックではreturn completions;が実行される
+        // （空の配列が返される想定）
+        if (result && Array.isArray(result)) {
+          assert.strictEqual(
+            result.length,
+            0,
+            "splitVariable.length === 1の場合は空の配列が返されるべき",
+          );
+        } else {
+          assert.ok(true, "null/undefinedが返されるのも正常");
+        }
+      } catch (error) {
+        assert.fail(`テスト実行中にエラーが発生しました: ${error}`);
       }
     });
   });

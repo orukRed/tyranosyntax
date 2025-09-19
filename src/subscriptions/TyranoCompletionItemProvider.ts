@@ -485,14 +485,22 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
 
     //f.hogeのようなパターンの場合
     if (splitVariable.length === 2) {
-      variableObject.nestVariableData.forEach((value) => {
-        const comp = new vscode.CompletionItem(`${value.name}`);
-        comp.filterText = `${sentence}.${value.name}`;
-        comp.kind = vscode.CompletionItemKind.Variable;
-        comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
-        comp.detail = `${sentence}.${value.name}`;
-        completions.push(comp);
-      });
+      // 最後の要素（例：hoge）に対応するネストされたオブジェクトを探す
+      const targetNestVariable = variableObject.nestVariableData.find(
+        (value) => value.name === splitVariable[1]
+      );
+      
+      if (targetNestVariable) {
+        // 見つかったネストオブジェクトの子要素を補完候補として提供
+        targetNestVariable.nestVariableData.forEach((value) => {
+          const comp = new vscode.CompletionItem(`${value.name}`);
+          comp.filterText = `${sentence}.${value.name}`;
+          comp.kind = vscode.CompletionItemKind.Variable;
+          comp.insertText = new vscode.SnippetString(`${sentence}.${value.name}`);
+          comp.detail = `${sentence}.${value.name}`;
+          completions.push(comp);
+        });
+      }
       return completions;
     }
 
