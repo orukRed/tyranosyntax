@@ -21,7 +21,12 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
-import { IscriptCommentProvider } from "./subscriptions/IscriptLanguageProvider";
+import { 
+  IscriptCommentProvider, 
+  IscriptCompletionProvider, 
+  IscriptHoverProvider, 
+  IscriptSignatureHelpProvider 
+} from "./subscriptions/IscriptLanguageProvider";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -109,6 +114,36 @@ export function activate(context: ExtensionContext) {
 
           // Register iscript language providers for JavaScript-like behavior
           const iscriptCommentProvider = new IscriptCommentProvider();
+          const iscriptCompletionProvider = new IscriptCompletionProvider();
+          const iscriptHoverProvider = new IscriptHoverProvider();
+          const iscriptSignatureHelpProvider = new IscriptSignatureHelpProvider();
+
+          // Register JavaScript-style completion provider for iscript blocks
+          context.subscriptions.push(
+            vscode.languages.registerCompletionItemProvider(
+              TYRANO_MODE,
+              iscriptCompletionProvider,
+              ".", // Trigger characters for JavaScript-style completions
+              " ",
+            ),
+          );
+
+          // Register JavaScript-style hover provider for iscript blocks
+          context.subscriptions.push(
+            vscode.languages.registerHoverProvider(
+              TYRANO_MODE,
+              iscriptHoverProvider,
+            ),
+          );
+
+          // Register JavaScript-style signature help provider for iscript blocks
+          context.subscriptions.push(
+            vscode.languages.registerSignatureHelpProvider(
+              TYRANO_MODE,
+              iscriptSignatureHelpProvider,
+              "(", ",", // Trigger characters for signature help
+            ),
+          );
 
           // Register a custom comment toggle command for TyranoScript files
           context.subscriptions.push(
