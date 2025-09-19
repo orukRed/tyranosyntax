@@ -21,6 +21,7 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
+import { IscriptCommentProvider, IscriptOnTypeFormattingProvider } from "./subscriptions/IscriptLanguageProvider";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -105,6 +106,27 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoCompletionItemProvider activate");
+
+          // Register iscript language providers for JavaScript-like behavior
+          const iscriptCommentProvider = new IscriptCommentProvider();
+          const iscriptOnTypeProvider = new IscriptOnTypeFormattingProvider();
+
+          context.subscriptions.push(
+            vscode.languages.registerOnTypeFormattingEditProvider(
+              TYRANO_MODE,
+              iscriptOnTypeProvider,
+              "{", "}", ";",
+            ),
+          );
+
+          // Override the default comment toggle command to be context-aware
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "editor.action.commentLine",
+              iscriptCommentProvider.toggleLineComment.bind(iscriptCommentProvider),
+            ),
+          );
+          TyranoLogger.print("IscriptLanguageProviders activate");
 
           //ショートカットコマンドの登録
           const _ctbs = new TyranoCreateTagByShortcutKey();

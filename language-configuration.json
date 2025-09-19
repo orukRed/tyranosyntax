@@ -1,8 +1,8 @@
 {
   "comments": {
-    // symbol used for single line comment. Remove this entry if your language does not support line comments
+    // Primary comment style for TyranoScript
     "lineComment": ";",
-    // symbols used for start and end a block comment. Remove this entry if your language does not support block comments
+    // Block comments (used in both TyranoScript and JavaScript sections)  
     "blockComment": ["/*", "*/"]
   },
   // symbols used as brackets
