@@ -21,7 +21,7 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
-import { IscriptCommentProvider, IscriptOnTypeFormattingProvider } from "./subscriptions/IscriptLanguageProvider";
+import { IscriptCommentProvider } from "./subscriptions/IscriptLanguageProvider";
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
@@ -109,23 +109,30 @@ export function activate(context: ExtensionContext) {
 
           // Register iscript language providers for JavaScript-like behavior
           const iscriptCommentProvider = new IscriptCommentProvider();
-          const iscriptOnTypeProvider = new IscriptOnTypeFormattingProvider();
 
-          context.subscriptions.push(
-            vscode.languages.registerOnTypeFormattingEditProvider(
-              TYRANO_MODE,
-              iscriptOnTypeProvider,
-              "{", "}", ";",
-            ),
-          );
-
-          // Override the default comment toggle command to be context-aware
+          // Register a custom comment toggle command for TyranoScript files
           context.subscriptions.push(
             vscode.commands.registerCommand(
-              "editor.action.commentLine",
+              "tyranosyntax.toggleComment", 
               iscriptCommentProvider.toggleLineComment.bind(iscriptCommentProvider),
             ),
           );
+
+          // Override default comment behavior for tyrano files
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "editor.action.commentLine",
+              async () => {
+                const editor = vscode.window.activeTextEditor;
+                if (editor && editor.document.languageId === "tyrano") {
+                  await iscriptCommentProvider.toggleLineComment();
+                } else {
+                  await vscode.commands.executeCommand("editor.action.commentLine");
+                }
+              },
+            ),
+          );
+
           TyranoLogger.print("IscriptLanguageProviders activate");
 
           //ショートカットコマンドの登録

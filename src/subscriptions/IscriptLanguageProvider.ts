@@ -18,8 +18,6 @@ export class IscriptCommentProvider {
   public async toggleLineComment(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.document.languageId !== "tyrano") {
-      // Fall back to default behavior
-      await vscode.commands.executeCommand("editor.action.commentLine");
       return;
     }
 
