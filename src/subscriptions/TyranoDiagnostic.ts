@@ -107,6 +107,21 @@ export class TyranoDiagnostic {
     );
 
     TyranoLogger.print(`diagnostic start.`);
+    
+    // 変更されたファイルのマクロ情報を更新してから診断を実行
+    // Update macro information for the changed file before running diagnostics
+    // This fixes the race condition where diagnostics run before macro map is updated
+    if (changedTextDocumentPath.endsWith('.ks')) {
+      try {
+        await this.infoWs.updateScenarioFileMap(changedTextDocumentPath);
+        await this.infoWs.updateMacroLabelVariableDataMapByKs(changedTextDocumentPath);
+        TyranoLogger.print(`Updated macro data for: ${changedTextDocumentPath}`);
+      } catch (error) {
+        TyranoLogger.print(`Error updating macro data for ${changedTextDocumentPath}: ${error}`);
+        // Continue with diagnostics even if update fails
+      }
+    }
+    
     const diagnosticArray: [
       vscode.Uri,
       readonly vscode.Diagnostic[] | undefined,
@@ -117,9 +132,8 @@ export class TyranoDiagnostic {
     let tyranoTag: string[] = Object.keys(
       this.infoWs.suggestions.get(diagnosticProjectPath)!,
     );
-    tyranoTag = tyranoTag.concat(
-      Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()),
-    );
+    // Note: Macros are already included in suggestions, so no need to add them separately
+    // The original line using defineMacroMap.keys() was incorrect as it used UUIDs instead of macro names
     //commentはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
     tyranoTag.push("comment");
     tyranoTag.push("label");
