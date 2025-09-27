@@ -129,15 +129,18 @@ export class TyranoDiagnostic {
 
     TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
 
-    let tyranoTag: string[] = Object.keys(
+    const baseTyranoTag: string[] = Object.keys(
       this.infoWs.suggestions.get(diagnosticProjectPath)!,
     );
     // Note: Macros are already included in suggestions, so no need to add them separately
     // The original line using defineMacroMap.keys() was incorrect as it used UUIDs instead of macro names
     //commentはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
-    tyranoTag.push("comment");
-    tyranoTag.push("label");
-    tyranoTag.push("text");
+    const tyranoTag: string[] = [
+      ...baseTyranoTag,
+      "comment",
+      "label", 
+      "text"
+    ];
 
     //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
     //未定義のマクロを使用しているか検出
