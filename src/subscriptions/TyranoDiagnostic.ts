@@ -50,6 +50,10 @@ export class TyranoDiagnostic {
     .get("TyranoScript syntax.tag.parameter")!;
 
   //ティラノビルダー固有の設定を取得
+  private tyranoBuilderEnabled: boolean = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tyranoBuilder.enabled")!;
+
   private tyranoBuilderSkipTags: string[] = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.tyranoBuilder.skipTags")!;
@@ -984,8 +988,8 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
-    //ティラノビルダーで定義されているタグ（マクロ）ならスキップ
-    if (this.tyranoBuilderSkipTags.includes(tagName)) {
+    //ティラノビルダーが有効でティラノビルダーで定義されているタグ（マクロ）ならスキップ
+    if (this.tyranoBuilderEnabled && this.tyranoBuilderSkipTags.includes(tagName)) {
       return;
     }
 
@@ -1049,8 +1053,9 @@ export class TyranoDiagnostic {
 
       // パラメータが定義されているかチェック
       if (!validParameterNames.includes(paramName)) {
-        // ティラノビルダー固有のパラメータの場合はスキップ
+        // ティラノビルダーが有効でティラノビルダー固有のパラメータの場合はスキップ
         if (
+          this.tyranoBuilderEnabled &&
           this.tyranoBuilderSkipParameters[tagName] &&
           this.tyranoBuilderSkipParameters[tagName].includes(paramName)
         ) {
