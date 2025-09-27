@@ -418,6 +418,11 @@ TyranoScript syntax.languageでタグ補完、ツールチップの言語設定�
 You can change the language settings for tag completion and tooltips with TyranoScript syntax.language.
 Only Japanese and English are supported.
 
+## ティラノビルダーとの併用について
+
+ティラノビルダーと本拡張機能を併用する場合は`TyranoScript syntax.tyranoBuilder.enabled`をtrueにしてください。
+ティラノビルダー固有のパラメータなどでエラーが出なくなります。
+
 ## Release Notes
 
 変更点については以下のリンクをご確認ください。
