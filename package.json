@@ -238,6 +238,11 @@
             "default": "false",
             "description": "エラーなどが発生した場合、出力ウィンドウにログを出力します。（動作が重い場合、こちらのチェックを外すことで改善される可能性があります。）"
           },
+          "TyranoScript syntax.tyranoBuilder.enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "ティラノビルダーを使用している場合はtrueに設定してください。ティラノビルダー固有のタグやパラメータがエラーとして検出されないようになります。"
+          },
           "TyranoScript syntax.tyranoBuilder.skipTags": {
             "type": "array",
             "default": [
