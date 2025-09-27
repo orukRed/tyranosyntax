@@ -6,7 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [1.14.0] 2025-09-27
 
-- 設定に`TyranoScript syntax.tyranoBuilder.enabled`を追加しました。ティラノビルダーを使用している場合はtrueに設定することで、ティラノビルダーに存在する固有のパラメータでエラーが出なくなります。
+- 設定に`TyranoScript syntax.tyranoBuilder.enabled`を追加しました。[issue#336](https://github.com/orukRed/tyranosyntax/issues/336)
+  - ティラノビルダーを使用している場合はtrueに設定することで、ティラノビルダーに存在する固有のパラメータ（_clickable_imgなど）でエラーが出なくなります。
+- たまにmacroタグで定義したタグを認識してくれない問題への暫定的対応を行いました。[issue#334](https://github.com/orukRed/tyranosyntax/issues/334)
+  - ただし、再現性が低く確認ができていないことから解決していない可能性があります。
+  - 同様のエラーが発生する場合は再度ご報告いただけますと嬉しいです。
 
 ## [1.13.0] 2025-09-15
 
