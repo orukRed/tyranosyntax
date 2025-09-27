@@ -50,6 +50,10 @@ export class TyranoDiagnostic {
     .get("TyranoScript syntax.tag.parameter")!;
 
   //ティラノビルダー固有の設定を取得
+  private tyranoBuilderEnabled: boolean = vscode.workspace
+    .getConfiguration()
+    .get("TyranoScript syntax.tyranoBuilder.enabled")!;
+
   private tyranoBuilderSkipTags: string[] = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.tyranoBuilder.skipTags")!;
@@ -107,6 +111,30 @@ export class TyranoDiagnostic {
     );
 
     TyranoLogger.print(`diagnostic start.`);
+
+    // 変更されたファイルのマクロ情報を更新してから診断を実行
+    // Update macro information for the changed file before running diagnostics
+    // This fixes the race condition where diagnostics run before macro map is updated
+    if (changedTextDocumentPath && changedTextDocumentPath.endsWith(".ks")) {
+      try {
+        // 診断前に必ずマクロ情報を更新（二重更新を避けるため、extension.ts側で更新済みでも確実性を保つ）
+        await this.infoWs.updateScenarioFileMap(changedTextDocumentPath);
+        await this.infoWs.updateMacroLabelVariableDataMapByKs(
+          changedTextDocumentPath,
+        );
+
+        // マクロ情報の更新完了を確認してログ出力
+        TyranoLogger.print(
+          `Updated macro data for: ${changedTextDocumentPath}`,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `Error updating macro data for ${changedTextDocumentPath}: ${error}`,
+        );
+        // Continue with diagnostics even if update fails
+      }
+    }
+
     const diagnosticArray: [
       vscode.Uri,
       readonly vscode.Diagnostic[] | undefined,
@@ -114,16 +142,13 @@ export class TyranoDiagnostic {
 
     TyranoLogger.print(`[${diagnosticProjectPath}] parsing start.`);
 
-    let tyranoTag: string[] = Object.keys(
+    const baseTyranoTag: string[] = Object.keys(
       this.infoWs.suggestions.get(diagnosticProjectPath)!,
     );
-    tyranoTag = tyranoTag.concat(
-      Array.from(this.infoWs.defineMacroMap.get(diagnosticProjectPath)!.keys()),
-    );
+    // Note: Macros are already included in suggestions, so no need to add them separately
+    // The original line using defineMacroMap.keys() was incorrect as it used UUIDs instead of macro names
     //commentはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
-    tyranoTag.push("comment");
-    tyranoTag.push("label");
-    tyranoTag.push("text");
+    const tyranoTag: string[] = [...baseTyranoTag, "comment", "label", "text"];
 
     //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
     //未定義のマクロを使用しているか検出
@@ -967,8 +992,11 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
-    //ティラノビルダーで定義されているタグ（マクロ）ならスキップ
-    if (this.tyranoBuilderSkipTags.includes(tagName)) {
+    //ティラノビルダーが有効でティラノビルダーで定義されているタグ（マクロ）ならスキップ
+    if (
+      this.tyranoBuilderEnabled &&
+      this.tyranoBuilderSkipTags.includes(tagName)
+    ) {
       return;
     }
 
@@ -1032,8 +1060,9 @@ export class TyranoDiagnostic {
 
       // パラメータが定義されているかチェック
       if (!validParameterNames.includes(paramName)) {
-        // ティラノビルダー固有のパラメータの場合はスキップ
+        // ティラノビルダーが有効でティラノビルダー固有のパラメータの場合はスキップ
         if (
+          this.tyranoBuilderEnabled &&
           this.tyranoBuilderSkipParameters[tagName] &&
           this.tyranoBuilderSkipParameters[tagName].includes(paramName)
         ) {
