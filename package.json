@@ -274,10 +274,31 @@
           "TyranoScript syntax.tyranoBuilder.skipParameters": {
             "type": "object",
             "default": {
-              "playbgm": ["time", "fadein"],
-              "stopbgm": ["time", "fadeout"],
-              "playse": ["time", "fadein"],
-              "stopse": ["time", "fadeout"]
+              "playbgm": [
+                "time",
+                "fadein"
+              ],
+              "stopbgm": [
+                "time",
+                "fadeout"
+              ],
+              "playse": [
+                "time",
+                "fadein"
+              ],
+              "stopse": [
+                "time",
+                "fadeout"
+              ],
+              "jump": [
+                "target"
+              ],
+              "glink": [
+                "_clickable_img"
+              ],
+              "clickable": [
+                "target"
+              ]
             },
             "description": "特定のタグに存在するティラノビルダー固有のパラメータのためスキップ可能なパラメータ"
           },

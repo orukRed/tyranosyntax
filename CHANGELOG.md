@@ -4,12 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.14.0] 2025-09-27
+
+- 設定に`TyranoScript syntax.tyranoBuilder.enabled`を追加しました。ティラノビルダーを使用している場合はtrueに設定することで、ティラノビルダーに存在する固有のパラメータでエラーが出なくなります。
+
 ## [1.13.0] 2025-09-15
 
 - ティラノビルダー固有のタグとパラメータをエラーとして検出しないようにしました。[issue#326](https://github.com/orukRed/tyranosyntax/issues/326)
   - ティラノビルダー専用タグ（`tb_eval`、`tb_show_message_window`など）がエラーとして検出されないようになりました。
-  - ティラノビルダー専用パラメータ（`playbgm`タグの`time`、`fadein`パラメータなど）がエラーとして検出されないようになりました。  - 設定で`TyranoScript syntax.tyranoBuilder.skipTags`および`TyranoScript syntax.tyranoBuilder.skipParameters`をカスタマイズ可能です。
-  - 新設定`TyranoScript syntax.tyranoBuilder.enabled`を追加しました。ティラノビルダーを使用している場合はtrueに設定することで、ティラノビルダー固有の機能が有効になります。
+  - ティラノビルダー専用パラメータ（`playbgm`タグの`time`、`fadein`パラメータなど）がエラーとして検出されないようになりました。設定で`TyranoScript syntax.tyranoBuilder.skipTags`および`TyranoScript syntax.tyranoBuilder.skipParameters`をカスタマイズ可能です。
+
 
 ## [1.12.1] 2025-09-08
 
