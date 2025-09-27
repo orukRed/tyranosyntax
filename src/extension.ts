@@ -3,9 +3,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { ExtensionContext } from "vscode";
-import {
-  LanguageClient,
-} from "vscode-languageclient/node";
+import { LanguageClient } from "vscode-languageclient/node";
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
 import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
@@ -163,6 +161,11 @@ export function activate(context: ExtensionContext) {
 
             await infoWs.initializeMaps();
             infoWs.extensionPath = context.extensionPath;
+
+            // レースコンディション対策：初期化後に少し待機してマクロ情報を再確認
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            TyranoLogger.print("Initial macro data loading completed");
+
             TyranoLogger.print("TyranoDiagnostic activate");
             const tyranoJumpProvider = new TyranoJumpProvider();
             context.subscriptions.push(
@@ -208,10 +211,16 @@ export function activate(context: ExtensionContext) {
                     !tyranoDiagnostic.isDiagnosing
                   ) {
                     tyranoDiagnostic.isDiagnosing = true;
+
+                    // マクロ情報を確実に更新
                     await infoWs.updateScenarioFileMap(e.document.fileName);
                     await infoWs.updateMacroLabelVariableDataMapByKs(
                       e.document.fileName,
                     );
+
+                    // レースコンディション対策のため少し待機
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+
                     try {
                       await tyranoDiagnostic.createDiagnostics(
                         e.document.fileName,
@@ -233,15 +242,35 @@ export function activate(context: ExtensionContext) {
               TyranoLogger.print("Auto diagnostic is not activate");
             }
 
-            //FIXME:ファイル保存時にも診断実行 autosaveONにしてると正しく働かないので様子見
-            // vscode.workspace.onDidSaveTextDocument(document => {
-            //   if (previewPanel) {
-            //     console.log("onDidSaveTextDocument");
-            //     previewPanel.webview.html = `
-            //     <iframe src="http://localhost:3000/index.html" frameborder="0" style="width:100%; height:100vh;"></iframe>
-            //     `
-            //   }
-            // });
+            // ファイル保存時の診断処理（レースコンディション対策版）
+            context.subscriptions.push(
+              vscode.workspace.onDidSaveTextDocument(async (document) => {
+                if (
+                  path.extname(document.fileName) === ".ks" &&
+                  !tyranoDiagnostic.isDiagnosing
+                ) {
+                  tyranoDiagnostic.isDiagnosing = true;
+
+                  // 保存時はマクロ情報を確実に更新してから診断
+                  await infoWs.updateScenarioFileMap(document.fileName);
+                  await infoWs.updateMacroLabelVariableDataMapByKs(
+                    document.fileName,
+                  );
+
+                  try {
+                    await tyranoDiagnostic.createDiagnostics(document.fileName);
+                  } catch (error) {
+                    TyranoLogger.print(
+                      "保存時診断でエラーが発生しました。",
+                      ErrorLevel.ERROR,
+                    );
+                    console.log(error);
+                  } finally {
+                    tyranoDiagnostic.isDiagnosing = false;
+                  }
+                }
+              }),
+            );
             //scenarioFileの値
             const scenarioFileSystemWatcher: vscode.FileSystemWatcher =
               vscode.workspace.createFileSystemWatcher(
@@ -251,6 +280,10 @@ export function activate(context: ExtensionContext) {
                 false,
               );
             scenarioFileSystemWatcher.onDidCreate(async (e) => {
+              await infoWs.updateScenarioFileMap(e.fsPath);
+              await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
+            });
+            scenarioFileSystemWatcher.onDidChange(async (e) => {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
             });
