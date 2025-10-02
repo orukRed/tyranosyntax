@@ -68,6 +68,7 @@
           "name": "keyword.operator.tyrano"
         }
       },
+      "contentName": "meta.embedded.block.javascript",
       "patterns": [
         {
           "include": "source.js"
@@ -99,6 +100,7 @@
           "name": "string.quoted.double.tyrano"
         }
       },
+      "contentName": "meta.embedded.block.javascript",
       "patterns": [
         {
           "include": "source.js"
