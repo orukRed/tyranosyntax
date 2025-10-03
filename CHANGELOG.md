@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.14.1] 2025-10-04
+
+- 英語版のREADMEを更新しました。
+
 ## [1.14.0] 2025-09-27
 
 - 設定に`TyranoScript syntax.tyranoBuilder.enabled`を追加しました。[issue#336](https://github.com/orukRed/tyranosyntax/issues/336)

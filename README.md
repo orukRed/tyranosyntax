@@ -4,6 +4,14 @@
 
 [ティラノスクリプト](https://tyrano.jp/)でのゲーム開発のサポートを行う拡張機能です。
 
+## 寄付のお願い
+
+この拡張機能はオープンソースで開発されており、無料でご利用いただけます。
+
+開発の継続とさらなる機能改善のため、もしよろしければ寄付をご検討ください。
+
+皆様のご支援が、より良いツール作りの励みになります。
+
 <a href="https://ofuse.me/orukred/letter" target="_blank">
   <img src="./ofuse_img/letter-fill.png" width="40">
   <img src="./ofuse_img/logo-blue.png" width="180">
@@ -14,7 +22,7 @@
 バグ報告や機能追加の要望お待ちしております！
 以下のいずれかの方法で報告をお願いします。
 
-- [Googleフォームから報告](https://forms.gle/PnWAzHiN8MYKhUrG6)
+- [Googleフォームから報告（おすすめ）](https://forms.gle/PnWAzHiN8MYKhUrG6)
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
@@ -24,11 +32,9 @@ vscodeの`ファイル`→`フォルダーを開く`から、
 
 ティラノスクリプトの`index.html` が存在するフォルダを選択してください。
 
-
 その後、`.ks`拡張子のファイルを開いたタイミングで
 
 `TyranoScript syntaxの初期化が完了しました。`と通知が出れば拡張機能が正常に読み込まれています。
-
 
 ※構文の強調表示など、一部の機能は上記手順を踏まなくても使用できます。
 
@@ -184,7 +190,6 @@ Ctrl + Spaceでタグやパラメータ、変数、ラベル、ファイルパ�
 ![](src/readme_img/outline.png)
 
 ラベルや変数、一部のタグがアウトラインビューに表示されます。
-
 現在アウトラインタグで表示されるタグは以下です。
 
 （設定の`TyranoScript syntax.outline.tag`から変更可能）

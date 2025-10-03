@@ -2,6 +2,26 @@
 
 This is an extension that supports game development with [TyranoScript](https://tyrano.jp/).
 
+## Donation Request
+
+This extension is developed as open source and is available for free.
+If you would like to support the continued development and further improvement of features, please consider making a donation.
+Your support encourages us to create better tools.
+
+<a href="https://ofuse.me/orukred/letter" target="_blank">
+  <img src="./ofuse_img/letter-fill.png" width="40">
+  <img src="./ofuse_img/logo-blue.png" width="180">
+</a>
+
+## Bug Reports and Feature Requests
+
+We welcome bug reports and feature requests!
+Please report using one of the following methods.
+
+- [Report via Google Form](https://forms.gle/PnWAzHiN8MYKhUrG6)
+- [Reply or DM on Twitter (@orukred)](https://twitter.com/OrukRed)
+- [Create an issue on Github (bugs only)](https://github.com/orukRed/tyranosyntax/issues)
+
 ## How to use
 
 From vscode's `File` → `Open Folder`,
@@ -164,6 +184,8 @@ Please refer to the following and add it to `setting.json` and use it.
 
 ### Outline display
 
+#### Tag and Variable Outline Display
+
 ![](src/readme_img/outline.png)
 
 Labels, variables, and some tags are displayed in the outline view.
@@ -189,6 +211,30 @@ The tags currently displayed in the outline tag are as follows.
 - html tag
 - endhtml tag
 
+#### Comment Outline Display
+
+![](src/readme_img/outline_comment.png)
+
+Comments starting with `;` will be displayed in the outline if they begin with any of the strings defined in `TyranoScript syntax.outline.comment`.
+
+```tyrano
+;■Define macro group here
+[macro name="test"]
+[endmacro]
+```
+
+The default defined strings are as follows. You can edit them from the settings as needed.
+
+- TODO
+- FIXME
+- NOTE
+- BUG
+- HACK
+- ♦
+- ■
+- ●
+- ○
+
 ### Diagnostics
 
 ![](src/readme_img/diagnostics.png)
@@ -200,23 +246,26 @@ Currently, the following errors can be detected.
 - Detects whether the destination specified by storage and target exists in jump tags ("jump", "call", "link", "button", "glink", "clickable")
 - Detects whether there is an & at the beginning when using variables in storage and target of jump tags (error occurs if there is no &)
 - Detects whether the tag being used exists in the project
+- Detects whether resources such as images and audio used in the project exist
+- Detects whether label names are correct
+- Detects duplicate macro definitions
 
 If not required, change the value of `TyranoScript syntax.execute.diagnostic` from the settings.
 
 It is defined as follows, so you can turn off the diagnostic function by changing the value of unnecessary keys to false and restarting vscode.
 
 ```json
-
-"TyranoScript syntax.execute.diagnostic": {
-
-"undefinedMacro": true,
-
-"missingScenariosAndLabels": true,
-
-"jumpAndCallInIfStatement": true
-
-}
-
+  "TyranoScript syntax.execute.diagnostic": {
+    "undefinedMacro": true,
+    "missingScenariosAndLabels": true,
+    "jumpAndCallInIfStatement": true,
+    "existResource": true,
+    "labelName": true,
+    "macroDuplicate": true,
+    "undefinedParameter": true,
+    "parameterSpacing": true,
+    "missingAmpersandInVariable": true
+  }
 ```
 
 ### Display document tooltip (Hover)
@@ -255,6 +304,8 @@ When you press `F12`, you can jump to the location defined by the macro tag.
 
 ### On-the-fly preview function (beta version)
 
+![](src/readme_img/spot_preview.gif)
+
 `ctrl + alt + P` opens a preview of the current cursor position.
 
 The preview opens under the following conditions.
@@ -262,39 +313,43 @@ The preview opens under the following conditions.
 - Processing will start from the closest label on the line before the cursor in the currently open file.
 - Processing will stop at the currently open cursor position. Click to resume processing.
 - Due to the above, variables that are not defined in the label will be treated as undefined.
-  - Therefore, if you want to define variables, set `[chara_new]` tags, etc. before previewing, follow the steps below.
+- Therefore, if you want to define variables, set `[chara_new]` tags, etc. before previewing, follow the steps below.
   - Write the variable definitions, `[chara_new]` tags, etc. settings in any .ks file
-  - Enter the absolute path of that .ks file in `TyranoScript syntax.preview.preprocess` from the settings
-  - - Do not use jump tags in your files, as this will prevent the preview from launching correctly.
-- Below is an example.
-```preview_init.ks
-;Characters and variables to predefine in on-the-fly preview
+  - Enter the relative path starting from the scenario folder or the absolute path of that .ks file in `TyranoScript syntax.preview.preprocess` from the settings
+  - Do not use jump tags in the files set by `TyranoScript syntax.preview.preprocess`, as this will prevent the preview from launching correctly.
+  - Below is an example.
+  ```preview_init.ks
+  ;Characters and variables to predefine in on-the-fly preview
 
-;Declares the characters that will appear in this game
-;akane
-[chara_new name="akane" storage="chara/akane/normal.png" jname="Akane" ]
-;Registers character facial expressions
-[chara_face name="akane" face="angry" storage="chara/akane/angry.png"]
-[chara_face name="akane" face="doki" storage="chara/akane/doki.png"]
-[chara_face name="akane" face="happy" storage="chara/akane/happy.png"]
-[chara_face name="akane" face="sad" storage="chara/akane/sad.png"]
+  ;Declares the characters that will appear in this game
+  ;akane
+  [chara_new  name="akane" storage="chara/akane/normal.png" jname="Akane"  ]
+  ;Registers character facial expressions
+  [chara_face name="akane" face="angry" storage="chara/akane/angry.png"]
+  [chara_face name="akane" face="doki" storage="chara/akane/doki.png"]
+  [chara_face name="akane" face="happy" storage="chara/akane/happy.png"]
+  [chara_face name="akane" face="sad" storage="chara/akane/sad.png"]
 
-;yamato
-[chara_new name="yamato" storage="chara/yamato/normal.png" jname="Yamato" ]
+  ;yamato
+  [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="Yamato" ]
 
-[if exp="tf.TYRANO_SYNTAX_PREVIEW==true"]
-; Message window settings
-[position layer="message0" left=160 top=500 width=1000 height=200 page=fore visible=true]
-[endif]
+  [call storage="macro_define.ks"]
 
-; Initialize variables
-[iscript ]
-f.hoge=0;
-f.fuga="piyo"
-[endscript ]
-```
+  [if exp="tf.TYRANO_SYNTAX_PREVIEW==true"]
+    ;Message window settings
+    [position layer="message0" left=160 top=500 width=1000 height=200 page=fore visible=true]
+  [endif]
+
+  ;Initialize variables
+  [iscript ]
+    f.hoge=0;
+    f.fuga="piyo"
+  [endscript ]
+  ```
+
 - `tf.TYRANO_SYNTAX_PREVIEW = true` is predefined. If you want to display a message in the instant preview even though there is no `position` tag immediately after the label start, please write the necessary processing using `if` tags, etc.
-- BGM and SE will not be played.
+- BGM and SE that exist before the cursor position will not be played.
+  - However, BGM and SE after the cursor position will be played.
 
 > [!NOTE]
 > `TyranoScript syntax.preview.preprocess` is updated only once when the preview is opened. <br>
@@ -307,8 +362,11 @@ f.fuga="piyo"
 ### Display Flowchart
 
 You can display the flowchart of the currently open file with `ctrl + alt + F`.
+
 Access localhost:3200/flowchart-list.html in your browser to display a link to the scenario list.
+
 Click on the link of the file you want to see the flowchart of.
+
 
 - `NONE` is displayed for places where no label is specified
 - Conditional expressions are displayed only if the cond attribute is specified
@@ -318,6 +376,7 @@ Click on the link of the file you want to see the flowchart of.
 
 ![](src/readme_img/flowchart1.png)
 ![](src/readme_img/flowchart2.png)
+
 ### Folding a process
 
 You can fold the range enclosed by `region` and `endregion`.
@@ -329,6 +388,14 @@ You can fold it by writing the following:
 "This line can be folded."
 ; endregion
 ```
+
+### Variable Rename Function
+
+You can rename variables and macros with F2.
+The following can be renamed:
+
+- Variables
+- Macros
 
 ## List of shortcuts
 
@@ -349,19 +416,56 @@ Please review the configuration file, especially if you want to complete tags de
 You can change the language settings for tag completion and tooltips with TyranoScript syntax.language.
 Only Japanese and English are supported.
 
+## Using with Tyrano Builder
+
+If you want to use this extension together with Tyrano Builder, please set `TyranoScript syntax.tyranoBuilder.enabled` to true.
+This will prevent errors for Tyrano Builder-specific parameters.
+
 ## Release Notes
 
 Please see the link below for changes.
 [CHANGELOG.md](CHANGELOG.md)
 
-## issues
+## Icon Provider
 
-We welcome bug reports and feature requests!
-Please report using one of the following methods.
+(Honorific titles omitted)
+Apo (@apo490)
 
-- [Report via Google Form](https://forms.gle/PnWAzHiN8MYKhUrG6)
-- [Reply or DM on Twitter (@orukred)](https://twitter.com/OrukRed)
-- [Create an issue on Github (bugs only)](https://github.com/orukRed/tyranosyntax/issues)
+## License/Credits
+
+This extension uses the following libraries.
+(Honorific titles omitted below)
+
+### Bakusoku Skip Plugin (High-Speed Skip Plugin)
+
+Creator: Sakuta
+Circle: Sakusaku Punta
+X (formerly Twitter): @skt_tyrano
+HP: https://skskpnt.app
+
+### mermaid-js
+
+The MIT License (MIT)
+
+Copyright (c) 2014 - 2022 Knut Sveidqvist
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ## Disclaimer
 
