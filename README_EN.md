@@ -4,9 +4,9 @@ This is an extension that supports game development with [TyranoScript](https://
 
 ## Donation Request
 
-This extension is developed as open source and is available for free.  
-If you would like to support the continued development and further improvement of features, please consider making a donation.  
-Your support encourages us to create better tools.  
+This extension is developed as open source and is available for free.
+If you would like to support the continued development and further improvement of features, please consider making a donation.
+Your support encourages us to create better tools.
 
 <a href="https://ofuse.me/orukred/letter" target="_blank">
   <img src="./ofuse_img/letter-fill.png" width="40">
