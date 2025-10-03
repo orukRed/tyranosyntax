@@ -491,16 +491,12 @@ export class TyranoDiagnostic {
         //storageに付いての処理(指定したファイルが有るかどうか)
         if (this.JUMP_TAG.includes(data["name"])) {
           if (data["pm"]["storage"] !== undefined) {
-            const tagFirstIndex: number = scenarioDocument
-              .lineAt(data["line"])
-              .text.indexOf(data["pm"]["storage"]); // 該当行からタグの定義場所(開始位置)探す
-            const tagLastIndex =
-              tagFirstIndex + this.sumStringLengthsInObject(data["pm"]); // 該当行からタグの定義場所(終了位置)探す
-            const range = new vscode.Range(
-              data["line"],
-              tagFirstIndex,
-              data["line"],
-              tagLastIndex,
+            // getParameterRangeメソッドを使用してパラメータの正確な位置を取得
+            const range = this.getParameterRange(
+              "storage",
+              data["pm"]["storage"],
+              data,
+              scenarioDocument,
             );
 
             //頭文字が%ならエラーとしては扱わない
@@ -551,16 +547,12 @@ export class TyranoDiagnostic {
 
           // targetについての処理
           if (data["pm"]["target"] !== undefined) {
-            const tagFirstIndex: number = scenarioDocument
-              .lineAt(data["line"])
-              .text.indexOf(data["pm"]["target"]); // 該当行からタグの定義場所(開始位置)探す
-            const tagLastIndex =
-              tagFirstIndex + this.sumStringLengthsInObject(data["pm"]); // 該当行からタグの定義場所(終了位置)探す
-            const range = new vscode.Range(
-              data["line"],
-              tagFirstIndex,
-              data["line"],
-              tagLastIndex,
+            // getParameterRangeメソッドを使用してパラメータの正確な位置を取得
+            const range = this.getParameterRange(
+              "target",
+              data["pm"]["target"],
+              data,
+              scenarioDocument,
             );
 
             //頭文字が%ならエラーとしては扱わない

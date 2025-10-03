@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.14.2] 2025-10-04
+
+- `[jump target="& 'page_' + tf.page "]`のように、`&`以降にスペースがある場合にすべてのエラーが出なくなってしまう問題を修正しました。
+
 ## [1.14.1] 2025-10-04
 
 - 英語版のREADMEを更新しました。
