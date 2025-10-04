@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { InformationWorkSpace as workspace } from "../InformationWorkSpace";
-import { TyranoLogger } from "../TyranoLogger";
+import { TyranoLogger, ErrorLevel } from "../TyranoLogger";
 import { Parser } from "../Parser";
 
 export class TyranoDiagnostic {
@@ -153,38 +153,62 @@ export class TyranoDiagnostic {
     //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
     //未定義のマクロを使用しているか検出
     if (this.isExecuteDiagnostic(this.undefinedMacro)) {
-      await this.detectionUndefineMacro(
-        tyranoTag,
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] macro detection finished.`,
-      );
+      try {
+        await this.detectionUndefineMacro(
+          tyranoTag,
+          this.infoWs.scenarioFileMap,
+          diagnosticArray,
+          diagnosticProjectPath,
+        );
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] macro detection finished.`,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] マクロ検出中に例外が発生しました。`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
+      }
     }
     //存在しないシナリオファイル、未定義のラベルを検出
     if (this.isExecuteDiagnostic(this.missingScenariosAndLabels)) {
-      await this.detectionMissingScenariosAndLabels(
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] scenario and label detection finished.`,
-      );
+      try {
+        await this.detectionMissingScenariosAndLabels(
+          this.infoWs.scenarioFileMap,
+          diagnosticArray,
+          diagnosticProjectPath,
+        );
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] scenario and label detection finished.`,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] シナリオファイル・ラベル検出中に例外が発生しました。`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
+      }
     }
 
     //if文の中でjump,callタグを使用しているか検出
     if (this.isExecuteDiagnostic(this.jumpAndCallInIfStatement)) {
-      await this.detectJumpAndCallInIfStatement(
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`,
-      );
+      try {
+        await this.detectJumpAndCallInIfStatement(
+          this.infoWs.scenarioFileMap,
+          diagnosticArray,
+          diagnosticProjectPath,
+        );
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `[${diagnosticProjectPath}] if文内のjump/call検出中に例外が発生しました。`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
+      }
     }
 
     //-----------------------------------------
@@ -219,18 +243,34 @@ export class TyranoDiagnostic {
       //-----------------------------------------
 
       //マクロの重複チェック
-      await this.checkMacroDuplicate(
-        diagnostics,
-        projectPathOfDiagFile,
-        scenarioDocument,
-      );
+      try {
+        await this.checkMacroDuplicate(
+          diagnostics,
+          projectPathOfDiagFile,
+          scenarioDocument,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} でマクロ重複チェック中に例外が発生しました。`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
+      }
 
       //パラメータ間のスペーシングチェック
-      await this.checkParameterSpacing(
-        diagnostics,
-        projectPathOfDiagFile,
-        scenarioDocument,
-      );
+      try {
+        await this.checkParameterSpacing(
+          diagnostics,
+          projectPathOfDiagFile,
+          scenarioDocument,
+        );
+      } catch (error) {
+        TyranoLogger.print(
+          `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} でパラメータスペーシングチェック中に例外が発生しました。`,
+          ErrorLevel.ERROR,
+        );
+        TyranoLogger.printStackTrace(error);
+      }
 
       for (const data of parsedData) {
         //early return
@@ -238,36 +278,68 @@ export class TyranoDiagnostic {
           continue;
         }
         //存在しないパラメータのチェック
-        await this.detectionUndefinedParameter(
-          data,
-          scenarioDocument,
-          projectPathOfDiagFile,
-          diagnostics,
-        );
+        try {
+          await this.detectionUndefinedParameter(
+            data,
+            scenarioDocument,
+            projectPathOfDiagFile,
+            diagnostics,
+          );
+        } catch (error) {
+          TyranoLogger.print(
+            `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} 行${data["line"] + 1} で未定義パラメータ検出中に例外が発生しました。`,
+            ErrorLevel.ERROR,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
 
         //変数で&がないもののチェック
-        await this.detectionMissingAmpersandInVariable(
-          data,
-          scenarioDocument,
-          projectPathOfDiagFile,
-          diagnostics,
-        );
+        try {
+          await this.detectionMissingAmpersandInVariable(
+            data,
+            scenarioDocument,
+            projectPathOfDiagFile,
+            diagnostics,
+          );
+        } catch (error) {
+          TyranoLogger.print(
+            `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} 行${data["line"] + 1} で&欠落検出中に例外が発生しました。`,
+            ErrorLevel.ERROR,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
 
         //TODO:今後もし行に対しての診断項目が増えた場合はここに追加
         // ファイルリソースの存在チェックを別メソッドで実行
-        await this.detectionMissingResources(
-          data,
-          scenarioDocument,
-          projectPathOfDiagFile,
-          diagnostics,
-        );
+        try {
+          await this.detectionMissingResources(
+            data,
+            scenarioDocument,
+            projectPathOfDiagFile,
+            diagnostics,
+          );
+        } catch (error) {
+          TyranoLogger.print(
+            `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} 行${data["line"] + 1} でリソース存在チェック中に例外が発生しました。`,
+            ErrorLevel.ERROR,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
         //ラベル名のチェック
-        await this.checkLabelName(
-          data,
-          scenarioDocument,
-          projectPathOfDiagFile,
-          diagnostics,
-        );
+        try {
+          await this.checkLabelName(
+            data,
+            scenarioDocument,
+            projectPathOfDiagFile,
+            diagnostics,
+          );
+        } catch (error) {
+          TyranoLogger.print(
+            `[${projectPathOfDiagFile}] ${scenarioDocument.fileName} 行${data["line"] + 1} でラベル名チェック中に例外が発生しました。`,
+            ErrorLevel.ERROR,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
       }
       diagnosticArray.push([scenarioDocument.uri, diagnostics]);
     }
