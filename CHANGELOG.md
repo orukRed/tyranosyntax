@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+- 拡張機能の初期化速度を大幅に改善しました。[issue#342](https://github.com/orukRed/tyranosyntax/issues/342)
+  - .ksファイルを開いたときの初期化処理を並列化することで、従来の10秒程度から数秒程度に短縮されました。
+  - ファイル数が多いプロジェクトほど効果が大きくなります。
+
 ## [1.14.2] 2025-10-04
 
 - `[jump target="& 'page_' + tf.page "]`のように、`&`以降にスペースがある場合にすべてのエラーが出なくなってしまう問題を修正しました。
