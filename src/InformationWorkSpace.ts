@@ -153,11 +153,14 @@ export class InformationWorkSpace {
         [".js"],
         true,
       ); //dataディレクトリ内の.jsファイルを取得
-      for (const i of absoluteScriptFilePaths) {
-        await this.updateScriptFileMap(i);
-        await this.updateMacroDataMapByJs(i);
-        await this.updateVariableMapByJS(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteScriptFilePaths.map(async (i) => {
+          await this.updateScriptFileMap(i);
+          await this.updateMacroDataMapByJs(i);
+          await this.updateVariableMapByJS(i);
+        }),
+      );
       //シナリオファイルを初期化
       TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
       const absoluteScenarioFilePaths = await this.getProjectFiles(
@@ -165,10 +168,13 @@ export class InformationWorkSpace {
         [".ks"],
         true,
       ); //dataディレクトリ内の.ksファイルを取得
-      for (const i of absoluteScenarioFilePaths) {
-        await this.updateScenarioFileMap(i);
-        await this.updateMacroLabelVariableDataMapByKs(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteScenarioFilePaths.map(async (i) => {
+          await this.updateScenarioFileMap(i);
+          await this.updateMacroLabelVariableDataMapByKs(i);
+        }),
+      );
       //リソースファイルを取得
       TyranoLogger.print(`${projectPath}'s resource file is loading...`);
       const absoluteResourceFilePaths = this.getProjectFiles(
@@ -176,9 +182,12 @@ export class InformationWorkSpace {
         this.resourceExtensionsArrays,
         true,
       ); //dataディレクトリのファイル取得
-      for (const i of absoluteResourceFilePaths) {
-        await this.addResourceFileMap(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteResourceFilePaths.map(async (i) => {
+          await this.addResourceFileMap(i);
+        }),
+      );
     }
   }
 
