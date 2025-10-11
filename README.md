@@ -17,6 +17,8 @@
   <img src="./ofuse_img/logo-blue.png" width="180">
 </a>
 
+https://ofuse.me/orukred/letter
+
 ## バグ報告・要望
 
 バグ報告や機能追加の要望お待ちしております！

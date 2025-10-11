@@ -10,6 +10,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - .ksファイルを開いたときの初期化処理を並列化することで、従来の10秒程度から数秒程度に短縮されました。
   - ファイル数が多いプロジェクトほど効果が大きくなります。
 
+## [1.14.3] 2025-10-11
+
+- `TyranoScript syntax.tyranoBuilder.enabled`がONの時の挙動を改善しました。
+  - jumpタグのtargetパラメータが空の場合にエラーを出さないようにしました。
+- `TyranoScript syntax.tyranoBuilder.skipParameters`の初期値に、clickableタグ及びbuttonタグの_clickable_imgパラメータを追加しました。
+
 ## [1.14.2] 2025-10-04
 
 - `[jump target="& 'page_' + tf.page "]`のように、`&`以降にスペースがある場合にすべてのエラーが出なくなってしまう問題を修正しました。
