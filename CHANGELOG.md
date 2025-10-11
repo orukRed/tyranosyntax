@@ -4,6 +4,12 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.14.3] 2025-10-11
+
+- `TyranoScript syntax.tyranoBuilder.enabled`がONの時の挙動を改善しました。
+  - jumpタグのtargetパラメータが空の場合にエラーを出さないようにしました。
+- `TyranoScript syntax.tyranoBuilder.skipParameters`の初期値に、clickableタグ及びbuttonタグの_clickable_imgパラメータを追加しました。
+
 ## [1.14.2] 2025-10-04
 
 - `[jump target="& 'page_' + tf.page "]`のように、`&`以降にスペースがある場合にすべてのエラーが出なくなってしまう問題を修正しました。
