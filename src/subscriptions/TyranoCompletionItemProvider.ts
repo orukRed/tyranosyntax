@@ -34,6 +34,12 @@ type TagParameterConfig = {
 export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
+  
+  // 正規表現を事前にコンパイルして再利用
+  private readonly PARAM_REGEXP = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");
+  private readonly VARIABLE_REGEXP = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;
+  private readonly SHARP_REGEXP = /\s*#.*$/;
+  
   public constructor() {}
   private tagParams: {
     [s: string]: { [s: string]: TagParameterConfig };
@@ -114,9 +120,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
         parsedData[tagIndex] !== undefined
           ? parsedData[tagIndex]["name"]
           : undefined; //今見てるタグの名前
-      const regExp2 = new RegExp('(\\S)+="(?![\\s\\S]*")', "g"); //今見てるタグの値を取得
-      const variableRegExp = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/; //変数の正規表現
-      const regExpResult = leftSideText?.match(regExp2); //「hoge="」を取得できる
+      const regExpResult = leftSideText?.match(this.PARAM_REGEXP); //「hoge="」を取得できる
       const lineParamName = regExpResult?.[0]
         .replace('"', "")
         .replace("=", "")
@@ -125,7 +129,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
         (lineParamName !== undefined &&
           this.tagParams?.[lineTagName]?.[lineParamName]) ||
         undefined; //今見てるタグのパラメータ情報  paramsInfo.path paramsInfo.type
-      const variableValue = variableRegExp.exec(leftSideText!);
+      const variableValue = this.VARIABLE_REGEXP.exec(leftSideText!);
       const characterOperationTagList = [
         "chara_ptext",
         "chara_config",
@@ -147,7 +151,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
       const layerParts = this.findLayerParts(projectPath, tagIndex, parsedData);
 
       //カーソルの左隣の文字取得
-      if (typeof leftSideText === "string" && /\s*#.*$/.test(leftSideText)) {
+      if (typeof leftSideText === "string" && this.SHARP_REGEXP.test(leftSideText)) {
         return await this.completionNameParameter(projectPath);
       } else if (variableValue) {
         const variableKind = variableValue[0].split(".")[0].replace("&", "");
