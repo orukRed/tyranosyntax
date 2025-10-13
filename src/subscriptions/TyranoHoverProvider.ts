@@ -3,11 +3,13 @@ import * as fs from "fs";
 import path from "path";
 import { InformationWorkSpace } from "../InformationWorkSpace";
 import { InformationExtension } from "../InformationExtension";
+import { Parser } from "../Parser";
 
 export class TyranoHoverProvider {
   private jsonTyranoSnippet: string;
   private regExp: RegExp;
   private infoWs: InformationWorkSpace = InformationWorkSpace.getInstance();
+  private parser: Parser = Parser.getInstance();
 
   constructor() {
     this.jsonTyranoSnippet = JSON.parse(
@@ -89,7 +91,7 @@ ${textCopy.join("  \n")}
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
       position,
-      new RegExp(/[\S]+="[\S]+"/),
+      new RegExp(/\w+="[^"]+"/),
     );
 
     if (parameterWordRange) {
@@ -98,32 +100,54 @@ ${textCopy.join("  \n")}
         document.uri.fsPath,
       );
 
-      //タグ名取得
-      const exp =
-        /(\w+)(\s*((\w*)="?([\w\u3040-\u30FF\u4E00-\u9FFF./*]*)"?)*)*/;
-      const wordRange = document.getWordRangeAtPosition(position, exp);
-      const matcher: RegExpMatchArray | null = document
-        .getText(wordRange)
-        .match(exp);
-      const tag = matcher![1];
-
       //parameter名(storageとかgraphicとか)取得
       const parameter = document
         .getText(parameterWordRange)
         .match(/(\w+)="/)![1];
 
-      //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう？ 要検討
+      //storage="hoge"のhogeを取得
       const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
       const match = document
         .getText(parameterWordRange)
         .match(regExpParameterValue);
       const parameterValue = match !== null ? match[1] : "";
 
+      //Parserを使ってタグ全体を解析し、タグ名とすべてのパラメータを取得
+      const lineText = document.lineAt(position.line).text;
+      const parsedData = this.parser.parseText(lineText);
+
+      //カーソル位置に対応するタグを見つける
+      const tagData: { name?: string; pm?: Record<string, string>; column?: number } | undefined =
+        parsedData.find(
+          (item: { column?: number }) =>
+            item.column !== undefined &&
+            item.column <= position.character &&
+            item.column + lineText.length >= position.character,
+        );
+
+      if (!tagData || !tagData.name) {
+        return Promise.reject("no tag found");
+      }
+
+      const tag = tagData.name;
+      const tagParameters = tagData.pm || {};
+
       //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
       const tagParams: object = await vscode.workspace
         .getConfiguration()
         .get("TyranoScript syntax.tag.parameter")!;
-      const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
+
+      if (!tagParams[tag] || !tagParams[tag][parameter]) {
+        return Promise.reject("no config found for tag parameter");
+      }
+
+      let defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
+
+      //folderパラメータが指定されている場合、そちらを優先する
+      if (tagParameters["folder"]) {
+        defaultPath = path.join(defaultPath, tagParameters["folder"]);
+      }
+
       const imageViewMarkdownText = await this.createImageViewMarkdownText(
         parameterValue,
         projectPath,
