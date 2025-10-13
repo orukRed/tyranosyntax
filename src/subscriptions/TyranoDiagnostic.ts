@@ -616,7 +616,12 @@ export class TyranoDiagnostic {
                 }
               }
 
-              if (!isLabelExsit) {
+              //tyranoBuilderEnabledがtrueで、targetが空("")の場合はエラーにしない
+              //tyranoBuilderEnabledがfalseの場合、存在しないラベルならエラー
+              if (
+                !isLabelExsit &&
+                !(this.tyranoBuilderEnabled && data["pm"]["target"] == "")
+              ) {
                 const diag = new vscode.Diagnostic(
                   range,
                   data["pm"]["target"] + "は存在しないラベルです。",

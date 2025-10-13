@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -297,7 +297,11 @@
                 "_clickable_img"
               ],
               "clickable": [
-                "target"
+                "target",
+                "_clickable_img"
+              ],
+              "button": [
+                "_clickable_img"
               ]
             },
             "description": "特定のタグに存在するティラノビルダー固有のパラメータのためスキップ可能なパラメータ"
