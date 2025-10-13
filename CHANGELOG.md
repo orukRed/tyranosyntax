@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [1.14.3] 2025-10-11
+## [1.14.3] 2025-10-13
 
 - `TyranoScript syntax.tyranoBuilder.enabled`がONの時の挙動を改善しました。
   - jumpタグのtargetパラメータが空の場合にエラーを出さないようにしました。
