@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - `TyranoScript syntax.tyranoBuilder.enabled`がONの時の挙動を改善しました。
   - jumpタグのtargetパラメータが空の場合にエラーを出さないようにしました。
 - `TyranoScript syntax.tyranoBuilder.skipParameters`の初期値に、clickableタグ及びbuttonタグの_clickable_imgパラメータを追加しました。
+- ツールチップで画像が表示されない不具合を修正しました。[issue#347](https://github.com/orukRed/tyranosyntax/issues/347)
 
 ## [1.14.2] 2025-10-04
 

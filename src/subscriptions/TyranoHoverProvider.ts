@@ -60,15 +60,24 @@ ${textCopy.join("  \n")}
     defaultPath: string,
   ): Promise<vscode.MarkdownString> {
     //chara/akane/angry.png
-    const markdownText = new vscode.MarkdownString(`${paramValue}<br>`);
-    markdownText.appendMarkdown(`<img src="${paramValue}" width=350>`);
+    const markdownText = new vscode.MarkdownString();
+
+    // baseUriを先に設定(HTMLコンテンツを追加する前に設定する必要がある)
+    markdownText.baseUri = vscode.Uri.file(
+      path.join(projectPath, defaultPath) + path.sep,
+    );
     markdownText.supportHtml = true;
     markdownText.isTrusted = true;
     markdownText.supportThemeIcons = true;
-    //data/fgimage
-    markdownText.baseUri = vscode.Uri.file(
-      path.join(projectPath, defaultPath, path.sep),
-    );
+
+    // 画像の絶対パスを作成
+    const absoluteImagePath = vscode.Uri.file(
+      path.join(projectPath, defaultPath, paramValue),
+    ).toString();
+
+    markdownText.appendMarkdown(`${paramValue}<br>`);
+    markdownText.appendMarkdown(`<img src="${absoluteImagePath}" width=350>`);
+
     return markdownText;
   }
 
@@ -115,14 +124,12 @@ ${textCopy.join("  \n")}
         .getConfiguration()
         .get("TyranoScript syntax.tag.parameter")!;
       const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
-
-      return new vscode.Hover(
-        await this.createImageViewMarkdownText(
-          parameterValue,
-          projectPath,
-          defaultPath,
-        ),
+      const imageViewMarkdownText = await this.createImageViewMarkdownText(
+        parameterValue,
+        projectPath,
+        defaultPath,
       );
+      return new vscode.Hover(imageViewMarkdownText);
     }
 
     const wordRange = document.getWordRangeAtPosition(position, this.regExp);
@@ -146,5 +153,3 @@ ${textCopy.join("  \n")}
     return new vscode.Hover(markdownText); //解決したPromiseオブジェクトを返却。この場合、現在の文字列を返却
   }
 }
-
-
