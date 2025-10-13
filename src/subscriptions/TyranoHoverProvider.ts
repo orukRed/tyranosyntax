@@ -3,6 +3,7 @@ import * as fs from "fs";
 import path from "path";
 import { InformationWorkSpace } from "../InformationWorkSpace";
 import { InformationExtension } from "../InformationExtension";
+import { Parser } from "../Parser";
 
 export class TyranoHoverProvider {
   private jsonTyranoSnippet: string;
@@ -111,8 +112,8 @@ ${textCopy.join("  \n")}
     const tag = tagMatch[2]; // 例: bg
 
     //2. 取得したタグをParserに通す
-    const parser = await import("../Parser");
-    const tyranoParser = parser.Parser.getInstance();
+    // const parser = await import("../Parser");
+    const tyranoParser = Parser.getInstance();
     const parsedData = tyranoParser.parseText(fullTag);
 
     if (!parsedData || parsedData.length === 0) {
@@ -125,11 +126,7 @@ ${textCopy.join("  \n")}
     const parameter = document.getText(parameterWordRange).match(/(\w+)="/)![1];
 
     //storage="hoge"のhogeを取得
-    const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
-    const match = document
-      .getText(parameterWordRange)
-      .match(regExpParameterValue);
-    const parameterValue = match !== null ? match[1] : "";
+    const parameterValue = parsedData[0].pm[parameter] || "";
 
     //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
     const tagParams: object = await vscode.workspace
