@@ -31,7 +31,9 @@ type TagParameterConfig = {
   values?: string[];
 };
 
-export class TyranoCompletionItemProvider implements vscode.CompletionItemProvider {
+export class TyranoCompletionItemProvider
+  implements vscode.CompletionItemProvider
+{
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
   public constructor() {}
@@ -651,7 +653,7 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
             const referenceFilePath = path
               .relative(referencePath, resource.filePath)
               .replace(/\\/g, "/"); //基準パスからの相対パス
-            
+
             // MarkdownStringの設定（baseUriを先に設定する必要がある）
             comp.documentation = new vscode.MarkdownString();
             comp.documentation.baseUri = vscode.Uri.file(
@@ -660,15 +662,17 @@ export class TyranoCompletionItemProvider implements vscode.CompletionItemProvid
             comp.documentation.supportHtml = true;
             comp.documentation.isTrusted = true;
             comp.documentation.supportThemeIcons = true;
-            
+
             // 画像の絶対パスを作成
-            const absoluteImagePath = vscode.Uri.file(resource.filePath).toString();
-            
+            const absoluteImagePath = vscode.Uri.file(
+              resource.filePath,
+            ).toString();
+
             comp.documentation.appendMarkdown(`${referenceFilePath}<br>`);
             comp.documentation.appendMarkdown(
               `<img src="${absoluteImagePath}" width=350>`,
             );
-            
+
             comp.insertText = new vscode.SnippetString(referenceFilePath); //基準パスからの相対パス
             completions.push(comp);
           }
