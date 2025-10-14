@@ -3,6 +3,7 @@ import * as fs from "fs";
 import path from "path";
 import { InformationWorkSpace } from "../InformationWorkSpace";
 import { InformationExtension } from "../InformationExtension";
+import { Parser } from "../Parser";
 
 export class TyranoHoverProvider {
   private jsonTyranoSnippet: string;
@@ -81,6 +82,74 @@ ${textCopy.join("  \n")}
     return markdownText;
   }
 
+  /**
+   * パラメータ付きホバーを処理します
+   * @param document
+   * @param position
+   * @param parameterWordRange
+   * @returns
+   */
+  private async handleParameterHover(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    parameterWordRange: vscode.Range,
+  ): Promise<vscode.Hover> {
+    //プロジェクトパス取得
+    const projectPath: string = await this.infoWs.getProjectPathByFilePath(
+      document.uri.fsPath,
+    );
+
+    //1. カーソル位置のタグを取得
+    const lineText = document.lineAt(position.line).text;
+    const tagRegex = /([[@])(\w+)(\s+[^\]]*)?/;
+    const tagMatch = lineText.match(tagRegex);
+
+    if (!tagMatch) {
+      return Promise.reject("no tag found");
+    }
+
+    const fullTag = tagMatch[0]; // 例: [bg storage="foo.png" folder="path/to"]
+    const tag = tagMatch[2]; // 例: bg
+
+    //2. 取得したタグをParserに通す
+    // const parser = await import("../Parser");
+    const tyranoParser = Parser.getInstance();
+    const parsedData = tyranoParser.parseText(fullTag);
+
+    if (!parsedData || parsedData.length === 0) {
+      return Promise.reject("failed to parse tag");
+    }
+
+    const parsedTag = parsedData[0];
+
+    //parameter名(storageとかgraphicとか)取得
+    const parameter = document.getText(parameterWordRange).match(/(\w+)="/)![1];
+
+    //storage="hoge"のhogeを取得
+    const parameterValue = parsedData[0].pm[parameter] || "";
+
+    //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
+    const tagParams: object = await vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.tag.parameter")!;
+
+    let defaultPath = "";
+
+    //3. folderが定義されている場合は、defaultPathにfolderの値を適用する
+    if (parsedTag.pm && parsedTag.pm.folder) {
+      defaultPath = "data/" + parsedTag.pm.folder;
+    } else if (tagParams[tag] && tagParams[tag][parameter]) {
+      defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
+    }
+
+    const imageViewMarkdownText = await this.createImageViewMarkdownText(
+      parameterValue,
+      projectPath,
+      defaultPath,
+    );
+    return new vscode.Hover(imageViewMarkdownText);
+  }
+
   public async provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -93,43 +162,7 @@ ${textCopy.join("  \n")}
     );
 
     if (parameterWordRange) {
-      //プロジェクトパス取得
-      const projectPath: string = await this.infoWs.getProjectPathByFilePath(
-        document.uri.fsPath,
-      );
-
-      //タグ名取得
-      const exp =
-        /(\w+)(\s*((\w*)="?([\w\u3040-\u30FF\u4E00-\u9FFF./*]*)"?)*)*/;
-      const wordRange = document.getWordRangeAtPosition(position, exp);
-      const matcher: RegExpMatchArray | null = document
-        .getText(wordRange)
-        .match(exp);
-      const tag = matcher![1];
-
-      //parameter名(storageとかgraphicとか)取得
-      const parameter = document
-        .getText(parameterWordRange)
-        .match(/(\w+)="/)![1];
-
-      //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう？ 要検討
-      const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
-      const match = document
-        .getText(parameterWordRange)
-        .match(regExpParameterValue);
-      const parameterValue = match !== null ? match[1] : "";
-
-      //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
-      const tagParams: object = await vscode.workspace
-        .getConfiguration()
-        .get("TyranoScript syntax.tag.parameter")!;
-      const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
-      const imageViewMarkdownText = await this.createImageViewMarkdownText(
-        parameterValue,
-        projectPath,
-        defaultPath,
-      );
-      return new vscode.Hover(imageViewMarkdownText);
+      return this.handleParameterHover(document, position, parameterWordRange);
     }
 
     const wordRange = document.getWordRangeAtPosition(position, this.regExp);
