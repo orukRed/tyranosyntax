@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - ツールチップの不具合を修正しました。[issue#349](https://github.com/orukRed/tyranosyntax/issues/349)
   - folderパラメータが指定されている場合に指定したパスに沿って画像を表示するようにしました。
   - storageより前のパラメータの値に負の数値を入れた場合にもツールチップが表示されるようにしました。
+- 補完機能でも画像が表示されなくなっている不具合を修正しました。
 
 ## [1.14.3] 2025-10-13
 
