@@ -101,7 +101,7 @@ ${textCopy.join("  \n")}
 
     //1. カーソル位置のタグを取得
     const lineText = document.lineAt(position.line).text;
-    const tagRegex = /([@[])(\w+)(\s+[^\]]*)?\]?/;
+    const tagRegex = /([@[])(\w+)(?:\s+(?:[^\]"]|"[^"]*")*)?]?/;
     const tagMatch = lineText.match(tagRegex);
 
     if (!tagMatch) {
@@ -158,7 +158,7 @@ ${textCopy.join("  \n")}
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
       position,
-      new RegExp(/[\S]+="[\S]+"/),
+      new RegExp(/\w+="[^"]*"/),
     );
 
     if (parameterWordRange) {
