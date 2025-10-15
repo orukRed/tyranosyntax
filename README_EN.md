@@ -22,6 +22,33 @@ Please report using one of the following methods.
 - [Reply or DM on Twitter (@orukred)](https://twitter.com/OrukRed)
 - [Create an issue on Github (bugs only)](https://github.com/orukRed/tyranosyntax/issues)
 
+## Table of Contents
+
+- [How to use](#how-to-use)
+- [Features](#features)
+  - [Syntax Highlighting](#syntax-highlighting)
+  - [Tag completion](#tag-completion)
+  - [Completion of plugin/macro parameters (beta version)](#completion-of-pluginmacro-parameters-beta-version)
+  - [Outline display](#outline-display)
+  - [Diagnostics](#diagnostics)
+  - [Display document tooltip (Hover)](#display-document-tooltip-hover)
+  - [Display image tooltip (Hover image)](#display-image-tooltip-hover-image)
+  - [Tag shortcut input (Snippets)](#tag-shortcut-input-snippets)
+  - [Go To Jump](#go-to-jump)
+  - [Go To Definition](#go-to-definition)
+  - [On-the-fly preview function (beta version)](#on-the-fly-preview-function-beta-version)
+  - [Display Flowchart](#display-flowchart)
+  - [Folding a process](#folding-a-process)
+  - [Variable Rename Function](#variable-rename-function)
+- [List of shortcuts](#list-of-shortcuts)
+- [About the configuration file](#about-the-configuration-file)
+  - [Language Settings](#language-settings)
+- [Using with Tyrano Builder](#using-with-tyrano-builder)
+- [Release Notes](#release-notes)
+- [Icon Provider](#icon-provider)
+- [License/Credits](#licensecredits)
+- [Disclaimer](#disclaimer)
+
 ## How to use
 
 From vscode's `File` → `Open Folder`,

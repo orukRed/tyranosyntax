@@ -144,12 +144,29 @@ ${textCopy.join("  \n")}
       defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
     }
 
-    const imageViewMarkdownText = await this.createImageViewMarkdownText(
-      parameterValue,
-      projectPath,
-      defaultPath,
+    // 4. 画像パラメータかどうか判定
+    // defaultPathが存在し、parameterValueが画像っぽい拡張子を持つ場合は画像表示
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"];
+    const hasImageExtension = imageExtensions.some((ext) =>
+      parameterValue.toLowerCase().endsWith(ext),
     );
-    return new vscode.Hover(imageViewMarkdownText);
+
+    if (defaultPath && parameterValue && hasImageExtension) {
+      // 画像パラメータの場合は画像を表示
+      const imageViewMarkdownText = await this.createImageViewMarkdownText(
+        parameterValue,
+        projectPath,
+        defaultPath,
+      );
+      return new vscode.Hover(imageViewMarkdownText);
+    } else {
+      // 画像以外のパラメータの場合はタグ情報を表示
+      const markdownText = this.createMarkdownText(this.jsonTyranoSnippet[tag]);
+      if (!markdownText) {
+        return Promise.reject("tag info not found");
+      }
+      return new vscode.Hover(markdownText);
+    }
   }
 
   public async provideHover(
