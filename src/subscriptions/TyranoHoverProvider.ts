@@ -76,7 +76,10 @@ ${textCopy.join("  \n")}
       path.join(projectPath, defaultPath, paramValue),
     ).toString();
 
-    markdownText.appendMarkdown(`${paramValue}<br>`);
+    // プロジェクトルートからの相対パスを作成
+    const relativePathFromRoot = path.join(defaultPath, paramValue);
+
+    markdownText.appendMarkdown(`${relativePathFromRoot}<br>`);
     markdownText.appendMarkdown(`<img src="${absoluteImagePath}" width=350>`);
 
     return markdownText;
@@ -112,7 +115,6 @@ ${textCopy.join("  \n")}
     const tag = tagMatch[2]; // 例: bg
 
     //2. 取得したタグをParserに通す
-    // const parser = await import("../Parser");
     const tyranoParser = Parser.getInstance();
     const parsedData = tyranoParser.parseText(fullTag);
 
