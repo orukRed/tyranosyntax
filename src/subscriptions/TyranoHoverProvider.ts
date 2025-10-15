@@ -76,7 +76,10 @@ ${textCopy.join("  \n")}
       path.join(projectPath, defaultPath, paramValue),
     ).toString();
 
-    markdownText.appendMarkdown(`${paramValue}<br>`);
+    // プロジェクトルートからの相対パスを作成
+    const relativePathFromRoot = path.join(defaultPath, paramValue);
+
+    markdownText.appendMarkdown(`${relativePathFromRoot}<br>`);
     markdownText.appendMarkdown(`<img src="${absoluteImagePath}" width=350>`);
 
     return markdownText;
@@ -101,7 +104,7 @@ ${textCopy.join("  \n")}
 
     //1. カーソル位置のタグを取得
     const lineText = document.lineAt(position.line).text;
-    const tagRegex = /([[@])(\w+)(\s+[^\]]*)?/;
+    const tagRegex = /([@[])(\w+)(?:\s+(?:[^\]"]|"[^"]*")*)?]?/;
     const tagMatch = lineText.match(tagRegex);
 
     if (!tagMatch) {
@@ -112,7 +115,6 @@ ${textCopy.join("  \n")}
     const tag = tagMatch[2]; // 例: bg
 
     //2. 取得したタグをParserに通す
-    // const parser = await import("../Parser");
     const tyranoParser = Parser.getInstance();
     const parsedData = tyranoParser.parseText(fullTag);
 
@@ -142,12 +144,29 @@ ${textCopy.join("  \n")}
       defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
     }
 
-    const imageViewMarkdownText = await this.createImageViewMarkdownText(
-      parameterValue,
-      projectPath,
-      defaultPath,
+    // 4. 画像パラメータかどうか判定
+    // defaultPathが存在し、parameterValueが画像っぽい拡張子を持つ場合は画像表示
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"];
+    const hasImageExtension = imageExtensions.some((ext) =>
+      parameterValue.toLowerCase().endsWith(ext),
     );
-    return new vscode.Hover(imageViewMarkdownText);
+
+    if (defaultPath && parameterValue && hasImageExtension) {
+      // 画像パラメータの場合は画像を表示
+      const imageViewMarkdownText = await this.createImageViewMarkdownText(
+        parameterValue,
+        projectPath,
+        defaultPath,
+      );
+      return new vscode.Hover(imageViewMarkdownText);
+    } else {
+      // 画像以外のパラメータの場合はタグ情報を表示
+      const markdownText = this.createMarkdownText(this.jsonTyranoSnippet[tag]);
+      if (!markdownText) {
+        return Promise.reject("tag info not found");
+      }
+      return new vscode.Hover(markdownText);
+    }
   }
 
   public async provideHover(
@@ -158,7 +177,7 @@ ${textCopy.join("  \n")}
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
       position,
-      new RegExp(/[\S]+="[\S]+"/),
+      new RegExp(/\w+="[^"]*"/),
     );
 
     if (parameterWordRange) {

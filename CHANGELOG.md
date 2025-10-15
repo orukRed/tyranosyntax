@@ -4,6 +4,13 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.14.5] 2025-10-15
+
+- 大かっこを含むパラメータを指定したときにツールチップが正しく表示されない不具合を修正しました。[issue#352](https://github.com/orukRed/tyranosyntax/issues/352)
+- storageパラメータなど、画像を表示するパラメータにマウスオンした場合に画像のパスも表示されるようにしました。
+- タグのツールチップが表示される範囲を拡大しました。（タグ名だけでなく、パラメータにマウスオンした場合にも表示されるようにしました。）
+- readmeに目次を追加しました。
+
 ## [1.14.4] 2025-10-14
 
 - ツールチップの不具合を修正しました。[issue#349](https://github.com/orukRed/tyranosyntax/issues/349)
