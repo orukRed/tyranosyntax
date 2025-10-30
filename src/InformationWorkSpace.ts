@@ -238,10 +238,13 @@ export class InformationWorkSpace {
     if (path.extname(filePath) !== ".js") {
       return;
     }
-    //vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
-    //fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
+    // vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
+    // fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
     // let textDocument = await vscode.workspace.openTextDocument(filePath);
     // this._scriptFileMap.set(textDocument.fileName, textDocument.getText());
+    
+    // fs.readFileSyncは常にディスクから最新の内容を読み込むため、
+    // キャッシュの無効化処理は不要（updateScenarioFileMapとは異なる）
     this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
   }
   public async updateScenarioFileMap(filePath: string) {

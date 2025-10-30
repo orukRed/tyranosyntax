@@ -19,7 +19,10 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
+
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
+// Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
+const FILE_SYNC_DELAY_MS = 100;
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
@@ -163,7 +166,7 @@ export function activate(context: ExtensionContext) {
             infoWs.extensionPath = context.extensionPath;
 
             // レースコンディション対策：初期化後に少し待機してマクロ情報を再確認
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
             TyranoLogger.print("Initial macro data loading completed");
 
             TyranoLogger.print("TyranoDiagnostic activate");
@@ -219,7 +222,7 @@ export function activate(context: ExtensionContext) {
                     );
 
                     // レースコンディション対策のため少し待機
-                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
 
                     try {
                       await tyranoDiagnostic.createDiagnostics(
@@ -285,7 +288,7 @@ export function activate(context: ExtensionContext) {
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) => setTimeout(resolve, 100));
+              await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
             });
@@ -312,7 +315,7 @@ export function activate(context: ExtensionContext) {
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) => setTimeout(resolve, 100));
+              await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
               await infoWs.updateVariableMapByJS(e.fsPath);
