@@ -238,17 +238,59 @@ export class InformationWorkSpace {
     if (path.extname(filePath) !== ".js") {
       return;
     }
-    //vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
-    //fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
+    // vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
+    // fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
     // let textDocument = await vscode.workspace.openTextDocument(filePath);
     // this._scriptFileMap.set(textDocument.fileName, textDocument.getText());
-    this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
+
+    try {
+      // fs.readFileSyncは常にディスクから最新の内容を読み込むため、
+      // キャッシュの無効化処理は不要（updateScenarioFileMapとは異なる）
+      this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
+    } catch (error) {
+      // ファイルが存在しない場合はキャッシュから削除
+      this._scriptFileMap.delete(filePath);
+      TyranoLogger.print(
+        `Script file read failed for ${filePath}, removed from cache`,
+        ErrorLevel.WARN,
+      );
+      throw error;
+    }
   }
   public async updateScenarioFileMap(filePath: string) {
     //.ks拡張子以外ならシナリオではないのでreturn
     if (path.extname(filePath) !== ".ks") {
       return;
     }
+
+    // 外部ファイルの変更後に最新のコンテンツを確実に取得するために、ドキュメントを強制的にリロードします。
+    // ドキュメントがすでにキャッシュにあるかどうかを確認します
+    const existingDoc = this._scenarioFileMap.get(filePath);
+    if (existingDoc) {
+      // If the document exists in cache, verify it's up to date by reading from disk
+      try {
+        const diskContent = fs.readFileSync(filePath, "utf-8");
+        const cachedContent = existingDoc.getText();
+
+        // コンテンツが異なる場合、ドキュメントは古いため、キャッシュから削除します
+        if (diskContent !== cachedContent) {
+          this._scenarioFileMap.delete(filePath);
+          TyranoLogger.print(
+            `Document cache invalidated for ${filePath} due to external changes`,
+          );
+        }
+      } catch (error) {
+        // If we can't read the file, remove it from cache
+        console.log(error);
+        this._scenarioFileMap.delete(filePath);
+        TyranoLogger.print(
+          `Document cache invalidated for ${filePath} due to read error`,
+          ErrorLevel.WARN,
+        );
+      }
+    }
+
+    // Open (or reopen) the document to get the latest version
     const textDocument = await vscode.workspace.openTextDocument(filePath);
     this._scenarioFileMap.set(textDocument.fileName, textDocument);
   }
@@ -883,6 +925,14 @@ export class InformationWorkSpace {
           }
         });
       });
+  }
+
+  /**
+   * 引数で指定したファイルパス（キー）のトランジションデータマップを削除
+   * @param fsPath
+   */
+  public async spliceTransitionMapByFilePath(fsPath: string) {
+    this.transitionMap.delete(fsPath);
   }
 
   /**
