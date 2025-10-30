@@ -249,6 +249,34 @@ export class InformationWorkSpace {
     if (path.extname(filePath) !== ".ks") {
       return;
     }
+    
+    // Force reload the document to ensure we get the latest content after external file changes
+    // Check if the document is already in our cache
+    const existingDoc = this._scenarioFileMap.get(filePath);
+    if (existingDoc) {
+      // If the document exists in cache, verify it's up to date by reading from disk
+      try {
+        const diskContent = fs.readFileSync(filePath, "utf-8");
+        const cachedContent = existingDoc.getText();
+        
+        // If content differs, the document is stale - remove it from cache
+        if (diskContent !== cachedContent) {
+          this._scenarioFileMap.delete(filePath);
+          TyranoLogger.print(
+            `Document cache invalidated for ${filePath} due to external changes`,
+          );
+        }
+      } catch (error) {
+        // If we can't read the file, remove it from cache
+        this._scenarioFileMap.delete(filePath);
+        TyranoLogger.print(
+          `Document cache invalidated for ${filePath} due to read error`,
+          ErrorLevel.WARN,
+        );
+      }
+    }
+    
+    // Open (or reopen) the document to get the latest version
     const textDocument = await vscode.workspace.openTextDocument(filePath);
     this._scenarioFileMap.set(textDocument.fileName, textDocument);
   }

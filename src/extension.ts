@@ -284,6 +284,8 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
+              // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
+              await new Promise((resolve) => setTimeout(resolve, 100));
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
             });
@@ -309,6 +311,8 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateVariableMapByJS(e.fsPath);
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
+              // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
+              await new Promise((resolve) => setTimeout(resolve, 100));
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
               await infoWs.updateVariableMapByJS(e.fsPath);
