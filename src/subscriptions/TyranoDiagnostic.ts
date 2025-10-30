@@ -150,47 +150,11 @@ export class TyranoDiagnostic {
     //commentはパーサーに独自で追加したもの、labelとtextはティラノスクリプト側で既に定義されているもの。
     const tyranoTag: string[] = [...baseTyranoTag, "comment", "label", "text"];
 
-    //FIXME:各関数でfor回すんじゃなくて、for回してから各関数を呼び出す処理にしたい
-    //未定義のマクロを使用しているか検出
-    if (this.isExecuteDiagnostic(this.undefinedMacro)) {
-      await this.detectionUndefineMacro(
-        tyranoTag,
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] macro detection finished.`,
-      );
-    }
-    //存在しないシナリオファイル、未定義のラベルを検出
-    if (this.isExecuteDiagnostic(this.missingScenariosAndLabels)) {
-      await this.detectionMissingScenariosAndLabels(
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] scenario and label detection finished.`,
-      );
-    }
+    // 統合ループ: 3つの診断メソッドを1つのループに統合して高速化
+    // Unified loop: Combine 3 diagnostic methods into one loop for better performance
 
-    //if文の中でjump,callタグを使用しているか検出
-    if (this.isExecuteDiagnostic(this.jumpAndCallInIfStatement)) {
-      await this.detectJumpAndCallInIfStatement(
-        this.infoWs.scenarioFileMap,
-        diagnosticArray,
-        diagnosticProjectPath,
-      );
-      TyranoLogger.print(
-        `[${diagnosticProjectPath}] Detect if the 'jump' or 'call' tags are being used within an 'if' statement.`,
-      );
-    }
-
-    //-----------------------------------------
-    //■その他の診断機能
-    //診断項目ごとにfor文作ってると処理速度が壊滅的な遅さになるのでここに書く
-    //-----------------------------------------
+    // パース結果のキャッシュを作成（同じファイルを何度もパースしないように）
+    const parsedDataCache = new Map<string, any>();
 
     //プロジェクトのシナリオファイルを一つずつ診断
     for (const [_filePath, scenarioDocument] of this.infoWs.scenarioFileMap) {
@@ -214,31 +178,217 @@ export class TyranoDiagnostic {
       const parsedData = this.parser.parseText(scenarioDocument.getText()); //構文解析
       const diagnostics: vscode.Diagnostic[] = [];
 
+      // パース結果をキャッシュに保存
+      parsedDataCache.set(scenarioDocument.fileName, parsedData);
+
       //-----------------------------------------
-      //■ファイルに対しての診断はここ
+      //■統合診断ループ: 1回のパースで複数の診断を実行
       //-----------------------------------------
 
-      //マクロの重複チェック
-      await this.checkMacroDuplicate(
-        diagnostics,
-        projectPathOfDiagFile,
-        scenarioDocument,
-      );
-
-      //パラメータ間のスペーシングチェック
-      await this.checkParameterSpacing(
-        diagnostics,
-        projectPathOfDiagFile,
-        scenarioDocument,
-      );
+      let isInIf: boolean = false; // if文の中にいるかどうか（detectJumpAndCallInIfStatement用）
 
       for (const data of parsedData) {
         //early return
         if (data["name"] === "comment") {
           continue;
         }
+
+        // 1. 未定義マクロの検出（元のdetectionUndefineMacro）
+        if (this.isExecuteDiagnostic(this.undefinedMacro)) {
+          if (!tyranoTag.includes(data["name"])) {
+            const tagFirstIndex = scenarioDocument
+              .lineAt(data["line"])
+              .text.indexOf(data["name"]);
+            const tagLastIndex = tagFirstIndex + data["name"].length;
+
+            const range = new vscode.Range(
+              data["line"],
+              tagFirstIndex,
+              data["line"],
+              tagLastIndex,
+            );
+            const diag = new vscode.Diagnostic(
+              range,
+              "タグ" + data["name"] + "は未定義です。",
+              vscode.DiagnosticSeverity.Error,
+            );
+            diagnostics.push(diag);
+          }
+        }
+
+        // 2. if文内のjump/call検出（元のdetectJumpAndCallInIfStatement）
+        if (this.isExecuteDiagnostic(this.jumpAndCallInIfStatement)) {
+          if (data["name"] === "if") {
+            isInIf = true;
+          }
+          if (data["name"] === "endif") {
+            isInIf = false;
+          }
+
+          if (
+            isInIf &&
+            (data["name"] === "jump" || data["name"] === "call")
+          ) {
+            const tagFirstIndex = scenarioDocument
+              .lineAt(data["line"])
+              .text.indexOf(data["name"]);
+            const tagLastIndex =
+              tagFirstIndex + this.sumStringLengthsInObject(data["pm"]);
+            const range = new vscode.Range(
+              data["line"],
+              tagFirstIndex,
+              data["line"],
+              tagLastIndex,
+            );
+            const diag = new vscode.Diagnostic(
+              range,
+              `ifの中での${data["name"]}は正常に動作しない可能性があります。[${data["name"]} cond="条件式"]に置き換えることを推奨します。`,
+              vscode.DiagnosticSeverity.Warning,
+            );
+            diagnostics.push(diag);
+          }
+        }
+
+        // 3. 存在しないシナリオファイル・未定義ラベルの検出（元のdetectionMissingScenariosAndLabels）
+        if (this.isExecuteDiagnostic(this.missingScenariosAndLabels)) {
+          if (this.JUMP_TAG.includes(data["name"])) {
+            // storageに付いての処理
+            if (data["pm"]["storage"] !== undefined) {
+              const range = this.getParameterRange(
+                "storage",
+                data["pm"]["storage"],
+                data,
+                scenarioDocument,
+              );
+
+              if (this.isExistPercentAtBeginning(data["pm"]["storage"])) {
+                continue;
+              }
+
+              if (this.isValueIsIncludeVariable(data["pm"]["storage"])) {
+                if (!this.isExistAmpersandAtBeginning(data["pm"]["storage"])) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    "パラメータに変数を使う場合は先頭に'&'が必要です。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+              } else {
+                if (!data["pm"]["storage"].endsWith(".ks")) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    "storageパラメータは末尾が'.ks'である必要があります。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+
+                if (
+                  !fs.existsSync(
+                    projectPathOfDiagFile +
+                      this.infoWs.DATA_DIRECTORY +
+                      this.infoWs.DATA_SCENARIO +
+                      this.infoWs.pathDelimiter +
+                      data["pm"]["storage"],
+                  )
+                ) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    data["pm"]["storage"] + "は存在しないファイルです。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+              }
+            }
+
+            // targetについての処理
+            if (data["pm"]["target"] !== undefined) {
+              const range = this.getParameterRange(
+                "target",
+                data["pm"]["target"],
+                data,
+                scenarioDocument,
+              );
+
+              if (this.isExistPercentAtBeginning(data["pm"]["target"])) {
+                continue;
+              }
+
+              if (this.isValueIsIncludeVariable(data["pm"]["target"])) {
+                if (!this.isExistAmpersandAtBeginning(data["pm"]["target"])) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    "パラメータに変数を使う場合は先頭に'&'が必要です。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+              } else if (!this.isValueIsIncludeVariable(data["pm"]["storage"])) {
+                data["pm"]["target"] = data["pm"]["target"].replace("*", "");
+
+                const storageScenarioDocument: vscode.TextDocument | undefined =
+                  data["pm"]["storage"] === undefined
+                    ? scenarioDocument
+                    : this.infoWs.scenarioFileMap.get(
+                        this.infoWs.convertToAbsolutePathFromRelativePath(
+                          projectPathOfDiagFile +
+                            this.infoWs.DATA_DIRECTORY +
+                            this.infoWs.DATA_SCENARIO +
+                            this.infoWs.pathDelimiter +
+                            data["pm"]["storage"],
+                        ),
+                      );
+
+                if (storageScenarioDocument === undefined) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    data["pm"]["target"] +
+                      "ファイル解析中に下線の箇所でエラーが発生しました。開発者への報告をお願いします。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+                const storageParsedData = this.parser.parseText(
+                  storageScenarioDocument.getText(),
+                );
+                let isLabelExsit: boolean = false;
+                for (const storageData in storageParsedData) {
+                  if (
+                    storageParsedData[storageData]["pm"]["label_name"] ===
+                    data["pm"]["target"]
+                  ) {
+                    isLabelExsit = true;
+                    break;
+                  }
+                }
+
+                if (!isLabelExsit && !this.tyranoBuilderEnabled) {
+                  const diag = new vscode.Diagnostic(
+                    range,
+                    data["pm"]["target"] + "は存在しないラベルです。",
+                    vscode.DiagnosticSeverity.Error,
+                  );
+                  diagnostics.push(diag);
+                  continue;
+                }
+              }
+            }
+          }
+        }
+
+        //-----------------------------------------
+        //■その他の診断項目（元々統合ループにあったもの）
+        //-----------------------------------------
+
         //存在しないパラメータのチェック
-        await this.detectionUndefinedParameter(
+         this.detectionUndefinedParameter(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
@@ -246,32 +396,57 @@ export class TyranoDiagnostic {
         );
 
         //変数で&がないもののチェック
-        await this.detectionMissingAmpersandInVariable(
+         this.detectionMissingAmpersandInVariable(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
           diagnostics,
         );
 
-        //TODO:今後もし行に対しての診断項目が増えた場合はここに追加
         // ファイルリソースの存在チェックを別メソッドで実行
-        await this.detectionMissingResources(
+         this.detectionMissingResources(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
           diagnostics,
         );
         //ラベル名のチェック
-        await this.checkLabelName(
+         this.checkLabelName(
           data,
           scenarioDocument,
           projectPathOfDiagFile,
           diagnostics,
         );
       }
+
+      //-----------------------------------------
+      //■ファイルに対しての診断
+      //-----------------------------------------
+
+      //マクロの重複チェック
+       this.checkMacroDuplicate(
+        diagnostics,
+        projectPathOfDiagFile,
+        scenarioDocument,
+      );
+
+      //パラメータ間のスペーシングチェック
+       this.checkParameterSpacing(
+        diagnostics,
+        projectPathOfDiagFile,
+        scenarioDocument,
+      );
+
       diagnosticArray.push([scenarioDocument.uri, diagnostics]);
     }
-    //診断結果をセット
+
+    TyranoLogger.print(
+      `[${diagnosticProjectPath}] unified diagnostic loop finished.`,
+    );
+
+    //-----------------------------------------
+    //■診断結果をセット
+    //-----------------------------------------
 
     TyranoLogger.print(`diagnostic set`);
     TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
