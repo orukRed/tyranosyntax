@@ -3,6 +3,7 @@ import * as fs from "fs";
 import path from "path";
 import { InformationWorkSpace } from "../InformationWorkSpace";
 import { InformationExtension } from "../InformationExtension";
+import { Parser } from "../Parser";
 
 export class TyranoHoverProvider {
   private jsonTyranoSnippet: string;
@@ -60,16 +61,112 @@ ${textCopy.join("  \n")}
     defaultPath: string,
   ): Promise<vscode.MarkdownString> {
     //chara/akane/angry.png
-    const markdownText = new vscode.MarkdownString(`${paramValue}<br>`);
-    markdownText.appendMarkdown(`<img src="${paramValue}" width=350>`);
+    const markdownText = new vscode.MarkdownString();
+
+    // baseUriを先に設定(HTMLコンテンツを追加する前に設定する必要がある)
+    markdownText.baseUri = vscode.Uri.file(
+      path.join(projectPath, defaultPath) + path.sep,
+    );
     markdownText.supportHtml = true;
     markdownText.isTrusted = true;
     markdownText.supportThemeIcons = true;
-    //data/fgimage
-    markdownText.baseUri = vscode.Uri.file(
-      path.join(projectPath, defaultPath, path.sep),
-    );
+
+    // 画像の絶対パスを作成
+    const absoluteImagePath = vscode.Uri.file(
+      path.join(projectPath, defaultPath, paramValue),
+    ).toString();
+
+    // プロジェクトルートからの相対パスを作成
+    const relativePathFromRoot = path.join(defaultPath, paramValue);
+
+    markdownText.appendMarkdown(`${relativePathFromRoot}<br>`);
+    markdownText.appendMarkdown(`<img src="${absoluteImagePath}" width=350>`);
+
     return markdownText;
+  }
+
+  /**
+   * パラメータ付きホバーを処理します
+   * @param document
+   * @param position
+   * @param parameterWordRange
+   * @returns
+   */
+  private async handleParameterHover(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    parameterWordRange: vscode.Range,
+  ): Promise<vscode.Hover> {
+    //プロジェクトパス取得
+    const projectPath: string = await this.infoWs.getProjectPathByFilePath(
+      document.uri.fsPath,
+    );
+
+    //1. カーソル位置のタグを取得
+    const lineText = document.lineAt(position.line).text;
+    const tagRegex = /([@[])(\w+)(?:\s+(?:[^\]"]|"[^"]*")*)?]?/;
+    const tagMatch = lineText.match(tagRegex);
+
+    if (!tagMatch) {
+      return Promise.reject("no tag found");
+    }
+
+    const fullTag = tagMatch[0]; // 例: [bg storage="foo.png" folder="path/to"]
+    const tag = tagMatch[2]; // 例: bg
+
+    //2. 取得したタグをParserに通す
+    const tyranoParser = Parser.getInstance();
+    const parsedData = tyranoParser.parseText(fullTag);
+
+    if (!parsedData || parsedData.length === 0) {
+      return Promise.reject("failed to parse tag");
+    }
+
+    const parsedTag = parsedData[0];
+
+    //parameter名(storageとかgraphicとか)取得
+    const parameter = document.getText(parameterWordRange).match(/(\w+)="/)![1];
+
+    //storage="hoge"のhogeを取得
+    const parameterValue = parsedData[0].pm[parameter] || "";
+
+    //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
+    const tagParams: object = await vscode.workspace
+      .getConfiguration()
+      .get("TyranoScript syntax.tag.parameter")!;
+
+    let defaultPath = "";
+
+    //3. folderが定義されている場合は、defaultPathにfolderの値を適用する
+    if (parsedTag.pm && parsedTag.pm.folder) {
+      defaultPath = "data/" + parsedTag.pm.folder;
+    } else if (tagParams[tag] && tagParams[tag][parameter]) {
+      defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
+    }
+
+    // 4. 画像パラメータかどうか判定
+    // defaultPathが存在し、parameterValueが画像っぽい拡張子を持つ場合は画像表示
+    const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"];
+    const hasImageExtension = imageExtensions.some((ext) =>
+      parameterValue.toLowerCase().endsWith(ext),
+    );
+
+    if (defaultPath && parameterValue && hasImageExtension) {
+      // 画像パラメータの場合は画像を表示
+      const imageViewMarkdownText = await this.createImageViewMarkdownText(
+        parameterValue,
+        projectPath,
+        defaultPath,
+      );
+      return new vscode.Hover(imageViewMarkdownText);
+    } else {
+      // 画像以外のパラメータの場合はタグ情報を表示
+      const markdownText = this.createMarkdownText(this.jsonTyranoSnippet[tag]);
+      if (!markdownText) {
+        return Promise.reject("tag info not found");
+      }
+      return new vscode.Hover(markdownText);
+    }
   }
 
   public async provideHover(
@@ -80,49 +177,11 @@ ${textCopy.join("  \n")}
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
       position,
-      new RegExp(/[\S]+="[\S]+"/),
+      new RegExp(/\w+="[^"]*"/),
     );
 
     if (parameterWordRange) {
-      //プロジェクトパス取得
-      const projectPath: string = await this.infoWs.getProjectPathByFilePath(
-        document.uri.fsPath,
-      );
-
-      //タグ名取得
-      const exp =
-        /(\w+)(\s*((\w*)="?([\w\u3040-\u30FF\u4E00-\u9FFF./*]*)"?)*)*/;
-      const wordRange = document.getWordRangeAtPosition(position, exp);
-      const matcher: RegExpMatchArray | null = document
-        .getText(wordRange)
-        .match(exp);
-      const tag = matcher![1];
-
-      //parameter名(storageとかgraphicとか)取得
-      const parameter = document
-        .getText(parameterWordRange)
-        .match(/(\w+)="/)![1];
-
-      //storage="hoge"のhogeを取得 この処理もParserに移動してよさそう？ 要検討
-      const regExpParameterValue = new RegExp(`${parameter}="([^"]+)"`);
-      const match = document
-        .getText(parameterWordRange)
-        .match(regExpParameterValue);
-      const parameterValue = match !== null ? match[1] : "";
-
-      //TyranoScript syntax.tag.parameterの値から、/data/bgimageなどのデフォルトパスを取得する
-      const tagParams: object = await vscode.workspace
-        .getConfiguration()
-        .get("TyranoScript syntax.tag.parameter")!;
-      const defaultPath = tagParams[tag][parameter]["path"]; // data/bgimage
-
-      return new vscode.Hover(
-        await this.createImageViewMarkdownText(
-          parameterValue,
-          projectPath,
-          defaultPath,
-        ),
-      );
+      return this.handleParameterHover(document, position, parameterWordRange);
     }
 
     const wordRange = document.getWordRangeAtPosition(position, this.regExp);
@@ -146,5 +205,3 @@ ${textCopy.join("  \n")}
     return new vscode.Hover(markdownText); //解決したPromiseオブジェクトを返却。この場合、現在の文字列を返却
   }
 }
-
-

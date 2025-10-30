@@ -4,17 +4,33 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [1.15.0] 2025-xx-xx
 
 - 拡張機能の初期化速度を大幅に改善しました。[issue#342](https://github.com/orukRed/tyranosyntax/issues/342)
   - .ksファイルを開いたときの初期化処理を並列化することで、従来の10秒程度から数秒程度に短縮されました。
   - ファイル数が多いプロジェクトほど効果が大きくなります。
+https://github.com/orukRed/tyranosyntax/issues/354
 
-## [1.14.3] 2025-10-11
+## [1.14.5] 2025-10-15
+
+- 大かっこを含むパラメータを指定したときにツールチップが正しく表示されない不具合を修正しました。[issue#352](https://github.com/orukRed/tyranosyntax/issues/352)
+- storageパラメータなど、画像を表示するパラメータにマウスオンした場合に画像のパスも表示されるようにしました。
+- タグのツールチップが表示される範囲を拡大しました。（タグ名だけでなく、パラメータにマウスオンした場合にも表示されるようにしました。）
+- readmeに目次を追加しました。
+
+## [1.14.4] 2025-10-14
+
+- ツールチップの不具合を修正しました。[issue#349](https://github.com/orukRed/tyranosyntax/issues/349)
+  - folderパラメータが指定されている場合に指定したパスに沿って画像を表示するようにしました。
+  - storageより前のパラメータの値に負の数値を入れた場合にもツールチップが表示されるようにしました。
+- 補完機能でも画像が表示されなくなっている不具合を修正しました。
+
+## [1.14.3] 2025-10-13
 
 - `TyranoScript syntax.tyranoBuilder.enabled`がONの時の挙動を改善しました。
   - jumpタグのtargetパラメータが空の場合にエラーを出さないようにしました。
 - `TyranoScript syntax.tyranoBuilder.skipParameters`の初期値に、clickableタグ及びbuttonタグの_clickable_imgパラメータを追加しました。
+- ツールチップで画像が表示されない不具合を修正しました。[issue#347](https://github.com/orukRed/tyranosyntax/issues/347)
 
 ## [1.14.2] 2025-10-04
 

@@ -28,6 +28,33 @@ https://ofuse.me/orukred/letter
 - [Twitter(@orukred)でリプライやDM](https://twitter.com/OrukRed)
 - [Githubにissueを立てる（バグのみ）](https://github.com/orukRed/tyranosyntax/issues)
 
+## 目次
+
+- [使い方](#使い方)
+- [機能](#機能)
+  - [構文の強調表示（Syntax Highlighting）](#構文の強調表示syntax-highlighting)
+  - [タグ補完（Completion）](#タグ補完completion)
+  - [プラグイン/マクロのパラメータ補完（β版）](#プラグインマクロのパラメータ補完β版)
+  - [アウトライン表示(Outline)](#アウトライン表示outline)
+  - [診断機能(Diagnostics)](#診断機能diagnostics)
+  - [ドキュメントツールチップ表示（Hover）](#ドキュメントツールチップ表示hover)
+  - [画像ツールチップ表示（Hover image）](#画像ツールチップ表示hover-image)
+  - [タグのショートカット入力（Snippets）](#タグのショートカット入力snippets)
+  - [ジャンプ先へ移動（Go To Jump）](#ジャンプ先へ移動go-to-jump)
+  - [定義へ移動（Go To Definition）](#定義へ移動go-to-definition)
+  - [その場プレビュー機能（β版）](#その場プレビュー機能β版)
+  - [フローチャート表示](#フローチャート表示)
+  - [処理のフォールディング（折り畳み）](#処理のフォールディング折り畳み)
+  - [変数のリネーム機能](#変数のリネーム機能)
+- [ショートカット一覧](#ショートカット一覧)
+- [設定ファイルについて](#設定ファイルについて)
+  - [言語設定](#言語設定)
+- [ティラノビルダーとの併用について](#ティラノビルダーとの併用について)
+- [Release Notes](#release-notes)
+- [アイコン提供](#アイコン提供)
+- [ライセンス/クレジット](#ライセンスクレジット)
+- [免責事項](#免責事項)
+
 ## 使い方
 
 vscodeの`ファイル`→`フォルダーを開く`から、
