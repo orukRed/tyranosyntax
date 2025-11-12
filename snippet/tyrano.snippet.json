@@ -2254,43 +2254,93 @@
         "sample": "[chara_hide_all time=1000 wait=true]"
     },
     "chara_layer": {
-        "name": "chara_layer",
-        "summary": "キャラクターの差分パーツ定義",
-        "category": "キャラクター操作",
-        "description": "キャラクターの表情を差分パーツを定義します。\nデフォルトのパーツは一番最初に登録したものになります。",
-        "parameters": [
-            {
-                "name": "name",
-                "required": true,
-                "description": "パーツを登録するキャラクターの名前。[chara_new]で定義したname属性を指定します。"
-            },
-            {
-                "name": "part",
-                "required": true,
-                "description": "パーツとして登録する名前を指定します。例えば目というパーツをpartを登録しておき、このpartの中で他の差分をいくつでも登録できます。"
-            },
-            {
-                "name": "id",
-                "required": true,
-                "description": "パーツの中の差分を識別するための名前を指定します。例えば目というpartの中で笑顔の目泣いてる目のようにidを分けて登録できます。"
-            },
-            {
-                "name": "storage",
-                "required": false,
-                "description": "差分として登録する画像を指定します。画像はdata/fgimageフォルダの中に配置します。noneを指定すると、デフォルトでそのパーツがない状態を表現できます。"
-            },
-            {
-                "name": "zindex",
-                "required": false,
-                "description": "このパーツが他のパーツと重なった時にどちらが前面に表示されるかを決定するための優先度を数字で指定します。数字が大きいほど前面に表示されます。一度登録しておけば、同パーツの他の差分にも適用されます。"
-            },
-            {
-                "name": "cond",
-                "required": false,
-                "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
-            }
-        ],
-        "sample": "[chara_layer name=\"yuko\" part=mouse id=egao storage=\"image/egao.png\" ]"
+      "name": "chara_layer",
+      "summary": "キャラクターの差分パーツ定義",
+      "category": "キャラクター操作",
+      "description": "キャラクターの表情を差分パーツを定義します。\nデフォルトのパーツは一番最初に登録したものになります。",
+      "parameters": [
+        {
+          "name": "name",
+          "required": true,
+          "description": "パーツを登録するキャラクターの名前。[chara_new]で定義したname属性を指定します。"
+        },
+        {
+          "name": "part",
+          "required": true,
+          "description": "パーツとして登録する名前を指定します。例えば目というパーツをpartを登録しておき、このpartの中で他の差分をいくつでも登録できます。"
+        },
+        {
+          "name": "id",
+          "required": true,
+          "description": "パーツの中の差分を識別するための名前を指定します。例えば目というpartの中で笑顔の目泣いてる目のようにidを分けて登録できます。"
+        },
+        {
+          "name": "storage",
+          "required": false,
+          "description": "差分として登録する画像を指定します。画像はdata/fgimageフォルダの中に配置します。noneを指定すると、デフォルトでそのパーツがない状態を表現できます。"
+        },
+        {
+          "name": "zindex",
+          "required": false,
+          "description": "このパーツが他のパーツと重なった時にどちらが前面に表示されるかを決定するための優先度を数字で指定します。数字が大きいほど前面に表示されます。一度登録しておけば、同パーツの他の差分にも適用されます。"
+        },
+        {
+          "name": "frame_image",
+          "required": false,
+          "description": "パーツアニメーション（目パチ等）の差分画像。カンマ区切りで複数指定できます。storageに指定した画像と拡張子が同じである場合、拡張子を省略して書くことができます。（アニメーションに使用する画像は、storageに指定した画像と同じ場所に配置します。アニメーションに使用する画像のファイル名が空白記号から始まっていてはいけません）"
+        },
+        {
+          "name": "frame_time",
+          "required": false,
+          "description": "パーツアニメーションの各コマの時間。ミリ秒単位の数値をカンマ区切りで記述します。storageに指定した画像の分も含めて指定します。ハイフンで区切った2個1組の数値を指定することで、その範囲からランダムで決定されるようにできます。目パチの時間にバラつきをもたせたい場合に使用できます。省略した場合、標準的な目パチの頻度・速度を想定し、4000-8000,50,50,50...が設定されます。"
+        },
+        {
+          "name": "frame_direction",
+          "required": false,
+          "description": "最後のコマを表示したあとすぐ最初のコマに戻るのではなく逆順にコマを表示していく（0→1→2→1→0）ようにしたい場合、alternateを指定します。"
+        },
+        {
+          "name": "frame_loop",
+          "required": false,
+          "description": "アニメーションをループさせずに最後のコマで止めたい場合はfalseを指定します。"
+        },
+        {
+          "name": "lip_image",
+          "required": false,
+          "description": "口パクに使用する画像ファイル。frame_imageと同じように指定します。なお、frame_imageとlip_imageを併用することはできません。音声ファイルによるリップシンクを行う場合には、より口が閉じている画像から順に書きます。"
+        },
+        {
+          "name": "lip_time",
+          "required": false,
+          "description": "口パクの画像を切り替える時間をミリ秒単位で指定します。省略した場合は50ミリ秒となります。"
+        },
+        {
+          "name": "lip_type",
+          "required": false,
+          "description": "音声ファイル（ボイス）によるリップシンクを行いたい場合はvoiceを指定します。省略した場合はテキストベースの口パクになります。"
+        },
+        {
+          "name": "lip_volume",
+          "required": false,
+          "description": "音声ファイルによるリップシンクを行う場合に、画像を切り替える音量の区切りをカンマ区切りの数値で指定します。音量は音声ファイル再生中にリアルタイムに解析され、0～100で表されます。数値はlip_imageで指定した画像の数だけ必要です。このパラメータは省略してもかまいませんが、違和感がある場合は微調整を推奨します。"
+        },
+        {
+          "name": "lip_se_buf",
+          "required": false,
+          "description": "リップシンクの対象とする[playse]のbufを指定します。ここで指定したbufで[playse]が実行されたとき、chara_ptextにこのキャラの名前が入っているなら、このキャラのリップシンクを開始します。"
+        },
+        {
+          "name": "lip_se_buf_all",
+          "required": false,
+          "description": "リップシンクの対象とする[playse]のbufを指定します。ここで指定されたbufで実行されたすべての[playse]について、このキャラのリップシンクを開始します。（chara_ptextに関係なく）"
+        },
+        {
+          "name": "cond",
+          "required": false,
+          "description": "JS式を記述して、その結果が真の場合のみタグが実行されます。"
+        }
+      ],
+      "sample": "[chara_layer name=\"yuko\" part=mouse id=egao storage=\"image/egao.png\" ]"
     },
     "chara_layer_mod": {
         "name": "chara_layer_mod",
