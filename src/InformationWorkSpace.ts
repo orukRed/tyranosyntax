@@ -48,6 +48,10 @@ export class InformationWorkSpace {
     string,
     Map<string, DefineMacroData>
   >(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
+  
+  // マクロ検索最適化用の逆引きMap (ファイルパス -> マクロUUIDのSet)
+  private _macroByFilePath: Map<string, Set<string>> = new Map<string, Set<string>>();
+  
   private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<
     string,
     ResourceFileData[]
@@ -119,6 +123,7 @@ export class InformationWorkSpace {
     for (const projectPath of this.getTyranoScriptProjectRootPaths()) {
       TyranoLogger.print(`${projectPath} variable initialzie start`);
       this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
+      this._macroByFilePath.clear(); // 逆引きMapも初期化
       this._resourceFileMap.set(projectPath, []);
       this.variableMap.set(projectPath, new Map<string, VariableData>());
       try {
@@ -153,11 +158,14 @@ export class InformationWorkSpace {
         [".js"],
         true,
       ); //dataディレクトリ内の.jsファイルを取得
-      for (const i of absoluteScriptFilePaths) {
-        await this.updateScriptFileMap(i);
-        await this.updateMacroDataMapByJs(i);
-        await this.updateVariableMapByJS(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteScriptFilePaths.map(async (i) => {
+          await this.updateScriptFileMap(i);
+          await this.updateMacroDataMapByJs(i);
+          await this.updateVariableMapByJS(i);
+        }),
+      );
       //シナリオファイルを初期化
       TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
       const absoluteScenarioFilePaths = await this.getProjectFiles(
@@ -165,10 +173,13 @@ export class InformationWorkSpace {
         [".ks"],
         true,
       ); //dataディレクトリ内の.ksファイルを取得
-      for (const i of absoluteScenarioFilePaths) {
-        await this.updateScenarioFileMap(i);
-        await this.updateMacroLabelVariableDataMapByKs(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteScenarioFilePaths.map(async (i) => {
+          await this.updateScenarioFileMap(i);
+          await this.updateMacroLabelVariableDataMapByKs(i);
+        }),
+      );
       //リソースファイルを取得
       TyranoLogger.print(`${projectPath}'s resource file is loading...`);
       const absoluteResourceFilePaths = this.getProjectFiles(
@@ -176,9 +187,12 @@ export class InformationWorkSpace {
         this.resourceExtensionsArrays,
         true,
       ); //dataディレクトリのファイル取得
-      for (const i of absoluteResourceFilePaths) {
-        await this.addResourceFileMap(i);
-      }
+      // 並列処理で高速化
+      await Promise.all(
+        absoluteResourceFilePaths.map(async (i) => {
+          await this.addResourceFileMap(i);
+        }),
+      );
     }
   }
 
@@ -238,17 +252,59 @@ export class InformationWorkSpace {
     if (path.extname(filePath) !== ".js") {
       return;
     }
-    //vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
-    //fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
+    // vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
+    // fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
     // let textDocument = await vscode.workspace.openTextDocument(filePath);
     // this._scriptFileMap.set(textDocument.fileName, textDocument.getText());
-    this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
+
+    try {
+      // fs.readFileSyncは常にディスクから最新の内容を読み込むため、
+      // キャッシュの無効化処理は不要（updateScenarioFileMapとは異なる）
+      this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
+    } catch (error) {
+      // ファイルが存在しない場合はキャッシュから削除
+      this._scriptFileMap.delete(filePath);
+      TyranoLogger.print(
+        `Script file read failed for ${filePath}, removed from cache`,
+        ErrorLevel.WARN,
+      );
+      throw error;
+    }
   }
   public async updateScenarioFileMap(filePath: string) {
     //.ks拡張子以外ならシナリオではないのでreturn
     if (path.extname(filePath) !== ".ks") {
       return;
     }
+
+    // 外部ファイルの変更後に最新のコンテンツを確実に取得するために、ドキュメントを強制的にリロードします。
+    // ドキュメントがすでにキャッシュにあるかどうかを確認します
+    const existingDoc = this._scenarioFileMap.get(filePath);
+    if (existingDoc) {
+      // If the document exists in cache, verify it's up to date by reading from disk
+      try {
+        const diskContent = fs.readFileSync(filePath, "utf-8");
+        const cachedContent = existingDoc.getText();
+
+        // コンテンツが異なる場合、ドキュメントは古いため、キャッシュから削除します
+        if (diskContent !== cachedContent) {
+          this._scenarioFileMap.delete(filePath);
+          TyranoLogger.print(
+            `Document cache invalidated for ${filePath} due to external changes`,
+          );
+        }
+      } catch (error) {
+        // If we can't read the file, remove it from cache
+        console.log(error);
+        this._scenarioFileMap.delete(filePath);
+        TyranoLogger.print(
+          `Document cache invalidated for ${filePath} due to read error`,
+          ErrorLevel.WARN,
+        );
+      }
+    }
+
+    // Open (or reopen) the document to get the latest version
     const textDocument = await vscode.workspace.openTextDocument(filePath);
     this._scenarioFileMap.set(textDocument.fileName, textDocument);
   }
@@ -320,9 +376,16 @@ export class InformationWorkSpace {
                 macroData.parameter.push(
                   new MacroParameterData("parameter", false, "description"),
                 ); //TODO:パーサーでパラメータの情報読み込んで追加する
-                this.defineMacroMap
-                  .get(projectPath)
-                  ?.set(crypto.randomUUID(), macroData);
+                
+                const uuid = crypto.randomUUID();
+                this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
+                
+                // 逆引きMapに登録
+                if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
+                  this._macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
+                }
+                this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
+                
                 //suggetionsに登録されてない場合のみ追加
                 if (
                   !Object.prototype.hasOwnProperty.call(
@@ -552,8 +615,8 @@ export class InformationWorkSpace {
         absoluteScenarioFilePath,
       );
 
-      await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
-      await this.spliceCharacterMapByFilePath(absoluteScenarioFilePath);
+      this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
+      this.spliceCharacterMapByFilePath(absoluteScenarioFilePath);
       await this.spliceSuggestionsByFilePath(projectPath, deleteTagList);
       let currentLabel = "NONE";
       let isMacro: boolean = false; //macrio-endmacro間であるかを判定
@@ -719,9 +782,15 @@ export class InformationWorkSpace {
         } else if ((await data["name"]) === "endmacro") {
           if (isMacro) {
             // マクロデータをdefineMacroMapに登録
-            this.defineMacroMap
-              .get(projectPath)
-              ?.set(crypto.randomUUID(), macroData);
+            const uuid = crypto.randomUUID();
+            this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
+            
+            // 逆引きMapに登録
+            if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
+              this._macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
+            }
+            this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
+            
             //suggetionsに登録されてない場合のみ追加
             if (
               !Object.prototype.hasOwnProperty.call(
@@ -840,22 +909,30 @@ export class InformationWorkSpace {
   public async spliceMacroDataMapByFilePath(filePath: string) {
     const deleteTagList: string[] = [];
     const projectPath = await this.getProjectPathByFilePath(filePath);
-
-    this.defineMacroMap.get(projectPath)?.forEach((value, _key) => {
-      if (value.filePath == filePath) {
-        //DefineMacroData.nameにvalue.macroNameと同じ値が存在するdefineMacroMap.get(projectPath)を取得して、それを削除する
-        this.defineMacroMap.set(
-          projectPath,
-          new Map(
-            Array.from(this.defineMacroMap.get(projectPath) || []).filter(
-              ([_k, v]) => v.macroName != value.macroName,
-            ),
-          ),
-        );
-
-        deleteTagList.push(value.macroName);
+    
+    // 逆引きMapを使ってO(1)で該当マクロのUUIDを取得
+    const macroUuids = this._macroByFilePath.get(filePath);
+    if (!macroUuids || macroUuids.size === 0) {
+      return deleteTagList;
+    }
+    
+    const projectMacroMap = this.defineMacroMap.get(projectPath);
+    if (!projectMacroMap) {
+      this._macroByFilePath.delete(filePath);
+      return deleteTagList;
+    }
+    
+    // UUIDを使って直接削除
+    for (const uuid of macroUuids) {
+      const macroData = projectMacroMap.get(uuid);
+      if (macroData) {
+        deleteTagList.push(macroData.macroName);
+        projectMacroMap.delete(uuid);
       }
-    });
+    }
+    
+    // 逆引きMapからも削除
+    this._macroByFilePath.delete(filePath);
 
     return deleteTagList;
   }
@@ -872,46 +949,54 @@ export class InformationWorkSpace {
    * 引数で指定したファイルパス（キー)の変数データマップを削除
    * @param fsPath
    */
-  public async spliceVariableMapByFilePath(fsPath: string) {
-    const projectPath: string = await this.getProjectPathByFilePath(fsPath);
-    this.variableMap
-      .get(projectPath)
-      ?.forEach((value: VariableData, key: string) => {
-        value.locations.forEach((location: vscode.Location) => {
-          if (location.uri.fsPath === fsPath) {
-            this.variableMap.get(projectPath)?.delete(key);
-          }
-        });
-      });
+  public spliceVariableMapByFilePath(fsPath: string) {
+    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+    const projectVariableMap = this.variableMap.get(projectPath);
+    if (!projectVariableMap) return;
+    
+    for (const [key, value] of projectVariableMap) {
+      for (const location of value.locations) {
+        if (location.uri.fsPath === fsPath) {
+          projectVariableMap.delete(key);
+          break;
+        }
+      }
+    }
+  }
+
+  /**
+   * 引数で指定したファイルパス（キー）のトランジションデータマップを削除
+   * @param fsPath
+   */
+  public async spliceTransitionMapByFilePath(fsPath: string) {
+    this.transitionMap.delete(fsPath);
   }
 
   /**
    *  引数で指定したファイルパス（Mapのキー）のCharacterDataをマップから削除
    * @param fsPath
    */
-  public async spliceCharacterMapByFilePath(fsPath: string) {
-    const projectPath: string = await this.getProjectPathByFilePath(fsPath);
+  public spliceCharacterMapByFilePath(fsPath: string) {
+    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+    const characterMap = this.characterMap.get(projectPath);
+    if (!characterMap) return;
 
     // chara_faceの定義削除
-    this.characterMap.get(projectPath)?.forEach((value: CharacterData) => {
-      value.deleteFaceByFilePath(fsPath);
-    });
+    for (const characterData of characterMap) {
+      characterData.deleteFaceByFilePath(fsPath);
+    }
 
     // chara_layerの定義削除
-    this.characterMap.get(projectPath)?.forEach((value: CharacterData) => {
-      value.deleteLayerByFilePath(fsPath);
-    });
+    for (const characterData of characterMap) {
+      characterData.deleteLayerByFilePath(fsPath);
+    }
 
     // chara_newの定義削除
-    const updatedCharacterData = this.characterMap
-      .get(projectPath)
-      ?.filter((value: CharacterData) => {
-        return value.location.uri.fsPath !== fsPath;
-      });
+    const updatedCharacterData = characterMap.filter((value: CharacterData) => {
+      return value.location.uri.fsPath !== fsPath;
+    });
 
-    if (updatedCharacterData) {
-      this.characterMap.set(projectPath, updatedCharacterData);
-    }
+    this.characterMap.set(projectPath, updatedCharacterData);
   }
 
   /**
@@ -956,24 +1041,37 @@ export class InformationWorkSpace {
     }
 
     //指定したファイルパスの中のファイルのうち、permissionExtensionの中に入ってる拡張子のファイルパスのみを取得
+    // スタックベースの実装で再帰を回避し高速化
     const listFiles = (dir: string): string[] => {
-      try {
-        return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
-          dirent.name === ".git"
-            ? [] // .git ディレクトリを無視
-            : dirent.isFile()
-              ? [`${dir}${this.pathDelimiter}${dirent.name}`].filter((file) => {
-                  if (permissionExtension.length <= 0) {
-                    return file;
-                  }
-                  return permissionExtension.includes(path.extname(file));
-                })
-              : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
-        );
-      } catch (_error) {
-        // ディレクトリアクセスに失敗した場合は空配列を返す
-        return [];
+      const results: string[] = [];
+      const stack = [dir];
+      
+      while (stack.length > 0) {
+        const currentDir = stack.pop()!;
+        try {
+          const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+          
+          for (const entry of entries) {
+            // .gitディレクトリを無視
+            if (entry.name === ".git") continue;
+            
+            const fullPath = `${currentDir}${this.pathDelimiter}${entry.name}`;
+            
+            if (entry.isDirectory()) {
+              stack.push(fullPath);
+            } else if (entry.isFile()) {
+              // 拡張子フィルタリング
+              if (permissionExtension.length === 0 || 
+                  permissionExtension.includes(path.extname(fullPath))) {
+                results.push(fullPath);
+              }
+            }
+          }
+        } catch (_error) {
+          // ディレクトリアクセスに失敗した場合はスキップ
+        }
       }
+      return results;
     };
     let ret = listFiles(projectRootPath); //絶対パスで取得
 
@@ -993,6 +1091,33 @@ export class InformationWorkSpace {
    * @returns
    */
   public async getProjectPathByFilePath(filePath: string): Promise<string> {
+    let searchDir;
+    do {
+      const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
+      if (delimiterIndex === -1) {
+        return "";
+      }
+
+      //filePathに存在するpathDelimiiter以降の文字列を削除
+      filePath = filePath.substring(0, delimiterIndex);
+      //フォルダ検索
+      try {
+        searchDir = fs.readdirSync(filePath, "utf-8");
+      } catch (_error) {
+        // ディレクトリが存在しない場合は空文字を返す
+        return "";
+      }
+      //index.htmlが見つからないならループ
+    } while (searchDir.filter((e) => e === "index.html").length <= 0);
+    return filePath;
+  }
+
+  /**
+   * 引数で指定したファイルパスからプロジェクトパス（index.htmlのあるフォルダパス）を同期的に取得します。
+   * @param filePath
+   * @returns
+   */
+  private getProjectPathByFilePathSync(filePath: string): string {
     let searchDir;
     do {
       const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
