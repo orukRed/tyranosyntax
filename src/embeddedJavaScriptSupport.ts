@@ -20,6 +20,18 @@ export interface ScriptBlock {
   tagEndLine: number;
 }
 
+/** ドキュメントごとのキャッシュ */
+interface DocumentCache {
+  /** キャッシュ生成時のドキュメントバージョン */
+  version: number;
+  /** [iscript] が存在するか */
+  hasBlocks: boolean;
+  /** スクリプトブロック一覧 */
+  blocks: ScriptBlock[];
+  /** 仮想 JS コンテンツ */
+  virtualContent: string;
+}
+
 // ── 正規表現 ──────────────────────────────────────────
 // [iscript] は属性付き (例: [iscript cond="..."]) にも対応、大文字小文字不問
 const ISCRIPT_TAG_REGEX = /^\s*\[iscript(\s.*?)?\]\s*$/i;
@@ -27,23 +39,66 @@ const ENDSCRIPT_TAG_REGEX = /^\s*\[endscript\]\s*$/i;
 const ISCRIPT_AT_REGEX = /^\s*@iscript(\s.*)?$/i;
 const ENDSCRIPT_AT_REGEX = /^\s*@endscript(\s.*)?$/i;
 
+// hasScriptBlocks 用の高速チェック正規表現（大文字小文字不問）
+const HAS_ISCRIPT_REGEX = /\[iscript[\s\]]|@iscript(?:\s|$)/i;
+
 // ── 定数 ──────────────────────────────────────────
 const EMBEDDED_SCHEME = "embedded-javascript";
+/** onDidChangeTextDocument のデバウンス間隔 (ms) */
+const DEBOUNCE_DELAY_MS = 150;
 
 // ── 仮想ドキュメント管理 ──────────────────────────
 /** 仮想 URI → 仮想 JS コンテンツ */
 const virtualContentMap = new Map<string, string>();
 /** 仮想 URI → 元ドキュメント URI (文字列) */
 const virtualToOriginalMap = new Map<string, string>();
+/** 元ドキュメント URI → キャッシュ */
+const documentCacheMap = new Map<string, DocumentCache>();
+/** 仮想ドキュメントを既に開いたかどうか */
+const openedVirtualDocs = new Set<string>();
+/** デバウンス用タイマー */
+const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 let contentProvider: EmbeddedJSDocumentProvider;
 
-// ── ユーティリティ関数 ──────────────────────────────
+// ── キャッシュ付きユーティリティ関数 ──────────────────
 
 /**
- * ドキュメント内のすべての [iscript]〜[endscript] ブロックを検出する
+ * ドキュメントのキャッシュを取得する。バージョンが変わっていたら再計算する。
  */
-export function findScriptBlocks(document: vscode.TextDocument): ScriptBlock[] {
+function getDocumentCache(document: vscode.TextDocument): DocumentCache {
+  const key = document.uri.toString();
+  const cached = documentCacheMap.get(key);
+  if (cached && cached.version === document.version) {
+    return cached;
+  }
+
+  // 高速チェック: [iscript] が含まれるか
+  const text = document.getText();
+  const hasBlocks = HAS_ISCRIPT_REGEX.test(text);
+
+  let blocks: ScriptBlock[] = [];
+  let virtualContent = "";
+
+  if (hasBlocks) {
+    blocks = computeScriptBlocks(document);
+    virtualContent = computeVirtualContent(document, blocks);
+  }
+
+  const cache: DocumentCache = {
+    version: document.version,
+    hasBlocks,
+    blocks,
+    virtualContent,
+  };
+  documentCacheMap.set(key, cache);
+  return cache;
+}
+
+/**
+ * ドキュメント内のすべての [iscript]〜[endscript] ブロックを検出する（内部実装）
+ */
+function computeScriptBlocks(document: vscode.TextDocument): ScriptBlock[] {
   const blocks: ScriptBlock[] = [];
   let tagStartLine = -1;
 
@@ -71,13 +126,49 @@ export function findScriptBlocks(document: vscode.TextDocument): ScriptBlock[] {
 }
 
 /**
+ * 仮想 JavaScript コンテンツを生成する（内部実装）
+ */
+function computeVirtualContent(
+  document: vscode.TextDocument,
+  blocks: ScriptBlock[],
+): string {
+  // スクリプトブロック内の行番号を Set に収集
+  const scriptLines = new Set<number>();
+  for (const block of blocks) {
+    for (let i = block.contentStartLine; i <= block.contentEndLine; i++) {
+      scriptLines.add(i);
+    }
+  }
+
+  const lines: string[] = [];
+  for (let i = 0; i < document.lineCount; i++) {
+    if (scriptLines.has(i)) {
+      lines.push(document.lineAt(i).text);
+    } else {
+      lines.push("");
+    }
+  }
+
+  return lines.join("\n");
+}
+
+// ── 公開 API（キャッシュ経由） ──────────────────────
+
+/**
+ * ドキュメント内のすべての [iscript]〜[endscript] ブロックを検出する
+ */
+export function findScriptBlocks(document: vscode.TextDocument): ScriptBlock[] {
+  return getDocumentCache(document).blocks;
+}
+
+/**
  * 指定された位置が [iscript]〜[endscript] ブロック内にあるかどうかを判定する
  */
 export function isInsideScriptBlock(
   document: vscode.TextDocument,
   position: vscode.Position,
 ): boolean {
-  const blocks = findScriptBlocks(document);
+  const blocks = getDocumentCache(document).blocks;
   return blocks.some(
     (block) =>
       position.line >= block.contentStartLine &&
@@ -92,35 +183,14 @@ export function isInsideScriptBlock(
 export function getVirtualJavaScriptContent(
   document: vscode.TextDocument,
 ): string {
-  const blocks = findScriptBlocks(document);
-
-  // スクリプトブロック内の行番号を Set に収集
-  const scriptLines = new Set<number>();
-  for (const block of blocks) {
-    for (let i = block.contentStartLine; i <= block.contentEndLine; i++) {
-      scriptLines.add(i);
-    }
-  }
-
-  const lines: string[] = [];
-  for (let i = 0; i < document.lineCount; i++) {
-    if (scriptLines.has(i)) {
-      lines.push(document.lineAt(i).text);
-    } else {
-      // 空行で埋めて行番号を保持
-      lines.push("");
-    }
-  }
-
-  return lines.join("\n");
+  return getDocumentCache(document).virtualContent;
 }
 
 /**
  * ドキュメントに [iscript] が含まれるかどうかの高速チェック
  */
 export function hasScriptBlocks(document: vscode.TextDocument): boolean {
-  const text = document.getText().toLowerCase();
-  return text.includes("[iscript]") || text.includes("@iscript");
+  return getDocumentCache(document).hasBlocks;
 }
 
 // ── 仮想 URI 管理 ─────────────────────────────────
@@ -147,10 +217,22 @@ function getOriginalUriString(virtualUri: vscode.Uri): string | undefined {
  * 仮想ドキュメントの内容を更新する
  */
 function updateVirtualContent(document: vscode.TextDocument): void {
+  const cache = getDocumentCache(document);
+  if (!cache.hasBlocks) {
+    return;
+  }
+
   const virtualUri = getVirtualUri(document);
-  const content = getVirtualJavaScriptContent(document);
-  virtualContentMap.set(virtualUri.toString(), content);
-  virtualToOriginalMap.set(virtualUri.toString(), document.uri.toString());
+  const key = virtualUri.toString();
+  const oldContent = virtualContentMap.get(key);
+
+  // コンテンツが変わっていなければ何もしない
+  if (oldContent === cache.virtualContent) {
+    return;
+  }
+
+  virtualContentMap.set(key, cache.virtualContent);
+  virtualToOriginalMap.set(key, document.uri.toString());
   if (contentProvider) {
     contentProvider.fireChange(virtualUri);
   }
@@ -163,11 +245,19 @@ async function ensureVirtualDocument(
   document: vscode.TextDocument,
 ): Promise<vscode.Uri> {
   const virtualUri = getVirtualUri(document);
+  const key = virtualUri.toString();
+
   updateVirtualContent(document);
-  try {
-    await vscode.workspace.openTextDocument(virtualUri);
-  } catch {
-    // すでに開いている場合は無視
+
+  // 初回のみ openTextDocument を呼ぶ
+  if (!openedVirtualDocs.has(key)) {
+    try {
+      await vscode.workspace.openTextDocument(virtualUri);
+      openedVirtualDocs.add(key);
+    } catch {
+      // すでに開いている場合は無視
+      openedVirtualDocs.add(key);
+    }
   }
   return virtualUri;
 }
@@ -224,9 +314,32 @@ export function registerEmbeddedJavaScriptSupport(
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
       const doc = event.document;
-      if (doc.uri.scheme !== EMBEDDED_SCHEME && doc.languageId === "tyrano") {
-        updateVirtualContent(doc);
+      if (doc.uri.scheme === EMBEDDED_SCHEME || doc.languageId !== "tyrano") {
+        return;
       }
+
+      // キャッシュを無効化（次回アクセス時に再計算される）
+      documentCacheMap.delete(doc.uri.toString());
+
+      // デバウンスして仮想ドキュメントを更新（キーストロークごとの更新を抑制）
+      const docKey = doc.uri.toString();
+      const existingTimer = debounceTimers.get(docKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
+      debounceTimers.set(
+        docKey,
+        setTimeout(() => {
+          debounceTimers.delete(docKey);
+          // ドキュメントがまだ開いているか確認
+          const currentDoc = vscode.workspace.textDocuments.find(
+            (d) => d.uri.toString() === docKey,
+          );
+          if (currentDoc) {
+            updateVirtualContent(currentDoc);
+          }
+        }, DEBOUNCE_DELAY_MS),
+      );
     }),
   );
 
@@ -236,6 +349,13 @@ export function registerEmbeddedJavaScriptSupport(
       const key = virtualUri.toString();
       virtualContentMap.delete(key);
       virtualToOriginalMap.delete(key);
+      openedVirtualDocs.delete(key);
+      documentCacheMap.delete(doc.uri.toString());
+      const timer = debounceTimers.get(doc.uri.toString());
+      if (timer) {
+        clearTimeout(timer);
+        debounceTimers.delete(doc.uri.toString());
+      }
     }),
   );
 
@@ -455,4 +575,10 @@ export function registerEmbeddedJavaScriptSupport(
 export function cleanupEmbeddedJavaScript(): void {
   virtualContentMap.clear();
   virtualToOriginalMap.clear();
+  documentCacheMap.clear();
+  openedVirtualDocs.clear();
+  for (const timer of debounceTimers.values()) {
+    clearTimeout(timer);
+  }
+  debounceTimers.clear();
 }
