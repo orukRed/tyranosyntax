@@ -25,6 +25,11 @@ export class TyranoDefinitionProvider {
     position: vscode.Position,
     token: vscode.CancellationToken, // eslint-disable-line @typescript-eslint/no-unused-vars
   ): Promise<vscode.Definition | vscode.LocationLink[] | null | undefined> {
+    // iscriptブロック内ではJavaScript言語サーバーに定義ジャンプを委譲する
+    if (this.parser.isPositionInIscriptBlock(document, position.line)) {
+      return undefined;
+    }
+
     const projectPath = await this.infoWs.getProjectPathByFilePath(
       document.uri.fsPath,
     );

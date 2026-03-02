@@ -103,6 +103,11 @@ export class TyranoCompletionItemProvider
     | undefined
   > {
     try {
+      // iscriptブロック内ではJavaScript言語サーバーに補完を委譲する
+      if (this.parser.isPositionInIscriptBlock(document, position.line)) {
+        return undefined;
+      }
+
       const projectPath = await this.infoWs.getProjectPathByFilePath(
         document.fileName,
       );

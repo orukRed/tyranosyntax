@@ -58,7 +58,7 @@
         "scopeName": "source.ks",
         "path": "./syntaxes/tyrano.tmLanguage.json",
         "embeddedLanguages": {
-          "source.js": "html",
+          "source.js": "javascript",
           "meta.embedded.block.html": "html"
         }
       }

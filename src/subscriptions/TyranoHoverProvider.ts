@@ -169,11 +169,18 @@ ${textCopy.join("  \n")}
     }
   }
 
+  private readonly parser = Parser.getInstance();
+
   public async provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
   ): Promise<vscode.Hover> {
+    // iscriptブロック内ではJavaScript言語サーバーにホバーを委譲する
+    if (this.parser.isPositionInIscriptBlock(document, position.line)) {
+      return Promise.reject("inside iscript block");
+    }
+
     //param="hoge"の部分があるかどうか検索
     const parameterWordRange = document.getWordRangeAtPosition(
       position,

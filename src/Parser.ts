@@ -63,6 +63,31 @@ export class Parser {
     return "";
   }
 
+  /**
+   * 指定した行が[iscript]と[endscript]の間にあるかどうかを判定します。
+   * @param document テキストドキュメント
+   * @param line 判定する行番号
+   * @returns iscriptブロック内ならtrue
+   */
+  public isPositionInIscriptBlock(
+    document: vscode.TextDocument,
+    line: number,
+  ): boolean {
+    const iscriptPattern = /(?:\[iscript\b|\@iscript\b)/i;
+    const endscriptPattern = /(?:\[endscript\b|\@endscript\b)/i;
+    let inScript = false;
+    for (let i = 0; i < line; i++) {
+      const lineText = document.lineAt(i).text;
+      if (endscriptPattern.test(lineText)) {
+        inScript = false;
+      }
+      if (iscriptPattern.test(lineText)) {
+        inScript = true;
+      }
+    }
+    return inScript;
+  }
+
   //----------------------------------------------
   // 以下、移植したパーサー処理
   //----------------------------------------------

@@ -132,3 +132,78 @@ suite("Parser.parseText", () => {
   });
 
 });
+
+suite("Parser.isPositionInIscriptBlock", () => {
+  const parser = Parser.getInstance();
+
+  function createMockDocument(lines: string[]): vscode.TextDocument {
+    return {
+      lineAt(line: number): vscode.TextLine {
+        return {
+          lineNumber: line,
+          text: lines[line] || "",
+          range: new vscode.Range(line, 0, line, (lines[line] || "").length),
+          rangeIncludingLineBreak: new vscode.Range(line, 0, line + 1, 0),
+          firstNonWhitespaceCharacterIndex: 0,
+          isEmptyOrWhitespace: (lines[line] || "").trim().length === 0,
+        };
+      },
+      lineCount: lines.length,
+    } as any;
+  }
+
+  test("iscriptブロック内の行を検出できる（[]記法）", () => {
+    const doc = createMockDocument([
+      "[iscript]",
+      "var x = 1;",
+      "[endscript]",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 1), true);
+  });
+
+  test("iscriptブロック外の行を検出できる", () => {
+    const doc = createMockDocument([
+      "[iscript]",
+      "var x = 1;",
+      "[endscript]",
+      "[bg storage=\"test.png\"]",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 3), false);
+  });
+
+  test("iscriptブロック内の行を検出できる（@記法）", () => {
+    const doc = createMockDocument([
+      "@iscript",
+      "var x = 1;",
+      "@endscript",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 1), true);
+  });
+
+  test("iscriptタグのある行自体はブロック外として扱う", () => {
+    const doc = createMockDocument([
+      "[iscript]",
+      "var x = 1;",
+      "[endscript]",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 0), false);
+  });
+
+  test("endscriptタグのある行はブロック内として扱う", () => {
+    const doc = createMockDocument([
+      "[iscript]",
+      "var x = 1;",
+      "[endscript]",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 2), true);
+  });
+
+  test("iscriptブロックがない場合はfalse", () => {
+    const doc = createMockDocument([
+      "[bg storage=\"test.png\"]",
+      "テキスト",
+    ]);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 0), false);
+    assert.strictEqual(parser.isPositionInIscriptBlock(doc, 1), false);
+  });
+});
