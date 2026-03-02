@@ -274,6 +274,7 @@ export function registerEmbeddedJavaScriptSupport(
                 virtualUri,
                 position,
                 completionContext.triggerCharacter,
+                100,
               );
             return result;
           } catch (e) {
