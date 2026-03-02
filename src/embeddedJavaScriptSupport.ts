@@ -43,9 +43,7 @@ let contentProvider: EmbeddedJSDocumentProvider;
 /**
  * ドキュメント内のすべての [iscript]〜[endscript] ブロックを検出する
  */
-export function findScriptBlocks(
-  document: vscode.TextDocument,
-): ScriptBlock[] {
+export function findScriptBlocks(document: vscode.TextDocument): ScriptBlock[] {
   const blocks: ScriptBlock[] = [];
   let tagStartLine = -1;
 
@@ -175,9 +173,7 @@ async function ensureVirtualDocument(
 }
 
 // ── TextDocumentContentProvider ───────────────────
-class EmbeddedJSDocumentProvider
-  implements vscode.TextDocumentContentProvider
-{
+class EmbeddedJSDocumentProvider implements vscode.TextDocumentContentProvider {
   private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
   public readonly onDidChange = this._onDidChange.event;
 
@@ -228,10 +224,7 @@ export function registerEmbeddedJavaScriptSupport(
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
       const doc = event.document;
-      if (
-        doc.uri.scheme !== EMBEDDED_SCHEME &&
-        doc.languageId === "tyrano"
-      ) {
+      if (doc.uri.scheme !== EMBEDDED_SCHEME && doc.languageId === "tyrano") {
         updateVirtualContent(doc);
       }
     }),
@@ -313,12 +306,11 @@ export function registerEmbeddedJavaScriptSupport(
         const virtualUri = await ensureVirtualDocument(document);
 
         try {
-          const hovers =
-            await vscode.commands.executeCommand<vscode.Hover[]>(
-              "vscode.executeHoverProvider",
-              virtualUri,
-              position,
-            );
+          const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+            "vscode.executeHoverProvider",
+            virtualUri,
+            position,
+          );
           return hovers && hovers.length > 0 ? hovers[0] : undefined;
         } catch (e) {
           console.error("[iscript] Hover error:", e);
@@ -344,12 +336,9 @@ export function registerEmbeddedJavaScriptSupport(
         const virtualUri = await ensureVirtualDocument(document);
 
         try {
-          const definitions =
-            await vscode.commands.executeCommand<vscode.Location[]>(
-              "vscode.executeDefinitionProvider",
-              virtualUri,
-              position,
-            );
+          const definitions = await vscode.commands.executeCommand<
+            vscode.Location[]
+          >("vscode.executeDefinitionProvider", virtualUri, position);
 
           if (!definitions) {
             return undefined;
@@ -456,9 +445,7 @@ export function registerEmbeddedJavaScriptSupport(
     }),
   );
 
-  console.log(
-    "[iscript] Embedded JavaScript Support registered",
-  );
+  console.log("[iscript] Embedded JavaScript Support registered");
 }
 
 /**
