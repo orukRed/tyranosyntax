@@ -80,8 +80,7 @@ export class Parser {
       const lineText = document.lineAt(i).text;
       if (endscriptPattern.test(lineText)) {
         inScript = false;
-      }
-      if (iscriptPattern.test(lineText)) {
+      } else if (iscriptPattern.test(lineText)) {
         inScript = true;
       }
     }
