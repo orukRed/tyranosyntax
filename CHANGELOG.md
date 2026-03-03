@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [1.16.0] 2025-03-04
+## [1.16.0] 2026-03-04
 
 - `iscript`～`endscript`で囲まれたJavaScript内ではJavaScriptの補完を行うようにしました。
 

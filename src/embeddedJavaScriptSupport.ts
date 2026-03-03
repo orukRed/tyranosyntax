@@ -297,8 +297,7 @@ class EmbeddedJSDocumentProvider implements vscode.TextDocumentContentProvider {
 /**
  * [iscript]〜[endscript] ブロック内での JavaScript 言語サポートを登録する。
  * activate() から呼び出す。
- */
-/**
+ *
  * 開いているドキュメントの仮想ドキュメントをすべて再構築する
  */
 function refreshAllVirtualDocuments(): void {
