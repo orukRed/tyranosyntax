@@ -327,7 +327,6 @@ export function activate(context: ExtensionContext) {
             scriptFileSystemWatcher.onDidCreate(async (e) => {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
-              await infoWs.updateVariableMapByJS(e.fsPath);
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -336,7 +335,6 @@ export function activate(context: ExtensionContext) {
               );
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
-              await infoWs.updateVariableMapByJS(e.fsPath);
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);

@@ -148,18 +148,6 @@ suite("InformationWorkSpace.updateMacroDataMapByJs", () => {
   });
 });
 
-suite("InformationWorkSpace.updateVariableMapByJS", () => {
-  test("正常系", async () => {
-    // 値定義
-    const info = InformationWorkSpace.getInstance();
-    const testPath = "/test/variables.js";
-
-    // 実行（例外が発生しないことを確認）
-    assert.doesNotThrow(async () => {
-      await info.updateVariableMapByJS(testPath);
-    });
-  });
-});
 
 suite("InformationWorkSpace.updateMacroLabelVariableDataMapByKs", () => {
   test("正常系", async () => {

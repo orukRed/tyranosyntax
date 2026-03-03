@@ -48,10 +48,10 @@ export class InformationWorkSpace {
     string,
     Map<string, DefineMacroData>
   >(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
-  
+
   // マクロ検索最適化用の逆引きMap (ファイルパス -> マクロUUIDのSet)
   private _macroByFilePath: Map<string, Set<string>> = new Map<string, Set<string>>();
-  
+
   private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<
     string,
     ResourceFileData[]
@@ -163,7 +163,6 @@ export class InformationWorkSpace {
         absoluteScriptFilePaths.map(async (i) => {
           await this.updateScriptFileMap(i);
           await this.updateMacroDataMapByJs(i);
-          await this.updateVariableMapByJS(i);
         }),
       );
       //シナリオファイルを初期化
@@ -376,16 +375,16 @@ export class InformationWorkSpace {
                 macroData.parameter.push(
                   new MacroParameterData("parameter", false, "description"),
                 ); //TODO:パーサーでパラメータの情報読み込んで追加する
-                
+
                 const uuid = crypto.randomUUID();
                 this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
-                
+
                 // 逆引きMapに登録
                 if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
                   this._macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
                 }
                 this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
-                
+
                 //suggetionsに登録されてない場合のみ追加
                 if (
                   !Object.prototype.hasOwnProperty.call(
@@ -466,129 +465,6 @@ export class InformationWorkSpace {
     return nestedObjects;
   }
 
-  /**
-   * jsやiscript-endscript間で定義した変数を取得する
-   * sentenceがundefined出ない場合、指定した値の範囲内で定義されている変数を取得する
-   * @param absoluteScenarioFilePath
-   * @param sentence
-   */
-  public async updateVariableMapByJS(
-    absoluteScenarioFilePath: string,
-    sentence: string | undefined = undefined,
-  ) {
-    await this.spliceVariableMapByFilePath(absoluteScenarioFilePath);
-    const projectPath: string = await this.getProjectPathByFilePath(
-      absoluteScenarioFilePath,
-    );
-    //others/pluginの中に入っているファイルならreturn
-    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
-      return;
-    }
-    if (sentence === undefined) {
-      sentence = this.scriptFileMap.get(absoluteScenarioFilePath)!;
-    }
-
-    const variablePrefixList = ["f", "sf", "tf", "mp"];
-
-    const ast = babel.parse(sentence, {
-      allowAwaitOutsideFunction: true,
-      allowUndeclaredExports: true,
-      errorRecovery: true,
-      allowSuperOutsideMethod: true,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this; // traverse内でthisコンテキストが変わるため
-    const typeConverter = this.typeConverter;
-    let keyName = "";
-    try {
-      traverse(ast, {
-        enter: (_path) => {},
-        MemberExpression(path) {
-          try {
-            const left = path.node;
-            if (
-              left?.object?.type === "Identifier" &&
-              variablePrefixList.includes(left.object.name)
-            ) {
-              if (left?.property?.type === "Identifier") {
-                // 'f.' をキー名の先頭に追加してプロパティ名を取得
-                const variableName = left.property.name;
-                const type = typeConverter(left.property.type);
-                const variableData = new VariableData(
-                  variableName,
-                  undefined,
-                  left.object.name,
-                  type,
-                );
-                if (path.node?.loc?.start) {
-                  const location = new vscode.Location(
-                    vscode.Uri.file(absoluteScenarioFilePath),
-                    new vscode.Position(
-                      path.node.loc.start.line,
-                      path.node.loc.start.column,
-                    ),
-                  );
-                  variableData.addLocation(location);
-                  keyName = variableName;
-                  that.variableMap
-                    .get(projectPath)
-                    ?.set(variableName, variableData);
-                }
-              }
-            }
-          } catch (error) {
-            TyranoLogger.printStackTrace(error);
-            // エラーを記録するだけで処理は続行
-          }
-        },
-        ObjectExpression: (path) => {
-          try {
-            const nowObject: VariableData | undefined = that.variableMap
-              .get(projectPath)
-              ?.get(keyName);
-            if (nowObject) {
-              path.node?.properties?.forEach((property) => {
-                try {
-                  if (
-                    property?.type === "ObjectMethod" ||
-                    property?.type === "ObjectProperty"
-                  ) {
-                    if (property?.key?.type === "Identifier") {
-                      const nestedObjects: VariableData[] =
-                        this.getNestedObject(
-                          path.node,
-                          absoluteScenarioFilePath,
-                        );
-                      if (nowObject.nestVariableData.length <= 0) {
-                        nowObject.nestVariableData = nestedObjects;
-                        that.variableMap
-                          .get(projectPath)
-                          ?.set(keyName, nowObject);
-                      }
-                    }
-                  } else {
-                    // SpreadElementの場合の処理
-                    TyranoLogger.print(
-                      "SpreadElementはkeyプロパティを持ちません。",
-                    );
-                  }
-                } catch (error) {
-                  TyranoLogger.printStackTrace(error);
-                  // プロパティ処理でエラーが発生しても次のプロパティを処理
-                }
-              });
-            }
-          } catch (error) {
-            TyranoLogger.printStackTrace(error);
-            // エラーを記録するだけで処理は続行
-          }
-        },
-      });
-    } catch (error) {
-      TyranoLogger.printStackTrace(error);
-      // traverseでエラーが発生しても処理を続行
-    }
-  }
 
   public async updateMacroLabelVariableDataMapByKs(
     absoluteScenarioFilePath: string,
@@ -606,8 +482,6 @@ export class InformationWorkSpace {
         absoluteScenarioFilePath,
         new Array<TransitionData>(),
       );
-      let isIscript = false;
-      let iscriptSentence: string = "";
       let description = "";
 
       //該当ファイルに登録されているマクロ、変数、タグ、nameを一度リセット
@@ -623,12 +497,6 @@ export class InformationWorkSpace {
       let macroData: DefineMacroData | null = null; // 現在処理中のマクロデータ
       for (const data of parsedData) {
         //iscript-endscript間のテキストを取得。
-        if (isIscript && data["name"] === "text") {
-          iscriptSentence +=
-            this.scenarioFileMap
-              .get(absoluteScenarioFilePath)
-              ?.lineAt(data["line"]).text + "\n";
-        }
 
         if (isMacro) {
           // マクロ内でパラメータを検索
@@ -774,23 +642,21 @@ export class InformationWorkSpace {
                 ?.splice(index, 1, updateCharacterData);
             }
           }
-        } else if ((await data["name"]) === "iscript") {
-          isIscript = true; //endscriptが見つかるまで行を保存するモードに入る
-        } else if ((await data["name"]) === "endscript") {
-          isIscript = false; //行を保存するモード終わり
-          this.updateVariableMapByJS(absoluteScenarioFilePath, iscriptSentence);
         } else if ((await data["name"]) === "endmacro") {
           if (isMacro) {
             // マクロデータをdefineMacroMapに登録
             const uuid = crypto.randomUUID();
             this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
-            
+
             // 逆引きMapに登録
             if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
-              this._macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
+              this._macroByFilePath.set(
+                absoluteScenarioFilePath,
+                new Set<string>(),
+              );
             }
             this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
-            
+
             //suggetionsに登録されてない場合のみ追加
             if (
               !Object.prototype.hasOwnProperty.call(
@@ -909,19 +775,19 @@ export class InformationWorkSpace {
   public async spliceMacroDataMapByFilePath(filePath: string) {
     const deleteTagList: string[] = [];
     const projectPath = await this.getProjectPathByFilePath(filePath);
-    
+
     // 逆引きMapを使ってO(1)で該当マクロのUUIDを取得
     const macroUuids = this._macroByFilePath.get(filePath);
     if (!macroUuids || macroUuids.size === 0) {
       return deleteTagList;
     }
-    
+
     const projectMacroMap = this.defineMacroMap.get(projectPath);
     if (!projectMacroMap) {
       this._macroByFilePath.delete(filePath);
       return deleteTagList;
     }
-    
+
     // UUIDを使って直接削除
     for (const uuid of macroUuids) {
       const macroData = projectMacroMap.get(uuid);
@@ -930,7 +796,7 @@ export class InformationWorkSpace {
         projectMacroMap.delete(uuid);
       }
     }
-    
+
     // 逆引きMapからも削除
     this._macroByFilePath.delete(filePath);
 
@@ -953,7 +819,7 @@ export class InformationWorkSpace {
     const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
     const projectVariableMap = this.variableMap.get(projectPath);
     if (!projectVariableMap) return;
-    
+
     for (const [key, value] of projectVariableMap) {
       for (const location of value.locations) {
         if (location.uri.fsPath === fsPath) {
@@ -1045,24 +911,26 @@ export class InformationWorkSpace {
     const listFiles = (dir: string): string[] => {
       const results: string[] = [];
       const stack = [dir];
-      
+
       while (stack.length > 0) {
         const currentDir = stack.pop()!;
         try {
           const entries = fs.readdirSync(currentDir, { withFileTypes: true });
-          
+
           for (const entry of entries) {
             // .gitディレクトリを無視
             if (entry.name === ".git") continue;
-            
+
             const fullPath = `${currentDir}${this.pathDelimiter}${entry.name}`;
-            
+
             if (entry.isDirectory()) {
               stack.push(fullPath);
             } else if (entry.isFile()) {
               // 拡張子フィルタリング
-              if (permissionExtension.length === 0 || 
-                  permissionExtension.includes(path.extname(fullPath))) {
+              if (
+                permissionExtension.length === 0 ||
+                permissionExtension.includes(path.extname(fullPath))
+              ) {
                 results.push(fullPath);
               }
             }
