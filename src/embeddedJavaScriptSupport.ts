@@ -3,6 +3,7 @@
  * 仮想ドキュメントを作成し、VS Code 組み込みの JS 言語サービスに委譲する。
  */
 import * as vscode from "vscode";
+import { CrossFileContextManager } from "./CrossFileContextManager";
 
 // ── 型定義 ──────────────────────────────────────────
 
@@ -60,6 +61,7 @@ const openedVirtualDocs = new Set<string>();
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 let contentProvider: EmbeddedJSDocumentProvider;
+let crossFileContext: CrossFileContextManager;
 
 // ── キャッシュ付きユーティリティ関数 ──────────────────
 
@@ -214,7 +216,9 @@ function getOriginalUriString(virtualUri: vscode.Uri): string | undefined {
 }
 
 /**
- * 仮想ドキュメントの内容を更新する
+ * 仮想ドキュメントの内容を更新する。
+ * 自ファイルの JS コンテンツに加え、ワークスペース内の他ファイルの JS コンテンツを
+ * 末尾に追記することで、クロスファイル補完を実現する。
  */
 function updateVirtualContent(document: vscode.TextDocument): void {
   const cache = getDocumentCache(document);
@@ -224,14 +228,26 @@ function updateVirtualContent(document: vscode.TextDocument): void {
 
   const virtualUri = getVirtualUri(document);
   const key = virtualUri.toString();
+
+  // 自ファイルの JS コンテンツ + 他ファイルの JS コンテンツ
+  let content = cache.virtualContent;
+  if (crossFileContext) {
+    const otherContent = crossFileContext.getOtherFilesContent(
+      document.uri.toString(),
+    );
+    if (otherContent.length > 0) {
+      content = cache.virtualContent + "\n" + otherContent;
+    }
+  }
+
   const oldContent = virtualContentMap.get(key);
 
   // コンテンツが変わっていなければ何もしない
-  if (oldContent === cache.virtualContent) {
+  if (oldContent === content) {
     return;
   }
 
-  virtualContentMap.set(key, cache.virtualContent);
+  virtualContentMap.set(key, content);
   virtualToOriginalMap.set(key, document.uri.toString());
   if (contentProvider) {
     contentProvider.fireChange(virtualUri);
@@ -282,10 +298,26 @@ class EmbeddedJSDocumentProvider implements vscode.TextDocumentContentProvider {
  * [iscript]〜[endscript] ブロック内での JavaScript 言語サポートを登録する。
  * activate() から呼び出す。
  */
+/**
+ * 開いているドキュメントの仮想ドキュメントをすべて再構築する
+ */
+function refreshAllVirtualDocuments(): void {
+  for (const doc of vscode.workspace.textDocuments) {
+    if (
+      doc.uri.scheme !== EMBEDDED_SCHEME &&
+      doc.languageId === "tyrano" &&
+      hasScriptBlocks(doc)
+    ) {
+      updateVirtualContent(doc);
+    }
+  }
+}
+
 export function registerEmbeddedJavaScriptSupport(
   context: vscode.ExtensionContext,
 ): void {
   contentProvider = new EmbeddedJSDocumentProvider();
+  crossFileContext = new CrossFileContextManager();
 
   // 仮想ドキュメントスキーム登録
   context.subscriptions.push(
@@ -295,12 +327,26 @@ export function registerEmbeddedJavaScriptSupport(
     ),
   );
 
-  // --- すでに開いているドキュメントの仮想ドキュメントを準備 ---
-  for (const doc of vscode.workspace.textDocuments) {
-    if (doc.languageId === "tyrano" && hasScriptBlocks(doc)) {
-      ensureVirtualDocument(doc);
+  // --- クロスファイルコンテキストの初期化 ---
+  crossFileContext.init().then(() => {
+    console.log(
+      `[iscript] CrossFileContext initialized: ${crossFileContext.cachedFileCount} files cached`,
+    );
+    // 初期化完了後、すでに開いているドキュメントの仮想ドキュメントを準備
+    for (const doc of vscode.workspace.textDocuments) {
+      if (doc.languageId === "tyrano" && hasScriptBlocks(doc)) {
+        ensureVirtualDocument(doc);
+      }
     }
-  }
+  });
+  context.subscriptions.push(crossFileContext);
+
+  // --- クロスファイルコンテキスト変更時: 全仮想ドキュメントを再構築 ---
+  context.subscriptions.push(
+    crossFileContext.onDidChange(() => {
+      refreshAllVirtualDocuments();
+    }),
+  );
 
   // --- ドキュメント開閉・変更イベント ---
   context.subscriptions.push(
@@ -321,6 +367,11 @@ export function registerEmbeddedJavaScriptSupport(
       // キャッシュを無効化（次回アクセス時に再計算される）
       documentCacheMap.delete(doc.uri.toString());
 
+      // エディタ上の変更をクロスファイルキャッシュにも即時反映
+      if (crossFileContext && doc.uri.scheme === "file") {
+        crossFileContext.updateFromDocument(doc);
+      }
+
       // デバウンスして仮想ドキュメントを更新（キーストロークごとの更新を抑制）
       const docKey = doc.uri.toString();
       const existingTimer = debounceTimers.get(docKey);
@@ -337,6 +388,21 @@ export function registerEmbeddedJavaScriptSupport(
           );
           if (currentDoc) {
             updateVirtualContent(currentDoc);
+
+            // .ks ファイルが変更された場合、他の開いている .ks ファイルの
+            // 仮想ドキュメントも再構築する（他ファイルの JS コンテンツが変わるため）
+            if (hasScriptBlocks(currentDoc)) {
+              for (const otherDoc of vscode.workspace.textDocuments) {
+                if (
+                  otherDoc.uri.toString() !== currentDoc.uri.toString() &&
+                  otherDoc.uri.scheme !== EMBEDDED_SCHEME &&
+                  otherDoc.languageId === "tyrano" &&
+                  hasScriptBlocks(otherDoc)
+                ) {
+                  updateVirtualContent(otherDoc);
+                }
+              }
+            }
           }
         }, DEBOUNCE_DELAY_MS),
       );
@@ -581,4 +647,7 @@ export function cleanupEmbeddedJavaScript(): void {
     clearTimeout(timer);
   }
   debounceTimers.clear();
+  if (crossFileContext) {
+    crossFileContext.dispose();
+  }
 }
