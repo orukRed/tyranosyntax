@@ -420,16 +420,30 @@ export function registerEmbeddedJavaScriptSupport(
 
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument((doc) => {
-      const virtualUri = getVirtualUri(doc);
-      const key = virtualUri.toString();
-      virtualContentMap.delete(key);
-      virtualToOriginalMap.delete(key);
-      openedVirtualDocs.delete(key);
-      documentCacheMap.delete(doc.uri.toString());
-      const timer = debounceTimers.get(doc.uri.toString());
-      if (timer) {
-        clearTimeout(timer);
-        debounceTimers.delete(doc.uri.toString());
+      if (doc.uri.scheme === EMBEDDED_SCHEME) {
+        // 仮想ドキュメントが閉じられた場合:
+        // その仮想URI自体をキーとしてクリーンアップする
+        const key = doc.uri.toString();
+        virtualContentMap.delete(key);
+        virtualToOriginalMap.delete(key);
+        openedVirtualDocs.delete(key);
+        // documentCacheMap / debounceTimers は元ドキュメントの URI をキーとしているため触らない
+      } else {
+        // 元ドキュメントが閉じられた場合:
+        // 対応する仮想URIをキーとしてクリーンアップし、
+        // 元ドキュメントに紐づくキャッシュやタイマーも削除する
+        const virtualUri = getVirtualUri(doc);
+        const key = virtualUri.toString();
+        virtualContentMap.delete(key);
+        virtualToOriginalMap.delete(key);
+        openedVirtualDocs.delete(key);
+        const docKey = doc.uri.toString();
+        documentCacheMap.delete(docKey);
+        const timer = debounceTimers.get(docKey);
+        if (timer) {
+          clearTimeout(timer);
+          debounceTimers.delete(docKey);
+        }
       }
     }),
   );
