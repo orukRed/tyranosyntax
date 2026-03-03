@@ -222,13 +222,23 @@ function getOriginalUriString(virtualUri: vscode.Uri): string | undefined {
  */
 function updateVirtualContent(document: vscode.TextDocument): void {
   const cache = getDocumentCache(document);
-  if (!cache.hasBlocks) {
-    return;
-  }
-
   const virtualUri = getVirtualUri(document);
   const key = virtualUri.toString();
 
+  if (!cache.hasBlocks) {
+    const oldContent = virtualContentMap.get(key);
+
+    // [iscript] ブロックが削除された場合は、仮想ドキュメント側の内容と
+    // マッピングをクリアし、変更イベントを発火して診断等を更新する。
+    if (oldContent !== undefined) {
+      virtualContentMap.delete(key);
+      virtualToOriginalMap.delete(key);
+      if (contentProvider) {
+        contentProvider.fireChange(virtualUri);
+      }
+    }
+    return;
+  }
   // 自ファイルの JS コンテンツ + 他ファイルの JS コンテンツ
   let content = cache.virtualContent;
   if (crossFileContext) {
