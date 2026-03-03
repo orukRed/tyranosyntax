@@ -19,6 +19,10 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
+import {
+  registerEmbeddedJavaScriptSupport,
+  cleanupEmbeddedJavaScript,
+} from "./embeddedJavaScriptSupport";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -70,6 +74,9 @@ export function activate(context: ExtensionContext) {
 
   // // 言語サーバーの開始
   // client.start();
+
+  // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
+  registerEmbeddedJavaScriptSupport(context);
 
   const run = async () => {
     await vscode.window.withProgress(
@@ -166,8 +173,12 @@ export function activate(context: ExtensionContext) {
             infoWs.extensionPath = context.extensionPath;
 
             // レースコンディション対策：初期化後に少し待機してマクロ情報を再確認
-            await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
-            TyranoLogger.print("Initial macro and variable data loading completed");
+            await new Promise((resolve) =>
+              setTimeout(resolve, FILE_SYNC_DELAY_MS),
+            );
+            TyranoLogger.print(
+              "Initial macro and variable data loading completed",
+            );
 
             TyranoLogger.print("TyranoDiagnostic activate");
             const tyranoJumpProvider = new TyranoJumpProvider();
@@ -222,7 +233,9 @@ export function activate(context: ExtensionContext) {
                     );
 
                     // レースコンディション対策のため少し待機
-                    await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
+                    await new Promise((resolve) =>
+                      setTimeout(resolve, FILE_SYNC_DELAY_MS),
+                    );
 
                     try {
                       await tyranoDiagnostic.createDiagnostics(
@@ -288,7 +301,9 @@ export function activate(context: ExtensionContext) {
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
+              await new Promise((resolve) =>
+                setTimeout(resolve, FILE_SYNC_DELAY_MS),
+              );
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
             });
@@ -312,14 +327,14 @@ export function activate(context: ExtensionContext) {
             scriptFileSystemWatcher.onDidCreate(async (e) => {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
-              await infoWs.updateVariableMapByJS(e.fsPath);
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) => setTimeout(resolve, FILE_SYNC_DELAY_MS));
+              await new Promise((resolve) =>
+                setTimeout(resolve, FILE_SYNC_DELAY_MS),
+              );
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
-              await infoWs.updateVariableMapByJS(e.fsPath);
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
@@ -402,6 +417,7 @@ export async function tmpDiagnostic() {
 }
 
 export function deactivate(): Thenable<void> | undefined {
+  cleanupEmbeddedJavaScript();
   if (!client) {
     return undefined;
   }

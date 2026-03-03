@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -58,7 +58,7 @@
         "scopeName": "source.ks",
         "path": "./syntaxes/tyrano.tmLanguage.json",
         "embeddedLanguages": {
-          "source.js": "html",
+          "source.js": "javascript",
           "meta.embedded.block.html": "html"
         }
       }

@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.16.0] 2026-03-04
+
+- `iscript`～`endscript`で囲まれたJavaScript内ではJavaScriptの補完を行うようにしました。
+
 ## [1.15.0] 2025-11-12
 
 - 拡張機能の初期化速度を改善しました。[issue#342](https://github.com/orukRed/tyranosyntax/issues/342)
@@ -11,7 +15,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - ファイル数が多いプロジェクトほど効果が大きくなります。
 - 定義済みの変数やマクロが未定義になる問題を修正しました。[issue#354](https://github.com/orukRed/tyranosyntax/issues/354)
 - 目パチ、口パク用のパラメータでエラー扱いになる問題を修正しました。
-
 
 ## [1.14.5] 2025-10-15
 
@@ -56,7 +59,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - ティラノビルダー専用タグ（`tb_eval`、`tb_show_message_window`など）がエラーとして検出されないようになりました。
   - ティラノビルダー専用パラメータ（`playbgm`タグの`time`、`fadein`パラメータなど）がエラーとして検出されないようになりました。設定で`TyranoScript syntax.tyranoBuilder.skipTags`および`TyranoScript syntax.tyranoBuilder.skipParameters`をカスタマイズ可能です。
 
-
 ## [1.12.1] 2025-09-08
 
 - readmeにofuseへのリンクを追加しました。
@@ -68,7 +70,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [1.11.1] 2025-08-23
 
 1.11.0で追加した`存在しないパラメータを指定したときにエラーを表示`にて、chara_layerタグでパラメータを追加したpartでエラーが発生してしまう問題を修正しました。
-
 
 ## [1.11.0] 2025-08-19
 
