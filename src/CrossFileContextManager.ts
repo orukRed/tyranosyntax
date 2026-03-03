@@ -1,5 +1,5 @@
 /**
- * ワークスペース内の全 .ks ファイルの JavaScript コンテンツをキャッシュ管理するクラス。
+ * ワークスペース内の Tyrano プロジェクト data/ 配下の .ks ファイルの JavaScript コンテンツをキャッシュ管理するクラス。
  * 各 .ks ファイルの仮想ドキュメントに「他ファイルの JS コンテンツ」を追記することで、
  * ファイルをまたいだ変数補完を実現する。
  */
@@ -93,17 +93,18 @@ export class CrossFileContextManager implements vscode.Disposable {
   private readonly DEBOUNCE_MS = 300;
 
   /**
-   * 初期化: ワークスペース内の全 .ks ファイルをスキャンしてキャッシュを構築する
+   * 初期化: Tyrano プロジェクトの data/ 配下の .ks ファイルをスキャンしてキャッシュを構築する
    */
   async init(): Promise<void> {
-    // ワークスペース内の全 .ks ファイルを検索
-    const files = await vscode.workspace.findFiles("**/*.ks");
+    // Tyrano プロジェクトの data/ 配下の .ks ファイルのみを対象にする（InformationWorkSpace と同様）
+    const KS_GLOB = "**/data/**/*.ks";
+    const files = await vscode.workspace.findFiles(KS_GLOB);
 
     // 並列でファイルを読み込みキャッシュ
     await Promise.all(files.map((uri) => this.loadFile(uri)));
 
-    // FileSystemWatcher で .ks ファイルの変更を監視
-    this.watcher = vscode.workspace.createFileSystemWatcher("**/*.ks");
+    // FileSystemWatcher で data/ 配下の .ks ファイルの変更を監視
+    this.watcher = vscode.workspace.createFileSystemWatcher(KS_GLOB);
 
     this.watcher.onDidCreate(
       (uri) => {
