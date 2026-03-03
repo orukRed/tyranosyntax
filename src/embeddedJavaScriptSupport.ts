@@ -647,7 +647,4 @@ export function cleanupEmbeddedJavaScript(): void {
     clearTimeout(timer);
   }
   debounceTimers.clear();
-  if (crossFileContext) {
-    crossFileContext.dispose();
-  }
 }
