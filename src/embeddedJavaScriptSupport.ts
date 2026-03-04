@@ -526,7 +526,7 @@ export function registerEmbeddedJavaScriptSupport(
                 virtualUri,
                 position,
                 completionContext.triggerCharacter,
-                5,
+                100,
               );
 
             // ネストされたプロパティアクセス (例: f.testObj.) の場合、
