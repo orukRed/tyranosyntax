@@ -43,6 +43,32 @@ const ENDSCRIPT_AT_REGEX = /^\s*@endscript(\s.*)?$/i;
 // hasScriptBlocks 用の高速チェック正規表現（大文字小文字不問）
 const HAS_ISCRIPT_REGEX = /\[iscript[\s\]]|@iscript(?:\s|$)/i;
 
+/**
+ * ネストされたプロパティアクセスのパターン検出用正規表現
+ * 例: `f.testObj.` `sf.config.value.` `tf.obj.sub.deep.`
+ * `f.` のような1段階のアクセスにはマッチしない
+ */
+const NESTED_PROPERTY_ACCESS_REGEX =
+  /(?:^|[^\w$.])(?:f|sf|tf|mp)\.[$\w]+(?:\.[$\w]+)*\.$|(?:^|[^\w$.])(?:f|sf|tf|mp)\.[$\w]+(?:\.[$\w]+)*\.[$\w]+$/;
+
+/**
+ * ネストされたプロパティアクセス時に保持する CompletionItemKind の集合。
+ * オブジェクトのメンバーに相当する kind のみを残し、スコープレベルの候補を除外する。
+ */
+const MEMBER_COMPLETION_KINDS = new Set<vscode.CompletionItemKind>([
+  vscode.CompletionItemKind.Property,
+  vscode.CompletionItemKind.Method,
+  vscode.CompletionItemKind.Field,
+  vscode.CompletionItemKind.Function,
+  vscode.CompletionItemKind.Constructor,
+  vscode.CompletionItemKind.Class,
+  vscode.CompletionItemKind.Interface,
+  vscode.CompletionItemKind.Enum,
+  vscode.CompletionItemKind.EnumMember,
+  vscode.CompletionItemKind.Constant,
+  vscode.CompletionItemKind.Event,
+]);
+
 // ── 定数 ──────────────────────────────────────────
 const EMBEDDED_SCHEME = "embedded-javascript";
 /** onDidChangeTextDocument のデバウンス間隔 (ms) */
@@ -193,6 +219,23 @@ export function getVirtualJavaScriptContent(
  */
 export function hasScriptBlocks(document: vscode.TextDocument): boolean {
   return getDocumentCache(document).hasBlocks;
+}
+
+/**
+ * カーソル位置がネストされたプロパティアクセス（例: `f.testObj.` `f.testObj.fu`）の
+ * 途中にあるかどうかを判定する。
+ * `f.` のような1段階のアクセスでは false を返す。
+ *
+ * @param lineText カーソルがある行のテキスト全体
+ * @param characterPos カーソルの列位置（0-indexed）
+ * @returns ネストされたプロパティアクセスパターンの場合 true
+ */
+export function isNestedPropertyAccess(
+  lineText: string,
+  characterPos: number,
+): boolean {
+  const textBeforeCursor = lineText.substring(0, characterPos);
+  return NESTED_PROPERTY_ACCESS_REGEX.test(textBeforeCursor);
 }
 
 // ── 仮想 URI 管理 ─────────────────────────────────
@@ -485,6 +528,25 @@ export function registerEmbeddedJavaScriptSupport(
                 completionContext.triggerCharacter,
                 5,
               );
+
+            // ネストされたプロパティアクセス (例: f.testObj.) の場合、
+            // オブジェクトメンバーに該当する kind のみを残し、
+            // スコープレベルの変数候補 (例: f.CHARA_LAYER) を除外する
+            if (result && result.items.length > 0) {
+              const lineText = document.lineAt(position.line).text;
+              if (isNestedPropertyAccess(lineText, position.character)) {
+                const filtered = result.items.filter(
+                  (item) =>
+                    item.kind !== undefined &&
+                    MEMBER_COMPLETION_KINDS.has(item.kind),
+                );
+                return new vscode.CompletionList(
+                  filtered,
+                  result.isIncomplete,
+                );
+              }
+            }
+
             return result;
           } catch (e) {
             console.error("[iscript] Completion error:", e);
