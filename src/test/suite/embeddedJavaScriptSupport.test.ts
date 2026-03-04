@@ -21,10 +21,7 @@ suite("isNestedPropertyAccess", () => {
   });
 
   test("f.obj.nested.deep. → true (3段以上のチェーン)", () => {
-    assert.strictEqual(
-      isNestedPropertyAccess("f.obj.nested.deep.", 18),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("f.obj.nested.deep.", 18), true);
   });
 
   test("f.testObj.fu → true (入力途中)", () => {
@@ -32,17 +29,11 @@ suite("isNestedPropertyAccess", () => {
   });
 
   test("代入の右辺: let x = f.testObj. → true", () => {
-    assert.strictEqual(
-      isNestedPropertyAccess("let x = f.testObj.", 18),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("let x = f.testObj.", 18), true);
   });
 
   test("条件式内: if (f.testObj. → true", () => {
-    assert.strictEqual(
-      isNestedPropertyAccess("if (f.testObj.", 14),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("if (f.testObj.", 14), true);
   });
 
   test("インデント付き:   f.testObj. → true", () => {
@@ -50,10 +41,7 @@ suite("isNestedPropertyAccess", () => {
   });
 
   test("f.testObj.$special. → true ($ を含む変数名)", () => {
-    assert.strictEqual(
-      isNestedPropertyAccess("f.testObj.$special.", 19),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("f.testObj.$special.", 19), true);
   });
 
   // ── 1段階のプロパティアクセス (false を返すケース) ──
@@ -108,18 +96,12 @@ suite("isNestedPropertyAccess", () => {
 
   test("カーソルが途中: 'f.testObj.hoge = 1' の位置10 → true", () => {
     // 'f.testObj.' までの位置
-    assert.strictEqual(
-      isNestedPropertyAccess("f.testObj.hoge = 1", 10),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("f.testObj.hoge = 1", 10), true);
   });
 
   test("カーソルが途中: 'f.testObj.hoge = 1' の位置14 → true", () => {
     // 'f.testObj.hoge' までの位置
-    assert.strictEqual(
-      isNestedPropertyAccess("f.testObj.hoge = 1", 14),
-      true,
-    );
+    assert.strictEqual(isNestedPropertyAccess("f.testObj.hoge = 1", 14), true);
   });
 
   test("xf.testObj. → false (プレフィックスが単語の一部)", () => {
