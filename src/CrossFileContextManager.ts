@@ -81,6 +81,9 @@ export class CrossFileContextManager implements vscode.Disposable {
   /** ファイル URI (文字列) → そのファイルの JS ブロック内容 */
   private fileJsCache = new Map<string, string>();
 
+  /** getOtherFilesContent の結果キャッシュ (excludeUri → 結合済みコンテンツ) */
+  private otherContentCache = new Map<string, string>();
+
   /** ファイル変更時のコールバック */
   private _onDidChange = new vscode.EventEmitter<void>();
   public readonly onDidChange = this._onDidChange.event;
@@ -125,6 +128,7 @@ export class CrossFileContextManager implements vscode.Disposable {
     this.watcher.onDidDelete(
       (uri) => {
         this.fileJsCache.delete(uri.toString());
+        this.otherContentCache.clear();
         this.fireChangeDebounced();
       },
       undefined,
@@ -152,9 +156,11 @@ export class CrossFileContextManager implements vscode.Disposable {
       } else {
         this.fileJsCache.delete(uri.toString());
       }
+      this.otherContentCache.clear();
     } catch {
       // ファイル読み込みエラー（削除済み等）は無視
       this.fileJsCache.delete(uri.toString());
+      this.otherContentCache.clear();
     }
   }
 
@@ -174,6 +180,7 @@ export class CrossFileContextManager implements vscode.Disposable {
     } else {
       this.fileJsCache.delete(document.uri.toString());
     }
+    this.otherContentCache.clear();
   }
 
   /**
@@ -181,13 +188,19 @@ export class CrossFileContextManager implements vscode.Disposable {
    * 仮想ドキュメントの末尾に追記するために使用する。
    */
   getOtherFilesContent(excludeUri: string): string {
+    const cached = this.otherContentCache.get(excludeUri);
+    if (cached !== undefined) {
+      return cached;
+    }
     const parts: string[] = [];
     for (const [uri, js] of this.fileJsCache) {
       if (uri !== excludeUri && js.length > 0) {
         parts.push(js);
       }
     }
-    return parts.join("\n");
+    const result = parts.join("\n");
+    this.otherContentCache.set(excludeUri, result);
+    return result;
   }
 
   /**
@@ -219,5 +232,6 @@ export class CrossFileContextManager implements vscode.Disposable {
       d.dispose();
     }
     this.fileJsCache.clear();
+    this.otherContentCache.clear();
   }
 }
