@@ -12,10 +12,10 @@ export class VariableData {
   public type: string = ""; //変数の型
 
   public addLocation(value: vscode.Location) {
-    this.locations?.push(value);
+    this.locations.push(value);
   }
   public deleteLocation(deletePath: vscode.Uri) {
-    this.locations = this.locations?.filter((location) => {
+    this.locations = this.locations.filter((location) => {
       return location.uri.fsPath !== deletePath.fsPath;
     });
   }
