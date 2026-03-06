@@ -33,6 +33,26 @@ type TagsByName = {
 
 export class TyranoJumpProvider {
   constructor() {}
+
+  /**
+   * ドキュメントを開いて指定行にカーソルを移動するヘルパー
+   * @param doc 対象のテキストドキュメント
+   * @param line 移動先の行番号
+   * @param revealType エディタのスクロール方法
+   */
+  private async showDocumentAtLine(
+    doc: vscode.TextDocument,
+    line: number = 0,
+    revealType?: vscode.TextEditorRevealType,
+  ): Promise<void> {
+    const pos = new vscode.Position(line, 0);
+    const activeTextEditor = await vscode.window.showTextDocument(doc, {
+      preview: true,
+    });
+    activeTextEditor.selection = new vscode.Selection(pos, pos);
+    activeTextEditor.revealRange(new vscode.Range(pos, pos), revealType);
+  }
+
   /**
    * alt(option) + J でシナリオジャンプした時の挙動
    */
@@ -120,20 +140,7 @@ export class TyranoJumpProvider {
         await vscode.workspace.openTextDocument(storagePath);
       //ラベル未指定ならファイル頭にジャンプ
       if (jumpTarget == undefined) {
-        const activeTextEditor = await vscode.window.showTextDocument(
-          jumpDefinitionFile,
-          { preview: true },
-        );
-        activeTextEditor.selection = new vscode.Selection(
-          new vscode.Position(0, 0),
-          new vscode.Position(0, 0),
-        );
-        activeTextEditor.revealRange(
-          new vscode.Range(
-            new vscode.Position(0, 0),
-            new vscode.Position(0, 0),
-          ),
-        );
+        await this.showDocumentAtLine(jumpDefinitionFile);
         return;
       }
 
@@ -157,19 +164,9 @@ export class TyranoJumpProvider {
         if (jumpDefinition["name"] === "label") {
           const { label_name: labelName, line = 0 } = jumpDefinition["pm"];
           if (labelName === jumpTarget) {
-            const activeTextEditor = await vscode.window.showTextDocument(
+            await this.showDocumentAtLine(
               jumpDefinitionFile,
-              { preview: true },
-            );
-            activeTextEditor.selection = new vscode.Selection(
-              new vscode.Position(line, 0),
-              new vscode.Position(line, 0),
-            );
-            activeTextEditor.revealRange(
-              new vscode.Range(
-                new vscode.Position(line, 0),
-                new vscode.Position(line, 0),
-              ),
+              line,
               vscode.TextEditorRevealType.InCenter,
             );
             return;
@@ -177,17 +174,7 @@ export class TyranoJumpProvider {
         }
       }
       //ラベル見つからなかった時の処理
-      const activeTextEditor = await vscode.window.showTextDocument(
-        jumpDefinitionFile,
-        { preview: true },
-      );
-      activeTextEditor.selection = new vscode.Selection(
-        new vscode.Position(0, 0),
-        new vscode.Position(0, 0),
-      );
-      activeTextEditor.revealRange(
-        new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0)),
-      );
+      await this.showDocumentAtLine(jumpDefinitionFile);
       vscode.window.showInformationMessage(
         "ラベルが見つからなかったためファイルの先頭へとジャンプしました。",
       );
