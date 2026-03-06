@@ -5,6 +5,18 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
     /\b(f\.|sf\.|tf\.|mp\.)([a-zA-Z_ぁ-んァ-ヶ一-龠Ａ-Ｚａ-ｚ]+)(([0-9a-zA-Z_ぁ-んァ-ヶ一-龠０-９Ａ-Ｚａ-ｚ]*))\b/; //変数検出用のアウトライン
   constructor() {}
 
+  /**
+   * DocumentSymbolを作成するヘルパーメソッド
+   */
+  private createSymbol(
+    name: string,
+    detail: string,
+    kind: vscode.SymbolKind,
+    range: vscode.Range,
+  ): vscode.DocumentSymbol {
+    return new vscode.DocumentSymbol(name, detail, kind, range, range);
+  }
+
   public provideDocumentSymbols(
     document: vscode.TextDocument,
     _token: vscode.CancellationToken,
@@ -42,62 +54,63 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
         //isAddCommentOutLineだけはコメント中でも表示させたい。
         //FIXME:暫定的な書き方なのでもっと良い書き方があるはず
         if (this.isAddCommentOutLine(line.text)) {
-          const symbol = new vscode.DocumentSymbol(
-            this.getCommentText(line.text),
-            "Comment",
-            vscode.SymbolKind.Enum,
-            line.range,
-            line.range,
+          symbols.push(
+            this.createSymbol(
+              this.getCommentText(line.text),
+              "Comment",
+              vscode.SymbolKind.Enum,
+              line.range,
+            ),
           );
-          symbols.push(symbol);
         }
         continue;
       }
 
       //タグのアウトライン表示
       if (this.isAddTagOutline(line.text)) {
-        const symbol = new vscode.DocumentSymbol(
-          line.text,
-          "Component",
-          vscode.SymbolKind.Class,
-          line.range,
-          line.range,
+        symbols.push(
+          this.createSymbol(
+            line.text,
+            "Component",
+            vscode.SymbolKind.Class,
+            line.range,
+          ),
         );
-        symbols.push(symbol);
       }
 
       //変数のアウトライン表示
       if (this.isAddVariableOutLine(line.text)) {
         const outlineText = line.text.match(this.REGEX_VARIABLE)![0];
-        const symbol = new vscode.DocumentSymbol(
-          outlineText,
-          "Component",
-          vscode.SymbolKind.Variable,
-          line.range,
-          line.range,
+        symbols.push(
+          this.createSymbol(
+            outlineText,
+            "Component",
+            vscode.SymbolKind.Variable,
+            line.range,
+          ),
         );
-        symbols.push(symbol);
-      } //ラベルをアウトラインに表示
+      }
+      //ラベルをアウトラインに表示
       if (this.isAddLabelOutLine(line.text)) {
-        const symbol = new vscode.DocumentSymbol(
-          line.text,
-          "Component",
-          vscode.SymbolKind.Function,
-          line.range,
-          line.range,
+        symbols.push(
+          this.createSymbol(
+            line.text,
+            "Component",
+            vscode.SymbolKind.Function,
+            line.range,
+          ),
         );
-        symbols.push(symbol);
       }
       //コメントをアウトラインに表示
       if (this.isAddCommentOutLine(line.text)) {
-        const symbol = new vscode.DocumentSymbol(
-          this.getCommentText(line.text),
-          "Comment",
-          vscode.SymbolKind.Enum,
-          line.range,
-          line.range,
+        symbols.push(
+          this.createSymbol(
+            this.getCommentText(line.text),
+            "Comment",
+            vscode.SymbolKind.Enum,
+            line.range,
+          ),
         );
-        symbols.push(symbol);
       }
     }
     return symbols;
@@ -134,10 +147,7 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
    * @returns アウトライン表示する変数が含まれているならtrue,そうでないならfalse
    */
   private isAddVariableOutLine(text: string): boolean {
-    if (text.search(this.REGEX_VARIABLE) !== -1) {
-      return true;
-    }
-    return false;
+    return text.search(this.REGEX_VARIABLE) !== -1;
   }
   /**
    * 引数で渡した文字列に、アウトライン表示するラベルが含まれているかを判定します。
@@ -147,11 +157,7 @@ export class TyranoOutlineProvider implements vscode.DocumentSymbolProvider {
   private isAddLabelOutLine(text: string): boolean {
     //ラベルをアウトラインに表示
     const REGEX = /^\*[0-9a-zA-Z\\-_]+/; //ラベル検出用正規表現
-
-    if (text.search(REGEX) !== -1) {
-      return true;
-    }
-    return false;
+    return text.search(REGEX) !== -1;
   }
   /**
    * 引数で渡した文字列に、アウトライン表示するコメントが含まれているかを判定します。

@@ -3,7 +3,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { ExtensionContext } from "vscode";
-import { LanguageClient } from "vscode-languageclient/node";
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
 import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
@@ -31,50 +30,51 @@ const FILE_SYNC_DELAY_MS = 100;
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
 
-let client: LanguageClient;
+/**
+ * .ksファイルの診断を実行する共通処理
+ * @param fileName 対象のファイル名
+ * @param tyranoDiagnostic 診断インスタンス
+ * @param infoWs ワークスペース情報
+ * @param errorMessage エラー時のログメッセージ
+ * @param waitBeforeDiagnostic 診断前にFILE_SYNC_DELAY_MSだけ待機するかどうか
+ */
+async function runDiagnostic(
+  fileName: string,
+  tyranoDiagnostic: TyranoDiagnostic,
+  infoWs: InformationWorkSpace,
+  errorMessage: string,
+  waitBeforeDiagnostic: boolean = false,
+): Promise<void> {
+  if (
+    path.extname(fileName) !== ".ks" ||
+    tyranoDiagnostic.isDiagnosing
+  ) {
+    return;
+  }
+  tyranoDiagnostic.isDiagnosing = true;
+
+  // マクロ、変数、ラベル、キャラクター、トランジション情報を確実に更新
+  await infoWs.updateScenarioFileMap(fileName);
+  await infoWs.updateMacroLabelVariableDataMapByKs(fileName);
+
+  if (waitBeforeDiagnostic) {
+    // レースコンディション対策のため少し待機
+    await new Promise((resolve) =>
+      setTimeout(resolve, FILE_SYNC_DELAY_MS),
+    );
+  }
+
+  try {
+    await tyranoDiagnostic.createDiagnostics(fileName);
+  } catch (error) {
+    TyranoLogger.print(errorMessage, ErrorLevel.ERROR);
+    TyranoLogger.printStackTrace(error);
+  } finally {
+    tyranoDiagnostic.isDiagnosing = false;
+  }
+}
 
 export function activate(context: ExtensionContext) {
-  // // サーバーモジュールのパス
-  // const serverModule = context.asAbsolutePath(
-  //   path.join('out', 'server', 'server.js')
-  // );
-
-  // // サーバーのデバッグオプション
-  // const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
-
-  // // サーバーオプションの設定
-  // const serverOptions: ServerOptions = {
-  //   run: {
-  //     module: serverModule,
-  //     transport: TransportKind.ipc,
-  //     options: { execArgv: [] },
-  //   },
-  //   debug: {
-  //     module: serverModule,
-  //     transport: TransportKind.ipc,
-  //     options: debugOptions,
-  //   },
-  // };
-
-  // // クライアントオプションの設定
-  // const clientOptions: LanguageClientOptions = {
-  //   documentSelector: [{ scheme: 'file', language: 'tyrano' }],
-  //   synchronize: {
-  //     fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
-  //   }
-  // };
-
-  // // クライアントの作成と起動
-  // client = new LanguageClient(
-  //   'tyranoLanguageServer',
-  //   'TyranoScript Language Server',
-  //   serverOptions,
-  //   clientOptions
-  // );
-
-  // // 言語サーバーの開始
-  // client.start();
-
   // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
   registerEmbeddedJavaScriptSupport(context);
 
@@ -115,7 +115,6 @@ export function activate(context: ExtensionContext) {
           TyranoLogger.print("TyranoCompletionItemProvider activate");
 
           //ショートカットコマンドの登録
-          const _ctbs = new TyranoCreateTagByShortcutKey();
           context.subscriptions.push(
             vscode.commands.registerCommand(
               "tyrano.shiftEnter",
@@ -208,8 +207,6 @@ export function activate(context: ExtensionContext) {
                 renameProvider,
               ),
             );
-            // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
-            // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
 
             //設定で診断機能の自動実行ONにしてるなら許可
             if (
@@ -220,37 +217,13 @@ export function activate(context: ExtensionContext) {
               //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
               context.subscriptions.push(
                 vscode.workspace.onDidChangeTextDocument(async (e) => {
-                  if (
-                    path.extname(e.document.fileName) === ".ks" &&
-                    !tyranoDiagnostic.isDiagnosing
-                  ) {
-                    tyranoDiagnostic.isDiagnosing = true;
-
-                    // マクロ、変数、ラベル、キャラクター、トランジション情報を確実に更新
-                    await infoWs.updateScenarioFileMap(e.document.fileName);
-                    await infoWs.updateMacroLabelVariableDataMapByKs(
-                      e.document.fileName,
-                    );
-
-                    // レースコンディション対策のため少し待機
-                    await new Promise((resolve) =>
-                      setTimeout(resolve, FILE_SYNC_DELAY_MS),
-                    );
-
-                    try {
-                      await tyranoDiagnostic.createDiagnostics(
-                        e.document.fileName,
-                      );
-                    } catch (error) {
-                      TyranoLogger.print(
-                        `診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`,
-                        ErrorLevel.ERROR,
-                      );
-                      console.log(error);
-                    } finally {
-                      tyranoDiagnostic.isDiagnosing = false;
-                    }
-                  }
+                  await runDiagnostic(
+                    e.document.fileName,
+                    tyranoDiagnostic,
+                    infoWs,
+                    `診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`,
+                    true,
+                  );
                 }),
               );
               TyranoLogger.print("Auto diagnostic activate");
@@ -258,33 +231,15 @@ export function activate(context: ExtensionContext) {
               TyranoLogger.print("Auto diagnostic is not activate");
             }
 
-            // ファイル保存時の診断処理（レースコンディション対策版）
+            // ファイル保存時の診断処理
             context.subscriptions.push(
               vscode.workspace.onDidSaveTextDocument(async (document) => {
-                if (
-                  path.extname(document.fileName) === ".ks" &&
-                  !tyranoDiagnostic.isDiagnosing
-                ) {
-                  tyranoDiagnostic.isDiagnosing = true;
-
-                  // 保存時はマクロ、変数、ラベル、キャラクター、トランジション情報を確実に更新してから診断
-                  await infoWs.updateScenarioFileMap(document.fileName);
-                  await infoWs.updateMacroLabelVariableDataMapByKs(
-                    document.fileName,
-                  );
-
-                  try {
-                    await tyranoDiagnostic.createDiagnostics(document.fileName);
-                  } catch (error) {
-                    TyranoLogger.print(
-                      "保存時診断でエラーが発生しました。",
-                      ErrorLevel.ERROR,
-                    );
-                    console.log(error);
-                  } finally {
-                    tyranoDiagnostic.isDiagnosing = false;
-                  }
-                }
+                await runDiagnostic(
+                  document.fileName,
+                  tyranoDiagnostic,
+                  infoWs,
+                  "保存時診断でエラーが発生しました。",
+                );
               }),
             );
             //scenarioFileの値
@@ -295,17 +250,19 @@ export function activate(context: ExtensionContext) {
                 false,
                 false,
               );
+            const updateScenarioFile = async (fsPath: string) => {
+              await infoWs.updateScenarioFileMap(fsPath);
+              await infoWs.updateMacroLabelVariableDataMapByKs(fsPath);
+            };
             scenarioFileSystemWatcher.onDidCreate(async (e) => {
-              await infoWs.updateScenarioFileMap(e.fsPath);
-              await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
+              await updateScenarioFile(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
               await new Promise((resolve) =>
                 setTimeout(resolve, FILE_SYNC_DELAY_MS),
               );
-              await infoWs.updateScenarioFileMap(e.fsPath);
-              await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
+              await updateScenarioFile(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
@@ -324,17 +281,19 @@ export function activate(context: ExtensionContext) {
                 false,
                 false,
               );
+            const updateScriptFile = async (fsPath: string) => {
+              await infoWs.updateScriptFileMap(fsPath);
+              await infoWs.updateMacroDataMapByJs(fsPath);
+            };
             scriptFileSystemWatcher.onDidCreate(async (e) => {
-              await infoWs.updateScriptFileMap(e.fsPath);
-              await infoWs.updateMacroDataMapByJs(e.fsPath);
+              await updateScriptFile(e.fsPath);
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
               await new Promise((resolve) =>
                 setTimeout(resolve, FILE_SYNC_DELAY_MS),
               );
-              await infoWs.updateScriptFileMap(e.fsPath);
-              await infoWs.updateMacroDataMapByJs(e.fsPath);
+              await updateScriptFile(e.fsPath);
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
@@ -416,10 +375,6 @@ export async function tmpDiagnostic() {
   TyranoLogger.print("manual diagnostic end");
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export function deactivate(): void {
   cleanupEmbeddedJavaScript();
-  if (!client) {
-    return undefined;
-  }
-  return client.stop();
 }
