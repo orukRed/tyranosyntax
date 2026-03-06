@@ -39,43 +39,43 @@ export class InformationWorkSpace {
   public readonly DATA_SYSTEM: string = this.pathDelimiter + "system";
   public readonly DATA_VIDEO: string = this.pathDelimiter + "video";
 
-  private _scriptFileMap: Map<string, string> = new Map<string, string>(); //ファイルパスと、中身(全文)
-  private _scenarioFileMap: Map<string, vscode.TextDocument> = new Map<
+  public readonly scriptFileMap: Map<string, string> = new Map<string, string>(); //ファイルパスと、中身(全文)
+  public readonly scenarioFileMap: Map<string, vscode.TextDocument> = new Map<
     string,
     vscode.TextDocument
   >(); //ファイルパスと、中身(全文)
-  private _defineMacroMap: Map<string, Map<string, DefineMacroData>> = new Map<
+  public readonly defineMacroMap: Map<string, Map<string, DefineMacroData>> = new Map<
     string,
     Map<string, DefineMacroData>
   >(); //マクロ名と、マクロデータ defineMacroMapの値をもとに生成して保持するやつ <projectPath, <macroName,macroData>>
 
   // マクロ検索最適化用の逆引きMap (ファイルパス -> マクロUUIDのSet)
-  private _macroByFilePath: Map<string, Set<string>> = new Map<string, Set<string>>();
+  private macroByFilePath: Map<string, Set<string>> = new Map<string, Set<string>>();
 
-  private _resourceFileMap: Map<string, ResourceFileData[]> = new Map<
+  public readonly resourceFileMap: Map<string, ResourceFileData[]> = new Map<
     string,
     ResourceFileData[]
   >(); //pngとかmp3とかのプロジェクトにあるリソースファイル
-  private _variableMap: Map<string, Map<string, VariableData>> = new Map<
+  public readonly variableMap: Map<string, Map<string, VariableData>> = new Map<
     string,
     Map<string, VariableData>
   >(); //projectpath,変数名と、定義情報
-  private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>(); //ファイルパス、LabelDataの配列
-  private _suggestions: Map<string, object> = new Map<string, object>(); //projectPath,入力候補のオブジェクト
-  private _characterMap: Map<string, CharacterData[]> = new Map<
+  public readonly labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>(); //ファイルパス、LabelDataの配列
+  public suggestions: Map<string, object> = new Map<string, object>(); //projectPath,入力候補のオブジェクト
+  public characterMap: Map<string, CharacterData[]> = new Map<
     string,
     CharacterData[]
   >(); //プロジェクトパスと、キャラクターデータ
-  private _transitionMap: Map<string, TransitionData[]> = new Map<
+  public transitionMap: Map<string, TransitionData[]> = new Map<
     string,
     TransitionData[]
   >(); //ファイル名、TransitionDataの配列
   private defaultTagList: string[] = [];
 
-  private readonly _resourceExtensions: object = vscode.workspace
+  public readonly resourceExtensions: object = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.resource.extension")!;
-  private readonly _resourceExtensionsArrays = Object.keys(
+  public readonly resourceExtensionsArrays = Object.keys(
     this.resourceExtensions,
   )
     .map((key) => this.resourceExtensions[key])
@@ -91,7 +91,7 @@ export class InformationWorkSpace {
     .getConfiguration()
     .get("TyranoScript syntax.parser.read_plugin")!;
 
-  private _extensionPath: string = "";
+  public extensionPath: string = "";
 
   private constructor() {}
   public static getInstance(): InformationWorkSpace {
@@ -123,8 +123,8 @@ export class InformationWorkSpace {
     for (const projectPath of this.getTyranoScriptProjectRootPaths()) {
       TyranoLogger.print(`${projectPath} variable initialzie start`);
       this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
-      this._macroByFilePath.clear(); // 逆引きMapも初期化
-      this._resourceFileMap.set(projectPath, []);
+      this.macroByFilePath.clear(); // 逆引きMapも初期化
+      this.resourceFileMap.set(projectPath, []);
       this.variableMap.set(projectPath, new Map<string, VariableData>());
       try {
         const passJoined = this.getSnippetPath();
@@ -254,15 +254,15 @@ export class InformationWorkSpace {
     // vscodeAPIを使うとESLintも起動してしまうため、fsモジュールで読み込む。
     // fsモジュールによる読み込みが不要になったら以下二行の処理に戻すこと。
     // let textDocument = await vscode.workspace.openTextDocument(filePath);
-    // this._scriptFileMap.set(textDocument.fileName, textDocument.getText());
+    // this.scriptFileMap.set(textDocument.fileName, textDocument.getText());
 
     try {
       // fs.readFileSyncは常にディスクから最新の内容を読み込むため、
       // キャッシュの無効化処理は不要（updateScenarioFileMapとは異なる）
-      this._scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
+      this.scriptFileMap.set(filePath, fs.readFileSync(filePath, "utf-8"));
     } catch (error) {
       // ファイルが存在しない場合はキャッシュから削除
-      this._scriptFileMap.delete(filePath);
+      this.scriptFileMap.delete(filePath);
       TyranoLogger.print(
         `Script file read failed for ${filePath}, removed from cache`,
         ErrorLevel.WARN,
@@ -278,7 +278,7 @@ export class InformationWorkSpace {
 
     // 外部ファイルの変更後に最新のコンテンツを確実に取得するために、ドキュメントを強制的にリロードします。
     // ドキュメントがすでにキャッシュにあるかどうかを確認します
-    const existingDoc = this._scenarioFileMap.get(filePath);
+    const existingDoc = this.scenarioFileMap.get(filePath);
     if (existingDoc) {
       // If the document exists in cache, verify it's up to date by reading from disk
       try {
@@ -287,15 +287,15 @@ export class InformationWorkSpace {
 
         // コンテンツが異なる場合、ドキュメントは古いため、キャッシュから削除します
         if (diskContent !== cachedContent) {
-          this._scenarioFileMap.delete(filePath);
+          this.scenarioFileMap.delete(filePath);
           TyranoLogger.print(
             `Document cache invalidated for ${filePath} due to external changes`,
           );
         }
       } catch (error) {
         // If we can't read the file, remove it from cache
-        console.log(error);
-        this._scenarioFileMap.delete(filePath);
+        TyranoLogger.printStackTrace(error);
+        this.scenarioFileMap.delete(filePath);
         TyranoLogger.print(
           `Document cache invalidated for ${filePath} due to read error`,
           ErrorLevel.WARN,
@@ -305,7 +305,7 @@ export class InformationWorkSpace {
 
     // Open (or reopen) the document to get the latest version
     const textDocument = await vscode.workspace.openTextDocument(filePath);
-    this._scenarioFileMap.set(textDocument.fileName, textDocument);
+    this.scenarioFileMap.set(textDocument.fileName, textDocument);
   }
 
   public async updateMacroDataMapByJs(absoluteScenarioFilePath: string) {
@@ -380,19 +380,19 @@ export class InformationWorkSpace {
                 this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
 
                 // 逆引きMapに登録
-                if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
-                  this._macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
+                if (!this.macroByFilePath.has(absoluteScenarioFilePath)) {
+                  this.macroByFilePath.set(absoluteScenarioFilePath, new Set<string>());
                 }
-                this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
+                this.macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
 
                 //suggetionsに登録されてない場合のみ追加
                 if (
                   !Object.prototype.hasOwnProperty.call(
-                    this._suggestions.get(projectPath)!,
+                    this.suggestions.get(projectPath)!,
                     macroName,
                   )
                 ) {
-                  this._suggestions.get(projectPath)![macroName] =
+                  this.suggestions.get(projectPath)![macroName] =
                     macroData.parseToJsonObject();
                 }
               }
@@ -649,22 +649,22 @@ export class InformationWorkSpace {
             this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
 
             // 逆引きMapに登録
-            if (!this._macroByFilePath.has(absoluteScenarioFilePath)) {
-              this._macroByFilePath.set(
+            if (!this.macroByFilePath.has(absoluteScenarioFilePath)) {
+              this.macroByFilePath.set(
                 absoluteScenarioFilePath,
                 new Set<string>(),
               );
             }
-            this._macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
+            this.macroByFilePath.get(absoluteScenarioFilePath)!.add(uuid);
 
             //suggetionsに登録されてない場合のみ追加
             if (
               !Object.prototype.hasOwnProperty.call(
-                this._suggestions.get(projectPath)!,
+                this.suggestions.get(projectPath)!,
                 macroData.macroName,
               )
             ) {
-              this._suggestions.get(projectPath)![macroData.macroName] =
+              this.suggestions.get(projectPath)![macroData.macroName] =
                 macroData.parseToJsonObject();
             }
           }
@@ -734,7 +734,7 @@ export class InformationWorkSpace {
         this.resourceExtensions[key].includes(path.extname(filePath)),
       )
       .toString(); //プロジェクトパスの拡張子からどのリソースタイプなのかを取得
-    this._resourceFileMap
+    this.resourceFileMap
       .get(absoluteProjectPath)
       ?.push(new ResourceFileData(filePath, resourceType));
   }
@@ -777,14 +777,14 @@ export class InformationWorkSpace {
     const projectPath = await this.getProjectPathByFilePath(filePath);
 
     // 逆引きMapを使ってO(1)で該当マクロのUUIDを取得
-    const macroUuids = this._macroByFilePath.get(filePath);
+    const macroUuids = this.macroByFilePath.get(filePath);
     if (!macroUuids || macroUuids.size === 0) {
       return deleteTagList;
     }
 
     const projectMacroMap = this.defineMacroMap.get(projectPath);
     if (!projectMacroMap) {
-      this._macroByFilePath.delete(filePath);
+      this.macroByFilePath.delete(filePath);
       return deleteTagList;
     }
 
@@ -798,7 +798,7 @@ export class InformationWorkSpace {
     }
 
     // 逆引きMapからも削除
-    this._macroByFilePath.delete(filePath);
+    this.macroByFilePath.delete(filePath);
 
     return deleteTagList;
   }
@@ -1041,54 +1041,5 @@ export class InformationWorkSpace {
     // ファイルパスがフォルダパスで始まっているかを判定
     const ret = normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
     return ret;
-  }
-
-  public get scriptFileMap(): Map<string, string> {
-    return this._scriptFileMap;
-  }
-  public get scenarioFileMap(): Map<string, vscode.TextDocument> {
-    return this._scenarioFileMap;
-  }
-  public get resourceFileMap(): Map<string, ResourceFileData[]> {
-    return this._resourceFileMap;
-  }
-  public get defineMacroMap(): Map<string, Map<string, DefineMacroData>> {
-    return this._defineMacroMap;
-  }
-  public get resourceExtensions(): object {
-    return this._resourceExtensions;
-  }
-  public get resourceExtensionsArrays() {
-    return this._resourceExtensionsArrays;
-  }
-  public get variableMap(): Map<string, Map<string, VariableData>> {
-    return this._variableMap;
-  }
-  public get labelMap(): Map<string, LabelData[]> {
-    return this._labelMap;
-  }
-  public get suggestions(): Map<string, object> {
-    return this._suggestions;
-  }
-  public set suggestions(value: Map<string, object>) {
-    this._suggestions = value;
-  }
-  public get extensionPath() {
-    return this._extensionPath;
-  }
-  public set extensionPath(value) {
-    this._extensionPath = value;
-  }
-  public get transitionMap(): Map<string, TransitionData[]> {
-    return this._transitionMap;
-  }
-  public set transitionMap(value: Map<string, TransitionData[]>) {
-    this._transitionMap = value;
-  }
-  public get characterMap(): Map<string, CharacterData[]> {
-    return this._characterMap;
-  }
-  public set characterMap(value: Map<string, CharacterData[]>) {
-    this._characterMap = value;
   }
 }

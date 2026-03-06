@@ -11,9 +11,6 @@ export class TyranoReferenceProvider {
     token: vscode.CancellationToken,
     /* eslint-enable @typescript-eslint/no-unused-vars */
   ): vscode.Location[] | null | undefined {
-    // console.log("provideReference");
-    // console.log(`document:${document.fileName}\nposition:${position.line}\ncontext:${context}\ntoken:${token}\n`);
-
     return null; //未定義の場合null
   }
 }

@@ -14,20 +14,15 @@ export class TyranoHoverProvider {
     this.jsonTyranoSnippet = JSON.parse(
       fs.readFileSync(this.getTooltipPath(), "utf8"),
     );
-    // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
     this.regExp = /(\[||@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
   }
 
   private getTooltipPath(): string {
-    return InformationExtension.language === "ja"
-      ? path.join(
-          InformationExtension.path +
-            `${path.sep}Tooltip${path.sep}tyrano.Tooltip.json`,
-        )
-      : path.join(
-          InformationExtension.path +
-            `${path.sep}Tooltip${path.sep}en.tyrano.Tooltip.json`,
-        );
+    const fileName =
+      InformationExtension.language === "ja"
+        ? "tyrano.Tooltip.json"
+        : "en.tyrano.Tooltip.json";
+    return path.join(InformationExtension.path!, "Tooltip", fileName);
   }
 
   private createMarkdownText(textValue: string): vscode.MarkdownString | null {

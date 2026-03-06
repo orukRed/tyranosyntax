@@ -16,7 +16,7 @@ export class TyranoFlowchart {
       try {
         TyranoLogger.print("port 3200 server start");
         const app = express();
-        console.log("flowchart");
+        TyranoLogger.print("flowchart");
         const filePath = InformationExtension.path + path.sep + "flowchart";
         app.use(express.static(filePath));
 
@@ -46,19 +46,19 @@ export class TyranoFlowchart {
               // Promise が解決された後、このブロック内で projectPath を使用
               const projectName = projectPath.split("\\").pop(); // プロジェクトパスからプロジェクト名を取得
               if (TransitionData) {
-                console.log(TransitionData);
+                TyranoLogger.print(`TransitionData found for: ${normalizedFilePath}`);
                 res.json({
                   TransitionData: TransitionData,
                   projectName: projectName,
                 }); // 値が見つかった場合、JSONとして返す
               } else {
-                console.log("Key not found");
+                TyranoLogger.print("Key not found");
                 res.status(404).send("Key not found"); // 値が見つからない場合、404エラーを返す
               }
             })
             .catch((error) => {
               // エラー処理
-              console.error("プロジェクトパスの取得に失敗しました:", error);
+              TyranoLogger.print("プロジェクトパスの取得に失敗しました");
               TyranoLogger.printStackTrace(error);
             });
           TyranoLogger.print("get-transition-data end");
@@ -118,7 +118,7 @@ export class TyranoFlowchart {
     };
     if (TyranoFlowchart.serverInstance) {
       TyranoFlowchart.serverInstance.close(() => {
-        console.log("port 3200 server closed");
+        TyranoLogger.print("port 3200 server closed");
       });
     }
 

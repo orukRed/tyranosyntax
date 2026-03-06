@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
 
 /**
  * [r][p]タグを追加するコマンドクラス
@@ -97,7 +98,11 @@ export class TyranoAddRAndPCommand {
             });
         });
     } catch (error) {
-      console.error("TyranoAddRAndPCommand.execute error:", error);
+      TyranoLogger.print(
+        `TyranoAddRAndPCommand.execute error: ${error}`,
+        ErrorLevel.ERROR,
+      );
+      TyranoLogger.printStackTrace(error);
       vscode.window.showErrorMessage(`エラーが発生しました: ${error}`);
     }
   }

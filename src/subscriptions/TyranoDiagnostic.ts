@@ -66,13 +66,7 @@ export class TyranoDiagnostic {
 
   //基本タグを取得
 
-  private _isDiagnosing: boolean = false;
-  public get isDiagnosing(): boolean {
-    return this._isDiagnosing;
-  }
-  public set isDiagnosing(value: boolean) {
-    this._isDiagnosing = value;
-  }
+  public isDiagnosing: boolean = false;
 
   constructor() {
     this.tyranoProjectPaths.forEach((element) => {
@@ -540,7 +534,7 @@ export class TyranoDiagnostic {
           `リソースファイル "${storage}" が見つかりません。`,
           vscode.DiagnosticSeverity.Error,
         );
-        console.log(resourcePath);
+        TyranoLogger.print(`リソースパス: ${resourcePath}`);
         diagnostics.push(diag);
       }
     }
@@ -1321,7 +1315,7 @@ export class TyranoDiagnostic {
         line.text.length,
       );
     } catch (error) {
-      console.log(error);
+      TyranoLogger.printStackTrace(error);
     }
     return new vscode.Range(data["line"], 1, data["line"], 2);
   }
