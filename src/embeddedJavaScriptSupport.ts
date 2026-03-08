@@ -4,6 +4,7 @@
  */
 import * as vscode from "vscode";
 import { CrossFileContextManager } from "./CrossFileContextManager";
+import { TyranoLogger } from "./TyranoLogger";
 
 // ── 型定義 ──────────────────────────────────────────
 
@@ -381,7 +382,7 @@ export function registerEmbeddedJavaScriptSupport(
 
   // --- クロスファイルコンテキストの初期化 ---
   crossFileContext.init().then(() => {
-    console.log(
+    TyranoLogger.print(
       `[iscript] CrossFileContext initialized: ${crossFileContext.cachedFileCount} files cached`,
     );
     // 初期化完了後、すでに開いているドキュメントの仮想ドキュメントを準備
@@ -549,7 +550,7 @@ export function registerEmbeddedJavaScriptSupport(
 
             return result;
           } catch (e) {
-            console.error("[iscript] Completion error:", e);
+            TyranoLogger.printStackTrace(e);
             return undefined;
           }
         },
@@ -585,7 +586,7 @@ export function registerEmbeddedJavaScriptSupport(
           );
           return hovers && hovers.length > 0 ? hovers[0] : undefined;
         } catch (e) {
-          console.error("[iscript] Hover error:", e);
+          TyranoLogger.printStackTrace(e);
           return undefined;
         }
       },
@@ -624,7 +625,7 @@ export function registerEmbeddedJavaScriptSupport(
             return def;
           });
         } catch (e) {
-          console.error("[iscript] Definition error:", e);
+          TyranoLogger.printStackTrace(e);
           return undefined;
         }
       },
@@ -663,7 +664,7 @@ export function registerEmbeddedJavaScriptSupport(
               );
             return result;
           } catch (e) {
-            console.error("[iscript] SignatureHelp error:", e);
+            TyranoLogger.printStackTrace(e);
             return undefined;
           }
         },
@@ -717,7 +718,7 @@ export function registerEmbeddedJavaScriptSupport(
     }),
   );
 
-  console.log("[iscript] Embedded JavaScript Support registered");
+  TyranoLogger.print("[iscript] Embedded JavaScript Support registered");
 }
 
 /**

@@ -32,7 +32,7 @@ const getScenarioName = async (): Promise<string> => {
     const scenarioPath = scenarioPathBase.replace(/\\/g, "/");
     return scenarioPath;
   } catch (error) {
-    console.log(error);
+    TyranoLogger.printStackTrace(error);
     return "";
   }
 };
@@ -70,13 +70,10 @@ const getPreprocess = async () => {
       const relativeUri = vscode.Uri.file(relativeFilePathResolved);
       const relativeData = await vscode.workspace.fs.readFile(relativeUri);
       preprocess = relativeData.toString();
-      console.log("Found file at relative path:", preprocess);
+      TyranoLogger.print("Found file at relative path");
       return preprocess;
-    } catch (relativeError) {
-      console.log(
-        "Relative path not found, trying absolute path:",
-        relativeError,
-      );
+    } catch (_relativeError) {
+      TyranoLogger.print("Relative path not found, trying absolute path");
     }
 
     // 絶対パスでファイルを探す
@@ -84,13 +81,13 @@ const getPreprocess = async () => {
       const absoluteUri = vscode.Uri.file(absoluteFilePath);
       const absoluteData = await vscode.workspace.fs.readFile(absoluteUri);
       preprocess = absoluteData.toString();
-      console.log("Found file at absolute path:", preprocess);
+      TyranoLogger.print("Found file at absolute path");
       return preprocess;
-    } catch (absoluteError) {
-      console.log("Absolute path not found:", absoluteError);
+    } catch (_absoluteError) {
+      TyranoLogger.print("Absolute path not found");
     }
   } catch (error) {
-    console.log(error);
+    TyranoLogger.printStackTrace(error);
   }
   return "";
 };
@@ -112,12 +109,12 @@ export class TyranoPreview {
         // サーバーが既に起動している場合は、一度閉じる
         if (TyranoPreview.serverInstance) {
           TyranoPreview.serverInstance.close(() => {
-            console.log("Existing server closed");
+            TyranoLogger.print("Existing server closed");
           });
         }
         if (wss) {
           wss.close(() => {
-            console.log("Existing WebSocket server closed");
+            TyranoLogger.print("Existing WebSocket server closed");
           });
         }
 
@@ -127,11 +124,11 @@ export class TyranoPreview {
         wss = new WebSocket.Server({ port: 8100 });
         wss.on("connection", (ws) => {
           ws.on("message", (message) => {
-            console.log(`Received message => ${message}`);
+            TyranoLogger.print(`Received message => ${message}`);
           });
           ws.send("connected");
         });
-        console.log("preview");
+        TyranoLogger.print("preview");
 
         // シナリオ、ラベル、事前に読み込む処理を取得
         const activeFilePath: string =
@@ -267,7 +264,6 @@ export class TyranoPreview {
         });
 
         // // 静的ファイルを提供する
-        // app.use(express.static(folderPath));//不要そうなのでいったんコメントアウト
         app.use(express.static(projectPath));
 
         // プレビュー用のAPI
@@ -282,13 +278,9 @@ export class TyranoPreview {
           TyranoPreview.clientCount++;
           ws.on("close", () => {
             TyranoPreview.clientCount--;
-            if (TyranoPreview.clientCount === 0) {
-              //TODO:リロード処理入れると接続切れてサーバー閉じちゃうみたいなので一時的にコメントアウト
-              // TyranoPreview.serverInstance?.close(() => {});
-            }
           });
           ws.on("message", (message) => {
-            console.log(`Received message => ${message}`);
+            TyranoLogger.print(`Received message => ${message}`);
           });
         });
       } catch (error) {
@@ -298,7 +290,7 @@ export class TyranoPreview {
 
     if (TyranoPreview.serverInstance) {
       TyranoPreview.serverInstance.close(() => {
-        console.log("port 3100 server closed");
+        TyranoLogger.print("port 3100 server closed");
       });
     }
     await vscode.window.withProgress(
@@ -376,7 +368,8 @@ export class TyranoPreview {
 
       return htmlContent;
     } catch (error) {
-      console.log("Error reading index.html:", error);
+      TyranoLogger.print("Error reading index.html");
+      TyranoLogger.printStackTrace(error);
       return `
 <!DOCTYPE html>
 <html>

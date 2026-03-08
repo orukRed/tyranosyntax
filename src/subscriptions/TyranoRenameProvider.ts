@@ -1,7 +1,50 @@
 import * as vscode from "vscode";
 
 export class TyranoRenameProvider implements vscode.RenameProvider {
+  private static readonly WORD_REGEX = /[a-zA-Z0-9_$.]+/g;
+  private static readonly MACRO_NAME_REGEX =
+    /(@macro|\[macro)\s+name\s*=\s*["'].*["']/;
+
   constructor() {}
+
+  /**
+   * テキスト内の指定オフセットにある単語の情報を取得します
+   */
+  private findWordAtOffset(
+    text: string,
+    offset: number,
+  ): {
+    word: string;
+    index: number;
+    currentLine: string;
+    isMacroName: boolean;
+  } | null {
+    const wordRegex = new RegExp(
+      TyranoRenameProvider.WORD_REGEX.source,
+      TyranoRenameProvider.WORD_REGEX.flags,
+    );
+    let match;
+
+    while ((match = wordRegex.exec(text)) !== null) {
+      if (match.index <= offset && offset <= match.index + match[0].length) {
+        const lineStart = text.lastIndexOf("\n", match.index) + 1;
+        const lineEnd = text.indexOf("\n", match.index);
+        const currentLine = text.substring(
+          lineStart,
+          lineEnd !== -1 ? lineEnd : text.length,
+        );
+        const isMacroName =
+          TyranoRenameProvider.MACRO_NAME_REGEX.test(currentLine);
+        return {
+          word: match[0],
+          index: match.index,
+          currentLine,
+          isMacroName,
+        };
+      }
+    }
+    return null;
+  }
 
   /**
    * リネーム操作が可能かどうかを確認し、可能な場合はリネーム対象の範囲を返します
@@ -17,11 +60,6 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
   ): vscode.ProviderResult<
     vscode.Range | { range: vscode.Range; placeholder: string }
   > {
-    const text = document.getText();
-    const offset = document.offsetAt(position);
-    const wordRegex = /[a-zA-Z0-9_$.]+/g;
-    let match;
-
     // カーソル位置の行を取得
     const lineText = document.lineAt(position.line).text.trim();
 
@@ -35,35 +73,23 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
     }
 
     // カーソル位置の単語を検索
-    while ((match = wordRegex.exec(text)) !== null) {
-      if (match.index <= offset && offset <= match.index + match[0].length) {
-        const word = match[0];
+    const text = document.getText();
+    const offset = document.offsetAt(position);
+    const wordInfo = this.findWordAtOffset(text, offset);
 
-        // TyranoScript変数（f.、sf.、tf.で始まる）かどうかをチェック
-        // マクロ定義のname属性かどうかをチェック
-        const lineStart = text.lastIndexOf("\n", match.index) + 1;
-        const lineEnd = text.indexOf("\n", match.index);
-        const currentLine = text.substring(
-          lineStart,
-          lineEnd !== -1 ? lineEnd : text.length,
+    if (wordInfo) {
+      const { word, index, currentLine, isMacroName } = wordInfo;
+      // TyranoScript変数（f.、sf.、tf.で始まる）またはマクロ名の場合のみリネーム可能
+      if (
+        /^(f\.|sf\.|tf\.)?[a-zA-Z0-9_$]+$/.test(word) ||
+        isMacroName ||
+        (isMacroName && currentLine.includes(`name="${word}"`)) ||
+        currentLine.includes(`name='${word}'`)
+      ) {
+        return new vscode.Range(
+          document.positionAt(index),
+          document.positionAt(index + word.length),
         );
-        const isMacroName = /(@macro|\[macro)\s+name\s*=\s*["'].*["']/.test(
-          currentLine,
-        );
-
-        // TyranoScript変数（f.、sf.、tf.で始まる）またはマクロ名の場合のみリネーム可能
-        if (
-          /^(f\.|sf\.|tf\.)?[a-zA-Z0-9_$]+$/.test(word) ||
-          isMacroName ||
-          (isMacroName && currentLine.includes(`name="${word}"`)) ||
-          currentLine.includes(`name='${word}'`)
-        ) {
-          return new vscode.Range(
-            document.positionAt(match.index),
-            document.positionAt(match.index + match[0].length),
-          );
-        }
-        break;
       }
     }
 
@@ -79,25 +105,11 @@ export class TyranoRenameProvider implements vscode.RenameProvider {
   ): { targetWord: string; isMacroName: boolean } | null {
     const text = document.getText();
     const offset = document.offsetAt(position);
-    const wordRegex = /[a-zA-Z0-9_$.]+/g;
-    let match;
-
-    while ((match = wordRegex.exec(text)) !== null) {
-      if (match.index <= offset && offset <= match.index + match[0].length) {
-        const targetWord = match[0];
-        const lineStart = text.lastIndexOf("\n", match.index) + 1;
-        const lineEnd = text.indexOf("\n", match.index);
-        const currentLine = text.substring(
-          lineStart,
-          lineEnd !== -1 ? lineEnd : text.length,
-        );
-        const isMacroName = /(@macro|\[macro)\s+name\s*=\s*["'].*["']/.test(
-          currentLine,
-        );
-        return { targetWord, isMacroName };
-      }
+    const result = this.findWordAtOffset(text, offset);
+    if (!result) {
+      return null;
     }
-    return null;
+    return { targetWord: result.word, isMacroName: result.isMacroName };
   }
 
   /**

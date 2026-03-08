@@ -13,14 +13,14 @@ export class TransitionData {
     "glink",
   ]; //tyranoJumpProviderでの定義と同じもの。重複なのでどこかで定義すべき？
 
-  private storage: string | undefined; //storageタグで指定したファイルパス
-  private target: string | undefined; //targetタグで指定したラベル名
-  private tag: string | undefined; //buttonやjumpなどのタグ名
-  private currentLabel: string | undefined; //現在のラベル名
-  private condition: string | undefined; //条件分岐の条件式
-  private currentFile: string | undefined; //現在のファイルパス
+  public readonly storage: string | undefined; //storageタグで指定したファイルパス
+  public readonly target: string | undefined; //targetタグで指定したラベル名
+  public readonly tag: string | undefined; //buttonやjumpなどのタグ名
+  public readonly currentLabel: string | undefined; //現在のラベル名
+  public readonly condition: string | undefined; //条件分岐の条件式
+  public readonly currentFile: string | undefined; //現在のファイルパス
   //上記のパラメータを定義したファイルパス
-  private fileUri: vscode.Location | undefined;
+  public readonly fileUri: vscode.Location | undefined;
 
   public constructor(
     tag: string,
@@ -57,4 +57,3 @@ export class TransitionData {
     }
   }
 }
-

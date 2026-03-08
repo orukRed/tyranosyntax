@@ -37,7 +37,6 @@ export class Parser {
    */
   public parseText(text: string): any {
     // 外部からtyrano_parser.jsを呼び出すのでなく、パーサー処理を移植した物を呼び出す
-    // return this.parser.parseScenario(text)["array_s"];
     return this.parseScenario(text)["array_s"];
   }
   /**
@@ -66,7 +65,6 @@ export class Parser {
   //----------------------------------------------
   // 以下、移植したパーサー処理
   //----------------------------------------------
-  // private parser = require(`.${path.sep}lib${path.sep}tyrano_parser.js`);
   private flag_script = false;
   /**
    * ティラノスクリプトのkag.parser.jsに存在するparseScenario関数を移植したものです。
@@ -149,17 +147,7 @@ export class Parser {
         array_s.push(label_obj);
 
         if (map_label[label_obj.pm.label_name]) {
-          //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");
-          // this.kag.warning(
-          // 	"Warning line:" +
-          // 	i +
-          // 	" " +
-          // 	$.lang("label") +
-          // 	"'" +
-          // 	label_obj.pm.label_name +
-          // 	"'" +
-          // 	$.lang("label_double")
-          // );
+          // ラベル名重複の警告（既知の仕様、ティラノスクリプト本体に合わせる）
         } else {
           map_label[label_obj.pm.label_name] = label_obj.pm;
         }
@@ -246,7 +234,6 @@ export class Parser {
           var nameParam = "text";
           if (flag_comment == true || first_char === ";") {
             nameParam = "comment";
-            // text = text.replaceAll(";", "");
           }
           var text_obj = {
             line: i,
@@ -268,11 +255,6 @@ export class Parser {
       array_s: array_s,
       map_label: map_label,
     };
-
-    // if (this.deep_if != 0) {
-    // 	// alert("[if]と[endif]の数が一致しません。シナリオを見直してみませんか？");
-    // 	this.deep_if = 0;
-    // }
 
     return result_obj;
   }
@@ -345,9 +327,6 @@ export class Parser {
 
     str = tmp_str;
 
-    //str = $.replaceAll(str,'"','');
-    //str = $.replaceAll(str,"'",'');
-
     var array = str.split(" ");
 
     //タグの名前 [xxx
@@ -419,19 +398,6 @@ export class Parser {
     if (obj.name == "endscript") {
       this.flag_script = false;
     }
-
-    // switch (obj.name) {
-    // 	case "if":
-    // 		this.deep_if++;
-    // 	case "elsif":
-    // 	case "else":
-    // 		obj.pm.deep_if = this.deep_if;
-    // 		break;
-    // 	case "endif":
-    // 		obj.pm.deep_if = this.deep_if;
-    // 		this.deep_if--;
-    // 		break;
-    // }
 
     return obj;
   }

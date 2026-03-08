@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { MacroParameterData } from "./MacroParameterData";
 
 export class DefineMacroData {
-  private _macroName: string = ""; //マクロ名。[hoge]などのhoge部分。
-  private _filePath: string = "";
-  private _location: vscode.Location | null = null; //定義ジャンプに使う位置情報
-  private _parameter: MacroParameterData[] = []; //TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
-  private _description: string = ""; //マクロの説明
+  public readonly macroName: string; //マクロ名。[hoge]などのhoge部分。
+  public readonly filePath: string;
+  public readonly location: vscode.Location | null; //定義ジャンプに使う位置情報
+  public readonly parameter: MacroParameterData[] = []; //TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
+  public description: string; //マクロの説明
 
   public constructor(
     macroName: string,
@@ -14,17 +14,17 @@ export class DefineMacroData {
     filePath: string,
     description: string,
   ) {
-    this._macroName = macroName;
-    this._location = location;
-    this._filePath = filePath;
-    this._description = description;
+    this.macroName = macroName;
+    this.location = location;
+    this.filePath = filePath;
+    this.description = description;
   }
 
   /**
    * マクロで定義したパラメータを入れる用のメソッド
    */
   private parseParametersToJsonObject(): object[] {
-    return this._parameter.map((parameter) => ({
+    return this.parameter.map((parameter) => ({
       name: parameter.name,
       required: parameter.required,
       description: parameter.description,
@@ -42,24 +42,5 @@ export class DefineMacroData {
       description: this.description,
       parameters: this.parseParametersToJsonObject(),
     };
-  }
-
-  public get macroName(): string {
-    return this._macroName;
-  }
-  public get filePath(): string {
-    return this._filePath;
-  }
-  public get location(): vscode.Location | null {
-    return this._location;
-  }
-  public get description(): string {
-    return this._description;
-  }
-  public set description(value: string) {
-    this._description = value;
-  }
-  public get parameter(): MacroParameterData[] {
-    return this._parameter;
   }
 }

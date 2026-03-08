@@ -13,10 +13,6 @@ export class InformationExtension {
     const configLanguage: string =
       vscode.workspace.getConfiguration().get("TyranoScript syntax.language") ??
       "default";
-    if (configLanguage === "default") {
-      return vscode.env.language;
-    } else {
-      return configLanguage;
-    }
+    return configLanguage === "default" ? vscode.env.language : configLanguage;
   }
 }
