@@ -25,6 +25,7 @@ import {
   FileChangedParams,
   ResolveJumpTargetParams,
   ResolveJumpTargetResult,
+  InitializationCompleteParams,
 } from "./shared/protocol";
 import { TyranoLogger } from "./TyranoLogger";
 
@@ -298,6 +299,16 @@ export function activate(context: ExtensionContext) {
 
   // ── LSPサーバー起動 ──
   const run = async () => {
+    // サーバー初期化完了通知を受け取るPromiseを先に準備（レース回避）
+    const initCompletePromise = new Promise<InitializationCompleteParams>(
+      (resolve) => {
+        client.onNotification(
+          TyranoNotifications.InitializationComplete,
+          (p: InitializationCompleteParams) => resolve(p),
+        );
+      },
+    );
+
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -307,11 +318,21 @@ export function activate(context: ExtensionContext) {
       async () => {
         try {
           await client.start();
-          const projectName =
-            vscode.workspace.workspaceFolders?.[0]?.name || "プロジェクト";
-          vscode.window.showInformationMessage(
-            `${projectName}の初期化が完了しました`,
-          );
+
+          // サーバー側の初期化完了通知を待つ
+          const params = await initCompletePromise;
+
+          if (params.projectNames.length === 0) {
+            vscode.window.showErrorMessage(
+              "TyranoScriptのプロジェクトが見つかりませんでした。一部機能が使用できません。",
+            );
+          } else {
+            for (const name of params.projectNames) {
+              vscode.window.showInformationMessage(
+                `${name}の初期化が完了しました。`,
+              );
+            }
+          }
         } catch (_error) {
           TyranoLogger.printStackTrace(_error);
           vscode.window.showErrorMessage(

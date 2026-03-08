@@ -16,6 +16,8 @@ export const TyranoRequests = {
 export const TyranoNotifications = {
   /** ファイルが作成/変更/削除された時の通知 */
   FileChanged: "tyrano/fileChanged",
+  /** サーバー側の初期化が完了した時の通知 */
+  InitializationComplete: "tyrano/initializationComplete",
 } as const;
 
 // カスタムリクエスト/通知のパラメータ型
@@ -44,6 +46,10 @@ export interface FileChangedParams {
   uri: string;
   type: "created" | "changed" | "deleted";
   fileType: "scenario" | "script" | "resource";
+}
+
+export interface InitializationCompleteParams {
+  projectNames: string[];
 }
 
 /**

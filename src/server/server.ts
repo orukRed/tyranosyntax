@@ -1,3 +1,5 @@
+/* eslint-disable no-control-regex */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createConnection,
   TextDocuments,
@@ -41,8 +43,6 @@ import {
   ResolveJumpTargetResult,
   TyranoNotifications,
   FileChangedParams,
-  GetTransitionDataParams,
-  GetScenarioListResult,
 } from "../shared/protocol";
 import { TyranoLogger, ErrorLevel } from "./TyranoLogger";
 import { InformationExtension } from "./InformationExtension";
@@ -122,8 +122,21 @@ connection.onInitialized(async () => {
   try {
     await infoWs.initializeMaps();
     TyranoLogger.print("InformationWorkSpace maps initialized");
+  } catch (error) {
+    TyranoLogger.print("Initialization failed", ErrorLevel.ERROR);
+    TyranoLogger.printStackTrace(error);
+  }
 
-    // Initialize CrossFileContextManager
+  // クライアントに初期化完了を通知（後続処理の失敗に関わらず送信する）
+  const projectNames = infoWs
+    .getTyranoScriptProjectRootPaths()
+    .map((p) => p.split(/[\\/]/).pop() || p);
+  connection.sendNotification(TyranoNotifications.InitializationComplete, {
+    projectNames,
+  });
+
+  // Initialize CrossFileContextManager
+  try {
     const dataDirectories: string[] = [];
     for (const projectPath of infoWs.getTyranoScriptProjectRootPaths()) {
       const dataDir = projectPath + infoWs.DATA_DIRECTORY;
@@ -139,7 +152,7 @@ connection.onInitialized(async () => {
       await runDiagnostics(projectPath + infoWs.pathDelimiter);
     }
   } catch (error) {
-    TyranoLogger.print("Initialization failed", ErrorLevel.ERROR);
+    TyranoLogger.print("Post-initialization failed", ErrorLevel.ERROR);
     TyranoLogger.printStackTrace(error);
   }
 });
@@ -244,12 +257,7 @@ connection.onHover(async (params: HoverParams): Promise<Hover | null> => {
       const start = paramMatch.index;
       const end = start + paramMatch[0].length;
       if (position.character >= start && position.character <= end) {
-        return handleParameterHover(
-          document,
-          position,
-          projectPath,
-          lineText,
-        );
+        return handleParameterHover(document, position, projectPath, lineText);
       }
     }
 
@@ -414,23 +422,15 @@ connection.onCompletion(
       const layerParts = findLayerParts(projectPath, tagIndex, parsedData);
 
       // # character name completion
-      if (
-        typeof leftSideText === "string" &&
-        SHARP_REGEXP.test(leftSideText)
-      ) {
+      if (typeof leftSideText === "string" && SHARP_REGEXP.test(leftSideText)) {
         return completionNameParameter(projectPath);
       }
       // Variable completion
       if (variableValue) {
-        const variableKind = variableValue[0]
-          .split(".")[0]
-          .replace("&", "");
+        const variableKind = variableValue[0].split(".")[0].replace("&", "");
         const variableName = getVariableName(variableValue[0]);
         if (variableName) {
-          const variableObject = findVariableObject(
-            projectPath,
-            variableName,
-          );
+          const variableObject = findVariableObject(projectPath, variableName);
           if (variableObject) {
             const splitVariable = variableValue[0].split(".");
             return completionNestVariable(variableObject, splitVariable);
@@ -509,9 +509,7 @@ connection.onCompletion(
         return completionResource(
           projectPath,
           paramInfo.type,
-          projectPath +
-            infoWs.pathDelimiter +
-            (paramInfo.path || ""),
+          projectPath + infoWs.pathDelimiter + (paramInfo.path || ""),
           paramInfo,
         );
       }
@@ -585,18 +583,14 @@ function findLayerParts(
     const characterData = infoWs.characterMap
       .get(projectPath)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ?.find(
-        (cd: any) => cd.name === parsedData[tagIndex]?.["pm"]?.["name"],
-      );
+      ?.find((cd: any) => cd.name === parsedData[tagIndex]?.["pm"]?.["name"]);
     return characterData?.layer ? [...characterData.layer.keys()] : [];
   } catch {
     return [];
   }
 }
 
-function completionNameParameter(
-  projectPath: string,
-): CompletionItem[] | null {
+function completionNameParameter(projectPath: string): CompletionItem[] | null {
   const characterDataList = infoWs.characterMap.get(projectPath);
   if (!characterDataList) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -691,10 +685,7 @@ function completionLabel(
               infoWs.pathDelimiter +
               storage;
         if (
-          infoWs.isSamePath(
-            URI.parse(value.location.uri).fsPath,
-            storagePath,
-          )
+          infoWs.isSamePath(URI.parse(value.location.uri).fsPath, storagePath)
         ) {
           completions.push({
             label: value.name,
@@ -842,15 +833,11 @@ function completionResource(
             .replace(/\\/g, "/");
           const displayLabel = resource.filePath
             .replace(
-              projectPath +
-                infoWs.DATA_DIRECTORY +
-                infoWs.pathDelimiter,
+              projectPath + infoWs.DATA_DIRECTORY + infoWs.pathDelimiter,
               "",
             )
             .replace(/\\/g, "/");
-          const absoluteImagePath = URI.file(
-            resource.filePath,
-          ).toString();
+          const absoluteImagePath = URI.file(resource.filePath).toString();
 
           completions.push({
             label: displayLabel,
@@ -898,8 +885,7 @@ function completionTag(
     } else if (isInsideBrackets) {
       insertText = `${textLabel} `;
     } else {
-      insertText =
-        inputType === "@" ? `@${textLabel} ` : `[${textLabel} ]`;
+      insertText = inputType === "@" ? `@${textLabel} ` : `[${textLabel} ]`;
     }
 
     completions.push({
@@ -935,10 +921,7 @@ function completionParameter(
     JSON.stringify(infoWs.suggestions.get(projectPath) || {}),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) as any;
-  const partList = getPartListFromCharacterData(
-    projectPath,
-    nameParamValue,
-  );
+  const partList = getPartListFromCharacterData(projectPath, nameParamValue);
 
   for (const item in suggestions) {
     const tagName = suggestions[item]["name"]?.toString();
@@ -947,8 +930,7 @@ function completionParameter(
         partList.forEach((part: string) => {
           suggestions[item]["parameters"].push({
             name: part,
-            description:
-              "chara_layerタグのpartパラメータで指定した値",
+            description: "chara_layerタグのpartパラメータで指定した値",
             required: false,
           });
         });
@@ -967,11 +949,7 @@ function completionParameter(
           completions.push({
             label: item2["name"],
             detail: detailText,
-            insertText:
-              spacePrefix +
-              item2["name"] +
-              '="$1"' +
-              spaceSuffix,
+            insertText: spacePrefix + item2["name"] + '="$1"' + spaceSuffix,
             insertTextFormat: InsertTextFormat.Snippet,
             documentation: {
               kind: MarkupKind.Markdown,
@@ -1007,12 +985,7 @@ function getConfigValues(projectPath: string): {
   numCharacterLayers: number;
   numMessageLayers: number;
 } {
-  const configPath = path.join(
-    projectPath,
-    "data",
-    "system",
-    "Config.tjs",
-  );
+  const configPath = path.join(projectPath, "data", "system", "Config.tjs");
   const defaultValues = { numCharacterLayers: 3, numMessageLayers: 2 };
   try {
     if (!fs.existsSync(configPath)) return defaultValues;
@@ -1029,10 +1002,7 @@ function getConfigValues(projectPath: string): {
   }
 }
 
-function extractConfigValue(
-  content: string,
-  paramName: string,
-): number | null {
+function extractConfigValue(content: string, paramName: string): number | null {
   const regex = new RegExp(`;\\s*${paramName}\\s*=\\s*(\\d+)\\s*;`, "m");
   const match = content.match(regex);
   return match ? parseInt(match[1], 10) : null;
@@ -1152,10 +1122,7 @@ function isTagOutline(text: string, outlineTags: string[]): boolean {
   return outlineTags.includes(matcher[1]);
 }
 
-function isCommentOutLine(
-  text: string,
-  commentStrings: string[],
-): boolean {
+function isCommentOutLine(text: string, commentStrings: string[]): boolean {
   if (!commentStrings || commentStrings.length === 0) return false;
   return commentStrings.some((cs) => {
     const escaped = cs.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1263,11 +1230,7 @@ connection.onRenameRequest(
         const edits = getMacroRenameEdits(fileText, targetWord, newName);
         if (edits.length > 0) changes[fileUri] = edits;
       } else {
-        const edits = getVariableRenameEdits(
-          fileText,
-          targetWord,
-          newName,
-        );
+        const edits = getVariableRenameEdits(fileText, targetWord, newName);
         if (edits.length > 0) changes[fileUri] = edits;
       }
     }
@@ -1286,14 +1249,10 @@ function findWordAtOffset(
   isMacroName: boolean;
 } | null {
   const WORD_REGEX = /[a-zA-Z0-9_$.]+/g;
-  const MACRO_NAME_REGEX =
-    /(@macro|\[macro)\s+name\s*=\s*["'].*["']/;
+  const MACRO_NAME_REGEX = /(@macro|\[macro)\s+name\s*=\s*["'].*["']/;
   let match;
   while ((match = WORD_REGEX.exec(text)) !== null) {
-    if (
-      match.index <= offset &&
-      offset <= match.index + match[0].length
-    ) {
+    if (match.index <= offset && offset <= match.index + match[0].length) {
       const lineStart = text.lastIndexOf("\n", match.index) + 1;
       const lineEnd = text.indexOf("\n", match.index);
       const currentLine = text.substring(
@@ -1327,12 +1286,7 @@ function getMacroRenameEdits(
     new RegExp(`@${escapeRegExp(targetWord)}(\\s|$)`, "g"),
   ];
 
-  const tmpDoc = TextDocument.create(
-    "file:///tmp",
-    "tyrano",
-    0,
-    fileText,
-  );
+  const tmpDoc = TextDocument.create("file:///tmp", "tyrano", 0, fileText);
 
   for (const pattern of macroPatterns) {
     let macroMatch;
@@ -1369,12 +1323,7 @@ function getVariableRenameEdits(
     `(f\\.|sf\\.|tf\\.)?${escapeRegExp(baseName)}`,
     "g",
   );
-  const tmpDoc = TextDocument.create(
-    "file:///tmp",
-    "tyrano",
-    0,
-    fileText,
-  );
+  const tmpDoc = TextDocument.create("file:///tmp", "tyrano", 0, fileText);
 
   let match;
   while ((match = searchPattern.exec(fileText)) !== null) {
@@ -1397,11 +1346,9 @@ function getVariableRenameEdits(
 // ══════════════════════════════════════════════════
 //  References (stub)
 // ══════════════════════════════════════════════════
-connection.onReferences(
-  (_params: ReferenceParams): Location[] | null => {
-    return null;
-  },
-);
+connection.onReferences((_params: ReferenceParams): Location[] | null => {
+  return null;
+});
 
 // ══════════════════════════════════════════════════
 //  Custom Requests
@@ -1417,8 +1364,7 @@ connection.onRequest(
 
       // Get the document (from open docs or scenario map)
       const doc =
-        documents.get(params.uri) ||
-        infoWs.scenarioFileMap.get(fsPath);
+        documents.get(params.uri) || infoWs.scenarioFileMap.get(fsPath);
       if (!doc) return null;
 
       const lineText = getLineText(doc, params.line);
@@ -1427,8 +1373,7 @@ connection.onRequest(
       if (tagIndex < 0) return null;
 
       const tagData = parsedData[tagIndex];
-      const storage =
-        tagData["pm"]["storage"] || tagData["pm"]["file"];
+      const storage = tagData["pm"]["storage"] || tagData["pm"]["file"];
       const target = tagData["pm"]["target"];
 
       // Determine file to jump to
@@ -1457,10 +1402,7 @@ connection.onRequest(
       if (target) {
         const targetLabel = target.replace("*", "");
         try {
-          const targetContent = fs.readFileSync(
-            targetFsPath,
-            "utf-8",
-          );
+          const targetContent = fs.readFileSync(targetFsPath, "utf-8");
           const targetParsedData = parser.parseText(targetContent);
           for (const data of targetParsedData) {
             if (
@@ -1482,10 +1424,7 @@ connection.onRequest(
         targetCharacter: 0,
       };
     } catch (error) {
-      TyranoLogger.print(
-        "ResolveJumpTarget failed",
-        ErrorLevel.ERROR,
-      );
+      TyranoLogger.print("ResolveJumpTarget failed", ErrorLevel.ERROR);
       TyranoLogger.printStackTrace(error);
       return null;
     }
@@ -1501,8 +1440,7 @@ connection.onRequest(
     if (!transitionData) {
       return null;
     }
-    const projectPath =
-      infoWs.getProjectPathByFilePath(normalizedFilePath);
+    const projectPath = infoWs.getProjectPathByFilePath(normalizedFilePath);
     const projectName = projectPath.split(/[\\/]/).pop() || "";
     return { transitionData, projectName };
   },
@@ -1572,8 +1510,7 @@ async function runDiagnostics(_triggerFileName: string): Promise<void> {
     const parsedData = parser.parseText(scenarioDocument.getText());
 
     for (const data of parsedData) {
-      if (data["name"] === "comment" || data["name"] === "text")
-        continue;
+      if (data["name"] === "comment" || data["name"] === "text") continue;
 
       // Undefined macro check
       if (isExecDiag(executeDiagnostic, "undefinedMacro")) {
@@ -1607,14 +1544,8 @@ async function runDiagnostics(_triggerFileName: string): Promise<void> {
       }
 
       // Missing ampersand in variable check
-      if (
-        isExecDiag(executeDiagnostic, "missingAmpersandInVariable")
-      ) {
-        checkMissingAmpersandInVariable(
-          data,
-          scenarioDocument,
-          diagnostics,
-        );
+      if (isExecDiag(executeDiagnostic, "missingAmpersandInVariable")) {
+        checkMissingAmpersandInVariable(data, scenarioDocument, diagnostics);
       }
     }
 
@@ -1632,11 +1563,7 @@ async function runDiagnostics(_triggerFileName: string): Promise<void> {
 
     // jump/call in if statement check
     if (isExecDiag(executeDiagnostic, "jumpAndCallInIfStatement")) {
-      checkJumpAndCallInIfStatement(
-        parsedData,
-        scenarioDocument,
-        diagnostics,
-      );
+      checkJumpAndCallInIfStatement(parsedData, scenarioDocument, diagnostics);
     }
 
     // Macro duplicate check
@@ -1680,10 +1607,7 @@ function checkUndefinedMacro(
     data["name"] === "text"
   )
     return;
-  if (
-    tyranoBuilderEnabled &&
-    tyranoBuilderSkipTags.includes(data["name"])
-  )
+  if (tyranoBuilderEnabled && tyranoBuilderSkipTags.includes(data["name"]))
     return;
 
   const suggestions = infoWs.suggestions.get(projectPath);
@@ -1725,8 +1649,7 @@ function checkLabelName(
   _doc: TextDocument,
   diagnostics: Diagnostic[],
 ): void {
-  if (data["name"] !== "label" || data["pm"]["is_in_comment"] === true)
-    return;
+  if (data["name"] !== "label" || data["pm"]["is_in_comment"] === true) return;
   const labelName = data["pm"]["label_name"];
   if (!labelName) return;
 
@@ -1828,8 +1751,7 @@ function checkMissingScenariosAndLabels(
           diagnostics.push(
             Diagnostic.create(
               range,
-              data["pm"]["storage"] +
-                "は存在しないファイルです。",
+              data["pm"]["storage"] + "は存在しないファイルです。",
               DiagnosticSeverity.Error,
             ),
           );
@@ -1858,13 +1780,8 @@ function checkMissingScenariosAndLabels(
           );
           continue;
         }
-      } else if (
-        !isValueIsIncludeVariable(data["pm"]["storage"])
-      ) {
-        data["pm"]["target"] = data["pm"]["target"].replace(
-          "*",
-          "",
-        );
+      } else if (!isValueIsIncludeVariable(data["pm"]["storage"])) {
+        data["pm"]["target"] = data["pm"]["target"].replace("*", "");
         const storageFsPath =
           data["pm"]["storage"] === undefined
             ? filePath
@@ -1876,8 +1793,7 @@ function checkMissingScenariosAndLabels(
                   data["pm"]["storage"],
               );
 
-        const storageDoc =
-          infoWs.scenarioFileMap.get(storageFsPath);
+        const storageDoc = infoWs.scenarioFileMap.get(storageFsPath);
         if (!storageDoc) {
           diagnostics.push(
             Diagnostic.create(
@@ -1889,31 +1805,22 @@ function checkMissingScenariosAndLabels(
           );
           continue;
         }
-        const storageParsedData = parser.parseText(
-          storageDoc.getText(),
-        );
+        const storageParsedData = parser.parseText(storageDoc.getText());
         let isLabelExist = false;
         for (const storageData of storageParsedData) {
-          if (
-            storageData["pm"]["label_name"] ===
-            data["pm"]["target"]
-          ) {
+          if (storageData["pm"]["label_name"] === data["pm"]["target"]) {
             isLabelExist = true;
             break;
           }
         }
         if (
           !isLabelExist &&
-          !(
-            tyranoBuilderEnabled &&
-            data["pm"]["target"] === ""
-          )
+          !(tyranoBuilderEnabled && data["pm"]["target"] === "")
         ) {
           diagnostics.push(
             Diagnostic.create(
               range,
-              data["pm"]["target"] +
-                "は存在しないラベルです。",
+              data["pm"]["target"] + "は存在しないラベルです。",
               DiagnosticSeverity.Error,
             ),
           );
@@ -1935,14 +1842,10 @@ function checkJumpAndCallInIfStatement(
     if (data["name"] === "if") isInIf = true;
     if (data["name"] === "endif") isInIf = false;
 
-    if (
-      isInIf &&
-      (data["name"] === "jump" || data["name"] === "call")
-    ) {
+    if (isInIf && (data["name"] === "jump" || data["name"] === "call")) {
       const lineText = getLineText(doc, data["line"]);
       const tagFirstIndex = lineText.indexOf(data["name"]);
-      const tagLastIndex =
-        tagFirstIndex + sumStringLengthsInObject(data["pm"]);
+      const tagLastIndex = tagFirstIndex + sumStringLengthsInObject(data["pm"]);
       const range = Range.create(
         data["line"],
         tagFirstIndex,
@@ -2054,11 +1957,7 @@ function checkUndefinedParameter(
   tyranoBuilderSkipParameters: { [tag: string]: string[] },
 ): void {
   const tagName = data["name"];
-  if (
-    tyranoBuilderEnabled &&
-    tyranoBuilderSkipTags.includes(tagName)
-  )
-    return;
+  if (tyranoBuilderEnabled && tyranoBuilderSkipTags.includes(tagName)) return;
 
   const tagParameters = data["pm"];
   if (!tagParameters || typeof tagParameters !== "object") return;
@@ -2068,10 +1967,7 @@ function checkUndefinedParameter(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tagDefinition = (suggestions as any)[tagName];
-  if (
-    !tagDefinition.parameters ||
-    !Array.isArray(tagDefinition.parameters)
-  )
+  if (!tagDefinition.parameters || !Array.isArray(tagDefinition.parameters))
     return;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2149,11 +2045,7 @@ function checkMissingAmpersandInVariable(
   if (!tagParameters || typeof tagParameters !== "object") return;
 
   for (const paramName in tagParameters) {
-    if (
-      paramName === "exp" ||
-      paramName === "cond" ||
-      paramName === "preexp"
-    )
+    if (paramName === "exp" || paramName === "cond" || paramName === "preexp")
       continue;
     if (
       (tagName === "edit" && paramName === "name") ||
@@ -2169,12 +2061,7 @@ function checkMissingAmpersandInVariable(
         !isExistAmpersandAtBeginning(paramValue) &&
         !isExistPercentAtBeginning(paramValue)
       ) {
-        const range = getParameterRange(
-          paramName,
-          paramValue,
-          data,
-          doc,
-        );
+        const range = getParameterRange(paramName, paramValue, data, doc);
         diagnostics.push(
           Diagnostic.create(
             range,
@@ -2249,8 +2136,7 @@ function getParameterRange(
     }
 
     // Fallback: whole line
-    const firstNonWhitespace =
-      lineText.length - lineText.trimStart().length;
+    const firstNonWhitespace = lineText.length - lineText.trimStart().length;
     return Range.create(
       data["line"],
       firstNonWhitespace,
@@ -2267,9 +2153,7 @@ function getParameterRange(
 // ══════════════════════════════════════════════════
 function getLineText(document: TextDocument, line: number): string {
   const startOffset = document.offsetAt(Position.create(line, 0));
-  const endOffset = document.offsetAt(
-    Position.create(line + 1, 0),
-  );
+  const endOffset = document.offsetAt(Position.create(line + 1, 0));
   const text = document.getText().substring(startOffset, endOffset);
   return text.replace(/\r?\n$/, "");
 }
