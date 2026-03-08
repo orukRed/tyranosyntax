@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
@@ -47,7 +46,7 @@ export class Parser {
    */
   public getNearestLabel(
     parsedData: any,
-    cursor: vscode.Position | undefined,
+    cursor: { line: number } | undefined,
   ): string {
     if (!cursor || !parsedData) {
       return "";

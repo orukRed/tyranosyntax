@@ -5,25 +5,24 @@ import express, { Application } from "express";
 import WebSocket from "ws";
 import open from "open";
 import { IncomingMessage, Server } from "http";
-import { InformationWorkSpace } from "../InformationWorkSpace";
 import { TyranoLogger } from "../TyranoLogger";
-import { InformationExtension } from "../InformationExtension";
 import path from "path";
 import { Parser } from "../Parser";
+import { ProjectPathResolver } from "../ProjectPathResolver";
 
 let wss: WebSocket.Server<typeof WebSocket, typeof IncomingMessage> | undefined; //クラス変数だとなぜかエラーが出たのでこちらに定義
 let app: Application | undefined;
 let scenarioName: string = "";
 let nearestLabel: string = "";
 let preprocess: string = "";
-const infoWs = InformationWorkSpace.getInstance();
+const pathResolver = new ProjectPathResolver();
 
 const getScenarioName = async (): Promise<string> => {
   const activeFilePath: string =
     vscode.window.activeTextEditor?.document.fileName || "";
 
   try {
-    const projectPath = await infoWs.getProjectPathByFilePath(activeFilePath);
+    const projectPath = pathResolver.getProjectPathByFilePath(activeFilePath);
     const scenarioPathBase = path.relative(
       projectPath + "/data/scenario",
       activeFilePath,
@@ -54,7 +53,7 @@ const getPreprocess = async () => {
       .get("TyranoScript syntax.preview.preprocess")!
       .toString();
 
-    const projectPath = await infoWs.getProjectPathByFilePath(
+    const projectPath = pathResolver.getProjectPathByFilePath(
       vscode.window.activeTextEditor?.document.fileName || "",
     );
     const relativeFilePathResolved = path.resolve(
@@ -99,9 +98,10 @@ preprocess = "";
 export class TyranoPreview {
   private static serverInstance: Server | undefined = undefined;
   private static clientCount: number = 0;
+  public static extensionPath: string = "";
 
   public static async createWindow() {
-    if (!vscode.window.activeTextEditor || !InformationExtension.path) {
+    if (!vscode.window.activeTextEditor || !TyranoPreview.extensionPath) {
       return;
     }
     const createServer = async () => {
@@ -134,8 +134,8 @@ export class TyranoPreview {
         const activeFilePath: string =
           vscode.window.activeTextEditor?.document.fileName || "";
         const projectPath =
-          await infoWs.getProjectPathByFilePath(activeFilePath);
-        const folderPath = InformationExtension.path + path.sep + "preview";
+          pathResolver.getProjectPathByFilePath(activeFilePath);
+        const folderPath = TyranoPreview.extensionPath + path.sep + "preview";
         scenarioName = await getScenarioName();
         nearestLabel = getNearestLabel();
         preprocess = await getPreprocess();

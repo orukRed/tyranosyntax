@@ -41,6 +41,8 @@ import {
   ResolveJumpTargetResult,
   TyranoNotifications,
   FileChangedParams,
+  GetTransitionDataParams,
+  GetScenarioListResult,
 } from "../shared/protocol";
 import { TyranoLogger, ErrorLevel } from "./TyranoLogger";
 import { InformationExtension } from "./InformationExtension";
@@ -1489,6 +1491,52 @@ connection.onRequest(
     }
   },
 );
+
+// ── GetTransitionData ──
+connection.onRequest(
+  TyranoRequests.GetTransitionData,
+  (params: { scenarioFilePath: string }) => {
+    const normalizedFilePath = params.scenarioFilePath.replace(/\\\\/g, "\\");
+    const transitionData = infoWs.transitionMap.get(normalizedFilePath);
+    if (!transitionData) {
+      return null;
+    }
+    const projectPath =
+      infoWs.getProjectPathByFilePath(normalizedFilePath);
+    const projectName = projectPath.split(/[\\/]/).pop() || "";
+    return { transitionData, projectName };
+  },
+);
+
+// ── GetScenarioList ──
+connection.onRequest(TyranoRequests.GetScenarioList, () => {
+  const scenarioList = Array.from(infoWs.transitionMap.keys());
+  const rootPathList = infoWs.getTyranoScriptProjectRootPaths();
+
+  const data: {
+    [key: string]: { fullPath: string; scenarioName: string }[];
+  } = {};
+  for (const rootPath of rootPathList) {
+    const projectName = rootPath.split(/[\\/]/).pop();
+    if (projectName) {
+      data[projectName] = [];
+    }
+  }
+  for (const scenarioPath of scenarioList) {
+    for (const rootPath of rootPathList) {
+      const projectName = rootPath.split(/[\\/]/).pop();
+      if (scenarioPath.includes(rootPath) && projectName) {
+        const sep = rootPath.includes("/") ? "/" : "\\";
+        const relativePath = scenarioPath.replace(rootPath + sep, "");
+        data[projectName].push({
+          fullPath: scenarioPath,
+          scenarioName: relativePath,
+        });
+      }
+    }
+  }
+  return { scenarioList: data };
+});
 
 // ══════════════════════════════════════════════════
 //  Diagnostics

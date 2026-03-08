@@ -113,6 +113,11 @@ export function activate(context: ExtensionContext) {
     clientOptions,
   );
 
+  // ── フローチャート・プレビューにクライアント/パスを設定 ──
+  TyranoFlowchart.client = client;
+  TyranoFlowchart.extensionPath = context.extensionPath;
+  TyranoPreview.extensionPath = context.extensionPath;
+
   // ── クライアント側コマンド登録 ──
 
   // ショートカットキー

@@ -3,34 +3,35 @@ import * as path from "path";
 import express from "express";
 import open from "open";
 import { type Server } from "http";
+import { LanguageClient } from "vscode-languageclient/node";
 
-import { InformationWorkSpace } from "../InformationWorkSpace";
-import { InformationExtension } from "../InformationExtension";
-import { TyranoLogger } from "../TyranoLogger";
+import {
+  TyranoRequests,
+  GetTransitionDataParams,
+  GetScenarioListResult,
+} from "../shared/protocol";
 
 export class TyranoFlowchart {
   private static serverInstance: Server | undefined = undefined;
+  /** extension.ts から設定される LSP クライアント */
+  static client: LanguageClient;
+  /** extension.ts から設定される拡張機能パス */
+  static extensionPath: string;
 
   public static async openFlowchart() {
     const createServer = async () => {
       try {
-        TyranoLogger.print("port 3200 server start");
         const app = express();
-        TyranoLogger.print("flowchart");
-        const filePath = InformationExtension.path + path.sep + "flowchart";
+        const filePath =
+          TyranoFlowchart.extensionPath + path.sep + "flowchart";
         app.use(express.static(filePath));
 
-        //ルートの設定
-
-        //特定のルートに対するGETリクエストを処理するためのメソッド
-        app.get("/get-transition-data", (req, res) => {
-          TyranoLogger.print("get-transition-data start");
-          const infoWs = InformationWorkSpace.getInstance();
-          //scenario=FILE_PATHの形で指定したファイルのデータを取得
+        // 特定のルートに対するGETリクエストを処理する
+        app.get("/get-transition-data", async (req, res) => {
           const scenarioFilePath = (() => {
             switch (typeof req.query["scenario"]) {
               case "string":
-                return req.query.scenario; // クエリパラメータからキーを取得
+                return req.query.scenario;
               default:
                 return;
             }
@@ -38,88 +39,45 @@ export class TyranoFlowchart {
           if (!scenarioFilePath) {
             return;
           }
-          const normalizedFilePath = scenarioFilePath.replace(/\\\\/g, "\\");
-          const TransitionData = infoWs.transitionMap.get(normalizedFilePath);
-          infoWs
-            .getProjectPathByFilePath(normalizedFilePath)
-            .then((projectPath) => {
-              // Promise が解決された後、このブロック内で projectPath を使用
-              const projectName = projectPath.split("\\").pop(); // プロジェクトパスからプロジェクト名を取得
-              if (TransitionData) {
-                TyranoLogger.print(`TransitionData found for: ${normalizedFilePath}`);
-                res.json({
-                  TransitionData: TransitionData,
-                  projectName: projectName,
-                }); // 値が見つかった場合、JSONとして返す
-              } else {
-                TyranoLogger.print("Key not found");
-                res.status(404).send("Key not found"); // 値が見つからない場合、404エラーを返す
-              }
-            })
-            .catch((error) => {
-              // エラー処理
-              TyranoLogger.print("プロジェクトパスの取得に失敗しました");
-              TyranoLogger.printStackTrace(error);
-            });
-          TyranoLogger.print("get-transition-data end");
+          try {
+            const params: GetTransitionDataParams = { scenarioFilePath };
+            const result = await TyranoFlowchart.client.sendRequest<{
+              transitionData: unknown;
+              projectName: string;
+            } | null>(TyranoRequests.GetTransitionData, params);
+            if (result) {
+              res.json({
+                TransitionData: result.transitionData,
+                projectName: result.projectName,
+              });
+            } else {
+              res.status(404).send("Key not found");
+            }
+          } catch {
+            res.status(500).send("Error resolving transition data");
+          }
         });
 
-        app.get("/get-scenario-list", (_req, res) => {
-          //シナリオファイルのリストと、プロジェクトパスのリストから、{PROJECT_NAME: [SCENARIO_FILE_PATH, ...]}の形式のオブジェクトを作成する
-          const organizeData = (
-            scenarioList: string[],
-            rootPathList: string[],
-          ) => {
-            const data: {
-              [key: string]: { fullPath: string; scenarioName: string }[];
-            } = {};
-
-            // rootPathList をループして、プロジェクト名をキーとした空の配列を data に追加
-            rootPathList.forEach((rootPath) => {
-              const projectName = rootPath.split("\\").pop(); // パスからプロジェクト名を取得
-              if (projectName) {
-                data[projectName] = [];
-              }
-            });
-
-            // scenarioList をループして、各シナリオファイルがどのプロジェクトに属するかを判断し、data に追加
-            scenarioList.forEach((scenarioPath) => {
-              rootPathList.forEach((rootPath) => {
-                const projectName = rootPath.split("\\").pop();
-                if (scenarioPath.includes(rootPath) && projectName) {
-                  const relativePath = scenarioPath.replace(
-                    rootPath + path.sep,
-                    "",
-                  );
-                  data[projectName].push({
-                    fullPath: scenarioPath,
-                    scenarioName: relativePath,
-                  });
-                }
-              });
-            });
-
-            return data;
-          };
-          const infoWs = InformationWorkSpace.getInstance();
-          const scenarioList = Array.from(infoWs.transitionMap.keys());
-          const rootPathList = infoWs.getTyranoScriptProjectRootPaths();
-          const organizedData = organizeData(scenarioList, rootPathList);
-          res.json({ scenarioList: organizedData });
+        app.get("/get-scenario-list", async (_req, res) => {
+          try {
+            const result = await TyranoFlowchart.client.sendRequest<{
+              scenarioList: GetScenarioListResult;
+            }>(TyranoRequests.GetScenarioList);
+            res.json({ scenarioList: result.scenarioList });
+          } catch {
+            res.status(500).send("Error fetching scenario list");
+          }
         });
 
         TyranoFlowchart.serverInstance = app.listen(3200, () => {
           open(`http://localhost:3200/flowchart-list.html`);
         });
-        TyranoLogger.print("port 3200 server initialized");
-      } catch (error) {
-        TyranoLogger.printStackTrace(error);
+      } catch {
+        // ignore
       }
     };
     if (TyranoFlowchart.serverInstance) {
-      TyranoFlowchart.serverInstance.close(() => {
-        TyranoLogger.print("port 3200 server closed");
-      });
+      TyranoFlowchart.serverInstance.close();
     }
 
     await vscode.window.withProgress(
