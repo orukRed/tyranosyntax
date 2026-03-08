@@ -26,6 +26,7 @@ import {
   ResolveJumpTargetParams,
   ResolveJumpTargetResult,
 } from "./shared/protocol";
+import { TyranoLogger } from "./TyranoLogger";
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
@@ -296,7 +297,31 @@ export function activate(context: ExtensionContext) {
   );
 
   // ── LSPサーバー起動 ──
-  client.start();
+  const run = async () => {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "TyranoScript_syntaxの初期化中...",
+        cancellable: false,
+      },
+      async () => {
+        try {
+          await client.start();
+          const projectName =
+            vscode.workspace.workspaceFolders?.[0]?.name || "プロジェクト";
+          vscode.window.showInformationMessage(
+            `${projectName}の初期化が完了しました`,
+          );
+        } catch (_error) {
+          TyranoLogger.printStackTrace(_error);
+          vscode.window.showErrorMessage(
+            "TyranoScript syntax初期化中にエラーが発生しました。",
+          );
+        }
+      },
+    );
+  };
+  run();
 }
 
 function sendFileChanged(
