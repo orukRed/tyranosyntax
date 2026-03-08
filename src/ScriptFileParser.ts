@@ -46,8 +46,9 @@ export class ScriptFileParser {
         allowSuperOutsideMethod: true,
       },
     );
-    const projectPath: string =
-      this.pathResolver.getProjectPathByFilePath(absoluteScenarioFilePath);
+    const projectPath: string = this.pathResolver.getProjectPathByFilePath(
+      absoluteScenarioFilePath,
+    );
 
     if (this.pathResolver.isSkipParse(absoluteScenarioFilePath, projectPath)) {
       return;

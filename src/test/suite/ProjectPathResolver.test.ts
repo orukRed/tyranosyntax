@@ -60,10 +60,7 @@ suite("ProjectPathResolver", () => {
         "first.ks",
       );
       const result = resolver.getProjectPathByFilePath(filePath);
-      assert.ok(
-        typeof result === "string",
-        "戻り値は文字列であるべき",
-      );
+      assert.ok(typeof result === "string", "戻り値は文字列であるべき");
     });
 
     test("異常系 存在しないパスで空文字を返す", () => {
@@ -101,10 +98,7 @@ suite("ProjectPathResolver", () => {
     });
 
     test("異常系 不正なパスで空配列を返す", () => {
-      assert.deepStrictEqual(
-        resolver.getProjectFiles("hoge/foo/bar/"),
-        [],
-      );
+      assert.deepStrictEqual(resolver.getProjectFiles("hoge/foo/bar/"), []);
     });
   });
 
@@ -115,10 +109,7 @@ suite("ProjectPathResolver", () => {
     });
 
     test("正常系 異なるパスの場合falseを返す", () => {
-      assert.strictEqual(
-        resolver.isSamePath("/path/a", "/path/b"),
-        false,
-      );
+      assert.strictEqual(resolver.isSamePath("/path/a", "/path/b"), false);
     });
 
     test("異常系 undefinedの場合falseを返す", () => {
@@ -140,10 +131,7 @@ suite("ProjectPathResolver", () => {
   suite("isSkipParse", () => {
     test("正常系 booleanを返す", () => {
       const result = resolver.isSkipParse("/some/file.ks", "/some");
-      assert.ok(
-        typeof result === "boolean",
-        "戻り値はbooleanであるべき",
-      );
+      assert.ok(typeof result === "boolean", "戻り値はbooleanであるべき");
     });
   });
 });

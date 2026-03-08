@@ -166,8 +166,7 @@ export class MapCacheManager {
    */
   public async spliceMacroDataMapByFilePath(filePath: string) {
     const deleteTagList: string[] = [];
-    const projectPath =
-      this.pathResolver.getProjectPathByFilePath(filePath);
+    const projectPath = this.pathResolver.getProjectPathByFilePath(filePath);
 
     const macroUuids = this.macroByFilePath.get(filePath);
     if (!macroUuids || macroUuids.size === 0) {

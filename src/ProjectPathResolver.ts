@@ -44,17 +44,19 @@ export class ProjectPathResolver {
 
     const listFiles = (dir: string): string[] => {
       try {
-        return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) =>
-          dirent.name === ".git"
-            ? []
-            : dirent.isFile()
-              ? [`${dir}${this.pathDelimiter}${dirent.name}`]
-                  .filter((_file) => dirent.name === "index.html")
-                  .map((str) =>
-                    str.replace(this.pathDelimiter + "index.html", ""),
-                  )
-              : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
-        );
+        return fs
+          .readdirSync(dir, { withFileTypes: true })
+          .flatMap((dirent) =>
+            dirent.name === ".git"
+              ? []
+              : dirent.isFile()
+                ? [`${dir}${this.pathDelimiter}${dirent.name}`]
+                    .filter((_file) => dirent.name === "index.html")
+                    .map((str) =>
+                      str.replace(this.pathDelimiter + "index.html", ""),
+                    )
+                : listFiles(`${dir}${this.pathDelimiter}${dirent.name}`),
+          );
       } catch (_error) {
         return [];
       }
@@ -110,7 +112,10 @@ export class ProjectPathResolver {
     return ret;
   }
 
-  private listFilesRecursively(dir: string, permissionExtension: string[]): string[] {
+  private listFilesRecursively(
+    dir: string,
+    permissionExtension: string[],
+  ): string[] {
     const results: string[] = [];
     const stack = [dir];
 
@@ -119,7 +124,13 @@ export class ProjectPathResolver {
       try {
         const entries = fs.readdirSync(currentDir, { withFileTypes: true });
         for (const entry of entries) {
-          this.collectFileEntry(entry, currentDir, stack, results, permissionExtension);
+          this.collectFileEntry(
+            entry,
+            currentDir,
+            stack,
+            results,
+            permissionExtension,
+          );
         }
       } catch (_error) {
         // ディレクトリアクセスに失敗した場合はスキップ
@@ -141,7 +152,8 @@ export class ProjectPathResolver {
       stack.push(fullPath);
     } else if (
       entry.isFile() &&
-      (permissionExtension.length === 0 || permissionExtension.includes(path.extname(fullPath)))
+      (permissionExtension.length === 0 ||
+        permissionExtension.includes(path.extname(fullPath)))
     ) {
       results.push(fullPath);
     }

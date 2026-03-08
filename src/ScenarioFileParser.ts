@@ -71,8 +71,9 @@ export class ScenarioFileParser {
     absoluteScenarioFilePath: string,
   ) {
     const scenarioData = this.scenarioFileMap.get(absoluteScenarioFilePath);
-    const projectPath =
-      this.pathResolver.getProjectPathByFilePath(absoluteScenarioFilePath);
+    const projectPath = this.pathResolver.getProjectPathByFilePath(
+      absoluteScenarioFilePath,
+    );
 
     if (scenarioData == undefined) {
       return;
@@ -119,10 +120,20 @@ export class ScenarioFileParser {
       const tagName = await data["name"];
       switch (tagName) {
         case "macro":
-          this.processMacroTag(data, scenarioData, absoluteScenarioFilePath, ctx);
+          this.processMacroTag(
+            data,
+            scenarioData,
+            absoluteScenarioFilePath,
+            ctx,
+          );
           break;
         case "label":
-          await this.processLabelTag(data, scenarioData, absoluteScenarioFilePath, ctx);
+          await this.processLabelTag(
+            data,
+            scenarioData,
+            absoluteScenarioFilePath,
+            ctx,
+          );
           break;
         case "eval":
           await this.processEvalTag(data, scenarioData, projectPath);
@@ -236,10 +247,7 @@ export class ScenarioFileParser {
       scenarioData.uri,
       new vscode.Position(await data["line"], await data["column"]),
     );
-    this.variableMap
-      .get(projectPath)
-      ?.get(variableName)
-      ?.addLocation(location);
+    this.variableMap.get(projectPath)?.get(variableName)?.addLocation(location);
   }
 
   private async processCharaNewTag(
@@ -273,23 +281,20 @@ export class ScenarioFileParser {
     const faceName: string | undefined = data["pm"]["name"];
     const face: string | undefined = data["pm"]["face"];
     if (characterData && faceName && face) {
-      const updateCharacterFaceData: CharacterFaceData =
-        new CharacterFaceData(
-          faceName,
-          face,
-          new vscode.Location(
-            scenarioData.uri,
-            new vscode.Position(await data["line"], await data["column"]),
-          ),
-        );
+      const updateCharacterFaceData: CharacterFaceData = new CharacterFaceData(
+        faceName,
+        face,
+        new vscode.Location(
+          scenarioData.uri,
+          new vscode.Position(await data["line"], await data["column"]),
+        ),
+      );
       characterData.addFace(updateCharacterFaceData);
       const index = this.characterMap
         .get(projectPath)
         ?.findIndex((value) => value.name === data["pm"]["name"]);
       if (index !== undefined) {
-        this.characterMap
-          .get(projectPath)
-          ?.splice(index, 1, characterData);
+        this.characterMap.get(projectPath)?.splice(index, 1, characterData);
       }
     }
   }
