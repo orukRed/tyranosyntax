@@ -1,380 +1,316 @@
-//拡張機能のエントリポイント
+//拡張機能のエントリポイント (LSP Client)
 
 import * as vscode from "vscode";
 import * as path from "path";
 import { ExtensionContext } from "vscode";
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  ServerOptions,
+  TransportKind,
+} from "vscode-languageclient/node";
 
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
-import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
-import { TyranoOutlineProvider } from "./subscriptions/TyranoOutlineProvider";
-import { TyranoCompletionItemProvider } from "./subscriptions/TyranoCompletionItemProvider";
-import { TyranoDiagnostic } from "./subscriptions/TyranoDiagnostic";
-import { ErrorLevel, TyranoLogger } from "./TyranoLogger";
-import { InformationWorkSpace } from "./InformationWorkSpace";
-import { TyranoDefinitionProvider } from "./subscriptions/TyranoDefinitionProvider";
-import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
-import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
-import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
 } from "./embeddedJavaScriptSupport";
-
-const TYRANO_MODE = { scheme: "file", language: "tyrano" };
-// Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
-const FILE_SYNC_DELAY_MS = 100;
+import {
+  TyranoInitializationOptions,
+  TyranoNotifications,
+  TyranoRequests,
+  FileChangedParams,
+  ResolveJumpTargetParams,
+  ResolveJumpTargetResult,
+} from "./shared/protocol";
 
 export const previewPanel: undefined | vscode.WebviewPanel = undefined;
 export const flowchartPanel: undefined | vscode.WebviewPanel = undefined;
 
-/**
- * .ksファイルの診断を実行する共通処理
- * @param fileName 対象のファイル名
- * @param tyranoDiagnostic 診断インスタンス
- * @param infoWs ワークスペース情報
- * @param errorMessage エラー時のログメッセージ
- * @param waitBeforeDiagnostic 診断前にFILE_SYNC_DELAY_MSだけ待機するかどうか
- */
-async function runDiagnostic(
-  fileName: string,
-  tyranoDiagnostic: TyranoDiagnostic,
-  infoWs: InformationWorkSpace,
-  errorMessage: string,
-  waitBeforeDiagnostic: boolean = false,
-): Promise<void> {
-  if (
-    path.extname(fileName) !== ".ks" ||
-    tyranoDiagnostic.isDiagnosing
-  ) {
-    return;
-  }
-  tyranoDiagnostic.isDiagnosing = true;
-
-  // マクロ、変数、ラベル、キャラクター、トランジション情報を確実に更新
-  await infoWs.updateScenarioFileMap(fileName);
-  await infoWs.updateMacroLabelVariableDataMapByKs(fileName);
-
-  if (waitBeforeDiagnostic) {
-    // レースコンディション対策のため少し待機
-    await new Promise((resolve) =>
-      setTimeout(resolve, FILE_SYNC_DELAY_MS),
-    );
-  }
-
-  try {
-    await tyranoDiagnostic.createDiagnostics(fileName);
-  } catch (error) {
-    TyranoLogger.print(errorMessage, ErrorLevel.ERROR);
-    TyranoLogger.printStackTrace(error);
-  } finally {
-    tyranoDiagnostic.isDiagnosing = false;
-  }
-}
+let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
   // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
   registerEmbeddedJavaScriptSupport(context);
 
-  const run = async () => {
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "TyranoScript_syntaxの初期化中...",
-        cancellable: true,
-      },
-      async (_progress, _token) => {
-        InformationExtension.path = context.extensionPath;
-        TyranoLogger.print("TyranoScript syntax initialize start.");
+  // ── LSP サーバーモジュール ──
+  const serverModule = context.asAbsolutePath(
+    path.join("out", "server", "server.js"),
+  );
+
+  const serverOptions: ServerOptions = {
+    run: { module: serverModule, transport: TransportKind.ipc },
+    debug: {
+      module: serverModule,
+      transport: TransportKind.ipc,
+      options: { execArgv: ["--nolazy", "--inspect=6009"] },
+    },
+  };
+
+  // ── 設定値を収集して initializationOptions に渡す ──
+  const config = vscode.workspace.getConfiguration();
+  const initOptions: TyranoInitializationOptions = {
+    extensionPath: context.extensionPath,
+    language:
+      config.get<string>("TyranoScript syntax.language") || "ja",
+    workspaceRoot:
+      vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "",
+    isParsePluginFolder:
+      config.get<boolean>("TyranoScript syntax.parser.read_plugin") ??
+      true,
+    resourceExtensions:
+      config.get<object>("TyranoScript syntax.resource.extension") || {},
+    pluginTags:
+      config.get<object>("TyranoScript syntax.plugin.parameter") || {},
+    tagParameter:
+      config.get("TyranoScript syntax.tag.parameter") || {},
+    outlineTags:
+      config.get<string[]>("TyranoScript syntax.outline.tag") || [],
+    outlineComment:
+      config.get<string[]>("TyranoScript syntax.outline.comment") || [],
+    outlineBlockComment:
+      config.get<boolean>(
+        "TyranoScript syntax.outline.blockComment",
+      ) ?? true,
+    completionTagInputType:
+      config.get<string>(
+        "TyranoScript syntax.completionTag.inputType",
+      ) || "[ ]",
+    autoDiagnosticEnabled:
+      config.get<boolean>(
+        "TyranoScript syntax.autoDiagnostic.isEnabled",
+      ) ?? true,
+    executeDiagnostic:
+      config.get("TyranoScript syntax.execute.diagnostic") || {},
+    loggerEnabled:
+      config.get<boolean>("TyranoScript syntax.logger.enabled") ??
+      false,
+    tyranoBuilderEnabled:
+      config.get<boolean>(
+        "TyranoScript syntax.tyranoBuilder.enabled",
+      ) ?? false,
+    tyranoBuilderSkipTags:
+      config.get<string[]>(
+        "TyranoScript syntax.tyranoBuilder.skipTags",
+      ) || [],
+    tyranoBuilderSkipParameters:
+      config.get("TyranoScript syntax.tyranoBuilder.skipParameters") ||
+      {},
+  };
+
+  const clientOptions: LanguageClientOptions = {
+    documentSelector: [{ scheme: "file", language: "tyrano" }],
+    initializationOptions: initOptions,
+  };
+
+  client = new LanguageClient(
+    "tyranoScriptLanguageServer",
+    "TyranoScript Language Server",
+    serverOptions,
+    clientOptions,
+  );
+
+  // ── クライアント側コマンド登録 ──
+
+  // ショートカットキー
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.shiftEnter",
+      TyranoCreateTagByShortcutKey.KeyPushShiftEnter,
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.ctrlEnter",
+      TyranoCreateTagByShortcutKey.KeyPushCtrlEnter,
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.altEnter",
+      TyranoCreateTagByShortcutKey.KeyPushAltEnter,
+    ),
+  );
+
+  // [r][p] 追加コマンド
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.addRAndP",
+      TyranoAddRAndPCommand.execute,
+    ),
+  );
+
+  // プレビュー
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.preview",
+      TyranoPreview.createWindow,
+    ),
+  );
+
+  // フローチャート
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.flowchart",
+      TyranoFlowchart.openFlowchart,
+    ),
+  );
+
+  // ジャンプコマンド (LSP custom request を利用)
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.jumpToDestination",
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) return;
+
+        const document = editor.document;
+        const position = editor.selection.active;
+
+        const params: ResolveJumpTargetParams = {
+          uri: document.uri.toString(),
+          line: position.line,
+          character: position.character,
+        };
+
         try {
-          //登録処理
-          //サブスクリプションを登録することで、拡張機能がアンロードされたときにコマンドを解除してくれる
-          context.subscriptions.push(
-            vscode.languages.registerHoverProvider(
-              TYRANO_MODE,
-              new TyranoHoverProvider(),
-            ),
-          );
-          TyranoLogger.print("TyranoHoverProvider activate");
-          context.subscriptions.push(
-            vscode.languages.registerDocumentSymbolProvider(
-              TYRANO_MODE,
-              new TyranoOutlineProvider(),
-            ),
-          );
-          TyranoLogger.print("TyranoOutlineProvider activate");
-          context.subscriptions.push(
-            vscode.languages.registerCompletionItemProvider(
-              TYRANO_MODE,
-              new TyranoCompletionItemProvider(),
-              ".",
-            ),
-          );
-          TyranoLogger.print("TyranoCompletionItemProvider activate");
+          const result = await client.sendRequest<
+            ResolveJumpTargetResult | null
+          >(TyranoRequests.ResolveJumpTarget, params);
 
-          //ショートカットコマンドの登録
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.shiftEnter",
-              TyranoCreateTagByShortcutKey.KeyPushShiftEnter,
-            ),
-          );
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.ctrlEnter",
-              TyranoCreateTagByShortcutKey.KeyPushCtrlEnter,
-            ),
-          );
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.altEnter",
-              TyranoCreateTagByShortcutKey.KeyPushAltEnter,
-            ),
-          );
-          TyranoLogger.print("TyranoCreateTagByShortcutKey activate");
-
-          // [r][p]を追加するコマンドの登録
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.addRAndP",
-              TyranoAddRAndPCommand.execute,
-            ),
-          );
-          TyranoLogger.print("TyranoAddRAndPCommand activate");
-
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.preview",
-              TyranoPreview.createWindow,
-            ),
-          );
-          TyranoLogger.print("TyranoPreview activate");
-          context.subscriptions.push(
-            vscode.commands.registerCommand(
-              "tyrano.flowchart",
-              TyranoFlowchart.openFlowchart,
-            ),
-          );
-          TyranoLogger.print("TyranoFlowchart activate");
-
-          const infoWs: InformationWorkSpace =
-            InformationWorkSpace.getInstance();
-          //診断機能の登録
-          //ワークスペースを開いてる && index.htmlがある時のみ診断機能使用OK
-          if (vscode.workspace.workspaceFolders !== undefined) {
-            TyranoLogger.print("workspace is opening");
-
-            const tyranoDiagnostic = new TyranoDiagnostic();
-
-            await infoWs.initializeMaps();
-            infoWs.extensionPath = context.extensionPath;
-
-            // レースコンディション対策：初期化後に少し待機してマクロ情報を再確認
-            await new Promise((resolve) =>
-              setTimeout(resolve, FILE_SYNC_DELAY_MS),
+          if (!result) {
+            vscode.window.showWarningMessage(
+              "現在選択しているタグはジャンプ対象ではありません。",
             );
-            TyranoLogger.print(
-              "Initial macro and variable data loading completed",
-            );
-
-            TyranoLogger.print("TyranoDiagnostic activate");
-            const tyranoJumpProvider = new TyranoJumpProvider();
-            context.subscriptions.push(
-              vscode.commands.registerCommand(
-                "tyrano.diagnostic",
-                tmpDiagnostic,
-              ),
-            ); //手動診断のコマンドON
-            context.subscriptions.push(
-              vscode.commands.registerCommand(
-                "tyrano.jumpToDestination",
-                tyranoJumpProvider.toDestination,
-              ),
-            ); //ジャンプ先のファイル開くコマンドON
-            context.subscriptions.push(
-              vscode.languages.registerDefinitionProvider(
-                TYRANO_MODE,
-                new TyranoDefinitionProvider(),
-              ),
-            ); //定義元への移動
-            //renameproviderの追加
-            const renameProvider = new TyranoRenameProvider();
-            context.subscriptions.push(
-              vscode.languages.registerRenameProvider(
-                TYRANO_MODE,
-                renameProvider,
-              ),
-            );
-
-            //設定で診断機能の自動実行ONにしてるなら許可
-            if (
-              vscode.workspace
-                .getConfiguration()
-                .get("TyranoScript syntax.autoDiagnostic.isEnabled")
-            ) {
-              //ファイルに変更を加えたタイミング、もしくはテキストエディタに変更を加えたタイミングでイベント呼び出すようにする
-              context.subscriptions.push(
-                vscode.workspace.onDidChangeTextDocument(async (e) => {
-                  await runDiagnostic(
-                    e.document.fileName,
-                    tyranoDiagnostic,
-                    infoWs,
-                    `診断中にエラーが発生しました。直前に触ったファイルは${e.document.fileName}です。`,
-                    true,
-                  );
-                }),
-              );
-              TyranoLogger.print("Auto diagnostic activate");
-            } else {
-              TyranoLogger.print("Auto diagnostic is not activate");
-            }
-
-            // ファイル保存時の診断処理
-            context.subscriptions.push(
-              vscode.workspace.onDidSaveTextDocument(async (document) => {
-                await runDiagnostic(
-                  document.fileName,
-                  tyranoDiagnostic,
-                  infoWs,
-                  "保存時診断でエラーが発生しました。",
-                );
-              }),
-            );
-            //scenarioFileの値
-            const scenarioFileSystemWatcher: vscode.FileSystemWatcher =
-              vscode.workspace.createFileSystemWatcher(
-                "**/*.{ks}",
-                false,
-                false,
-                false,
-              );
-            const updateScenarioFile = async (fsPath: string) => {
-              await infoWs.updateScenarioFileMap(fsPath);
-              await infoWs.updateMacroLabelVariableDataMapByKs(fsPath);
-            };
-            scenarioFileSystemWatcher.onDidCreate(async (e) => {
-              await updateScenarioFile(e.fsPath);
-            });
-            scenarioFileSystemWatcher.onDidChange(async (e) => {
-              // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) =>
-                setTimeout(resolve, FILE_SYNC_DELAY_MS),
-              );
-              await updateScenarioFile(e.fsPath);
-            });
-            scenarioFileSystemWatcher.onDidDelete(async (e) => {
-              await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
-              await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
-              await infoWs.spliceLabelMapByFilePath(e.fsPath);
-              await infoWs.spliceVariableMapByFilePath(e.fsPath);
-              await infoWs.spliceCharacterMapByFilePath(e.fsPath);
-              await infoWs.spliceTransitionMapByFilePath(e.fsPath);
-            });
-
-            //scriptFileの値
-            const scriptFileSystemWatcher: vscode.FileSystemWatcher =
-              vscode.workspace.createFileSystemWatcher(
-                "**/*.{js}",
-                false,
-                false,
-                false,
-              );
-            const updateScriptFile = async (fsPath: string) => {
-              await infoWs.updateScriptFileMap(fsPath);
-              await infoWs.updateMacroDataMapByJs(fsPath);
-            };
-            scriptFileSystemWatcher.onDidCreate(async (e) => {
-              await updateScriptFile(e.fsPath);
-            });
-            scriptFileSystemWatcher.onDidChange(async (e) => {
-              // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
-              await new Promise((resolve) =>
-                setTimeout(resolve, FILE_SYNC_DELAY_MS),
-              );
-              await updateScriptFile(e.fsPath);
-            });
-            scriptFileSystemWatcher.onDidDelete(async (e) => {
-              await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
-              await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
-              await infoWs.spliceVariableMapByFilePath(e.fsPath);
-            });
-
-            const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
-            const resourceFileSystemWatcher: vscode.FileSystemWatcher =
-              vscode.workspace.createFileSystemWatcher(
-                resourceGlob,
-                false,
-                false,
-                false,
-              );
-            resourceFileSystemWatcher.onDidCreate(async (e) => {
-              infoWs.addResourceFileMap(e.fsPath);
-            });
-            resourceFileSystemWatcher.onDidDelete(async (e) => {
-              infoWs.spliceResourceFileMapByFilePath(e.fsPath);
-            });
-
-            //すべてのプロジェクトに対して初回診断実行
-            for (const i of infoWs.getTyranoScriptProjectRootPaths()) {
-              tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
-            }
+            return;
           }
-          //カーソル移動時のイベント登録
-          context.subscriptions.push(
-            vscode.window.onDidChangeTextEditorSelection(async (_e) => {
-              await TyranoPreview.triggerHotReload();
-            }),
-          );
 
-          TyranoLogger.print("TyranoScript syntax initialize end");
-
-          //エラーポップアップ
-          if (infoWs.getTyranoScriptProjectRootPaths().length === 0) {
-            vscode.window.showErrorMessage(
-              `TyranoScriptのプロジェクトが見つかりませんでした。一部機能が使用できません。`,
-            );
-          }
-          infoWs.getTyranoScriptProjectRootPaths().forEach((element) => {
-            vscode.window.showInformationMessage(
-              `${element.split(infoWs.pathDelimiter).pop()}の初期化が完了しました。`,
-            );
-          });
-        } catch (error) {
-          TyranoLogger.print(
-            "TyranoScript syntax initialize failed",
-            ErrorLevel.ERROR,
+          const targetUri = vscode.Uri.parse(result.targetUri);
+          const targetDoc =
+            await vscode.workspace.openTextDocument(targetUri);
+          const pos = new vscode.Position(
+            result.targetLine,
+            result.targetCharacter,
           );
-          TyranoLogger.printStackTrace(error);
+          const activeEditor =
+            await vscode.window.showTextDocument(targetDoc, {
+              preview: true,
+            });
+          activeEditor.selection = new vscode.Selection(pos, pos);
+          activeEditor.revealRange(
+            new vscode.Range(pos, pos),
+            vscode.TextEditorRevealType.InCenter,
+          );
+        } catch {
           vscode.window.showErrorMessage(
-            `TyranoScript syntax初期化中にエラーが発生しました。`,
+            "ジャンプ先の解決中にエラーが発生しました。",
           );
         }
       },
-    );
-  };
-
-  run();
-}
-
-/**
- * 診断機能のアルゴリズム改善までの間、一時的にコマンドから診断実装可能にするのでその処理を置いとく関数
- */
-export async function tmpDiagnostic() {
-  //activate内で直接createDiagnosticを呼び出すと、エラーが出る
-  //おそらくクラス内で定義した変数がコマンドからの呼び出しに対応していない？
-  //のでここに専用の関数
-  //実行速度が改善され次第削除予定
-
-  TyranoLogger.print("manual diagnostic start");
-  const tyranoDiagnostic: TyranoDiagnostic = new TyranoDiagnostic();
-  await tyranoDiagnostic.createDiagnostics(
-    vscode.window.activeTextEditor?.document.fileName,
+    ),
   );
-  TyranoLogger.print("manual diagnostic end");
+
+  // 手動診断コマンド（サーバー側で処理されるため、ファイル変更通知を送る）
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.diagnostic", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || !editor.document.fileName.endsWith(".ks")) return;
+
+      const params: FileChangedParams = {
+        uri: editor.document.uri.toString(),
+        type: "changed",
+        fileType: "scenario",
+      };
+      client.sendNotification(
+        TyranoNotifications.FileChanged,
+        params,
+      );
+    }),
+  );
+
+  // ── ファイルウォッチャー（サーバーに通知を送信） ──
+  const scenarioWatcher = vscode.workspace.createFileSystemWatcher(
+    "**/*.ks",
+    false,
+    false,
+    false,
+  );
+  scenarioWatcher.onDidCreate((e) =>
+    sendFileChanged(e, "created", "scenario"),
+  );
+  scenarioWatcher.onDidChange((e) =>
+    sendFileChanged(e, "changed", "scenario"),
+  );
+  scenarioWatcher.onDidDelete((e) =>
+    sendFileChanged(e, "deleted", "scenario"),
+  );
+
+  const scriptWatcher = vscode.workspace.createFileSystemWatcher(
+    "**/*.js",
+    false,
+    false,
+    false,
+  );
+  scriptWatcher.onDidCreate((e) =>
+    sendFileChanged(e, "created", "script"),
+  );
+  scriptWatcher.onDidChange((e) =>
+    sendFileChanged(e, "changed", "script"),
+  );
+  scriptWatcher.onDidDelete((e) =>
+    sendFileChanged(e, "deleted", "script"),
+  );
+
+  // Resource file watcher
+  const resourceExtensions =
+    config.get<object>("TyranoScript syntax.resource.extension") || {};
+  const extList = Object.values(resourceExtensions).flat();
+  if (extList.length > 0) {
+    const resourceGlob = `**/*{${extList.join(",")}}`;
+    const resourceWatcher = vscode.workspace.createFileSystemWatcher(
+      resourceGlob,
+      false,
+      true,
+      false,
+    );
+    resourceWatcher.onDidCreate((e) =>
+      sendFileChanged(e, "created", "resource"),
+    );
+    resourceWatcher.onDidDelete((e) =>
+      sendFileChanged(e, "deleted", "resource"),
+    );
+    context.subscriptions.push(resourceWatcher);
+  }
+
+  context.subscriptions.push(scenarioWatcher, scriptWatcher);
+
+  // カーソル移動時のイベント登録（プレビュー用）
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(async (_e) => {
+      await TyranoPreview.triggerHotReload();
+    }),
+  );
+
+  // ── LSPサーバー起動 ──
+  client.start();
 }
 
-export function deactivate(): void {
+function sendFileChanged(
+  uri: vscode.Uri,
+  type: "created" | "changed" | "deleted",
+  fileType: "scenario" | "script" | "resource",
+): void {
+  if (!client) return;
+  const params: FileChangedParams = {
+    uri: uri.toString(),
+    type,
+    fileType,
+  };
+  client.sendNotification(TyranoNotifications.FileChanged, params);
+}
+
+export async function deactivate(): Promise<void> {
   cleanupEmbeddedJavaScript();
+  if (client) {
+    await client.stop();
+  }
 }
