@@ -47,6 +47,10 @@
 
 ## Phase 7: テスト・検証・クリーンアップ
 - [x] TypeScript コンパイルエラーなし確認（tsc --noEmit, tsc -p ./ ともにパス）
-- [ ] テストの LSP 対応更新
-- [ ] deprecate フォルダ整理
-- [ ] 動作確認
+- [x] テストの LSP 対応更新
+  - extension.test.ts 更新（拡張機能のアクティベーション・コマンド登録テスト）
+  - 既存テスト群はクライアント側モジュールのまま（コンパイル・テスト通過確認済み）
+  - サーバー側モジュールの単体テスト追加は将来対応
+- [x] deprecate フォルダ整理（__TyranoRenameProvider.ts 削除、deprecate ディレクトリ消去）
+- [x] ビルド出力確認（out/server/server.js, out/extension.js, out/shared/protocol.js 生成確認）
+- [ ] 実行時動作確認（拡張ホストでのエンドツーエンドテスト）
