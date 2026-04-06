@@ -444,17 +444,17 @@ export class TyranoCompletionItemProvider
   > {
     // プロジェクト内で定義済みのラベル名セットを構築
     const definedLabels = new Set<string>();
-    this.infoWs.labelMap.forEach(async (labels, filePath) => {
+    for (const [filePath, labels] of this.infoWs.labelMap) {
       const labelProjectPath =
         await this.infoWs.getProjectPathByFilePath(filePath);
       if (labelProjectPath === projectPath) {
         labels.forEach((label) => definedLabels.add(label.name));
       }
-    });
+    }
 
     // プロジェクト内のjump系タグで参照されているtargetラベル名を収集
     const referencedTargets = new Set<string>();
-    this.infoWs.transitionMap.forEach(async (transitions, filePath) => {
+    for (const [filePath, transitions] of this.infoWs.transitionMap) {
       const transitionProjectPath =
         await this.infoWs.getProjectPathByFilePath(filePath);
       if (transitionProjectPath === projectPath) {
@@ -468,7 +468,7 @@ export class TyranoCompletionItemProvider
           }
         });
       }
-    });
+    }
 
     // 未定義のターゲットのみを補完候補として返す
     const completions: vscode.CompletionItem[] = [];

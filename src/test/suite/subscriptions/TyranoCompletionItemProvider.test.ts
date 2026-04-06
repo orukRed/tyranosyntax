@@ -504,4 +504,244 @@ suite("TyranoCompletionItemProvider", () => {
       }
     });
   });
+
+  // ラベル定義行（*から始まる行）の補完テスト
+  suite("completionLabelDefinition", () => {
+    const PROJECT_PATH = "/project";
+
+    /** infoWs のモックを組み立てるヘルパー */
+    function makeInfoWsMock({
+      definedLabels,
+      referencedTargets,
+    }: {
+      definedLabels: string[];
+      referencedTargets: string[];
+    }) {
+      const labelMap = new Map<string, { name: string }[]>([
+        [
+          `${PROJECT_PATH}/data/scenario/first.ks`,
+          definedLabels.map((name) => ({ name })),
+        ],
+      ]);
+      const transitionMap = new Map<
+        string,
+        { targetLabel: string | undefined }[]
+      >([
+        [
+          `${PROJECT_PATH}/data/scenario/first.ks`,
+          referencedTargets.map((t) => ({ targetLabel: t })),
+        ],
+      ]);
+      return {
+        labelMap,
+        transitionMap,
+        getProjectPathByFilePath: async (_: string) => PROJECT_PATH,
+      };
+    }
+
+    test("正常系 jumpターゲットとして参照されているが未定義のラベルが候補に表示される", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: [],
+        referencedTargets: ["undefined_label"],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      assert.strictEqual(result.length, 1, "1件の候補が返されるべき");
+      assert.strictEqual(
+        result[0].label,
+        "undefined_label",
+        "未定義ターゲット名が候補に含まれるべき",
+      );
+      assert.strictEqual(
+        result[0].kind,
+        vscode.CompletionItemKind.Interface,
+        "CompletionItemKind.Interfaceであるべき",
+      );
+    });
+
+    test("正常系 定義済みのラベルは補完候補から除外される", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: ["already_defined"],
+        referencedTargets: ["already_defined", "undefined_label"],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      const labels = result.map((item: any) => item.label);
+      assert.ok(
+        !labels.includes("already_defined"),
+        "定義済みラベルは候補に含まれないべき",
+      );
+      assert.ok(
+        labels.includes("undefined_label"),
+        "未定義ラベルは候補に含まれるべき",
+      );
+    });
+
+    test("正常系 *付きで保存されたtargetも正規化して扱われる", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: [],
+        referencedTargets: ["*star_prefixed_label"],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      assert.strictEqual(result.length, 1, "1件の候補が返されるべき");
+      assert.strictEqual(
+        result[0].label,
+        "star_prefixed_label",
+        "*を除いたラベル名が候補に表示されるべき",
+      );
+    });
+  });
+
+  // *から始まる行での provideCompletionItems ルーティングテスト
+  suite("*行でのラベル定義補完ルーティング", () => {
+    function makeMockDocumentWithLine(
+      lineText: string,
+    ): vscode.TextDocument {
+      return {
+        uri: vscode.Uri.file("/project/data/scenario/test.ks"),
+        fileName: "/project/data/scenario/test.ks",
+        isUntitled: false,
+        languageId: "tyrano",
+        version: 1,
+        isDirty: false,
+        isClosed: false,
+        eol: vscode.EndOfLine.LF,
+        lineCount: 1,
+        save: () => Promise.resolve(true),
+        lineAt: (_: number | vscode.Position) => ({
+          lineNumber: 0,
+          text: lineText,
+          range: new vscode.Range(0, 0, 0, lineText.length),
+          rangeIncludingLineBreak: new vscode.Range(0, 0, 1, 0),
+          firstNonWhitespaceCharacterIndex: lineText.search(/\S/),
+          isEmptyOrWhitespace: lineText.trim() === "",
+        }),
+        offsetAt: () => 0,
+        positionAt: () => new vscode.Position(0, 0),
+        getText: () => lineText,
+        getWordRangeAtPosition: () => undefined,
+        validateRange: (r: vscode.Range) => r,
+        validatePosition: (p: vscode.Position) => p,
+      } as vscode.TextDocument;
+    }
+
+    test("正常系 *から始まる行では completionLabelDefinition が呼ばれる", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      // completionLabelDefinition を監視用の関数に差し替え
+      let called = false;
+      providerAny.completionLabelDefinition = async () => {
+        called = true;
+        return [];
+      };
+      providerAny.infoWs = {
+        getProjectPathByFilePath: async () => "/project",
+        labelMap: new Map(),
+        transitionMap: new Map(),
+      };
+      providerAny.parser = {
+        parseText: () => [],
+        getIndex: () => 0,
+      };
+
+      const document = makeMockDocumentWithLine("*my_label");
+      const position = new vscode.Position(0, 5);
+      const token = { isCancellationRequested: false, onCancellationRequested: new vscode.EventEmitter<any>().event };
+      const context = { triggerKind: vscode.CompletionTriggerKind.Invoke, triggerCharacter: undefined };
+
+      await provider.provideCompletionItems(
+        document,
+        position,
+        token,
+        context,
+      );
+
+      assert.ok(called, "completionLabelDefinitionが呼ばれるべき");
+    });
+
+    test("正常系 インデント付き（スペース）の*行でも completionLabelDefinition が呼ばれる", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      let called = false;
+      providerAny.completionLabelDefinition = async () => {
+        called = true;
+        return [];
+      };
+      providerAny.infoWs = {
+        getProjectPathByFilePath: async () => "/project",
+        labelMap: new Map(),
+        transitionMap: new Map(),
+      };
+      providerAny.parser = {
+        parseText: () => [],
+        getIndex: () => 0,
+      };
+
+      const document = makeMockDocumentWithLine("  *indented_label");
+      const position = new vscode.Position(0, 5);
+      const token = { isCancellationRequested: false, onCancellationRequested: new vscode.EventEmitter<any>().event };
+      const context = { triggerKind: vscode.CompletionTriggerKind.Invoke, triggerCharacter: undefined };
+
+      await provider.provideCompletionItems(
+        document,
+        position,
+        token,
+        context,
+      );
+
+      assert.ok(called, "インデント付き*行でもcompletionLabelDefinitionが呼ばれるべき");
+    });
+
+    test("正常系 タブインデント付きの*行でも completionLabelDefinition が呼ばれる", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      let called = false;
+      providerAny.completionLabelDefinition = async () => {
+        called = true;
+        return [];
+      };
+      providerAny.infoWs = {
+        getProjectPathByFilePath: async () => "/project",
+        labelMap: new Map(),
+        transitionMap: new Map(),
+      };
+      providerAny.parser = {
+        parseText: () => [],
+        getIndex: () => 0,
+      };
+
+      const document = makeMockDocumentWithLine("\t*tab_indented_label");
+      const position = new vscode.Position(0, 5);
+      const token = { isCancellationRequested: false, onCancellationRequested: new vscode.EventEmitter<any>().event };
+      const context = { triggerKind: vscode.CompletionTriggerKind.Invoke, triggerCharacter: undefined };
+
+      await provider.provideCompletionItems(
+        document,
+        position,
+        token,
+        context,
+      );
+
+      assert.ok(called, "タブインデント付き*行でもcompletionLabelDefinitionが呼ばれるべき");
+    });
+  });
 });
