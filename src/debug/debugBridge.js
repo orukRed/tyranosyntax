@@ -22,6 +22,8 @@
   var pendingResume = null; // 一時停止中の実行再開用コールバック
   var initialized = false; // TYRANO.kag が利用可能になったか
   var waitingForInit = true; // 初期化待ち
+  var pausedFile = null; // 一時停止中のファイル名
+  var pausedLine = 0; // 一時停止中の行番号
 
   // ── WebSocket 接続 ──
   function connect() {
@@ -44,6 +46,8 @@
         var fn = pendingResume;
         pendingResume = null;
         paused = false;
+        pausedFile = null;
+        pausedLine = 0;
         fn();
       }
       // 再接続を試みる
@@ -112,6 +116,8 @@
   function resumeExecution() {
     paused = false;
     stepping = null;
+    pausedFile = null;
+    pausedLine = 0;
     if (pendingResume) {
       var fn = pendingResume;
       pendingResume = null;
@@ -122,6 +128,8 @@
   function stepExecution(mode) {
     stepping = mode;
     paused = false;
+    pausedFile = null;
+    pausedLine = 0;
     stepStartDepth = getMacroStackDepth();
     if (pendingResume) {
       var fn = pendingResume;
@@ -145,6 +153,8 @@
    */
   function pauseAndWait(reason, file, line) {
     paused = true;
+    pausedFile = file;
+    pausedLine = line;
 
     // DAP に stopped イベント送信
     send({
@@ -256,15 +266,19 @@
     var frames = [];
     try {
       var kag = TYRANO.kag;
-      var currentFile = kag.stat.current_scenario || "unknown.ks";
-      var currentLine = kag.stat.current_line || 0;
+      // 一時停止中は保存した位置を使用（current_order_index がまだ進んでいないため）
+      var currentFile = pausedFile || kag.stat.current_scenario || "unknown.ks";
+      var currentLine = pausedLine || kag.stat.current_line || 0;
       var currentIndex = kag.ftag.current_order_index || 0;
 
       // 現在のタグ情報を取得
       var currentTag = null;
       if (kag.ftag.array_tag && kag.ftag.array_tag[currentIndex]) {
         currentTag = kag.ftag.array_tag[currentIndex];
-        currentLine = currentTag.line || currentLine;
+        // pausedLine がある場合はそちらを優先
+        if (!pausedLine) {
+          currentLine = currentTag.line || currentLine;
+        }
       }
 
       // 現在の実行位置をトップフレームとして追加
@@ -345,8 +359,11 @@
         currentLine = tag ? tag.line || 0 : 0;
       }
 
+      // text / comment ノードはスキップ（ブレークポイント・ステップ・pause 判定対象外）
+      var isExecutableTag = tag && tag.name !== "text" && tag.name !== "comment";
+
       // ── ブレークポイント判定 ──
-      if (tag && isBreakpoint(currentFile, currentLine)) {
+      if (isExecutableTag && isBreakpoint(currentFile, currentLine)) {
         // 元の nextOrder を実行（インデックスを進めてタグ情報を更新）
         // ただし、タグの start() 呼び出し前に一時停止したい
         // → nextOrder 自体の前で止め、resume 時に nextOrder を呼ぶ
@@ -358,7 +375,7 @@
       }
 
       // ── ステップ実行判定 ──
-      if (stepping && tag) {
+      if (stepping && isExecutableTag) {
         var currentDepth = getMacroStackDepth();
         var shouldStop = false;
 
@@ -388,7 +405,7 @@
       }
 
       // ── pause コマンド判定 ──
-      if (paused && tag) {
+      if (paused && isExecutableTag) {
         pendingResume = function () {
           originalNextOrder();
         };

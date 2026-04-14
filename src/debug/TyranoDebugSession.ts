@@ -105,6 +105,11 @@ export class TyranoDebugSession extends DebugSession {
       // WebSocket サーバー起動
       await this.runtime.start(wsPort);
 
+      // ブリッジ再接続時にブレークポイントを再同期する（ブラウザリロード対応）
+      this.runtime.on("connected", () => {
+        this.syncBreakpointsToRuntime();
+      });
+
       // HTTP サーバー起動
       this.server = new TyranoDebugServer(
         this.projectRoot,
@@ -138,11 +143,7 @@ export class TyranoDebugSession extends DebugSession {
       this.runtime.resume();
     } else {
       this.runtime.once("connected", () => {
-        // 接続時にすでに設定済みのブレークポイントを送信（1-based → 0-based 変換）
-        for (const [file, bps] of this.breakpointMap) {
-          const lines = bps.map((bp) => bp.line! - 1);
-          this.runtime.setBreakpoints(file, lines);
-        }
+        // ブレークポイント同期は launchRequest で登録した persistent listener が処理する
         this.runtime.resume();
       });
     }
@@ -396,6 +397,18 @@ export class TyranoDebugSession extends DebugSession {
       this.server = undefined;
     }
     this.sendResponse(response);
+  }
+
+  /**
+   * breakpointMap の内容をすべてブリッジに再送信する。
+   * ブラウザリロード等で新しいブリッジが接続した際に、
+   * 最新のブレークポイント状態を同期するために使用する。
+   */
+  private syncBreakpointsToRuntime(): void {
+    for (const [file, bps] of this.breakpointMap) {
+      const lines = bps.map((bp) => bp.line! - 1); // 1-based → 0-based
+      this.runtime.setBreakpoints(file, lines);
+    }
   }
 
   // ── ユーティリティ ──

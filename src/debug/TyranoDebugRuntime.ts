@@ -52,7 +52,10 @@ export class TyranoDebugRuntime extends EventEmitter {
             this.handleMessage(data.toString());
           });
           ws.on("close", () => {
-            this.client = undefined;
+            // 新しいクライアントが既に接続済みの場合は上書きしない
+            if (this.client === ws) {
+              this.client = undefined;
+            }
           });
           this.emit("connected");
         });
