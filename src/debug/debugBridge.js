@@ -89,6 +89,9 @@
       case "getCallStack":
         sendCallStack(msg.requestId);
         break;
+      case "evaluate":
+        evaluateExpression(msg.data.expression, msg.requestId);
+        break;
     }
   }
 
@@ -206,6 +209,46 @@
       }
     }
     return String(val);
+  }
+
+  // ── 式の評価 ──
+  function evaluateExpression(expression, requestId) {
+    var value = "<unavailable>";
+    try {
+      // "f.hoge", "sf.flag", "tf.tmp", "mp.name" 形式をサポート
+      var match = expression.match(/^(f|sf|tf|mp)\.(.+)$/);
+      if (match) {
+        var scope = match[1];
+        var key = match[2];
+        var obj = null;
+        switch (scope) {
+          case "f": obj = TYRANO.kag.stat.f; break;
+          case "sf": obj = TYRANO.kag.variable.sf; break;
+          case "tf": obj = TYRANO.kag.variable.tf; break;
+          case "mp": obj = TYRANO.kag.stat.mp; break;
+        }
+        if (obj && key in obj) {
+          value = formatValue(obj[key]);
+        }
+      } else {
+        // スコープ指定なしの場合は f → tf → sf → mp の順で検索
+        var scopes = [
+          TYRANO.kag.stat.f,
+          TYRANO.kag.variable.tf,
+          TYRANO.kag.variable.sf,
+          TYRANO.kag.stat.mp
+        ];
+        for (var i = 0; i < scopes.length; i++) {
+          if (scopes[i] && expression in scopes[i]) {
+            value = formatValue(scopes[i][expression]);
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      // 評価失敗
+    }
+    send({ type: "evaluate", data: { value: value }, requestId: requestId });
   }
 
   // ── コールスタック送信 ──

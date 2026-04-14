@@ -80,7 +80,7 @@ export class TyranoDebugSession extends DebugSession {
     response.body.supportsBreakpointLocationsRequest = false;
     response.body.supportsFunctionBreakpoints = false;
     response.body.supportsConditionalBreakpoints = false;
-    response.body.supportsEvaluateForHovers = false;
+    response.body.supportsEvaluateForHovers = true;
     response.body.supportsStepBack = false;
     response.body.supportsSetVariable = false;
     response.body.supportsRestartRequest = false;
@@ -98,7 +98,7 @@ export class TyranoDebugSession extends DebugSession {
     args: LaunchRequestArguments,
   ): Promise<void> {
     this.projectRoot = args.projectRoot || "";
-    const httpPort = args.httpPort || 3200;
+    const httpPort = args.httpPort || 3300;
     const wsPort = args.wsPort || 8200;
 
     try {
@@ -301,6 +301,29 @@ export class TyranoDebugSession extends DebugSession {
       response.body = { variables };
     } catch {
       response.body = { variables: [] };
+    }
+    this.sendResponse(response);
+  }
+
+  /**
+   * DAP: evaluate — ウォッチ式・ホバー評価
+   * "f.hoge" や "sf.flag" のようなTyranoScript変数式を評価する。
+   */
+  protected async evaluateRequest(
+    response: DebugProtocol.EvaluateResponse,
+    args: DebugProtocol.EvaluateArguments,
+  ): Promise<void> {
+    try {
+      const result = await this.runtime.evaluate(args.expression);
+      response.body = {
+        result: result.value,
+        variablesReference: 0,
+      };
+    } catch {
+      response.body = {
+        result: "<unavailable>",
+        variablesReference: 0,
+      };
     }
     this.sendResponse(response);
   }

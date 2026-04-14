@@ -140,6 +140,13 @@ export class TyranoDebugRuntime extends EventEmitter {
     return this.sendRequest("getCallStack", {});
   }
 
+  /**
+   * ブリッジで式を評価する
+   */
+  public evaluate(expression: string): Promise<{ value: string }> {
+    return this.sendRequest("evaluate", { expression });
+  }
+
   // ── 内部メソッド ──
 
   private send(msg: any): void {

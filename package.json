@@ -1841,7 +1841,7 @@
               "httpPort": {
                 "type": "number",
                 "description": "デバッグ用HTTPサーバーのポート番号",
-                "default": 4200
+                "default": 3300
               },
               "wsPort": {
                 "type": "number",
