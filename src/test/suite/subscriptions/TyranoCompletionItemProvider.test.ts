@@ -606,6 +606,36 @@ suite("TyranoCompletionItemProvider", () => {
         "*を除いたラベル名が候補に表示されるべき",
       );
     });
+
+    test("正常系 変数参照（&を含むターゲット）は補完候補から除外される", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: [],
+        referencedTargets: [
+          "*&tf.selected_replay_obj",
+          "&tf.target_page",
+          "*&f.some_var",
+          "normal_label",
+        ],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      assert.strictEqual(result.length, 1, "変数を除外して1件のみ返されるべき");
+      assert.strictEqual(
+        result[0].label,
+        "normal_label",
+        "通常のラベルのみ候補に含まれるべき",
+      );
+      const labels = result.map((item: any) => item.label);
+      assert.ok(
+        !labels.some((l: string) => l.includes("&")),
+        "変数参照（&を含む）は候補に含まれないべき",
+      );
+    });
   });
 
   // *から始まる行での provideCompletionItems ルーティングテスト

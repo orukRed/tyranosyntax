@@ -462,9 +462,13 @@ export class TyranoCompletionItemProvider
           const target = transition.targetLabel;
           if (target) {
             // *付きで保存されている場合は除去して正規化
-            referencedTargets.add(
-              target.startsWith("*") ? target.slice(1) : target,
-            );
+            const normalized = target.startsWith("*")
+              ? target.slice(1)
+              : target;
+            // 変数参照（&を含む）はラベルではないため除外
+            if (!normalized.includes("&")) {
+              referencedTargets.add(normalized);
+            }
           }
         });
       }
