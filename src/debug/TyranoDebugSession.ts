@@ -226,7 +226,9 @@ export class TyranoDebugSession extends DebugSession {
     try {
       const result = await this.runtime.getCallStack();
       // Bridge は配列または { frames: [...] } で返す場合がある
-      const frames = Array.isArray(result) ? result : (result as any).frames || [];
+      const frames = Array.isArray(result)
+        ? result
+        : (result as any).frames || [];
       const stackFrames: StackFrame[] = frames.map((frame: any, i: number) => {
         const source = new Source(
           path.basename(frame.file),
