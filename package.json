@@ -1812,6 +1812,69 @@
         "title": "tyrano.flowchart"
       }
     ],
+    "breakpoints": [
+      {
+        "language": "tyrano"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "tyranoDebug",
+        "languages": [
+          "tyrano"
+        ],
+        "label": "TyranoScript Debug",
+        "configurationAttributes": {
+          "launch": {
+            "required": [],
+            "properties": {
+              "projectRoot": {
+                "type": "string",
+                "description": "TyranoScript プロジェクトのルートパス（index.htmlがあるフォルダ）",
+                "default": "${workspaceFolder}"
+              },
+              "scenario": {
+                "type": "string",
+                "description": "起動時に実行するシナリオファイル",
+                "default": "first.ks"
+              },
+              "httpPort": {
+                "type": "number",
+                "description": "デバッグ用HTTPサーバーのポート番号",
+                "default": 4200
+              },
+              "wsPort": {
+                "type": "number",
+                "description": "デバッグ用WebSocketサーバーのポート番号",
+                "default": 8200
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "tyranoDebug",
+            "request": "launch",
+            "name": "TyranoScript Debug",
+            "projectRoot": "${workspaceFolder}",
+            "scenario": "first.ks"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "TyranoScript Debug: Launch",
+            "description": "TyranoScriptプロジェクトをデバッグ実行します",
+            "body": {
+              "type": "tyranoDebug",
+              "request": "launch",
+              "name": "TyranoScript Debug",
+              "projectRoot": "^\"${workspaceFolder}\"",
+              "scenario": "first.ks"
+            }
+          }
+        ]
+      }
+    ],
     "keybindings": [
       {
         "command": "tyrano.shiftEnter",
@@ -1889,6 +1952,8 @@
     "npm-check-updates": "^16.10.13",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.8"
+    "vscode-languageserver-textdocument": "^1.0.8",
+    "@vscode/debugadapter": "^1.65.0",
+    "ws": "^8.17.0"
   }
 }
