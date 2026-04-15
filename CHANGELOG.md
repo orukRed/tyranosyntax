@@ -4,10 +4,20 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.0.0] 2026-04-19
+
+- デバッグ機能を実装しました。以下の機能を利用できます。
+  - ブレークポイントの設置、ステップ実行
+  - 変数の表示
+- アクティビティバーにTyranoScript_syntaxアイコンを追加しました。以下の機能を呼び出せます。
+  - デバッグ実行
+  - その場プレビュー
+  - フローチャート表示
+  - バグ報告
+
 ## [1.16.1] 2026-03-05
 
 - `iscript`～`endscript`で囲まれたJavaScript内の補完の挙動を改善しました。
-
 
 ## [1.16.0] 2026-03-04
 

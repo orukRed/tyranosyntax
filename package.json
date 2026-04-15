@@ -1778,6 +1778,39 @@
         }
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tyrano-sidebar",
+          "title": "TyranoScript syntax",
+          "icon": "images/tyrano_activity.png"
+        }
+      ]
+    },
+    "views": {
+      "tyrano-sidebar": [
+        {
+          "id": "tyrano-dev-tools",
+          "name": "開発ツール",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-links",
+          "name": "リンク",
+          "icon": ""
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "tyrano-dev-tools",
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)"
+      },
+      {
+        "view": "tyrano-links",
+        "contents": "[$(bug) バグ報告（Googleフォーム）](command:tyrano.sidebar.openBugReport)\n\n[$(heart) OFUSE（寄付）](command:tyrano.sidebar.openOfuse)"
+      }
+    ],
     "commands": [
       {
         "command": "tyrano.shiftEnter",
@@ -1810,6 +1843,31 @@
       {
         "command": "tyrano.flowchart",
         "title": "tyrano.flowchart"
+      },
+      {
+        "command": "tyrano.sidebar.debug",
+        "title": "デバッグ実行（β版）",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "tyrano.sidebar.preview",
+        "title": "その場プレビュー",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "tyrano.sidebar.flowchart",
+        "title": "フローチャート表示",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "tyrano.sidebar.openBugReport",
+        "title": "バグ報告（Googleフォーム）",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "tyrano.sidebar.openOfuse",
+        "title": "OFUSE（寄付）",
+        "icon": "$(heart)"
       }
     ],
     "breakpoints": [
@@ -1894,25 +1952,29 @@
         "command": "tyrano.altEnter",
         "win": "alt+enter",
         "mac": "option+enter",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "alt+enter"
       },
       {
         "command": "tyrano.jumpToDestination",
         "win": "alt+j",
         "mac": "option+j",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "alt+j"
       },
       {
         "command": "tyrano.preview",
         "win": "ctrl+alt+p",
         "mac": "command+option+p",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "ctrl+alt+p"
       },
       {
         "command": "tyrano.flowchart",
         "win": "ctrl+alt+f",
         "mac": "command+option+f",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "ctrl+alt+f"
       }
     ]
   },
