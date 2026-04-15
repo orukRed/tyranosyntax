@@ -215,7 +215,7 @@ ver1.7.0で追加した、以下の機能を修正しました。
 ## [1.3.3]- 2025-02-23
 
 - その場プレビューで画像ファイルが大きい場合にchara_showタグが正しく動作しないことがあったため暫定的な対応を行いました。
-- [cm][p]などがないファイルに対してその場プレビューをしたときの挙動を修正しました。[issue#241](https://github.com/orukRed/tyranosyntax/issues/241)
+- `[cm][p]`などがないファイルに対してその場プレビューをしたときの挙動を修正しました。[issue#241](https://github.com/orukRed/tyranosyntax/issues/241)
 
 ## [1.3.2]- 2025-02-13
 
@@ -784,9 +784,9 @@ playbgmのstorageパラメータのインテリセンスを出したとき、sou
 ## [0.2.0] - 2021-12-21
 
 - 以下のショートカットキーで入力する文字列を任意のものへと変更できるようにしました。setting.jsonより変更できます。
-  - [l][r] shift + enter
-  - [p] ctrl + enter
-  - \# alt + enter
+  - `[l][r]` shift + enter
+  - `[p]` ctrl + enter
+  - `#` alt + enter
 
 ## [0.1.6] - 2021-10-07
 
@@ -799,8 +799,8 @@ playbgmのstorageパラメータのインテリセンスを出したとき、sou
 ## [0.1.4]
 
 - Macの場合に、ショートカットコマンドが正常に正しく機能しない不具合の修正
-  - [l][r] shift + enter
-  - [p] ctrl + enter（Macならcmd+enter）
+  - `[l][r]` shift + enter
+  - `[p]` ctrl + enter（Macならcmd+enter）
 
 ## [0.1.3]
 
@@ -813,7 +813,7 @@ playbgmのstorageパラメータのインテリセンスを出したとき、sou
 ## [0.1.1]
 
 - 特定のタグ・記号の簡易出力（ショートカットキー）の追加
-  - [l][r] shift + enter
+  - `[l][r]` shift + enter
   - [p] ctrl + enter
   - \# alt + enter
 
