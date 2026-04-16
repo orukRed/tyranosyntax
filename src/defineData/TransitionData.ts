@@ -22,6 +22,10 @@ export class TransitionData {
   //上記のパラメータを定義したファイルパス
   private fileUri: vscode.Location | undefined;
 
+  public get targetLabel(): string | undefined {
+    return this.target;
+  }
+
   public constructor(
     tag: string,
     storage: string | undefined,
@@ -57,4 +61,3 @@ export class TransitionData {
     }
   }
 }
-
