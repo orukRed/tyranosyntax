@@ -36,12 +36,12 @@ export class TyranoCompletionItemProvider
 {
   private infoWs = InformationWorkSpace.getInstance();
   private parser = Parser.getInstance();
-  
+
   // 正規表現を事前にコンパイルして再利用
   private readonly PARAM_REGEXP = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");
   private readonly VARIABLE_REGEXP = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;
   private readonly SHARP_REGEXP = /\s*#.*$/;
-  
+
   public constructor() {}
   private tagParams: {
     [s: string]: { [s: string]: TagParameterConfig };
@@ -152,8 +152,18 @@ export class TyranoCompletionItemProvider
       // //characterDataのlayerのキー（part）の配列を取得
       const layerParts = this.findLayerParts(projectPath, tagIndex, parsedData);
 
+      // *から始まる行（ラベル定義行）ならラベル補完を出す
+      if (/^[\t ]*\*/.test(lineText)) {
+        return await this.completionLabelDefinition(
+          projectPath,
+          document.fileName,
+        );
+      }
       //カーソルの左隣の文字取得
-      if (typeof leftSideText === "string" && this.SHARP_REGEXP.test(leftSideText)) {
+      if (
+        typeof leftSideText === "string" &&
+        this.SHARP_REGEXP.test(leftSideText)
+      ) {
         return await this.completionNameParameter(projectPath);
       } else if (variableValue) {
         const variableKind = variableValue[0].split(".")[0].replace("&", "");
@@ -422,6 +432,88 @@ export class TyranoCompletionItemProvider
 
     return completions;
   }
+  /**
+   * ラベル定義行（*から始まる行）でのインテリセンス。
+   * プロジェクト内のjump系タグで参照されているが、まだ定義されていないラベル名を候補として返す。
+   * storageパラメータが指定されている場合、そのターゲットは指定先ファイルに属するため、
+   * 現在のファイルへの補完候補からは除外する。
+   * @param projectPath
+   * @param currentDocumentPath 現在編集中のファイルの絶対パス
+   */
+  private async completionLabelDefinition(
+    projectPath: string,
+    currentDocumentPath: string,
+  ): Promise<
+    | vscode.CompletionItem[]
+    | vscode.CompletionList<vscode.CompletionItem>
+    | null
+    | undefined
+  > {
+    // プロジェクト内で定義済みのラベル名セットを構築
+    const definedLabels = new Set<string>();
+    for (const [filePath, labels] of this.infoWs.labelMap) {
+      const labelProjectPath =
+        await this.infoWs.getProjectPathByFilePath(filePath);
+      if (labelProjectPath === projectPath) {
+        labels.forEach((label) => definedLabels.add(label.name));
+      }
+    }
+
+    // プロジェクト内のjump系タグで参照されているtargetラベル名を収集
+    // storageが指定されている場合はそのファイル、未指定の場合はtransitionが定義されたファイルに属する
+    const referencedTargets = new Set<string>();
+    for (const [filePath, transitions] of this.infoWs.transitionMap) {
+      const transitionProjectPath =
+        await this.infoWs.getProjectPathByFilePath(filePath);
+      if (transitionProjectPath === projectPath) {
+        transitions.forEach((transition) => {
+          const target = transition.targetLabel;
+          if (target) {
+            // *付きで保存されている場合は除去して正規化
+            const normalized = target.startsWith("*")
+              ? target.slice(1)
+              : target;
+            // 変数参照（&を含む）はラベルではないため除外
+            if (!normalized.includes("&")) {
+              // storageが指定されている場合、targetはそのstorage先ファイルに属する
+              // storageが未指定の場合、targetはtransitionが定義されたファイルに属する
+              const storage = transition.targetStorage;
+              const resolvedPath =
+                storage !== undefined
+                  ? projectPath +
+                    this.infoWs.DATA_DIRECTORY +
+                    this.infoWs.DATA_SCENARIO +
+                    this.infoWs.pathDelimiter +
+                    storage
+                  : filePath;
+              if (
+                this.infoWs.isSamePath(resolvedPath, currentDocumentPath)
+              ) {
+                referencedTargets.add(normalized);
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // 未定義のターゲットのみを補完候補として返す
+    const completions: vscode.CompletionItem[] = [];
+    referencedTargets.forEach((target) => {
+      if (!definedLabels.has(target)) {
+        const comp = new vscode.CompletionItem(target);
+        comp.kind = vscode.CompletionItemKind.Interface;
+        comp.insertText = target;
+        comp.detail = "未定義のjumpターゲット";
+        comp.documentation = new vscode.MarkdownString(
+          `jump/callタグで参照されているが、まだ定義されていないラベルです。`,
+        );
+        completions.push(comp);
+      }
+    });
+    return completions;
+  }
+
   /**
    * ラベルへのインテリセンス
    * @param projectPath

@@ -15,6 +15,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - フローチャート表示
   - バグ報告
 
+## [1.16.3] 2026-04-18
+
+- issue#245で発生した軽微なバグを修正しました。
+
+## [1.16.2] 2026-04-17
+
+- 診断機能の軽微なバグを修正しました。[issue#341](https://github.com/orukRed/tyranosyntax/issues/341)
+- *から始まる行の場合にすでに定義されたラベルの補完を行うようにしました。[issue#245](https://github.com/orukRed/tyranosyntax/issues/245)
+
 ## [1.16.1] 2026-03-05
 
 - `iscript`～`endscript`で囲まれたJavaScript内の補完の挙動を改善しました。
