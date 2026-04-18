@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.16.3] 2026-04-18
+
+- issue#245で発生した軽微なバグを修正しました。
+
 ## [1.16.2] 2026-04-17
 
 - 診断機能の軽微なバグを修正しました。[issue#341](https://github.com/orukRed/tyranosyntax/issues/341)

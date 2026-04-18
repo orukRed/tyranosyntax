@@ -154,7 +154,10 @@ export class TyranoCompletionItemProvider
 
       // *から始まる行（ラベル定義行）ならラベル補完を出す
       if (/^[\t ]*\*/.test(lineText)) {
-        return await this.completionLabelDefinition(projectPath);
+        return await this.completionLabelDefinition(
+          projectPath,
+          document.fileName,
+        );
       }
       //カーソルの左隣の文字取得
       if (
@@ -432,10 +435,14 @@ export class TyranoCompletionItemProvider
   /**
    * ラベル定義行（*から始まる行）でのインテリセンス。
    * プロジェクト内のjump系タグで参照されているが、まだ定義されていないラベル名を候補として返す。
+   * storageパラメータが指定されている場合、そのターゲットは指定先ファイルに属するため、
+   * 現在のファイルへの補完候補からは除外する。
    * @param projectPath
+   * @param currentDocumentPath 現在編集中のファイルの絶対パス
    */
   private async completionLabelDefinition(
     projectPath: string,
+    currentDocumentPath: string,
   ): Promise<
     | vscode.CompletionItem[]
     | vscode.CompletionList<vscode.CompletionItem>
@@ -453,6 +460,7 @@ export class TyranoCompletionItemProvider
     }
 
     // プロジェクト内のjump系タグで参照されているtargetラベル名を収集
+    // storageが指定されている場合はそのファイル、未指定の場合はtransitionが定義されたファイルに属する
     const referencedTargets = new Set<string>();
     for (const [filePath, transitions] of this.infoWs.transitionMap) {
       const transitionProjectPath =
@@ -467,7 +475,22 @@ export class TyranoCompletionItemProvider
               : target;
             // 変数参照（&を含む）はラベルではないため除外
             if (!normalized.includes("&")) {
-              referencedTargets.add(normalized);
+              // storageが指定されている場合、targetはそのstorage先ファイルに属する
+              // storageが未指定の場合、targetはtransitionが定義されたファイルに属する
+              const storage = transition.targetStorage;
+              const resolvedPath =
+                storage !== undefined
+                  ? projectPath +
+                    this.infoWs.DATA_DIRECTORY +
+                    this.infoWs.DATA_SCENARIO +
+                    this.infoWs.pathDelimiter +
+                    storage
+                  : filePath;
+              if (
+                this.infoWs.isSamePath(resolvedPath, currentDocumentPath)
+              ) {
+                referencedTargets.add(normalized);
+              }
             }
           }
         });

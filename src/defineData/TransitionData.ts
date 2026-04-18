@@ -26,6 +26,10 @@ export class TransitionData {
     return this.target;
   }
 
+  public get targetStorage(): string | undefined {
+    return this.storage;
+  }
+
   public constructor(
     tag: string,
     storage: string | undefined,

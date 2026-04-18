@@ -508,6 +508,7 @@ suite("TyranoCompletionItemProvider", () => {
   // ラベル定義行（*から始まる行）の補完テスト
   suite("completionLabelDefinition", () => {
     const PROJECT_PATH = "/project";
+    const CURRENT_FILE = `${PROJECT_PATH}/data/scenario/first.ks`;
 
     /** infoWs のモックを組み立てるヘルパー */
     function makeInfoWsMock({
@@ -515,27 +516,34 @@ suite("TyranoCompletionItemProvider", () => {
       referencedTargets,
     }: {
       definedLabels: string[];
-      referencedTargets: string[];
+      referencedTargets: { targetLabel: string | undefined; targetStorage: string | undefined }[];
     }) {
       const labelMap = new Map<string, { name: string }[]>([
         [
-          `${PROJECT_PATH}/data/scenario/first.ks`,
+          CURRENT_FILE,
           definedLabels.map((name) => ({ name })),
         ],
       ]);
       const transitionMap = new Map<
         string,
-        { targetLabel: string | undefined }[]
+        { targetLabel: string | undefined; targetStorage: string | undefined }[]
       >([
         [
-          `${PROJECT_PATH}/data/scenario/first.ks`,
-          referencedTargets.map((t) => ({ targetLabel: t })),
+          CURRENT_FILE,
+          referencedTargets,
         ],
       ]);
       return {
         labelMap,
         transitionMap,
         getProjectPathByFilePath: async (_: string) => PROJECT_PATH,
+        isSamePath: (p1: string, p2: string) => {
+          const path = require("path");
+          return path.resolve(p1) === path.resolve(p2);
+        },
+        DATA_DIRECTORY: "/data",
+        DATA_SCENARIO: "/scenario",
+        pathDelimiter: "/",
       };
     }
 
@@ -545,10 +553,10 @@ suite("TyranoCompletionItemProvider", () => {
 
       providerAny.infoWs = makeInfoWsMock({
         definedLabels: [],
-        referencedTargets: ["undefined_label"],
+        referencedTargets: [{ targetLabel: "undefined_label", targetStorage: undefined }],
       });
 
-      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, CURRENT_FILE);
 
       assert.ok(Array.isArray(result), "配列が返されるべき");
       assert.strictEqual(result.length, 1, "1件の候補が返されるべき");
@@ -570,10 +578,13 @@ suite("TyranoCompletionItemProvider", () => {
 
       providerAny.infoWs = makeInfoWsMock({
         definedLabels: ["already_defined"],
-        referencedTargets: ["already_defined", "undefined_label"],
+        referencedTargets: [
+          { targetLabel: "already_defined", targetStorage: undefined },
+          { targetLabel: "undefined_label", targetStorage: undefined },
+        ],
       });
 
-      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, CURRENT_FILE);
 
       assert.ok(Array.isArray(result), "配列が返されるべき");
       const labels = result.map((item: any) => item.label);
@@ -593,10 +604,10 @@ suite("TyranoCompletionItemProvider", () => {
 
       providerAny.infoWs = makeInfoWsMock({
         definedLabels: [],
-        referencedTargets: ["*star_prefixed_label"],
+        referencedTargets: [{ targetLabel: "*star_prefixed_label", targetStorage: undefined }],
       });
 
-      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, CURRENT_FILE);
 
       assert.ok(Array.isArray(result), "配列が返されるべき");
       assert.strictEqual(result.length, 1, "1件の候補が返されるべき");
@@ -614,14 +625,14 @@ suite("TyranoCompletionItemProvider", () => {
       providerAny.infoWs = makeInfoWsMock({
         definedLabels: [],
         referencedTargets: [
-          "*&tf.selected_replay_obj",
-          "&tf.target_page",
-          "*&f.some_var",
-          "normal_label",
+          { targetLabel: "*&tf.selected_replay_obj", targetStorage: undefined },
+          { targetLabel: "&tf.target_page", targetStorage: undefined },
+          { targetLabel: "*&f.some_var", targetStorage: undefined },
+          { targetLabel: "normal_label", targetStorage: undefined },
         ],
       });
 
-      const result = await providerAny.completionLabelDefinition(PROJECT_PATH);
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, CURRENT_FILE);
 
       assert.ok(Array.isArray(result), "配列が返されるべき");
       assert.strictEqual(result.length, 1, "変数を除外して1件のみ返されるべき");
@@ -634,6 +645,60 @@ suite("TyranoCompletionItemProvider", () => {
       assert.ok(
         !labels.some((l: string) => l.includes("&")),
         "変数参照（&を含む）は候補に含まれないべき",
+      );
+    });
+
+    test("正常系 storage指定ありのtargetは現在のファイルの補完候補に含まれない", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: [],
+        referencedTargets: [
+          { targetLabel: "test1", targetStorage: undefined },
+          { targetLabel: "test2", targetStorage: "test.ks" },
+        ],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, CURRENT_FILE);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      const labels = result.map((item: any) => item.label);
+      assert.ok(
+        labels.includes("test1"),
+        "storage未指定のtargetは現在のファイルの補完候補に含まれるべき",
+      );
+      assert.ok(
+        !labels.includes("test2"),
+        "storage指定ありのtargetは現在のファイルの補完候補に含まれないべき",
+      );
+    });
+
+    test("正常系 storage指定ありのtargetはstorage先ファイルの補完候補に含まれる", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      const STORAGE_FILE = `${PROJECT_PATH}/data/scenario/test.ks`;
+
+      providerAny.infoWs = makeInfoWsMock({
+        definedLabels: [],
+        referencedTargets: [
+          { targetLabel: "test1", targetStorage: undefined },
+          { targetLabel: "test2", targetStorage: "test.ks" },
+        ],
+      });
+
+      const result = await providerAny.completionLabelDefinition(PROJECT_PATH, STORAGE_FILE);
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      const labels = result.map((item: any) => item.label);
+      assert.ok(
+        !labels.includes("test1"),
+        "storage未指定のtargetはstorage先ファイルの補完候補に含まれないべき",
+      );
+      assert.ok(
+        labels.includes("test2"),
+        "storage指定ありのtargetはstorage先ファイルの補完候補に含まれるべき",
       );
     });
   });
