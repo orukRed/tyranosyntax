@@ -41,6 +41,8 @@
 ;yamato
 [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
 
+
+
 #
 さて、ゲームが簡単に作れるというから、来てみたものの[p]
 
