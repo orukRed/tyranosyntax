@@ -23,6 +23,9 @@ import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
 } from "./embeddedJavaScriptSupport";
+import { TyranoDebugConfigProvider } from "./debug/TyranoDebugConfigProvider";
+import { TyranoDebugSession } from "./debug/TyranoDebugSession";
+import { TyranoSidebarProvider } from "./subscriptions/TyranoSidebarProvider";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -77,6 +80,73 @@ export function activate(context: ExtensionContext) {
 
   // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
   registerEmbeddedJavaScriptSupport(context);
+
+  // サイドバーWelcome Viewの登録
+  const sidebarProvider = new TyranoSidebarProvider();
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      "tyrano-dev-tools",
+      sidebarProvider,
+    ),
+  );
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider("tyrano-links", sidebarProvider),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.debug", () => {
+      vscode.debug.startDebugging(undefined, {
+        type: "tyranoDebug",
+        request: "launch",
+        name: "TyranoScript Debug",
+      });
+    }),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.preview", () => {
+      vscode.commands.executeCommand("tyrano.preview");
+    }),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.flowchart", () => {
+      vscode.commands.executeCommand("tyrano.flowchart");
+    }),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.openBugReport", () => {
+      vscode.env.openExternal(
+        vscode.Uri.parse("https://forms.gle/PnWAzHiN8MYKhUrG6"),
+      );
+    }),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.openOfuse", () => {
+      vscode.env.openExternal(
+        vscode.Uri.parse("https://ofuse.me/orukred/letter"),
+      );
+    }),
+  );
+  TyranoLogger.print("TyranoSidebarProvider activate");
+
+  // デバッグアダプターの登録
+  const debugConfigProvider = new TyranoDebugConfigProvider();
+  context.subscriptions.push(
+    vscode.debug.registerDebugConfigurationProvider(
+      "tyranoDebug",
+      debugConfigProvider,
+    ),
+  );
+  context.subscriptions.push(
+    vscode.debug.registerDebugAdapterDescriptorFactory("tyranoDebug", {
+      createDebugAdapterDescriptor(
+        _session: vscode.DebugSession,
+      ): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+        return new vscode.DebugAdapterInlineImplementation(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          new TyranoDebugSession(context.extensionPath) as any,
+        );
+      },
+    }),
+  );
 
   const run = async () => {
     await vscode.window.withProgress(
