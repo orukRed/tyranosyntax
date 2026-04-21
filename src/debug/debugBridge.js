@@ -1,3 +1,5 @@
+/* eslint-disable no-empty */
+/* eslint-disable @typescript-eslint/no-this-alias */
 /**
  * TyranoScript Debug Bridge
  *
@@ -25,6 +27,10 @@
   var pausedFile = null; // 一時停止中のファイル名
   var pausedLine = 0; // 一時停止中の行番号
 
+  // iscript 内部行デバッグ用の状態
+  var currentIScriptContext = null; // { file: string, lines: number[] }
+  var pendingIScriptResume = null; // iscript 内で await 停止中の resolve コールバック
+
   // ── WebSocket 接続 ──
   function connect() {
     try {
@@ -42,12 +48,17 @@
     ws.onclose = function () {
       connected = false;
       // 一時停止中なら再開して切断
+      paused = false;
+      pausedFile = null;
+      pausedLine = 0;
+      if (pendingIScriptResume) {
+        var r = pendingIScriptResume;
+        pendingIScriptResume = null;
+        r();
+      }
       if (pendingResume) {
         var fn = pendingResume;
         pendingResume = null;
-        paused = false;
-        pausedFile = null;
-        pausedLine = 0;
         fn();
       }
       // 再接続を試みる
@@ -118,6 +129,12 @@
     stepping = null;
     pausedFile = null;
     pausedLine = 0;
+    if (pendingIScriptResume) {
+      var r = pendingIScriptResume;
+      pendingIScriptResume = null;
+      r();
+      return;
+    }
     if (pendingResume) {
       var fn = pendingResume;
       pendingResume = null;
@@ -131,6 +148,12 @@
     pausedFile = null;
     pausedLine = 0;
     stepStartDepth = getMacroStackDepth();
+    if (pendingIScriptResume) {
+      var r = pendingIScriptResume;
+      pendingIScriptResume = null;
+      r();
+      return;
+    }
     if (pendingResume) {
       var fn = pendingResume;
       pendingResume = null;
@@ -329,6 +352,278 @@
     }
   }
 
+  // ── iscript 内部行デバッグ支援 ──
+
+  /**
+   * [iscript] タグ検出直後に array_tag を前方走査し、次の非 text タグ (endscript) までの
+   * text タグの .line を順に集める。buff_script を "\n" で split した配列の要素と
+   * 1 対 1 で対応する想定。
+   */
+  function collectIScriptLines(ftag, iscriptIndex, file) {
+    var lines = [];
+    var arr = ftag.array_tag;
+    if (!arr) return { file: file, lines: lines };
+    for (var i = iscriptIndex + 1; i < arr.length; i++) {
+      var t = arr[i];
+      if (!t) break;
+      if (t.name === "text") {
+        lines.push(typeof t.line === "number" ? t.line : -1);
+      } else {
+        break;
+      }
+    }
+    return { file: file, lines: lines };
+  }
+
+  /**
+   * 1 行分の JS ソースをざっくりスキャンし、括弧／文字列の深度変化を返す。
+   * コメント（//, /* *\/）と文字列リテラル（'、"、`）とエスケープをケア。
+   * 注入可否判定に使う「行終了時点での未閉じ状態」を返す。
+   * parenDepth は ( と [ の合計、braceDepth は { の合計を別々に返す。
+   */
+  function scanLineTokens(line, startInString, startInBlockComment) {
+    var parenDepth = 0;
+    var braceDepth = 0;
+    var inString = startInString || null; // null | "'" | '"' | "`"
+    var inBlockComment = !!startInBlockComment;
+    var i = 0;
+    var n = line.length;
+    while (i < n) {
+      var c = line.charAt(i);
+      var next = i + 1 < n ? line.charAt(i + 1) : "";
+
+      if (inBlockComment) {
+        if (c === "*" && next === "/") {
+          inBlockComment = false;
+          i += 2;
+          continue;
+        }
+        i++;
+        continue;
+      }
+
+      if (inString) {
+        if (c === "\\") {
+          i += 2;
+          continue;
+        }
+        if (c === inString) {
+          inString = null;
+        }
+        i++;
+        continue;
+      }
+
+      // コメント開始
+      if (c === "/" && next === "/") {
+        break; // 行末までコメント
+      }
+      if (c === "/" && next === "*") {
+        inBlockComment = true;
+        i += 2;
+        continue;
+      }
+
+      if (c === "'" || c === '"' || c === "`") {
+        inString = c;
+        i++;
+        continue;
+      }
+
+      if (c === "(" || c === "[") {
+        parenDepth++;
+      } else if (c === ")" || c === "]") {
+        parenDepth--;
+      } else if (c === "{") {
+        braceDepth++;
+      } else if (c === "}") {
+        braceDepth--;
+      }
+      i++;
+    }
+    return {
+      parenDepth: parenDepth,
+      braceDepth: braceDepth,
+      inString: inString,
+      inBlockComment: inBlockComment,
+    };
+  }
+
+  /**
+   * iscript ソースを行単位で変換し、各行先頭に await __tyranoBP(...) を挿入する。
+   * 文の途中（括弧内・未閉じ文字列・ブロックコメント内）では挿入しない。
+   */
+  function transformIScriptSource(str, file, lines) {
+    var srcLines = str.split("\n");
+    var out = [];
+    var parenDepth = 0;
+    var inString = null;
+    var inBlockComment = false;
+
+    // オブジェクトキー様パターン: "key": / 'key': / key: の行頭
+    var reObjKey = /^(?:["'][^"']*["']|[\w$]+)\s*:/;
+
+    for (var i = 0; i < srcLines.length; i++) {
+      var ksLine = i < lines.length ? lines[i] : -1;
+      var trimmed = srcLines[i].trimLeft ? srcLines[i].trimLeft() : srcLines[i].replace(/^\s+/, "");
+      // 丸括弧・ブラケットの深度が 0 で、文字列・ブロックコメント内でもなく、
+      // かつオブジェクトキー様パターン（case/default/ラベルを含む）でない行に挿入する。
+      var isObjKeyLine = reObjKey.test(trimmed);
+      var canInject =
+        parenDepth === 0 && inString === null && !inBlockComment && ksLine >= 0 && !isObjKeyLine;
+      var prefix = canInject
+        ? "await __tyranoBP(" + JSON.stringify(file) + "," + ksLine + ");"
+        : "";
+      out.push(prefix + srcLines[i]);
+      var state = scanLineTokens(srcLines[i], inString, inBlockComment);
+      parenDepth += state.parenDepth;
+      inString = state.inString;
+      inBlockComment = state.inBlockComment;
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * iscript 内の行で停止する非同期ヘルパー。BP またはステップ条件に該当すれば
+   * stopped イベントを送信し、resume/step コマンドが来るまで Promise で待機する。
+   */
+  function tyranoBP(file, line) {
+    if (!connected) return Promise.resolve();
+    var hitBP = isBreakpoint(file, line);
+    var shouldStop = hitBP;
+    var reason = "breakpoint";
+
+    if (!hitBP && stepping) {
+      switch (stepping) {
+        case "stepIn":
+        case "stepOver":
+          shouldStop = true;
+          reason = "step";
+          break;
+        case "stepOut":
+          // iscript を抜けてからタグレベルの stepOut 判定に任せる
+          shouldStop = false;
+          break;
+      }
+    }
+
+    if (!shouldStop) return Promise.resolve();
+
+    return new Promise(function (resolve) {
+      pendingIScriptResume = resolve;
+      stepping = null;
+      paused = true;
+      pausedFile = file;
+      pausedLine = line;
+      send({
+        type: "stopped",
+        data: { reason: reason, file: file, line: line },
+      });
+    });
+  }
+
+  // グローバルに公開（変換後の JS から呼ばれる）
+  window.__tyranoBP = tyranoBP;
+
+  /**
+   * TYRANO.kag.evalScript をラップし、iscript 起因の eval を async IIFE に変換して実行する。
+   */
+  function hookEvalScript() {
+    var kag = TYRANO.kag;
+    if (!kag || !kag.evalScript) return false;
+    var original = kag.evalScript.bind(kag);
+    kag.evalScript = function (str) {
+      var ctx = currentIScriptContext;
+      if (!ctx || !str) {
+        return original(str);
+      }
+      currentIScriptContext = null;
+
+      var transformed;
+      try {
+        transformed = transformIScriptSource(str, ctx.file, ctx.lines);
+      } catch (e) {
+        console.error("[TyranoDebug] transformIScriptSource failed:", e);
+        return original(str);
+      }
+
+      // evalScript 相当のスコープ束縛を再現（直接 eval でこれらが見える）
+      var TG = this;
+      var f = this.stat.f;
+      var sf = this.variable.sf;
+      var tf = this.variable.tf;
+      var mp = this.stat.mp;
+      void TG; void f; void sf; void tf; void mp;
+
+      var wrapped =
+        "(async function(){\n" + transformed + "\n}).call(TG)";
+      try {
+        var p = eval(wrapped);
+        if (p && typeof p.then === "function") {
+          return p.then(
+            function () {
+              try {
+                kag.saveSystemVariable();
+              } catch (_) {}
+              if (kag.is_studio && kag.studio && kag.studio.notifyChangeVariable) {
+                kag.studio.notifyChangeVariable();
+              }
+            },
+            function (err) {
+              console.error(err);
+              try {
+                kag.warning(err, true);
+              } catch (_) {}
+            }
+          );
+        }
+        return p;
+      } catch (e) {
+        console.error(e);
+        try {
+          kag.warning(e, true);
+        } catch (_) {}
+        return Promise.resolve();
+      }
+    };
+    return true;
+  }
+
+  /**
+   * [endscript] タグの start を差し替え、evalScript が Promise を返す場合は
+   * then 内で nextOrder を呼ぶように変更する。
+   */
+  function hookEndscript() {
+    var kag = TYRANO.kag;
+    if (!kag || !kag.ftag || !kag.ftag.master_tag) return false;
+    var tagObj = kag.ftag.master_tag.endscript;
+    if (!tagObj || !tagObj.start) return false;
+    tagObj.start = function (pm) {
+      kag.stat.is_script = false;
+      var result;
+      try {
+        result = kag.evalScript(kag.stat.buff_script);
+      } catch (err) {
+        try {
+          kag.error("error_in_iscript");
+        } catch (_) {}
+        console.error(err);
+      }
+      kag.stat.buff_script = "";
+      var after = function () {
+        if (pm && pm.stop === "false") {
+          kag.ftag.nextOrder();
+        }
+      };
+      if (result && typeof result.then === "function") {
+        result.then(after);
+      } else {
+        after();
+      }
+    };
+    return true;
+  }
+
   // ── nextOrder フック ──
   function hookNextOrder() {
     if (typeof TYRANO === "undefined" || !TYRANO.kag || !TYRANO.kag.ftag) {
@@ -341,6 +636,10 @@
     var originalNextOrder = ftag.nextOrder.bind(ftag);
     initialized = true;
     waitingForInit = false;
+
+    // iscript 内部行デバッグ用フック
+    hookEvalScript();
+    hookEndscript();
 
     ftag.nextOrder = function () {
       if (!connected) {
@@ -357,6 +656,11 @@
       if (ftag.array_tag && ftag.array_tag.length > currentIndex) {
         tag = ftag.array_tag[currentIndex];
         currentLine = tag ? tag.line || 0 : 0;
+      }
+
+      // [iscript] 検出時、endscript までの text タグの .line を収集し、evalScript 変換用に保存
+      if (tag && tag.name === "iscript") {
+        currentIScriptContext = collectIScriptLines(ftag, currentIndex, currentFile);
       }
 
       // text / comment ノードはスキップ（ブレークポイント・ステップ・pause 判定対象外）

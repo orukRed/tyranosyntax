@@ -40,8 +40,25 @@ export class Parser {
   public getValidBreakpointLines(text: string): number[] {
     const parsed = this.parseScenario(text)["array_s"];
     const validLines = new Set<number>();
+    let insideScript = false;
     for (const tag of parsed) {
-      if (tag.name === "comment" || tag.name === "text") {
+      if (tag.name === "iscript") {
+        insideScript = true;
+        if (tag.line !== undefined) validLines.add(tag.line);
+        continue;
+      }
+      if (tag.name === "endscript") {
+        insideScript = false;
+        if (tag.line !== undefined) validLines.add(tag.line);
+        continue;
+      }
+      if (tag.name === "comment") {
+        continue;
+      }
+      if (tag.name === "text") {
+        if (insideScript && tag.line !== undefined) {
+          validLines.add(tag.line);
+        }
         continue;
       }
       if (tag.name === "label") {

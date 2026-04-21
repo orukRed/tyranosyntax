@@ -1,5 +1,5 @@
 *start
-@jump target="*test10"
+; @jump target="*test10"
 [s]
 
 *end

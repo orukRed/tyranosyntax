@@ -41,19 +41,19 @@
 [chara_new  name="yamato"  storage="chara/yamato/normal.png" jname="やまと" ]
 
 
-ver2.0.0で実装するissue6のテストです。[r]
-このシナリオでは、デバッグ機能のテストを行います。[p]
+; ver2.0.0で実装するissue6のテストです。[r]
+; このシナリオでは、デバッグ機能のテストを行います。[p]
 
 
-;各種タグで止まるか
-任意のタグにブレークポイントを置いて、動作が止まるかテストします。[p]
+; ;各種タグで止まるか
+; 任意のタグにブレークポイントを置いて、動作が止まるかテストします。[p]
 
-;chara_showテスト
-@chara_show name="akane" 
-;chara_moveテスト
-@chara_move name="akane" left="+=200" time="1000" anim="true"
-;bgテスト
-@bg storage="room.jpg" time="1000"
+; ;chara_showテスト
+; @chara_show name="akane" 
+; ;chara_moveテスト
+; @chara_move name="akane" left="+=200" time="1000" anim="true"
+; ;bgテスト
+; @bg storage="room.jpg" time="1000"
 
 
 ; iscript,html内部で止まるか（できれば止めたいけど今後の対応にしてもよい）
@@ -79,8 +79,8 @@ f.foobar="TEST_VALUE";
 
 変更されましたか？[p]
 
-コールスタックのテストです。
-別のラベルに飛ばします。
+コールスタックのテストです。[r]
+別のラベルに飛ばします。[p]
 @call target="*next1"
 
 *next1
