@@ -284,61 +284,140 @@
     send({ type: "evaluate", data: { value: value }, requestId: requestId });
   }
 
+  // ── コールスタック用ヘルパ ──
+
+  // storage がアクティブシナリオと同じなら array_tag を返す。
+  // call/macro スタックエントリは index のみ保持するため、index→(line, label) 解決に使う。
+  function getArrayTagForStorage(kag, storage) {
+    if (!kag || !kag.ftag || !kag.ftag.array_tag) return null;
+    if (
+      storage &&
+      kag.stat &&
+      kag.stat.current_scenario &&
+      storage !== kag.stat.current_scenario
+    ) {
+      return null;
+    }
+    return kag.ftag.array_tag;
+  }
+
+  // array_tag を index から後方走査し、最も近い先行ラベル名 ("*label") を返す。
+  function findNearestLabel(kag, storage, index) {
+    var arr = getArrayTagForStorage(kag, storage);
+    if (!arr) return null;
+    var start = Math.min(index | 0, arr.length - 1);
+    for (var i = start; i >= 0; i--) {
+      var t = arr[i];
+      if (t && t.name === "label") {
+        var n = (t.pm && t.pm.label_name) || t.val;
+        if (n) return "*" + n;
+      }
+    }
+    return null;
+  }
+
+  // array_tag[index] のソース行番号 (0-based) を返す。
+  // TyranoScript の call/macro スタックエントリには line がないため index 経由で解決する。
+  function findLineByIndex(kag, storage, index) {
+    var arr = getArrayTagForStorage(kag, storage);
+    if (!arr) return 0;
+    var t = arr[index | 0];
+    return (t && t.line) || 0;
+  }
+
+  function basenameNoExt(file) {
+    if (!file) return "(top)";
+    var base = String(file).replace(/\\/g, "/").split("/").pop();
+    return base.replace(/\.ks$/i, "");
+  }
+
+  // 現在フレームの表示名を組み立てる
+  function buildCurrentFrameName(currentLabel, currentTag, currentFile) {
+    if (currentLabel && currentTag) {
+      return currentLabel + " [" + currentTag.name + "]";
+    }
+    if (currentTag) return "[" + currentTag.name + "]";
+    if (currentLabel) return currentLabel;
+    return basenameNoExt(currentFile);
+  }
+
+  // 現在フレームの位置情報 (file/line/index/tag) を取得
+  function resolveCurrentPosition(kag) {
+    var currentFile = pausedFile || kag.stat.current_scenario || "unknown.ks";
+    var currentLine = pausedLine || kag.stat.current_line || 0;
+    var currentIndex = kag.ftag.current_order_index || 0;
+    var currentTag = null;
+    if (kag.ftag.array_tag && kag.ftag.array_tag[currentIndex]) {
+      currentTag = kag.ftag.array_tag[currentIndex];
+      if (!pausedLine) {
+        currentLine = currentTag.line || currentLine;
+      }
+    }
+    return {
+      file: currentFile,
+      line: currentLine,
+      index: currentIndex,
+      tag: currentTag,
+    };
+  }
+
+  // macro スタックを逆順にフレーム化
+  function buildMacroFrames(kag, currentFile) {
+    var result = [];
+    var macroStack = (kag.stat.stack && kag.stat.stack.macro) || [];
+    for (var i = macroStack.length - 1; i >= 0; i--) {
+      var entry = macroStack[i];
+      if (!entry) continue;
+      var macroName =
+        entry.name ||
+        (entry.pm && entry.pm._macro) ||
+        findNearestLabel(kag, entry.storage, entry.index) ||
+        "(macro)";
+      result.push({
+        name: macroName,
+        file: entry.storage || currentFile,
+        line: findLineByIndex(kag, entry.storage, entry.index),
+        index: entry.index || 0,
+      });
+    }
+    return result;
+  }
+
+  // call スタックを逆順にフレーム化（ラベル名解決を含む）
+  function buildCallFrames(kag, currentFile) {
+    var result = [];
+    var callStack = (kag.stat.stack && kag.stat.stack.call) || [];
+    for (var j = callStack.length - 1; j >= 0; j--) {
+      var entry = callStack[j];
+      if (!entry) continue;
+      var name =
+        findNearestLabel(kag, entry.storage, entry.index) ||
+        basenameNoExt(entry.storage);
+      result.push({
+        name: name,
+        file: entry.storage || currentFile,
+        line: findLineByIndex(kag, entry.storage, entry.index),
+        index: entry.index || 0,
+      });
+    }
+    return result;
+  }
+
   // ── コールスタック送信 ──
   function sendCallStack(requestId) {
     var frames = [];
     try {
       var kag = TYRANO.kag;
-      // 一時停止中は保存した位置を使用（current_order_index がまだ進んでいないため）
-      var currentFile = pausedFile || kag.stat.current_scenario || "unknown.ks";
-      var currentLine = pausedLine || kag.stat.current_line || 0;
-      var currentIndex = kag.ftag.current_order_index || 0;
-
-      // 現在のタグ情報を取得
-      var currentTag = null;
-      if (kag.ftag.array_tag && kag.ftag.array_tag[currentIndex]) {
-        currentTag = kag.ftag.array_tag[currentIndex];
-        // pausedLine がある場合はそちらを優先
-        if (!pausedLine) {
-          currentLine = currentTag.line || currentLine;
-        }
-      }
-
-      // 現在の実行位置をトップフレームとして追加
+      var pos = resolveCurrentPosition(kag);
+      var currentLabel = findNearestLabel(kag, pos.file, pos.index);
       frames.push({
-        name: currentTag ? "[" + currentTag.name + "]" : "(current)",
-        file: currentFile,
-        line: currentLine,
-        index: currentIndex,
+        name: buildCurrentFrameName(currentLabel, pos.tag, pos.file),
+        file: pos.file,
+        line: pos.line,
+        index: pos.index,
       });
-
-      // macro スタックを逆順に辿る
-      var macroStack = kag.stat.stack.macro || [];
-      for (var i = macroStack.length - 1; i >= 0; i--) {
-        var entry = macroStack[i];
-        if (entry) {
-          frames.push({
-            name: entry.name || "(macro)",
-            file: entry.storage || currentFile,
-            line: entry.line || 0,
-            index: entry.index || 0,
-          });
-        }
-      }
-
-      // call スタックも辿る
-      var callStack = kag.stat.stack.call || [];
-      for (var j = callStack.length - 1; j >= 0; j--) {
-        var callEntry = callStack[j];
-        if (callEntry) {
-          frames.push({
-            name: "(call)",
-            file: callEntry.storage || "unknown.ks",
-            line: callEntry.line || 0,
-            index: callEntry.index || 0,
-          });
-        }
-      }
+      frames = frames.concat(buildMacroFrames(kag, pos.file));
+      frames = frames.concat(buildCallFrames(kag, pos.file));
     } catch (e) {
       // TYRANO が未初期化の場合は空配列を返す
     }
