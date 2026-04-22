@@ -4,7 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [2.0.0] 2026-04-19
+## [2.0.0] 2026-04-22
 
 - デバッグ機能を実装しました。以下の機能を利用できます。
   - ブレークポイントの設置、ステップ実行
