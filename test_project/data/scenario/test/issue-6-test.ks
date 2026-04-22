@@ -49,7 +49,7 @@
 ; 任意のタグにブレークポイントを置いて、動作が止まるかテストします。[p]
 
 ; ;chara_showテスト
-; @chara_show name="akane" 
+; @chara_show name="akane"
 ; ;chara_moveテスト
 ; @chara_move name="akane" left="+=200" time="1000" anim="true"
 ; ;bgテスト
@@ -68,14 +68,14 @@ iscript内部が止まるかをテストします。[p]
       f.value += i;
       console.log(i);
   }
-@endscript 
+@endscript
 
 変数の値を変更します。[p]
 
-@iscript 
+@iscript
 f.hoge=12.3;
 f.foobar="TEST_VALUE";
-@endscript 
+@endscript
 
 変更されましたか？[p]
 
@@ -89,4 +89,5 @@ f.foobar="TEST_VALUE";
 *next2
 コールスタックは正しく表示されますか？[r]
 期待値はnext2->next1->startです。[p]
+@call storage="test/issue-6-test2.ks"
 [s]

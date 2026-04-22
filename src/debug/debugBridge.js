@@ -288,17 +288,19 @@
 
   // storage がアクティブシナリオと同じなら array_tag を返す。
   // call/macro スタックエントリは index のみ保持するため、index→(line, label) 解決に使う。
+  // 別ファイルの場合は cache_scenario からタグ配列を取得する。
   function getArrayTagForStorage(kag, storage) {
     if (!kag || !kag.ftag || !kag.ftag.array_tag) return null;
-    if (
-      storage &&
-      kag.stat &&
-      kag.stat.current_scenario &&
-      storage !== kag.stat.current_scenario
-    ) {
-      return null;
+    if (!storage || storage === (kag.stat && kag.stat.current_scenario)) {
+      return kag.ftag.array_tag;
     }
-    return kag.ftag.array_tag;
+    // 別ファイルの場合、cache_scenario からタグ配列を取得
+    var cacheKey = "./data/scenario/" + storage;
+    var cached = kag.cache_scenario && kag.cache_scenario[cacheKey];
+    if (cached && cached.array_s) {
+      return cached.array_s;
+    }
+    return null;
   }
 
   // array_tag を index から後方走査し、最も近い先行ラベル名 ("*label") を返す。
