@@ -89,3 +89,4 @@ f.foobar="TEST_VALUE";
 *next2
 コールスタックは正しく表示されますか？[r]
 期待値はnext2->next1->startです。[p]
+[s]

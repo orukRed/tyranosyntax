@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(git status *)",
+      "Bash(grep -n \"tag\\\\.macro\\\\|tag\\\\\\\\.endmacro\\\\|stack\\\\\\\\.macro\\\\|callMacro\" test_project/tyrano/plugins/kag/kag.tag_system.js)",
+      "Bash(npm run *)"
     ]
   }
 }
