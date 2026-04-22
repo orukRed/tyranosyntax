@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "1.16.3",
+  "version": "2.0.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -1778,6 +1778,39 @@
         }
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tyrano-sidebar",
+          "title": "TyranoScript syntax",
+          "icon": "images/tyrano_activity.png"
+        }
+      ]
+    },
+    "views": {
+      "tyrano-sidebar": [
+        {
+          "id": "tyrano-dev-tools",
+          "name": "開発ツール",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-links",
+          "name": "リンク",
+          "icon": ""
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "tyrano-dev-tools",
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)"
+      },
+      {
+        "view": "tyrano-links",
+        "contents": "[$(bug) バグ報告（Googleフォーム）](command:tyrano.sidebar.openBugReport)\n\n[$(heart) OFUSE（寄付）](command:tyrano.sidebar.openOfuse)"
+      }
+    ],
     "commands": [
       {
         "command": "tyrano.shiftEnter",
@@ -1810,6 +1843,94 @@
       {
         "command": "tyrano.flowchart",
         "title": "tyrano.flowchart"
+      },
+      {
+        "command": "tyrano.sidebar.debug",
+        "title": "デバッグ実行（β版）",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "tyrano.sidebar.preview",
+        "title": "その場プレビュー",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "tyrano.sidebar.flowchart",
+        "title": "フローチャート表示",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "tyrano.sidebar.openBugReport",
+        "title": "バグ報告（Googleフォーム）",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "tyrano.sidebar.openOfuse",
+        "title": "OFUSE（寄付）",
+        "icon": "$(heart)"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "tyrano"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "tyranoDebug",
+        "languages": [
+          "tyrano"
+        ],
+        "label": "TyranoScript Debug",
+        "configurationAttributes": {
+          "launch": {
+            "required": [],
+            "properties": {
+              "projectRoot": {
+                "type": "string",
+                "description": "TyranoScript プロジェクトのルートパス（index.htmlがあるフォルダ）",
+                "default": "${workspaceFolder}"
+              },
+              "scenario": {
+                "type": "string",
+                "description": "起動時に実行するシナリオファイル",
+                "default": "first.ks"
+              },
+              "httpPort": {
+                "type": "number",
+                "description": "デバッグ用HTTPサーバーのポート番号",
+                "default": 3300
+              },
+              "wsPort": {
+                "type": "number",
+                "description": "デバッグ用WebSocketサーバーのポート番号",
+                "default": 8200
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "tyranoDebug",
+            "request": "launch",
+            "name": "TyranoScript Debug",
+            "projectRoot": "${workspaceFolder}",
+            "scenario": "first.ks"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "TyranoScript Debug: Launch",
+            "description": "TyranoScriptプロジェクトをデバッグ実行します",
+            "body": {
+              "type": "tyranoDebug",
+              "request": "launch",
+              "name": "TyranoScript Debug",
+              "projectRoot": "^\"${workspaceFolder}\"",
+              "scenario": "first.ks"
+            }
+          }
+        ]
       }
     ],
     "keybindings": [
@@ -1831,25 +1952,29 @@
         "command": "tyrano.altEnter",
         "win": "alt+enter",
         "mac": "option+enter",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "alt+enter"
       },
       {
         "command": "tyrano.jumpToDestination",
         "win": "alt+j",
         "mac": "option+j",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "alt+j"
       },
       {
         "command": "tyrano.preview",
         "win": "ctrl+alt+p",
         "mac": "command+option+p",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "ctrl+alt+p"
       },
       {
         "command": "tyrano.flowchart",
         "win": "ctrl+alt+f",
         "mac": "command+option+f",
-        "when": "editorLangId == tyrano"
+        "when": "editorLangId == tyrano",
+        "key": "ctrl+alt+f"
       }
     ]
   },
@@ -1889,6 +2014,8 @@
     "npm-check-updates": "^16.10.13",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.8"
+    "vscode-languageserver-textdocument": "^1.0.8",
+    "@vscode/debugadapter": "^1.65.0",
+    "ws": "^8.17.0"
   }
 }

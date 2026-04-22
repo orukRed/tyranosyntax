@@ -31,6 +31,62 @@ export class Parser {
   }
 
   /**
+   * ブレークポイントを設定可能な行番号の一覧を返す。
+   * タグ行（@記法、[]記法）、ラベル行、キャラクター名行が対象。
+   * コメント行・空行・テキスト行は除外。
+   * @param text シナリオテキスト
+   * @returns 0始まりの行番号の配列
+   */
+  public getValidBreakpointLines(text: string): number[] {
+    const parsed = this.parseScenario(text)["array_s"];
+    const validLines = new Set<number>();
+    let insideScript = false;
+    for (const tag of parsed) {
+      if (tag.name === "iscript") {
+        insideScript = true;
+        if (tag.line !== undefined) validLines.add(tag.line);
+        continue;
+      }
+      if (tag.name === "endscript") {
+        insideScript = false;
+        if (tag.line !== undefined) validLines.add(tag.line);
+        continue;
+      }
+      if (tag.name === "comment") {
+        continue;
+      }
+      if (tag.name === "text") {
+        if (insideScript && tag.line !== undefined) {
+          validLines.add(tag.line);
+        }
+        continue;
+      }
+      if (tag.name === "label") {
+        validLines.add(tag.pm.line);
+      } else if (tag.line !== undefined) {
+        validLines.add(tag.line);
+      }
+    }
+    return Array.from(validLines).sort((a, b) => a - b);
+  }
+
+  /**
+   * パース済みデータから指定行のタグオブジェクトを返す。
+   * @param parsedData parseText()で取得したパース済みデータ
+   * @param line 行番号（0始まり）
+   * @returns 指定行のタグオブジェクト、見つからなければ undefined
+   */
+  public getTagAtLine(parsedData: any[], line: number): any | undefined {
+    for (const tag of parsedData) {
+      const tagLine = tag.name === "label" ? tag.pm.line : tag.line;
+      if (tagLine === line && tag.name !== "comment" && tag.name !== "text") {
+        return tag;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * 引数で与えたテキストをパースして、パースしたデータを返却します。
    * @param text
    * @returns
@@ -204,7 +260,11 @@ export class Parser {
               } else {
                 tag_str += c;
               }
-            } else if (c === "[" && this.flag_script == false && first_char !== ";") {
+            } else if (
+              c === "[" &&
+              this.flag_script == false &&
+              first_char !== ";"
+            ) {
               num_kakko++;
               tag_str += c;
             } else {
