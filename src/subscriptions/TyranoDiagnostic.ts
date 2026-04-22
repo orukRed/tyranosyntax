@@ -431,7 +431,7 @@ export class TyranoDiagnostic {
       //-----------------------------------------
 
       //存在しないパラメータのチェック
-       this.detectionUndefinedParameter(
+      await this.detectionUndefinedParameter(
         data,
         scenarioDocument,
         projectPathOfDiagFile,
@@ -439,7 +439,7 @@ export class TyranoDiagnostic {
       );
 
       //変数で&がないもののチェック
-       this.detectionMissingAmpersandInVariable(
+      await this.detectionMissingAmpersandInVariable(
         data,
         scenarioDocument,
         projectPathOfDiagFile,
@@ -447,14 +447,14 @@ export class TyranoDiagnostic {
       );
 
       // ファイルリソースの存在チェックを別メソッドで実行
-       this.detectionMissingResources(
+      await this.detectionMissingResources(
         data,
         scenarioDocument,
         projectPathOfDiagFile,
         diagnostics,
       );
       //ラベル名のチェック
-       this.checkLabelName(
+      await this.checkLabelName(
         data,
         scenarioDocument,
         projectPathOfDiagFile,
@@ -467,14 +467,14 @@ export class TyranoDiagnostic {
     //-----------------------------------------
 
     //マクロの重複チェック
-     this.checkMacroDuplicate(
+    await this.checkMacroDuplicate(
       diagnostics,
       projectPathOfDiagFile,
       scenarioDocument,
     );
 
     //パラメータ間のスペーシングチェック
-     this.checkParameterSpacing(
+    await this.checkParameterSpacing(
       diagnostics,
       projectPathOfDiagFile,
       scenarioDocument,
