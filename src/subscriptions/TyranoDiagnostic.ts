@@ -447,7 +447,7 @@ export class TyranoDiagnostic {
       );
 
       // ファイルリソースの存在チェックを別メソッドで実行
-       this.detectionMissingResources(
+      await this.detectionMissingResources(
         data,
         scenarioDocument,
         projectPathOfDiagFile,
