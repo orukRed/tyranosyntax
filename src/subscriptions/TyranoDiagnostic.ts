@@ -1380,12 +1380,16 @@ export class TyranoDiagnostic {
 
   /**
    * プロジェクト全体で一度も参照されていない変数定義を検出します。
-   * - 定義は [eval exp="kind.name = ..."] により variableMap に登録されたものを対象とします。
-   * - 使用集計はすべてのタグの文字列パラメータを正規表現でスキャンします。
-   *   eval の exp パラメータについては、平たんな代入 (kind.name = RHS) の場合のみ
-   *   左辺を定義扱いとし右辺のみをスキャンします。+= 等の複合代入は左辺も読み取りとして扱います。
+   * - 定義の収集元:
+   *   1) [eval exp="kind.name = ..."] により variableMap に登録されたもの
+   *   2) [iscript]〜[endscript] 内の JS 行に含まれる平たんな代入 "kind.name = ..."
+   * - 使用集計:
+   *   eval の exp は平たんな代入なら RHS のみ走査、複合代入 (+=, -= 等) は全体走査。
+   *   iscript 内の text 行も同様に LHS をブランクアウトしてから走査するため、
+   *   自己参照のみの代入は未使用として検出されます。
+   *   その他のタグは全ての文字列パラメータをそのままスキャンします。
    * - コメント (data.name === "comment" や is_in_comment === true) は除外します。
-   * - .js で定義された変数や、bare-name 衝突によりマップに登録されない変数は対象外です (既知の制限)。
+   * - .js ファイルや、bare-name 衝突により variableMap に登録されない変数は対象外です (既知の制限)。
    * @param projectPath 診断対象プロジェクトのルートパス
    * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
    * @param diagnosticArray 診断結果を格納する配列
@@ -1399,30 +1403,185 @@ export class TyranoDiagnostic {
       return;
     }
 
-    const variableMap = this.infoWs.variableMap.get(projectPath);
-    if (!variableMap) {
-      return;
+    const allDefinitions = new Map<string, vscode.Location[]>();
+    this.seedVariableDefinitionsFromMap(projectPath, allDefinitions);
+
+    const usedSet = this.collectVariableDefinitionsAndUses(
+      parsedDataCache,
+      allDefinitions,
+    );
+
+    const unusedByFile = this.buildUnusedVariableDiagnostics(
+      allDefinitions,
+      usedSet,
+    );
+
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
     }
+  }
 
-    const usedSet = this.collectUsedVariables(parsedDataCache);
-
-    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+  /**
+   * variableMap (eval 由来) の定義を allDefinitions にシードします。
+   */
+  private seedVariableDefinitionsFromMap(
+    projectPath: string,
+    allDefinitions: Map<string, vscode.Location[]>,
+  ): void {
+    const variableMap = this.infoWs.variableMap.get(projectPath);
+    if (!variableMap) return;
     for (const [, varData] of variableMap) {
       const name = varData.name;
       const kind = varData.kind;
       if (!name || !kind) continue;
       const key = `${kind}.${name}`;
-      if (usedSet.has(key)) continue;
+      if (!allDefinitions.has(key)) {
+        allDefinitions.set(key, []);
+      }
+      allDefinitions.get(key)!.push(...varData.locations);
+    }
+  }
 
-      for (const loc of varData.locations) {
-        const start = loc.range.start;
-        const endCol = start.character + `[eval exp="${key}"`.length;
-        const range = new vscode.Range(
-          start.line,
-          start.character,
-          start.line,
-          endCol,
+  /**
+   * 全パース結果を走査して、追加の変数定義 (iscript 由来) と
+   * 使用集合を収集します。
+   */
+  private collectVariableDefinitionsAndUses(
+    parsedDataCache: Map<string, any>,
+    allDefinitions: Map<string, vscode.Location[]>,
+  ): Set<string> {
+    const usedSet = new Set<string>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      this.scanFileForVariables(filePath, parsedData, allDefinitions, usedSet);
+    }
+    return usedSet;
+  }
+
+  /**
+   * 1ファイル分の parsed data を走査し、iscript 深度を追跡しながら
+   * 定義/使用を収集します。
+   */
+  private scanFileForVariables(
+    filePath: string,
+    parsedData: any[],
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): void {
+    let scriptDepth = 0;
+    for (const data of parsedData) {
+      if (data["name"] === "iscript") {
+        scriptDepth++;
+        continue;
+      }
+      if (data["name"] === "endscript") {
+        scriptDepth = Math.max(0, scriptDepth - 1);
+        continue;
+      }
+      if (this.shouldSkipForVariableScan(data)) continue;
+
+      if (scriptDepth > 0 && data["name"] === "text") {
+        this.scanIscriptTextForVariables(
+          data,
+          filePath,
+          allDefinitions,
+          usedSet,
         );
+      } else {
+        this.scanTagParamsForVariables(data, usedSet);
+      }
+    }
+  }
+
+  private shouldSkipForVariableScan(data: any): boolean {
+    if (data["name"] === "comment") return true;
+    if (data["pm"]?.["is_in_comment"] === true) return true;
+    if (!data["pm"]) return true;
+    return false;
+  }
+
+  /**
+   * iscript 本文の text トークンから、平たんな代入の LHS を定義として登録し、
+   * LHS をブランクアウトした上で残りを使用集合に追加します。
+   */
+  private scanIscriptTextForVariables(
+    data: any,
+    filePath: string,
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): void {
+    const val = data["pm"]["val"];
+    if (typeof val !== "string") return;
+    const line = data["line"];
+    const jsAssignAll = /(?:^|[^\w.])((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)/g;
+    let scanValue = val;
+    let m: RegExpExecArray | null;
+    while ((m = jsAssignAll.exec(val)) !== null) {
+      const lhs = m[1];
+      const lhsIdx = val.indexOf(lhs, m.index);
+      if (lhsIdx < 0) continue;
+
+      if (!allDefinitions.has(lhs)) {
+        allDefinitions.set(lhs, []);
+      }
+      allDefinitions.get(lhs)!.push(
+        new vscode.Location(
+          vscode.Uri.file(filePath),
+          new vscode.Range(line, lhsIdx, line, lhsIdx + lhs.length),
+        ),
+      );
+
+      scanValue =
+        scanValue.substring(0, lhsIdx) +
+        " ".repeat(lhs.length) +
+        scanValue.substring(lhsIdx + lhs.length);
+    }
+    this.addVariableMatches(scanValue, usedSet);
+  }
+
+  /**
+   * 通常タグの全文字列パラメータから変数参照を usedSet に追加します。
+   * eval の exp が平たんな代入なら RHS のみをスキャンします。
+   */
+  private scanTagParamsForVariables(
+    data: any,
+    usedSet: Set<string>,
+  ): void {
+    const evalPlainAssign =
+      /^\s*((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)\s*([\s\S]*)$/;
+    for (const [paramName, paramValue] of Object.entries(data["pm"])) {
+      if (typeof paramValue !== "string") continue;
+      let scanValue: string = paramValue;
+      if (data["name"] === "eval" && paramName === "exp") {
+        const m = paramValue.match(evalPlainAssign);
+        if (m) {
+          scanValue = m[2];
+        }
+      }
+      this.addVariableMatches(scanValue, usedSet);
+    }
+  }
+
+  private addVariableMatches(scanValue: string, usedSet: Set<string>): void {
+    const matches = scanValue.match(/(?:f|sf|tf|mp)\.[a-zA-Z_]\w*/g);
+    if (!matches) return;
+    for (const v of matches) {
+      usedSet.add(v);
+    }
+  }
+
+  /**
+   * 定義済みかつ未使用の変数について、ファイル単位で Diagnostic を組み立てます。
+   */
+  private buildUnusedVariableDiagnostics(
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): Map<string, vscode.Diagnostic[]> {
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const [key, locations] of allDefinitions) {
+      if (usedSet.has(key)) continue;
+      for (const loc of locations) {
+        const range = this.computeUnusedVariableRange(loc, key);
         const diag = new vscode.Diagnostic(
           range,
           `変数 "${key}" は未使用です。`,
@@ -1435,52 +1594,23 @@ export class TyranoDiagnostic {
         unusedByFile.get(fsPath)!.push(diag);
       }
     }
-
-    for (const [fsPath, diags] of unusedByFile) {
-      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
-    }
+    return unusedByFile;
   }
 
   /**
-   * プロジェクト全体で参照されている変数を "kind.name" 形式の Set として収集します。
-   * - eval の exp は平たんな代入なら RHS のみ、複合代入なら全体をスキャンします。
-   * - その他のタグはすべての文字列パラメータをそのままスキャンします。
+   * eval 由来 (ゼロ幅) なら [eval exp="key" の長さまで拡張、
+   * iscript 由来 (既に名前範囲を持つ) ならそのまま返します。
    */
-  private collectUsedVariables(
-    parsedDataCache: Map<string, any>,
-  ): Set<string> {
-    const used = new Set<string>();
-    const varPattern = /(?:f|sf|tf|mp)\.[a-zA-Z_]\w*/g;
-    const plainAssign =
-      /^\s*((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)\s*([\s\S]*)$/;
-
-    for (const [, parsedData] of parsedDataCache) {
-      if (!parsedData) continue;
-      for (const data of parsedData) {
-        if (data["name"] === "comment") continue;
-        if (data["pm"]?.["is_in_comment"] === true) continue;
-        const pm = data["pm"];
-        if (!pm) continue;
-
-        for (const [paramName, paramValue] of Object.entries(pm)) {
-          if (typeof paramValue !== "string") continue;
-          let scanValue: string = paramValue;
-          if (data["name"] === "eval" && paramName === "exp") {
-            const m = paramValue.match(plainAssign);
-            if (m) {
-              scanValue = m[2];
-            }
-          }
-          const matches = scanValue.match(varPattern);
-          if (matches) {
-            for (const v of matches) {
-              used.add(v);
-            }
-          }
-        }
-      }
+  private computeUnusedVariableRange(
+    loc: vscode.Location,
+    key: string,
+  ): vscode.Range {
+    if (loc.range.start.character !== loc.range.end.character) {
+      return loc.range;
     }
-    return used;
+    const start = loc.range.start;
+    const endCol = start.character + `[eval exp="${key}"`.length;
+    return new vscode.Range(start.line, start.character, start.line, endCol);
   }
 
   /**

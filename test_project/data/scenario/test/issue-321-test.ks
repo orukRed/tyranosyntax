@@ -22,7 +22,7 @@
 ; ケース3: テキスト中の埋め込み参照（&f.xxx;）で読まれる変数（警告が出ないこと）
 ; ====================================================================
 [eval exp="f.issue321_used_in_text = 0"]
-こんにちは [emb exp="f/issue321_used_in_text" ]  さん[p]
+こんにちは [emb exp="f.issue321_used_in_text" ]  さん[p]
 
 ; ====================================================================
 ; ケース4: どこからも読まれない変数（警告が出ること）
@@ -45,14 +45,16 @@
 [eval exp="f.issue321_self_ref = f.issue321_self_ref + 1"]
 
 ; ====================================================================
-; ケース7: iscript 内で参照されている変数（警告が出ないこと）
-; iscript の本文は text トークンとして展開されるためスキャン対象になる
+; ケース7: iscript 内の変数の取り扱い
+; - f.issue321_used_in_iscript は eval で定義され iscript 内で読まれる（警告なし）
+; - f.issue321_unused_in_iscript は iscript 内でのみ代入され他で読まれない
+;   → iscript 内代入も定義として扱い、未使用なら警告を出す
 ; ====================================================================
 [eval exp="f.issue321_used_in_iscript = 0"]
 [iscript]
 if (f.issue321_used_in_iscript > 0) {
   TYRANO.kag.stat.f.dummy = 1;
-  f.hoge=12;
+  f.issue321_unused_in_iscript = 0;
 }
 [endscript]
 
