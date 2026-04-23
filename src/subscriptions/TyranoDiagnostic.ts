@@ -33,6 +33,7 @@ export class TyranoDiagnostic {
   private readonly parameterSpacing = "parameterSpacing";
   private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
   private readonly unusedMacro = "unusedMacro";
+  private readonly unusedLabel = "unusedLabel";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -180,6 +181,11 @@ export class TyranoDiagnostic {
 
     // プロジェクト全体スキャンが必要な診断を実行
     await this.detectionUnusedMacro(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+    await this.detectionUnusedLabel(
       diagnosticProjectPath,
       parsedDataCache,
       diagnosticArray,
@@ -1212,6 +1218,158 @@ export class TyranoDiagnostic {
     for (const [fsPath, diags] of unusedByFile) {
       diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
     }
+  }
+
+  /**
+   * プロジェクト全体で一度も参照されていないラベル定義を検出します。
+   * - JUMP_TAG (jump/call/link/button/glink/clickable) の target パラメータが参照元。
+   * - storage 指定ありなら参照先ファイル、storage 未指定なら参照元ファイル自身のラベルとみなす。
+   * - target が変数 (&, %, f./sf./tf./mp.) の場合は解決できないため除外。
+   * - コメント内のラベル定義 (is_in_comment) は対象外。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedLabel(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedLabel)) {
+      return;
+    }
+
+    const usedLabelsByFile = this.collectUsedLabelsByFile(
+      projectPath,
+      parsedDataCache,
+    );
+
+    const unusedByFile = this.collectUnusedLabelDiagnostics(
+      parsedDataCache,
+      usedLabelsByFile,
+    );
+
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
+  }
+
+  /**
+   * プロジェクト全体で参照されているラベルをファイル単位で収集します。
+   * @returns Key: 参照先ファイルの絶対パス、Value: ラベル名 (先頭の * なし) の Set
+   */
+  private collectUsedLabelsByFile(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+  ): Map<string, Set<string>> {
+    const usedLabelsByFile = new Map<string, Set<string>>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      for (const data of parsedData) {
+        const usage = this.resolveLabelReference(projectPath, filePath, data);
+        if (!usage) continue;
+        if (!usedLabelsByFile.has(usage.file)) {
+          usedLabelsByFile.set(usage.file, new Set<string>());
+        }
+        usedLabelsByFile.get(usage.file)!.add(usage.label);
+      }
+    }
+    return usedLabelsByFile;
+  }
+
+  /**
+   * JUMP_TAG の target から参照先ラベル名と参照先ファイルパスを解決します。
+   * - 非 JUMP_TAG や target 未指定、変数指定の場合は null を返します。
+   */
+  private resolveLabelReference(
+    projectPath: string,
+    currentFilePath: string,
+    data: any,
+  ): { file: string; label: string } | null {
+    if (data["name"] === "comment") return null;
+    if (!this.JUMP_TAG.includes(data["name"])) return null;
+
+    const target = data["pm"]?.["target"];
+    if (typeof target !== "string") return null;
+    if (this.isNonLiteralValue(target)) return null;
+
+    const labelName = target.replace(/^\*/, "");
+    if (labelName === "") return null;
+
+    const storage = data["pm"]?.["storage"];
+    if (storage === undefined) {
+      return { file: currentFilePath, label: labelName };
+    }
+    if (typeof storage !== "string") return null;
+    if (this.isNonLiteralValue(storage)) return null;
+
+    const resolvedFile = this.infoWs.convertToAbsolutePathFromRelativePath(
+      projectPath +
+        this.infoWs.DATA_DIRECTORY +
+        this.infoWs.DATA_SCENARIO +
+        this.infoWs.pathDelimiter +
+        storage,
+    );
+    return { file: resolvedFile, label: labelName };
+  }
+
+  /**
+   * 値が &, %, もしくは変数を含んでいる場合 true を返します。
+   */
+  private isNonLiteralValue(value: string): boolean {
+    return (
+      this.isExistAmpersandAtBeginning(value) ||
+      this.isExistPercentAtBeginning(value) ||
+      this.isValueIsIncludeVariable(value)
+    );
+  }
+
+  /**
+   * 参照されていないラベルを走査して、ファイル単位で Diagnostic を作成します。
+   */
+  private collectUnusedLabelDiagnostics(
+    parsedDataCache: Map<string, any>,
+    usedLabelsByFile: Map<string, Set<string>>,
+  ): Map<string, vscode.Diagnostic[]> {
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      const usedInFile = usedLabelsByFile.get(filePath) ?? new Set<string>();
+
+      for (const data of parsedData) {
+        const diag = this.buildUnusedLabelDiagnostic(data, usedInFile);
+        if (!diag) continue;
+        if (!unusedByFile.has(filePath)) {
+          unusedByFile.set(filePath, []);
+        }
+        unusedByFile.get(filePath)!.push(diag);
+      }
+    }
+    return unusedByFile;
+  }
+
+  /**
+   * 1つのラベル定義データから未使用判定を行い、該当する場合は Diagnostic を返します。
+   */
+  private buildUnusedLabelDiagnostic(
+    data: any,
+    usedInFile: Set<string>,
+  ): vscode.Diagnostic | null {
+    if (data["name"] !== "label") return null;
+    if (data["pm"]?.["is_in_comment"] === true) return null;
+
+    const labelName: string | undefined = data["pm"]?.["label_name"];
+    if (!labelName) return null;
+    if (labelName === "/") return null;
+    if (usedInFile.has(labelName)) return null;
+
+    const line = data["pm"]["line"];
+    const range = new vscode.Range(line, 0, line, labelName.length + 1);
+    return new vscode.Diagnostic(
+      range,
+      `ラベル "*${labelName}" は未使用です。`,
+      vscode.DiagnosticSeverity.Warning,
+    );
   }
 
   /**
