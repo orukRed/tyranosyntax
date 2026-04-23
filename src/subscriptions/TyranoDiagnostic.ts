@@ -34,6 +34,7 @@ export class TyranoDiagnostic {
   private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
   private readonly unusedMacro = "unusedMacro";
   private readonly unusedLabel = "unusedLabel";
+  private readonly unusedVariable = "unusedVariable";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -186,6 +187,11 @@ export class TyranoDiagnostic {
       diagnosticArray,
     );
     await this.detectionUnusedLabel(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+    await this.detectionUnusedVariable(
       diagnosticProjectPath,
       parsedDataCache,
       diagnosticArray,
@@ -1370,6 +1376,111 @@ export class TyranoDiagnostic {
       `ラベル "*${labelName}" は未使用です。`,
       vscode.DiagnosticSeverity.Warning,
     );
+  }
+
+  /**
+   * プロジェクト全体で一度も参照されていない変数定義を検出します。
+   * - 定義は [eval exp="kind.name = ..."] により variableMap に登録されたものを対象とします。
+   * - 使用集計はすべてのタグの文字列パラメータを正規表現でスキャンします。
+   *   eval の exp パラメータについては、平たんな代入 (kind.name = RHS) の場合のみ
+   *   左辺を定義扱いとし右辺のみをスキャンします。+= 等の複合代入は左辺も読み取りとして扱います。
+   * - コメント (data.name === "comment" や is_in_comment === true) は除外します。
+   * - .js で定義された変数や、bare-name 衝突によりマップに登録されない変数は対象外です (既知の制限)。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedVariable(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedVariable)) {
+      return;
+    }
+
+    const variableMap = this.infoWs.variableMap.get(projectPath);
+    if (!variableMap) {
+      return;
+    }
+
+    const usedSet = this.collectUsedVariables(parsedDataCache);
+
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const [, varData] of variableMap) {
+      const name = varData.name;
+      const kind = varData.kind;
+      if (!name || !kind) continue;
+      const key = `${kind}.${name}`;
+      if (usedSet.has(key)) continue;
+
+      for (const loc of varData.locations) {
+        const start = loc.range.start;
+        const endCol = start.character + `[eval exp="${key}"`.length;
+        const range = new vscode.Range(
+          start.line,
+          start.character,
+          start.line,
+          endCol,
+        );
+        const diag = new vscode.Diagnostic(
+          range,
+          `変数 "${key}" は未使用です。`,
+          vscode.DiagnosticSeverity.Warning,
+        );
+        const fsPath = loc.uri.fsPath;
+        if (!unusedByFile.has(fsPath)) {
+          unusedByFile.set(fsPath, []);
+        }
+        unusedByFile.get(fsPath)!.push(diag);
+      }
+    }
+
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
+  }
+
+  /**
+   * プロジェクト全体で参照されている変数を "kind.name" 形式の Set として収集します。
+   * - eval の exp は平たんな代入なら RHS のみ、複合代入なら全体をスキャンします。
+   * - その他のタグはすべての文字列パラメータをそのままスキャンします。
+   */
+  private collectUsedVariables(
+    parsedDataCache: Map<string, any>,
+  ): Set<string> {
+    const used = new Set<string>();
+    const varPattern = /(?:f|sf|tf|mp)\.[a-zA-Z_]\w*/g;
+    const plainAssign =
+      /^\s*((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)\s*([\s\S]*)$/;
+
+    for (const [, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      for (const data of parsedData) {
+        if (data["name"] === "comment") continue;
+        if (data["pm"]?.["is_in_comment"] === true) continue;
+        const pm = data["pm"];
+        if (!pm) continue;
+
+        for (const [paramName, paramValue] of Object.entries(pm)) {
+          if (typeof paramValue !== "string") continue;
+          let scanValue: string = paramValue;
+          if (data["name"] === "eval" && paramName === "exp") {
+            const m = paramValue.match(plainAssign);
+            if (m) {
+              scanValue = m[2];
+            }
+          }
+          const matches = scanValue.match(varPattern);
+          if (matches) {
+            for (const v of matches) {
+              used.add(v);
+            }
+          }
+        }
+      }
+    }
+    return used;
   }
 
   /**
