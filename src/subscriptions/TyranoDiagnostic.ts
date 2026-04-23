@@ -32,6 +32,7 @@ export class TyranoDiagnostic {
   private readonly undefinedParameter = "undefinedParameter";
   private readonly parameterSpacing = "parameterSpacing";
   private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
+  private readonly unusedMacro = "unusedMacro";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -177,12 +178,38 @@ export class TyranoDiagnostic {
       `[${diagnosticProjectPath}] unified diagnostic loop finished.`,
     );
 
+    // プロジェクト全体スキャンが必要な診断を実行
+    await this.detectionUnusedMacro(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+
     //-----------------------------------------
     //■診断結果をセット
     //-----------------------------------------
 
+    // diagnosticArray に同一URIの複数エントリが含まれる場合、
+    // VSCode API は後勝ちで上書きするため事前にマージする
+    const mergedMap = new Map<
+      string,
+      { uri: vscode.Uri; diags: vscode.Diagnostic[] }
+    >();
+    for (const [uri, diags] of diagnosticArray) {
+      const key = uri.fsPath;
+      const entry = mergedMap.get(key);
+      if (entry) {
+        entry.diags.push(...(diags ?? []));
+      } else {
+        mergedMap.set(key, { uri, diags: [...(diags ?? [])] });
+      }
+    }
+    const mergedArray: [vscode.Uri, vscode.Diagnostic[]][] = Array.from(
+      mergedMap.values(),
+    ).map((e) => [e.uri, e.diags]);
+
     TyranoLogger.print(`diagnostic set`);
-    TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
+    TyranoDiagnostic.diagnosticCollection.set(mergedArray);
     TyranoLogger.print("diagnostic end");
   }
 
@@ -210,10 +237,7 @@ export class TyranoDiagnostic {
     }
     //skipしてOKならreturnする
     if (
-      this.infoWs.isSkipParse(
-        scenarioDocument.fileName,
-        projectPathOfDiagFile,
-      )
+      this.infoWs.isSkipParse(scenarioDocument.fileName, projectPathOfDiagFile)
     ) {
       return;
     }
@@ -268,10 +292,7 @@ export class TyranoDiagnostic {
           isInIf = false;
         }
 
-        if (
-          isInIf &&
-          (data["name"] === "jump" || data["name"] === "call")
-        ) {
+        if (isInIf && (data["name"] === "jump" || data["name"] === "call")) {
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]);
@@ -1113,6 +1134,84 @@ export class TyranoDiagnostic {
     }
 
     return;
+  }
+
+  /**
+   * プロジェクト全体で一度も呼び出されていない .ks 定義マクロを検出します。
+   * - 使用集計時はマクロ定義ブロック ([macro]〜[endmacro]) 内のタグを除外し、
+   *   自己参照のみのマクロも未使用と判定します。
+   * - .js で定義されたマクロは誤検出防止のため対象外です。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedMacro(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedMacro)) {
+      return;
+    }
+
+    const defineMacroMap = this.infoWs.defineMacroMap.get(projectPath);
+    if (!defineMacroMap) {
+      return;
+    }
+
+    // Step 1: プロジェクト全体で使用されているタグ名を収集
+    // マクロ定義ブロック内 (macro〜endmacro) のタグ呼び出しは除外する
+    const usedTagNames = new Set<string>();
+    for (const [, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      let depth = 0;
+      for (const data of parsedData) {
+        if (data["name"] === "macro") {
+          depth++;
+          continue;
+        }
+        if (data["name"] === "endmacro") {
+          depth = Math.max(0, depth - 1);
+          continue;
+        }
+        if (depth > 0) continue;
+        if (data["name"] === "comment") continue;
+        usedTagNames.add(data["name"]);
+      }
+    }
+
+    // Step 2: 未使用マクロをファイル単位で収集
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const macro of defineMacroMap.values()) {
+      if (!macro.location) continue;
+      if (macro.filePath.endsWith(".js")) continue;
+      if (usedTagNames.has(macro.macroName)) continue;
+
+      const end = new vscode.Position(
+        macro.location.range.start.line,
+        macro.location.range.end.character +
+          macro.macroName.length +
+          `macro name="${macro.macroName}"`.length,
+      );
+      const range = new vscode.Range(macro.location.range.start, end);
+
+      const diag = new vscode.Diagnostic(
+        range,
+        `マクロ "${macro.macroName}" は未使用です。`,
+        vscode.DiagnosticSeverity.Warning,
+      );
+
+      const fsPath = macro.location.uri.fsPath;
+      if (!unusedByFile.has(fsPath)) {
+        unusedByFile.set(fsPath, []);
+      }
+      unusedByFile.get(fsPath)!.push(diag);
+    }
+
+    // Step 3: diagnosticArray へ追加（同一URIのマージは呼び出し側で実施）
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
   }
 
   /**
