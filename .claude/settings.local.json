@@ -3,7 +3,10 @@
     "allow": [
       "Bash(gh pr *)",
       "Bash(xargs grep *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(gh issue *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npx eslint *)"
     ]
   }
 }
