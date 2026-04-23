@@ -1513,6 +1513,12 @@ export class TyranoDiagnostic {
     const val = data["pm"]["val"];
     if (typeof val !== "string") return;
     const line = data["line"];
+    // Parser.parseScenario が各行を trim() するため pm.val は左端の空白が落ちている。
+    // VSCode に渡す Range は元の行に対する位置なので、元行の先頭空白幅を加算する必要がある。
+    const sourceDoc = this.infoWs.scenarioFileMap.get(filePath);
+    const sourceLine = sourceDoc?.lineAt(line).text ?? val;
+    const leadingOffset = sourceLine.length - sourceLine.trimStart().length;
+
     const jsAssignAll = /(?:^|[^\w.])((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)/g;
     let scanValue = val;
     let m: RegExpExecArray | null;
@@ -1524,10 +1530,11 @@ export class TyranoDiagnostic {
       if (!allDefinitions.has(lhs)) {
         allDefinitions.set(lhs, []);
       }
+      const trueLhsCol = lhsIdx + leadingOffset;
       allDefinitions.get(lhs)!.push(
         new vscode.Location(
           vscode.Uri.file(filePath),
-          new vscode.Range(line, lhsIdx, line, lhsIdx + lhs.length),
+          new vscode.Range(line, trueLhsCol, line, trueLhsCol + lhs.length),
         ),
       );
 

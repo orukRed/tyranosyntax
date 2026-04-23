@@ -53,8 +53,7 @@
 [eval exp="f.issue321_used_in_iscript = 0"]
 [iscript]
 if (f.issue321_used_in_iscript > 0) {
-  TYRANO.kag.stat.f.dummy = 1;
-  f.issue321_unused_in_iscript = 0;
+  f.issue321_unused_in_iscript = 0;  
 }
 [endscript]
 
