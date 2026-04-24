@@ -20,29 +20,22 @@
     background-color: #0056b3;
   }
 
-  .zoom-control {
-    margin: 10px 0;
-    text-align: center;
-  }
-
-  #zoom-select {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-  }
-
   .flowchart-container {
     overflow: auto;
     max-height: 80vh;
     border: 1px solid #eee;
     padding: 10px;
     margin: 10px 0;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .flowchart-container.dragging {
+    cursor: grabbing;
   }
 
   #flowchart {
     transform-origin: left top;
-    transition: transform 0.3s ease;
     min-height: 100px;
     padding-bottom: 50px;
     padding-right: 50px;
@@ -131,18 +124,69 @@
     return `<pre class="mermaid">${graphDefinition}</pre>`;
   }
 
-  function updateZoom() {
-    const zoomLevel = document.getElementById("zoom-select").value;
-    const scale = parseInt(zoomLevel) / 100;
-    document.getElementById("flowchart").style.transform = `scale(${scale})`;
+  let currentScale = 1;
+  const MIN_SCALE = 0.3;
+  const MAX_SCALE = 5;
 
-    // 拡大率に応じてコンテナのサイズを調整
-    const flowchartContainer = document.querySelector(".flowchart-container");
-    if (scale > 1) {
-      flowchartContainer.style.height = `${Math.min(80, 40 * scale)}vh`;
-    } else {
-      flowchartContainer.style.height = "80vh";
-    }
+  function setupWheelZoom(container, flowchart) {
+    container.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        const newScale = Math.max(
+          MIN_SCALE,
+          Math.min(MAX_SCALE, currentScale * delta),
+        );
+        if (newScale === currentScale) return;
+
+        const rect = container.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        const contentX = (container.scrollLeft + offsetX) / currentScale;
+        const contentY = (container.scrollTop + offsetY) / currentScale;
+
+        currentScale = newScale;
+        flowchart.style.transform = `scale(${currentScale})`;
+
+        container.scrollLeft = contentX * currentScale - offsetX;
+        container.scrollTop = contentY * currentScale - offsetY;
+      },
+      { passive: false },
+    );
+  }
+
+  function setupDragPan(container) {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startScrollTop = 0;
+
+    container.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startScrollLeft = container.scrollLeft;
+      startScrollTop = container.scrollTop;
+      container.classList.add("dragging");
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      container.scrollLeft = startScrollLeft - (e.clientX - startX);
+      container.scrollTop = startScrollTop - (e.clientY - startY);
+    });
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      container.classList.remove("dragging");
+    };
+    document.addEventListener("mouseup", endDrag);
+    window.addEventListener("blur", endDrag);
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -176,10 +220,13 @@
         element.innerHTML += htmlContent;
         // mermaidを初期化
         mermaid.run();
-        // ズーム機能の初期化
-        document
-          .getElementById("zoom-select")
-          .addEventListener("change", updateZoom);
+        // ホイールズーム・ドラッグパンの初期化
+        const flowchartContainer = document.querySelector(
+          ".flowchart-container",
+        );
+        const flowchartElement = document.getElementById("flowchart");
+        setupWheelZoom(flowchartContainer, flowchartElement);
+        setupDragPan(flowchartContainer);
       } else {
         console.log("transitionData is not found");
       }
@@ -189,22 +236,6 @@
 
 <body>
   <h3></h3>
-  <div class="zoom-control">
-    <label for="zoom-select">拡大率: </label>
-    <select id="zoom-select">
-      <option value="100">100%</option>
-      <option value="150">150%</option>      
-      <option value="200">200%</option>
-      <option value="250">250%</option>
-      <option value="300">300%</option>
-      <option value="350">350%</option> 
-      <option value="400">400%</option>
-      <option value="450">450%</option>
-      <option value="500">500%</option>
-    
-
-    </select>
-  </div>
   <div class="flowchart-container">
     <div id="flowchart"></div>
   </div>
