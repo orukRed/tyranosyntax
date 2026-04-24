@@ -40,6 +40,10 @@ export class TyranoFlowchart {
           }
           const normalizedFilePath = scenarioFilePath.replace(/\\\\/g, "\\");
           const TransitionData = infoWs.transitionMap.get(normalizedFilePath);
+          const labels = infoWs.labelMap.get(normalizedFilePath) ?? [];
+          const LabelData = labels.map((label) =>
+            label.name.startsWith("*") ? label.name : "*" + label.name,
+          );
           infoWs
             .getProjectPathByFilePath(normalizedFilePath)
             .then((projectPath) => {
@@ -50,6 +54,7 @@ export class TyranoFlowchart {
                 res.json({
                   TransitionData: TransitionData,
                   projectName: projectName,
+                  LabelData: LabelData,
                 }); // 値が見つかった場合、JSONとして返す
               } else {
                 console.log("Key not found");

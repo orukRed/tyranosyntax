@@ -51,63 +51,80 @@
 <script>
   console.log("flowchart.html");
 
-  function generateFlowchart(obj) {
+  function generateFlowchart(obj, labels, currentFile) {
     // フローチャートの定義を開始
-    console.log(obj);
+    console.log(obj, labels);
     let graphDefinition = "graph LR\n";
     graphDefinition +=
       "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
-    if (!obj || obj.length === 0) {
+
+    const hasTransitions = obj && obj.length > 0;
+    const hasLabels = labels && labels.length > 0;
+
+    if (!hasTransitions && !hasLabels) {
       graphDefinition += `subgraph "\`**このファイルから他のラベル、シナリオへの遷移はありません**\`"\n`;
       graphDefinition += `end\n`;
       return `<pre class="mermaid">${graphDefinition}</pre>`;
     }
-    graphDefinition += `subgraph "\`**${obj[0].currentFile}**\`"\n`;
+
+    const subgraphLabel = hasTransitions ? obj[0].currentFile : currentFile;
+    graphDefinition += `subgraph "\`**${subgraphLabel}**\`"\n`;
 
     // ノードの重複を防ぐための追跡用オブジェクト
     const addedNodes = {};
+    const toNodeId = (label) => `node_${label.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
-    for (key in obj) {
-      const condition = obj[key].condition ? `${obj[key].condition}` : "";
-      console.log("s");
+    if (hasTransitions) {
+      for (key in obj) {
+        const condition = obj[key].condition ? `${obj[key].condition}` : "";
 
-      const currentLabel = obj[key].currentLabel;
-      // 一意のノードIDを作成
-      const nodeId = `node_${currentLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
-
-      // 未追加のノードだけ追加
-      if (!addedNodes[nodeId]) {
+        const currentLabel = obj[key].currentLabel;
+        // 一意のノードIDを作成
+        const nodeId = toNodeId(currentLabel);
         addedNodes[nodeId] = true;
-      }
 
-      //storageもtargetもある場合
-      if (obj[key].storage && obj[key].target) {
-        const fileName = `${obj[key].storage}_${obj[key].target}`;
-        const fileId = `file_${obj[key].storage}_${obj[key].target}`.replace(
-          /[^a-zA-Z0-9]/g,
-          "_",
-        );
-        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
-      }
-      //storageのみある場合
-      else if (obj[key].storage) {
-        const fileName = `${obj[key].storage}_NONE`;
-        const fileId = `file_${obj[key].storage}_NONE`.replace(
-          /[^a-zA-Z0-9]/g,
-          "_",
-        );
-        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
-      }
-      //targetのみある場合
-      else if (obj[key].target) {
-        const targetLabel = obj[key].target;
-        const targetId = `node_${targetLabel.replace(/[^a-zA-Z0-9]/g, "_")}`;
-        graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${targetId}["${targetLabel}"]\n`;
-      }
-      //storageもtargetも指定しない場合はなにも追加しない
-      else if (!obj[key].storage && !obj[key].target) {
+        //storageもtargetもある場合
+        if (obj[key].storage && obj[key].target) {
+          const fileName = `${obj[key].storage}_${obj[key].target}`;
+          const fileId = `file_${obj[key].storage}_${obj[key].target}`.replace(
+            /[^a-zA-Z0-9]/g,
+            "_",
+          );
+          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
+        }
+        //storageのみある場合
+        else if (obj[key].storage) {
+          const fileName = `${obj[key].storage}_NONE`;
+          const fileId = `file_${obj[key].storage}_NONE`.replace(
+            /[^a-zA-Z0-9]/g,
+            "_",
+          );
+          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
+        }
+        //targetのみある場合
+        else if (obj[key].target) {
+          const targetLabel = obj[key].target;
+          const targetId = toNodeId(targetLabel);
+          addedNodes[targetId] = true;
+          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${targetId}["${targetLabel}"]\n`;
+        }
+        //storageもtargetも指定しない場合はなにも追加しない
+        else if (!obj[key].storage && !obj[key].target) {
+        }
       }
     }
+
+    // 遷移タグに登場しないラベルを孤立ノードとして追加
+    if (hasLabels) {
+      for (const labelName of labels) {
+        const nodeId = toNodeId(labelName);
+        if (!addedNodes[nodeId]) {
+          addedNodes[nodeId] = true;
+          graphDefinition += `${nodeId}["${labelName}"]\n`;
+        }
+      }
+    }
+
     graphDefinition += `end\n`;
     console.log(graphDefinition);
     // HTMLに描画するためのmermaidの定義を返す
@@ -143,8 +160,17 @@
         document.querySelector("h3").textContent = projectName;
 
         transitionData = data.TransitionData;
+        const labelData = data.LabelData || [];
+        // scenarioパスから data/scenario/ 以降のパスを抽出（遷移が無くファイル名を補完したい場合に使用）
+        const currentFile =
+          (scenario || "").replace(/\\/g, "/").split("data/scenario/").pop() ||
+          "";
 
-        const htmlContent = generateFlowchart(transitionData);
+        const htmlContent = generateFlowchart(
+          transitionData,
+          labelData,
+          currentFile,
+        );
         // HTMLに追加するためのコード
         const element = document.getElementById("flowchart");
         element.innerHTML += htmlContent;
