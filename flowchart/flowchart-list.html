@@ -15,7 +15,7 @@
       #controls {
         margin-bottom: 15px;
       }
-      #sort-toggle {
+      #controls button {
         padding: 8px 14px;
         font-size: 14px;
         background-color: #007bff;
@@ -24,8 +24,9 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.3s ease;
+        margin-right: 8px;
       }
-      #sort-toggle:hover {
+      #controls button:hover {
         background-color: #0056b3;
       }
       #scenario-list {
@@ -95,6 +96,8 @@
   <body>
     <div id="controls">
       <button id="sort-toggle" type="button">▲ 昇順</button>
+      <button id="expand-all" type="button">すべて開く</button>
+      <button id="collapse-all" type="button">すべて閉じる</button>
     </div>
     <div id="scenario-list"></div>
 
@@ -187,6 +190,18 @@
           ? '▲ 昇順'
           : '▼ 降順';
         render();
+      });
+
+      document.getElementById('expand-all').addEventListener('click', () => {
+        document
+          .querySelectorAll('#scenario-list details.folder')
+          .forEach((d) => (d.open = true));
+      });
+
+      document.getElementById('collapse-all').addEventListener('click', () => {
+        document
+          .querySelectorAll('#scenario-list details.folder')
+          .forEach((d) => (d.open = false));
       });
 
       fetch(`/get-scenario-list`)
