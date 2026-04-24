@@ -40,6 +40,10 @@ export class TyranoFlowchart {
           }
           const normalizedFilePath = scenarioFilePath.replace(/\\\\/g, "\\");
           const TransitionData = infoWs.transitionMap.get(normalizedFilePath);
+          const labels = infoWs.labelMap.get(normalizedFilePath) ?? [];
+          const LabelData = labels.map((label) =>
+            label.name.startsWith("*") ? label.name : "*" + label.name,
+          );
           infoWs
             .getProjectPathByFilePath(normalizedFilePath)
             .then((projectPath) => {
@@ -50,6 +54,7 @@ export class TyranoFlowchart {
                 res.json({
                   TransitionData: TransitionData,
                   projectName: projectName,
+                  LabelData: LabelData,
                 }); // 値が見つかった場合、JSONとして返す
               } else {
                 console.log("Key not found");
@@ -83,13 +88,23 @@ export class TyranoFlowchart {
             });
 
             // scenarioList をループして、各シナリオファイルがどのプロジェクトに属するかを判断し、data に追加
+            // data/scenario/ 配下のファイルのみを対象とし、data/scenario/ より後ろの相対パスで表示する
             scenarioList.forEach((scenarioPath) => {
               rootPathList.forEach((rootPath) => {
                 const projectName = rootPath.split("\\").pop();
                 if (scenarioPath.includes(rootPath) && projectName) {
-                  const relativePath = scenarioPath.replace(
-                    rootPath + path.sep,
-                    "",
+                  const scenarioDirPath =
+                    rootPath +
+                    path.sep +
+                    "data" +
+                    path.sep +
+                    "scenario" +
+                    path.sep;
+                  if (!scenarioPath.startsWith(scenarioDirPath)) {
+                    return; // data/scenario/ 配下でないファイル (data/others/plugin 等) は除外
+                  }
+                  const relativePath = scenarioPath.substring(
+                    scenarioDirPath.length,
                   );
                   data[projectName].push({
                     fullPath: scenarioPath,
