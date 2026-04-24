@@ -529,25 +529,31 @@ export class InformationWorkSpace {
             );
           }
         } else if ((await data["name"]) === "label") {
+          // *label_name 記法は pm.label_name、[label name="..."] 記法は pm.name に入る
+          const labelName =
+            (await data["pm"]["label_name"]) ?? (await data["pm"]["name"]);
           //複数コメントの場合「*/」がラベルとして登録されてしまうので、それを除外する
-          if ((await data["pm"]["label_name"]) !== "/") {
-            currentLabel = await data["pm"]["label_name"];
+          if (labelName !== undefined && labelName !== "/") {
+            currentLabel = labelName;
             if (!currentLabel.startsWith("*")) {
               currentLabel = "*" + currentLabel;
             }
-          }
-          this.labelMap
-            .get(absoluteScenarioFilePath)
-            ?.push(
-              new LabelData(
-                await data["pm"]["label_name"],
-                new vscode.Location(
-                  scenarioData.uri,
-                  new vscode.Position(await data["line"], await data["column"]),
+            this.labelMap
+              .get(absoluteScenarioFilePath)
+              ?.push(
+                new LabelData(
+                  labelName,
+                  new vscode.Location(
+                    scenarioData.uri,
+                    new vscode.Position(
+                      await data["line"],
+                      await data["column"],
+                    ),
+                  ),
+                  "" + description + "\n",
                 ),
-                "" + description + "\n",
-              ),
-            );
+              );
+          }
         } else if ((await data["name"]) === "eval") {
           const [variableBase, variableValue] = data["pm"]["exp"]
             .split("=")
