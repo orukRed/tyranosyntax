@@ -12,6 +12,23 @@
         margin: 0;
         padding: 20px;
       }
+      #controls {
+        margin-bottom: 15px;
+      }
+      #controls button {
+        padding: 8px 14px;
+        font-size: 14px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-right: 8px;
+      }
+      #controls button:hover {
+        background-color: #0056b3;
+      }
       #scenario-list {
         display: flex;
         flex-direction: column;
@@ -43,50 +60,184 @@
         cursor: pointer; /* マウスカーソルをポインターに */
         transition: background-color 0.3s ease; /* 背景色の変化を滑らかに */
       }
-
       .scenario:hover {
         background-color: #d1d3d6; /* ホバー時の背景色を暗く */
+      }
+      .folder {
+        margin-bottom: 10px;
+      }
+      .folder > summary {
+        cursor: pointer;
+        padding: 8px 12px;
+        background-color: #d9e3f0;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #333;
+        list-style: none;
+        user-select: none;
+      }
+      .folder > summary::before {
+        content: '▶';
+        display: inline-block;
+        margin-right: 6px;
+        transition: transform 0.2s ease;
+      }
+      .folder[open] > summary::before {
+        transform: rotate(90deg);
+      }
+      .folder > summary::-webkit-details-marker {
+        display: none;
+      }
+      .folder-content {
+        padding: 10px 0 0 20px;
+      }
+      .project-actions {
+        margin-bottom: 12px;
+      }
+      .project-actions a {
+        display: inline-block;
+        padding: 8px 14px;
+        background-color: #28a745;
+        color: #ffffff;
+        border-radius: 5px;
+        font-size: 13px;
+        transition: background-color 0.3s ease;
+      }
+      .project-actions a:hover {
+        background-color: #1e7e34;
+        color: #ffffff;
       }
     </style>
   </head>
   <body>
+    <div id="controls">
+      <button id="sort-toggle" type="button">▲ 昇順</button>
+      <button id="expand-all" type="button">すべて開く</button>
+      <button id="collapse-all" type="button">すべて閉じる</button>
+    </div>
     <div id="scenario-list"></div>
 
     <script>
+      let scenarioListData = null;
+      let projectPathsData = {};
+      let sortAsc = true;
+
+      const compare = (a, b) => {
+        const cmp = a.localeCompare(b, undefined, { sensitivity: 'base' });
+        return sortAsc ? cmp : -cmp;
+      };
+
+      const escapeHtml = (str) =>
+        str.replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        }[c]));
+
+      // scenarioName（ファイル名含む相対パス）からフォルダ構造のツリーを構築
+      function buildTree(scenarios) {
+        const root = { files: [], folders: {} };
+        for (const scenario of scenarios) {
+          const parts = scenario.scenarioName.split(/[\\/]/);
+          const fileName = parts.pop();
+          let cur = root;
+          for (const folder of parts) {
+            if (!cur.folders[folder]) {
+              cur.folders[folder] = { files: [], folders: {} };
+            }
+            cur = cur.folders[folder];
+          }
+          cur.files.push({ fullPath: scenario.fullPath, fileName });
+        }
+        return root;
+      }
+
+      function renderNode(node) {
+        const sortedFiles = [...node.files].sort((a, b) =>
+          compare(a.fileName, b.fileName),
+        );
+        const sortedFolderNames = Object.keys(node.folders).sort(compare);
+
+        let html = '';
+        for (const file of sortedFiles) {
+          html += `
+            <a href="http://localhost:3200/flowchart.html?scenario=${encodeURIComponent(file.fullPath)}">
+              <div class="scenario">${escapeHtml(file.fileName)}</div>
+            </a>
+          `;
+        }
+        for (const folderName of sortedFolderNames) {
+          html += `
+            <details class="folder">
+              <summary>${escapeHtml(folderName)}/</summary>
+              <div class="folder-content">
+                ${renderNode(node.folders[folderName])}
+              </div>
+            </details>
+          `;
+        }
+        return html;
+      }
+
+      function render() {
+        const container = document.getElementById('scenario-list');
+        if (!scenarioListData) {
+          container.innerHTML = 'ERROR!';
+          return;
+        }
+        const sortedProjectNames = Object.keys(scenarioListData).sort(compare);
+        container.innerHTML = sortedProjectNames
+          .map((projectName) => {
+            const tree = buildTree(scenarioListData[projectName]);
+            const projectPath = projectPathsData[projectName] || '';
+            const projectAllUrl =
+              `/flowchart.html?scope=project` +
+              `&project=${encodeURIComponent(projectName)}` +
+              (projectPath
+                ? `&projectPath=${encodeURIComponent(projectPath)}`
+                : '');
+            return `
+              <div class="project-container">
+                <h3>${escapeHtml(projectName)}</h3>
+                <div class="project-actions">
+                  <a href="${projectAllUrl}">プロジェクト全体のフローチャート</a>
+                </div>
+                ${renderNode(tree)}
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      document.getElementById('sort-toggle').addEventListener('click', () => {
+        sortAsc = !sortAsc;
+        document.getElementById('sort-toggle').textContent = sortAsc
+          ? '▲ 昇順'
+          : '▼ 降順';
+        render();
+      });
+
+      document.getElementById('expand-all').addEventListener('click', () => {
+        document
+          .querySelectorAll('#scenario-list details.folder')
+          .forEach((d) => (d.open = true));
+      });
+
+      document.getElementById('collapse-all').addEventListener('click', () => {
+        document
+          .querySelectorAll('#scenario-list details.folder')
+          .forEach((d) => (d.open = false));
+      });
+
       fetch(`/get-scenario-list`)
         .then((response) => response.json())
         .then((data) => {
-          const scenarioList = data.scenarioList;
-          console.log('scenarioList', scenarioList);
-          if (scenarioList) {
-            const scenarioListContainer = document.getElementById('scenario-list');
-            scenarioListContainer.innerHTML = Object.entries(scenarioList)
-              .map(
-                ([projectName, scenarios]) =>
-                  `
-                  <div class="project-container">
-                    <h3>${projectName}</h3>
-                    ${scenarios
-                      .map(
-                        (scenario) =>
-                          `
-                            <a href="http://localhost:3200/flowchart.html?scenario=${encodeURIComponent(scenario.fullPath)}">
-                              <div class="scenario">
-                                  ${scenario.scenarioName}
-                              </div>
-                            </a>
-                            `
-                      )
-                      .join('')}
-                  </div>
-                `
-              )
-              .join('');
-          } else {
-            console.log('scenarioList is not found');
-            const scenarioListContainer = document.getElementById('scenario-list');
-            scenarioListContainer.innerHTML = 'ERROR!';
-          }
+          scenarioListData = data.scenarioList;
+          projectPathsData = data.projectPaths || {};
+          console.log('scenarioList', scenarioListData);
+          render();
         })
         .catch((error) => console.error('Error:', error));
     </script>

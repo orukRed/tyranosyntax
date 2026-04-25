@@ -32,6 +32,9 @@ export class TyranoDiagnostic {
   private readonly undefinedParameter = "undefinedParameter";
   private readonly parameterSpacing = "parameterSpacing";
   private readonly missingAmpersandInVariable = "missingAmpersandInVariable";
+  private readonly unusedMacro = "unusedMacro";
+  private readonly unusedLabel = "unusedLabel";
+  private readonly unusedVariable = "unusedVariable";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -177,12 +180,48 @@ export class TyranoDiagnostic {
       `[${diagnosticProjectPath}] unified diagnostic loop finished.`,
     );
 
+    // プロジェクト全体スキャンが必要な診断を実行
+    await this.detectionUnusedMacro(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+    await this.detectionUnusedLabel(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+    await this.detectionUnusedVariable(
+      diagnosticProjectPath,
+      parsedDataCache,
+      diagnosticArray,
+    );
+
     //-----------------------------------------
     //■診断結果をセット
     //-----------------------------------------
 
+    // diagnosticArray に同一URIの複数エントリが含まれる場合、
+    // VSCode API は後勝ちで上書きするため事前にマージする
+    const mergedMap = new Map<
+      string,
+      { uri: vscode.Uri; diags: vscode.Diagnostic[] }
+    >();
+    for (const [uri, diags] of diagnosticArray) {
+      const key = uri.fsPath;
+      const entry = mergedMap.get(key);
+      if (entry) {
+        entry.diags.push(...(diags ?? []));
+      } else {
+        mergedMap.set(key, { uri, diags: [...(diags ?? [])] });
+      }
+    }
+    const mergedArray: [vscode.Uri, vscode.Diagnostic[]][] = Array.from(
+      mergedMap.values(),
+    ).map((e) => [e.uri, e.diags]);
+
     TyranoLogger.print(`diagnostic set`);
-    TyranoDiagnostic.diagnosticCollection.set(diagnosticArray);
+    TyranoDiagnostic.diagnosticCollection.set(mergedArray);
     TyranoLogger.print("diagnostic end");
   }
 
@@ -210,10 +249,7 @@ export class TyranoDiagnostic {
     }
     //skipしてOKならreturnする
     if (
-      this.infoWs.isSkipParse(
-        scenarioDocument.fileName,
-        projectPathOfDiagFile,
-      )
+      this.infoWs.isSkipParse(scenarioDocument.fileName, projectPathOfDiagFile)
     ) {
       return;
     }
@@ -268,10 +304,7 @@ export class TyranoDiagnostic {
           isInIf = false;
         }
 
-        if (
-          isInIf &&
-          (data["name"] === "jump" || data["name"] === "call")
-        ) {
+        if (isInIf && (data["name"] === "jump" || data["name"] === "call")) {
           const tagFirstIndex = scenarioDocument
             .lineAt(data["line"])
             .text.indexOf(data["name"]);
@@ -1113,6 +1146,478 @@ export class TyranoDiagnostic {
     }
 
     return;
+  }
+
+  /**
+   * プロジェクト全体で一度も呼び出されていない .ks 定義マクロを検出します。
+   * - 使用集計時はマクロ定義ブロック ([macro]〜[endmacro]) 内のタグを除外し、
+   *   自己参照のみのマクロも未使用と判定します。
+   * - .js で定義されたマクロは誤検出防止のため対象外です。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedMacro(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedMacro)) {
+      return;
+    }
+
+    const defineMacroMap = this.infoWs.defineMacroMap.get(projectPath);
+    if (!defineMacroMap) {
+      return;
+    }
+
+    // Step 1: プロジェクト全体で使用されているタグ名を収集
+    // マクロ定義ブロック内 (macro〜endmacro) のタグ呼び出しは除外する
+    const usedTagNames = new Set<string>();
+    for (const [, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      let depth = 0;
+      for (const data of parsedData) {
+        if (data["name"] === "macro") {
+          depth++;
+          continue;
+        }
+        if (data["name"] === "endmacro") {
+          depth = Math.max(0, depth - 1);
+          continue;
+        }
+        if (depth > 0) continue;
+        if (data["name"] === "comment") continue;
+        usedTagNames.add(data["name"]);
+      }
+    }
+
+    // Step 2: 未使用マクロをファイル単位で収集
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const macro of defineMacroMap.values()) {
+      if (!macro.location) continue;
+      if (macro.filePath.endsWith(".js")) continue;
+      if (usedTagNames.has(macro.macroName)) continue;
+
+      const end = new vscode.Position(
+        macro.location.range.start.line,
+        macro.location.range.end.character +
+          macro.macroName.length +
+          `macro name="${macro.macroName}"`.length,
+      );
+      const range = new vscode.Range(macro.location.range.start, end);
+
+      const diag = new vscode.Diagnostic(
+        range,
+        `マクロ "${macro.macroName}" は未使用です。`,
+        vscode.DiagnosticSeverity.Warning,
+      );
+
+      const fsPath = macro.location.uri.fsPath;
+      if (!unusedByFile.has(fsPath)) {
+        unusedByFile.set(fsPath, []);
+      }
+      unusedByFile.get(fsPath)!.push(diag);
+    }
+
+    // Step 3: diagnosticArray へ追加（同一URIのマージは呼び出し側で実施）
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
+  }
+
+  /**
+   * プロジェクト全体で一度も参照されていないラベル定義を検出します。
+   * - JUMP_TAG (jump/call/link/button/glink/clickable) の target パラメータが参照元。
+   * - storage 指定ありなら参照先ファイル、storage 未指定なら参照元ファイル自身のラベルとみなす。
+   * - target が変数 (&, %, f./sf./tf./mp.) の場合は解決できないため除外。
+   * - コメント内のラベル定義 (is_in_comment) は対象外。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedLabel(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedLabel)) {
+      return;
+    }
+
+    const usedLabelsByFile = this.collectUsedLabelsByFile(
+      projectPath,
+      parsedDataCache,
+    );
+
+    const unusedByFile = this.collectUnusedLabelDiagnostics(
+      parsedDataCache,
+      usedLabelsByFile,
+    );
+
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
+  }
+
+  /**
+   * プロジェクト全体で参照されているラベルをファイル単位で収集します。
+   * @returns Key: 参照先ファイルの絶対パス、Value: ラベル名 (先頭の * なし) の Set
+   */
+  private collectUsedLabelsByFile(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+  ): Map<string, Set<string>> {
+    const usedLabelsByFile = new Map<string, Set<string>>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      for (const data of parsedData) {
+        const usage = this.resolveLabelReference(projectPath, filePath, data);
+        if (!usage) continue;
+        if (!usedLabelsByFile.has(usage.file)) {
+          usedLabelsByFile.set(usage.file, new Set<string>());
+        }
+        usedLabelsByFile.get(usage.file)!.add(usage.label);
+      }
+    }
+    return usedLabelsByFile;
+  }
+
+  /**
+   * JUMP_TAG の target から参照先ラベル名と参照先ファイルパスを解決します。
+   * - 非 JUMP_TAG や target 未指定、変数指定の場合は null を返します。
+   */
+  private resolveLabelReference(
+    projectPath: string,
+    currentFilePath: string,
+    data: any,
+  ): { file: string; label: string } | null {
+    if (data["name"] === "comment") return null;
+    if (!this.JUMP_TAG.includes(data["name"])) return null;
+
+    const target = data["pm"]?.["target"];
+    if (typeof target !== "string") return null;
+    if (this.isNonLiteralValue(target)) return null;
+
+    const labelName = target.replace(/^\*/, "");
+    if (labelName === "") return null;
+
+    const storage = data["pm"]?.["storage"];
+    if (storage === undefined) {
+      return { file: currentFilePath, label: labelName };
+    }
+    if (typeof storage !== "string") return null;
+    if (this.isNonLiteralValue(storage)) return null;
+
+    const resolvedFile = this.infoWs.convertToAbsolutePathFromRelativePath(
+      projectPath +
+        this.infoWs.DATA_DIRECTORY +
+        this.infoWs.DATA_SCENARIO +
+        this.infoWs.pathDelimiter +
+        storage,
+    );
+    return { file: resolvedFile, label: labelName };
+  }
+
+  /**
+   * 値が &, %, もしくは変数を含んでいる場合 true を返します。
+   */
+  private isNonLiteralValue(value: string): boolean {
+    return (
+      this.isExistAmpersandAtBeginning(value) ||
+      this.isExistPercentAtBeginning(value) ||
+      this.isValueIsIncludeVariable(value)
+    );
+  }
+
+  /**
+   * 参照されていないラベルを走査して、ファイル単位で Diagnostic を作成します。
+   */
+  private collectUnusedLabelDiagnostics(
+    parsedDataCache: Map<string, any>,
+    usedLabelsByFile: Map<string, Set<string>>,
+  ): Map<string, vscode.Diagnostic[]> {
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      const usedInFile = usedLabelsByFile.get(filePath) ?? new Set<string>();
+
+      for (const data of parsedData) {
+        const diag = this.buildUnusedLabelDiagnostic(data, usedInFile);
+        if (!diag) continue;
+        if (!unusedByFile.has(filePath)) {
+          unusedByFile.set(filePath, []);
+        }
+        unusedByFile.get(filePath)!.push(diag);
+      }
+    }
+    return unusedByFile;
+  }
+
+  /**
+   * 1つのラベル定義データから未使用判定を行い、該当する場合は Diagnostic を返します。
+   */
+  private buildUnusedLabelDiagnostic(
+    data: any,
+    usedInFile: Set<string>,
+  ): vscode.Diagnostic | null {
+    if (data["name"] !== "label") return null;
+    if (data["pm"]?.["is_in_comment"] === true) return null;
+
+    const labelName: string | undefined = data["pm"]?.["label_name"];
+    if (!labelName) return null;
+    if (labelName === "/") return null;
+    if (usedInFile.has(labelName)) return null;
+
+    const line = data["pm"]["line"];
+    const range = new vscode.Range(line, 0, line, labelName.length + 1);
+    return new vscode.Diagnostic(
+      range,
+      `ラベル "*${labelName}" は未使用です。`,
+      vscode.DiagnosticSeverity.Warning,
+    );
+  }
+
+  /**
+   * プロジェクト全体で一度も参照されていない変数定義を検出します。
+   * - 定義の収集元:
+   *   1) [eval exp="kind.name = ..."] により variableMap に登録されたもの
+   *   2) [iscript]〜[endscript] 内の JS 行に含まれる平たんな代入 "kind.name = ..."
+   * - 使用集計:
+   *   eval の exp は平たんな代入なら RHS のみ走査、複合代入 (+=, -= 等) は全体走査。
+   *   iscript 内の text 行も同様に LHS をブランクアウトしてから走査するため、
+   *   自己参照のみの代入は未使用として検出されます。
+   *   その他のタグは全ての文字列パラメータをそのままスキャンします。
+   * - コメント (data.name === "comment" や is_in_comment === true) は除外します。
+   * - .js ファイルや、bare-name 衝突により variableMap に登録されない変数は対象外です (既知の制限)。
+   * @param projectPath 診断対象プロジェクトのルートパス
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   * @param diagnosticArray 診断結果を格納する配列
+   */
+  private async detectionUnusedVariable(
+    projectPath: string,
+    parsedDataCache: Map<string, any>,
+    diagnosticArray: [vscode.Uri, readonly vscode.Diagnostic[] | undefined][],
+  ): Promise<void> {
+    if (!this.isExecuteDiagnostic(this.unusedVariable)) {
+      return;
+    }
+
+    const allDefinitions = new Map<string, vscode.Location[]>();
+    this.seedVariableDefinitionsFromMap(projectPath, allDefinitions);
+
+    const usedSet = this.collectVariableDefinitionsAndUses(
+      parsedDataCache,
+      allDefinitions,
+    );
+
+    const unusedByFile = this.buildUnusedVariableDiagnostics(
+      allDefinitions,
+      usedSet,
+    );
+
+    for (const [fsPath, diags] of unusedByFile) {
+      diagnosticArray.push([vscode.Uri.file(fsPath), diags]);
+    }
+  }
+
+  /**
+   * variableMap (eval 由来) の定義を allDefinitions にシードします。
+   */
+  private seedVariableDefinitionsFromMap(
+    projectPath: string,
+    allDefinitions: Map<string, vscode.Location[]>,
+  ): void {
+    const variableMap = this.infoWs.variableMap.get(projectPath);
+    if (!variableMap) return;
+    for (const [, varData] of variableMap) {
+      const name = varData.name;
+      const kind = varData.kind;
+      if (!name || !kind) continue;
+      const key = `${kind}.${name}`;
+      if (!allDefinitions.has(key)) {
+        allDefinitions.set(key, []);
+      }
+      allDefinitions.get(key)!.push(...varData.locations);
+    }
+  }
+
+  /**
+   * 全パース結果を走査して、追加の変数定義 (iscript 由来) と
+   * 使用集合を収集します。
+   */
+  private collectVariableDefinitionsAndUses(
+    parsedDataCache: Map<string, any>,
+    allDefinitions: Map<string, vscode.Location[]>,
+  ): Set<string> {
+    const usedSet = new Set<string>();
+    for (const [filePath, parsedData] of parsedDataCache) {
+      if (!parsedData) continue;
+      this.scanFileForVariables(filePath, parsedData, allDefinitions, usedSet);
+    }
+    return usedSet;
+  }
+
+  /**
+   * 1ファイル分の parsed data を走査し、iscript 深度を追跡しながら
+   * 定義/使用を収集します。
+   */
+  private scanFileForVariables(
+    filePath: string,
+    parsedData: any[],
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): void {
+    let scriptDepth = 0;
+    for (const data of parsedData) {
+      if (data["name"] === "iscript") {
+        scriptDepth++;
+        continue;
+      }
+      if (data["name"] === "endscript") {
+        scriptDepth = Math.max(0, scriptDepth - 1);
+        continue;
+      }
+      if (this.shouldSkipForVariableScan(data)) continue;
+
+      if (scriptDepth > 0 && data["name"] === "text") {
+        this.scanIscriptTextForVariables(
+          data,
+          filePath,
+          allDefinitions,
+          usedSet,
+        );
+      } else {
+        this.scanTagParamsForVariables(data, usedSet);
+      }
+    }
+  }
+
+  private shouldSkipForVariableScan(data: any): boolean {
+    if (data["name"] === "comment") return true;
+    if (data["pm"]?.["is_in_comment"] === true) return true;
+    if (!data["pm"]) return true;
+    return false;
+  }
+
+  /**
+   * iscript 本文の text トークンから、平たんな代入の LHS を定義として登録し、
+   * LHS をブランクアウトした上で残りを使用集合に追加します。
+   */
+  private scanIscriptTextForVariables(
+    data: any,
+    filePath: string,
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): void {
+    const val = data["pm"]["val"];
+    if (typeof val !== "string") return;
+    const line = data["line"];
+    // Parser.parseScenario が各行を trim() するため pm.val は左端の空白が落ちている。
+    // VSCode に渡す Range は元の行に対する位置なので、元行の先頭空白幅を加算する必要がある。
+    const sourceDoc = this.infoWs.scenarioFileMap.get(filePath);
+    const sourceLine = sourceDoc?.lineAt(line).text ?? val;
+    const leadingOffset = sourceLine.length - sourceLine.trimStart().length;
+
+    const jsAssignAll = /(?:^|[^\w.])((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)/g;
+    let scanValue = val;
+    let m: RegExpExecArray | null;
+    while ((m = jsAssignAll.exec(val)) !== null) {
+      const lhs = m[1];
+      const lhsIdx = val.indexOf(lhs, m.index);
+      if (lhsIdx < 0) continue;
+
+      if (!allDefinitions.has(lhs)) {
+        allDefinitions.set(lhs, []);
+      }
+      const trueLhsCol = lhsIdx + leadingOffset;
+      allDefinitions.get(lhs)!.push(
+        new vscode.Location(
+          vscode.Uri.file(filePath),
+          new vscode.Range(line, trueLhsCol, line, trueLhsCol + lhs.length),
+        ),
+      );
+
+      scanValue =
+        scanValue.substring(0, lhsIdx) +
+        " ".repeat(lhs.length) +
+        scanValue.substring(lhsIdx + lhs.length);
+    }
+    this.addVariableMatches(scanValue, usedSet);
+  }
+
+  /**
+   * 通常タグの全文字列パラメータから変数参照を usedSet に追加します。
+   * eval の exp が平たんな代入なら RHS のみをスキャンします。
+   */
+  private scanTagParamsForVariables(
+    data: any,
+    usedSet: Set<string>,
+  ): void {
+    const evalPlainAssign =
+      /^\s*((?:f|sf|tf|mp)\.[a-zA-Z_]\w*)\s*=(?!=)\s*([\s\S]*)$/;
+    for (const [paramName, paramValue] of Object.entries(data["pm"])) {
+      if (typeof paramValue !== "string") continue;
+      let scanValue: string = paramValue;
+      if (data["name"] === "eval" && paramName === "exp") {
+        const m = paramValue.match(evalPlainAssign);
+        if (m) {
+          scanValue = m[2];
+        }
+      }
+      this.addVariableMatches(scanValue, usedSet);
+    }
+  }
+
+  private addVariableMatches(scanValue: string, usedSet: Set<string>): void {
+    const matches = scanValue.match(/(?:f|sf|tf|mp)\.[a-zA-Z_]\w*/g);
+    if (!matches) return;
+    for (const v of matches) {
+      usedSet.add(v);
+    }
+  }
+
+  /**
+   * 定義済みかつ未使用の変数について、ファイル単位で Diagnostic を組み立てます。
+   */
+  private buildUnusedVariableDiagnostics(
+    allDefinitions: Map<string, vscode.Location[]>,
+    usedSet: Set<string>,
+  ): Map<string, vscode.Diagnostic[]> {
+    const unusedByFile = new Map<string, vscode.Diagnostic[]>();
+    for (const [key, locations] of allDefinitions) {
+      if (usedSet.has(key)) continue;
+      for (const loc of locations) {
+        const range = this.computeUnusedVariableRange(loc, key);
+        const diag = new vscode.Diagnostic(
+          range,
+          `変数 "${key}" は未使用です。`,
+          vscode.DiagnosticSeverity.Warning,
+        );
+        const fsPath = loc.uri.fsPath;
+        if (!unusedByFile.has(fsPath)) {
+          unusedByFile.set(fsPath, []);
+        }
+        unusedByFile.get(fsPath)!.push(diag);
+      }
+    }
+    return unusedByFile;
+  }
+
+  /**
+   * eval 由来 (ゼロ幅) なら [eval exp="key" の長さまで拡張、
+   * iscript 由来 (既に名前範囲を持つ) ならそのまま返します。
+   */
+  private computeUnusedVariableRange(
+    loc: vscode.Location,
+    key: string,
+  ): vscode.Range {
+    if (loc.range.start.character !== loc.range.end.character) {
+      return loc.range;
+    }
+    const start = loc.range.start;
+    const endCol = start.character + `[eval exp="${key}"`.length;
+    return new vscode.Range(start.line, start.character, start.line, endCol);
   }
 
   /**

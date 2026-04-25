@@ -4,6 +4,17 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.1.0] 2026-04-25
+
+- 未使用マクロを警告として検出するようにしました。[issue#324](https://github.com/orukRed/tyranosyntax/issues/324)
+- 未使用ラベルを警告として検出するようにしました。[issue#323](https://github.com/orukRed/tyranosyntax/issues/323)
+- 未使用変数を警告として検出するようにしました。[issue#321](https://github.com/orukRed/tyranosyntax/issues/321)
+- プロジェクト全体のフローチャートを表示できるようにしました。[issue#386](https://github.com/orukRed/tyranosyntax/issues/386)
+- フローチャートでjump系タグが存在しない場合にもラベルを表示するようにしました。[issue#252](https://github.com/orukRed/tyranosyntax/issues/252)
+- フローチャートをマウスホイールで拡大・ドラッグで移動できるようにしました。
+- フローチャートに凡例を追加し、タグ（jump/call/link/clickable等）ごとの色分けを実装しました。
+- フローチャートのjumpTagsに「link」と「clickable」を追加しました。
+
 ## [2.0.1] 2026-04-22
 
 - 存在しないリソースへのエラーが正しく検出されない不具合を修正しました。
