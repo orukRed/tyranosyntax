@@ -2,11 +2,11 @@
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
 <script>
   // クリック遷移（click NODE "URL"）を有効化するため securityLevel を loose に
-  mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
+  mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
 </script>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f2f5;
     color: #333;
     margin: 0;
@@ -92,7 +92,7 @@
     user-select: none;
   }
   details.file-filter > summary::before {
-    content: '▶';
+    content: "▶";
     display: inline-block;
     margin-right: 6px;
     transition: transform 0.2s ease;
@@ -162,7 +162,7 @@
     user-select: none;
   }
   details.legend > summary::before {
-    content: '▶';
+    content: "▶";
     display: inline-block;
     margin-right: 6px;
     transition: transform 0.2s ease;
@@ -265,30 +265,30 @@
   }
 </style>
 <script>
-  console.log('flowchart.html');
+  console.log("flowchart.html");
 
   // タグごとの「エッジ（矢印）色」。ノードではなく矢印に適用する。
   const TAG_EDGE_COLOR = {
-    jump: '#1d4ed8',
-    button: '#c2410c',
-    glink: '#15803d',
-    call: '#7c3aed',
-    scenario: '#a16207',
-    script: '#b91c1c',
-    html: '#a21caf',
-    css: '#0e7490',
+    jump: "#1d4ed8",
+    button: "#c2410c",
+    glink: "#15803d",
+    call: "#7c3aed",
+    scenario: "#a16207",
+    script: "#b91c1c",
+    html: "#a21caf",
+    css: "#0e7490",
   };
 
   const COMMON_CLASS_DEFS = [
     // 別ファイルへのリーフノード
-    'classDef green fill:#e3faea,stroke:#333,stroke-width:2px;',
+    "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;",
     // 同じファイルのラベル（遷移元・遷移先のいずれか）
-    'classDef label fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px;',
+    "classDef label fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px;",
   ];
 
-  const sanitizeId = (s) => (s || '').replace(/[^a-zA-Z0-9]/g, '_');
+  const sanitizeId = (s) => (s || "").replace(/[^a-zA-Z0-9]/g, "_");
   const escapeMermaidLabel = (s) =>
-    (s || '').replace(/"/g, '#quot;').replace(/\n/g, ' ');
+    (s || "").replace(/"/g, "#quot;").replace(/\n/g, " ");
 
   // nodeClasses (id -> className) を Mermaid の class ステートメントに整形
   function emitClassStatements(nodeClasses) {
@@ -296,9 +296,9 @@
     for (const [id, cls] of Object.entries(nodeClasses)) {
       (byClass[cls] ||= []).push(id);
     }
-    let out = '';
+    let out = "";
     for (const [cls, ids] of Object.entries(byClass)) {
-      out += `class ${ids.join(',')} ${cls}\n`;
+      out += `class ${ids.join(",")} ${cls}\n`;
     }
     return out;
   }
@@ -311,14 +311,14 @@
       const e = edgeStyles[i];
       const color = TAG_EDGE_COLOR[e.tag];
       if (!color) continue;
-      const key = `${color}|${e.dashed ? '1' : '0'}`;
+      const key = `${color}|${e.dashed ? "1" : "0"}`;
       (groups[key] ||= []).push(i);
     }
-    let out = '';
+    let out = "";
     for (const [key, idxs] of Object.entries(groups)) {
-      const [color, dashed] = key.split('|');
-      const dashPart = dashed === '1' ? ',stroke-dasharray:5 5' : '';
-      out += `linkStyle ${idxs.join(',')} stroke:${color},stroke-width:2px${dashPart}\n`;
+      const [color, dashed] = key.split("|");
+      const dashPart = dashed === "1" ? ",stroke-dasharray:5 5" : "";
+      out += `linkStyle ${idxs.join(",")} stroke:${color},stroke-width:2px${dashPart}\n`;
     }
     return out;
   }
@@ -326,8 +326,8 @@
   // 単一ファイルモード（既存の挙動 + クリック遷移 + タグ色分け + 破線条件分岐）
   function generateFlowchart(obj, labels, currentFile, storageResolution) {
     console.log(obj, labels);
-    let graphDefinition = 'graph LR\n';
-    graphDefinition += COMMON_CLASS_DEFS.join('\n') + '\n';
+    let graphDefinition = "graph LR\n";
+    graphDefinition += COMMON_CLASS_DEFS.join("\n") + "\n";
 
     const hasTransitions = obj && obj.length > 0;
     const hasLabels = labels && labels.length > 0;
@@ -350,32 +350,32 @@
     if (hasTransitions) {
       for (const key in obj) {
         const t = obj[key];
-        const condition = t.condition ? `${t.condition}` : '';
+        const condition = t.condition ? `${t.condition}` : "";
         const dashed = !!condition;
-        const arrow = dashed ? '-.->' : '-->';
+        const arrow = dashed ? "-.->" : "-->";
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
-          : '';
+          : "";
 
         const currentLabel = t.currentLabel;
         const nodeId = toNodeId(currentLabel);
         addedNodes[nodeId] = true;
         // 遷移元（=このファイルのラベル）にも label クラス
-        nodeClasses[nodeId] = 'label';
+        nodeClasses[nodeId] = "label";
 
         // storage + target / storage only -> クロスファイル
         if (t.storage) {
-          const targetPart = t.target ? `_${t.target}` : '_NONE';
+          const targetPart = t.target ? `_${t.target}` : "_NONE";
           const fileName = `${t.storage}${targetPart}`;
           const fileId = sanitizeId(`file_${t.storage}${targetPart}`);
           graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${fileId}["${escapeMermaidLabel(fileName)}"]\n`;
-          nodeClasses[fileId] = 'green';
+          nodeClasses[fileId] = "green";
           edgeStyles.push({ tag: t.tag, dashed });
           // クロスファイルクリック遷移
           if (storageResolution) {
             const resolvedAbs =
               storageResolution[t.storage] ||
-              storageResolution[t.storage.replace(/\\/g, '/')];
+              storageResolution[t.storage.replace(/\\/g, "/")];
             if (resolvedAbs) {
               const targetUrl = `/flowchart.html?scenario=${encodeURIComponent(resolvedAbs)}`;
               clickStatements.push(
@@ -389,7 +389,7 @@
           addedNodes[targetId] = true;
           graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${targetId}["${escapeMermaidLabel(targetLabel)}"]\n`;
           // 同じファイルの到達先ラベルは label クラス
-          nodeClasses[targetId] = 'label';
+          nodeClasses[targetId] = "label";
           edgeStyles.push({ tag: t.tag, dashed });
         }
       }
@@ -403,7 +403,7 @@
           graphDefinition += `${nodeId}["${escapeMermaidLabel(labelName)}"]\n`;
         }
         // 孤立ラベル含めすべてのラベルを label クラスに
-        nodeClasses[nodeId] = 'label';
+        nodeClasses[nodeId] = "label";
       }
     }
 
@@ -411,7 +411,7 @@
     graphDefinition += emitClassStatements(nodeClasses);
     graphDefinition += emitLinkStyles(edgeStyles);
     if (clickStatements.length) {
-      graphDefinition += clickStatements.join('\n') + '\n';
+      graphDefinition += clickStatements.join("\n") + "\n";
     }
     console.log(graphDefinition);
     return `<pre class="mermaid">${graphDefinition}</pre>`;
@@ -421,8 +421,8 @@
   // files: [{filePath, relativePath, transitions, labels}]
   // visibleSet: Set<relativePath> (絞り込み後の表示対象)
   function generateProjectFlowchart(files, storageResolution, visibleSet) {
-    let graphDefinition = 'graph LR\n';
-    graphDefinition += COMMON_CLASS_DEFS.join('\n') + '\n';
+    let graphDefinition = "graph LR\n";
+    graphDefinition += COMMON_CLASS_DEFS.join("\n") + "\n";
 
     if (!files || files.length === 0) {
       graphDefinition += `subgraph "\`**このプロジェクトには遷移可能なシナリオがありません**\`"\nend\n`;
@@ -443,7 +443,7 @@
 
     const fileHash = (rel) => sanitizeId(rel);
     const nodeId = (rel, label) =>
-      `node_${fileHash(rel)}__${sanitizeId(label || 'ENTRY')}`;
+      `node_${fileHash(rel)}__${sanitizeId(label || "ENTRY")}`;
 
     // クロスファイル外部ノード（プロジェクト外、または非表示ファイル）
     const externalEdges = []; // {from, storage, target, condition, tag}
@@ -468,7 +468,7 @@
       if (!subgraphLabelSet[rel].has(id)) {
         subgraphLabelSet[rel].add(id);
         const block = subgraphBlocks.find((b) => b.rel === rel);
-        block.lines.push(`${id}["${escapeMermaidLabel(label || 'ENTRY')}"]`);
+        block.lines.push(`${id}["${escapeMermaidLabel(label || "ENTRY")}"]`);
       }
       return id;
     };
@@ -479,7 +479,7 @@
       // ラベル先行追加（孤立ラベルも残す）。同じファイルのラベルなので label クラスに。
       for (const label of file.labels || []) {
         const id = addNode(file.relativePath, label);
-        nodeClasses[id] = 'label';
+        nodeClasses[id] = "label";
       }
     }
 
@@ -491,34 +491,38 @@
 
       for (const t of file.transitions || []) {
         const fromId = addNode(rel, t.currentLabel);
-        nodeClasses[fromId] = 'label';
-        const condition = t.condition ? `${t.condition}` : '';
+        nodeClasses[fromId] = "label";
+        const condition = t.condition ? `${t.condition}` : "";
         const dashed = !!condition;
-        const arrow = dashed ? '-.->' : '-->';
+        const arrow = dashed ? "-.->" : "-->";
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
-          : '';
+          : "";
 
         if (t.storage) {
           // クロスファイル: target ファイルを解決
-          const storageNorm = t.storage.replace(/\\/g, '/');
+          const storageNorm = t.storage.replace(/\\/g, "/");
           const resolvedAbs =
             storageResolution[t.storage] || storageResolution[storageNorm];
           const targetRel = resolvedAbs ? absToRel[resolvedAbs] : undefined;
 
           if (targetRel && visibleSet.has(targetRel)) {
             // 表示対象内: target の subgraph 内ノードへ直接刺す
-            const targetLabel = t.target || 'ENTRY';
+            const targetLabel = t.target || "ENTRY";
             const targetFile = fileByRel[targetRel];
             const labelExists =
               t.target &&
               targetFile &&
               (targetFile.labels || []).includes(t.target);
             // ラベルが存在しなければ合成ENTRY扱い
-            const useLabel = labelExists ? targetLabel : (t.target ? targetLabel : 'ENTRY');
+            const useLabel = labelExists
+              ? targetLabel
+              : t.target
+                ? targetLabel
+                : "ENTRY";
             const toId = addNode(targetRel, useLabel);
             edgeLines.push(`${fromId} ${arrow}${labelPart} ${toId}`);
-            nodeClasses[toId] = 'label';
+            nodeClasses[toId] = "label";
             edgeStyles.push({ tag: t.tag, dashed });
           } else {
             // プロジェクト外 or 非表示: external として緑リーフ
@@ -536,7 +540,7 @@
           // 同一ファイル内
           const toId = addNode(rel, t.target);
           edgeLines.push(`${fromId} ${arrow}${labelPart} ${toId}`);
-          nodeClasses[toId] = 'label';
+          nodeClasses[toId] = "label";
           edgeStyles.push({ tag: t.tag, dashed });
         }
       }
@@ -548,20 +552,18 @@
     const externalClicks = [];
     if (externalEdges.length > 0) {
       for (const e of externalEdges) {
-        const targetPart = e.target ? `_${e.target}` : '_NONE';
+        const targetPart = e.target ? `_${e.target}` : "_NONE";
         const extId = sanitizeId(`file_${e.storage}${targetPart}`);
         const labelText = `${e.storage}${targetPart}`;
         const dashed = !!e.dashed;
-        const arrow = dashed ? '-.->' : '-->';
+        const arrow = dashed ? "-.->" : "-->";
         const labelPart = e.condition
           ? `|"${escapeMermaidLabel(e.condition)}"|`
-          : '';
+          : "";
         if (!externalSet.has(extId)) {
           externalSet.add(extId);
-          externalLines.push(
-            `${extId}["${escapeMermaidLabel(labelText)}"]`,
-          );
-          nodeClasses[extId] = 'green';
+          externalLines.push(`${extId}["${escapeMermaidLabel(labelText)}"]`);
+          nodeClasses[extId] = "green";
           // 解決済み（=非表示なだけ）の場合は単一ファイルビューへ遷移できる
           if (e.resolvedAbs) {
             externalClicks.push(
@@ -578,21 +580,21 @@
     for (const block of subgraphBlocks) {
       if (block.lines.length === 0) continue; // 空subgraphは出さない
       graphDefinition += `subgraph sg_${fileHash(block.rel)}["${escapeMermaidLabel(block.rel)}"]\n`;
-      graphDefinition += block.lines.join('\n') + '\n';
+      graphDefinition += block.lines.join("\n") + "\n";
       graphDefinition += `end\n`;
     }
     if (externalLines.length > 0) {
       graphDefinition += `subgraph sg__external["external"]\n`;
-      graphDefinition += externalLines.join('\n') + '\n';
+      graphDefinition += externalLines.join("\n") + "\n";
       graphDefinition += `end\n`;
     }
     if (edgeLines.length > 0) {
-      graphDefinition += edgeLines.join('\n') + '\n';
+      graphDefinition += edgeLines.join("\n") + "\n";
     }
     graphDefinition += emitClassStatements(nodeClasses);
     graphDefinition += emitLinkStyles(edgeStyles);
     if (externalClicks.length > 0) {
-      graphDefinition += externalClicks.join('\n') + '\n';
+      graphDefinition += externalClicks.join("\n") + "\n";
     }
 
     return `<pre class="mermaid">${graphDefinition}</pre>`;
@@ -609,7 +611,7 @@
 
   function setupWheelZoom(container, flowchart) {
     container.addEventListener(
-      'wheel',
+      "wheel",
       (e) => {
         e.preventDefault();
         const delta = e.deltaY < 0 ? 1.1 : 1 / 1.1;
@@ -642,20 +644,20 @@
     let startScrollLeft = 0;
     let startScrollTop = 0;
 
-    container.addEventListener('mousedown', (e) => {
+    container.addEventListener("mousedown", (e) => {
       if (e.button !== 0) return;
       // ノード（リンク）クリックはドラッグ扱いにしない
-      if (e.target.closest('a')) return;
+      if (e.target.closest("a")) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
       startScrollLeft = container.scrollLeft;
       startScrollTop = container.scrollTop;
-      container.classList.add('dragging');
+      container.classList.add("dragging");
       e.preventDefault();
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
       container.scrollLeft = startScrollLeft - (e.clientX - startX);
       container.scrollTop = startScrollTop - (e.clientY - startY);
@@ -664,38 +666,36 @@
     const endDrag = () => {
       if (!isDragging) return;
       isDragging = false;
-      container.classList.remove('dragging');
+      container.classList.remove("dragging");
     };
-    document.addEventListener('mouseup', endDrag);
-    window.addEventListener('blur', endDrag);
+    document.addEventListener("mouseup", endDrag);
+    window.addEventListener("blur", endDrag);
   }
 
   // ============== 検索ハイライト ==============
   function setupSearch(searchInput, matchCountEl) {
-    searchInput.addEventListener('input', () => {
+    searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim().toLowerCase();
-      const svg = document.querySelector('#flowchart svg');
+      const svg = document.querySelector("#flowchart svg");
       if (!svg) return;
-      const nodes = svg.querySelectorAll('g.node');
+      const nodes = svg.querySelectorAll("g.node");
       let matchCount = 0;
       let firstMatch = null;
       nodes.forEach((n) => {
-        n.classList.remove('match-highlight');
+        n.classList.remove("match-highlight");
         if (!q) return;
-        const text = (n.textContent || '').toLowerCase();
+        const text = (n.textContent || "").toLowerCase();
         if (text.includes(q)) {
-          n.classList.add('match-highlight');
+          n.classList.add("match-highlight");
           matchCount++;
           if (!firstMatch) firstMatch = n;
         }
       });
       if (matchCountEl) {
-        matchCountEl.textContent = q
-          ? `${matchCount} 件一致`
-          : '';
+        matchCountEl.textContent = q ? `${matchCount} 件一致` : "";
       }
       if (firstMatch) {
-        firstMatch.scrollIntoView({ block: 'center', inline: 'center' });
+        firstMatch.scrollIntoView({ block: "center", inline: "center" });
       }
     });
   }
@@ -703,8 +703,8 @@
   // ============== ダイアログ ==============
   function showConfirmDialog({ title, message, confirmLabel, cancelLabel }) {
     return new Promise((resolve) => {
-      const backdrop = document.createElement('div');
-      backdrop.className = 'modal-backdrop';
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop";
       backdrop.innerHTML = `
         <div class="modal" role="dialog">
           <h4>${title}</h4>
@@ -716,11 +716,11 @@
         </div>
       `;
       document.body.appendChild(backdrop);
-      backdrop.addEventListener('click', (e) => {
+      backdrop.addEventListener("click", (e) => {
         const action = e.target?.dataset?.action;
-        if (action === 'confirm' || action === 'cancel') {
+        if (action === "confirm" || action === "cancel") {
           document.body.removeChild(backdrop);
-          resolve(action === 'confirm');
+          resolve(action === "confirm");
         }
       });
     });
@@ -732,8 +732,8 @@
   let visibleRelSet = new Set();
 
   async function renderProjectGraph() {
-    const flowchart = document.getElementById('flowchart');
-    flowchart.innerHTML = '';
+    const flowchart = document.getElementById("flowchart");
+    flowchart.innerHTML = "";
     const html = generateProjectFlowchart(
       projectFiles,
       projectStorageResolution,
@@ -742,22 +742,19 @@
     flowchart.innerHTML = html;
     await mermaid.run();
     currentScale = 0.7;
-    applyScale(
-      document.querySelector('.flowchart-container'),
-      flowchart,
-    );
+    applyScale(document.querySelector(".flowchart-container"), flowchart);
   }
 
   function buildFileFilterUI(files) {
-    const list = document.getElementById('file-filter-list');
-    list.innerHTML = '';
+    const list = document.getElementById("file-filter-list");
+    list.innerHTML = "";
     const sorted = [...files].sort((a, b) =>
       a.relativePath.localeCompare(b.relativePath),
     );
     for (const f of sorted) {
       const id = `chk_${sanitizeId(f.relativePath)}`;
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" id="${id}" data-rel="${f.relativePath.replace(/"/g, '&quot;')}" checked> ${f.relativePath}`;
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="checkbox" id="${id}" data-rel="${f.relativePath.replace(/"/g, "&quot;")}" checked> ${f.relativePath}`;
       list.appendChild(label);
     }
   }
@@ -765,7 +762,7 @@
   function readVisibleFromUI() {
     const set = new Set();
     document
-      .querySelectorAll('#file-filter-list input[type=checkbox]')
+      .querySelectorAll("#file-filter-list input[type=checkbox]")
       .forEach((c) => {
         if (c.checked) {
           set.add(c.dataset.rel);
@@ -776,57 +773,58 @@
 
   function setAllChecks(checked) {
     document
-      .querySelectorAll('#file-filter-list input[type=checkbox]')
+      .querySelectorAll("#file-filter-list input[type=checkbox]")
       .forEach((c) => (c.checked = checked));
   }
 
   // ============== エントリ ==============
   const urlParams = new URLSearchParams(window.location.search);
-  const scope = urlParams.get('scope');
-  const project = urlParams.get('project');
-  const projectPathParam = urlParams.get('projectPath');
-  const scenario = urlParams.get('scenario');
+  const scope = urlParams.get("scope");
+  const project = urlParams.get("project");
+  const projectPathParam = urlParams.get("projectPath");
+  const scenario = urlParams.get("scenario");
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    const flowchartContainer = document.querySelector('.flowchart-container');
-    const flowchartElement = document.getElementById('flowchart');
+  document.addEventListener("DOMContentLoaded", async () => {
+    const flowchartContainer = document.querySelector(".flowchart-container");
+    const flowchartElement = document.getElementById("flowchart");
 
     setupWheelZoom(flowchartContainer, flowchartElement);
     setupDragPan(flowchartContainer);
 
-    const searchInput = document.getElementById('search-box');
-    const matchCount = document.getElementById('match-count');
+    const searchInput = document.getElementById("search-box");
+    const matchCount = document.getElementById("match-count");
     setupSearch(searchInput, matchCount);
 
-    if (scope === 'project') {
+    if (scope === "project") {
       // プロジェクト全体モード
       const fetchUrl =
-        `/get-transition-data?scope=project&project=${encodeURIComponent(project || '')}` +
+        `/get-transition-data?scope=project&project=${encodeURIComponent(project || "")}` +
         (projectPathParam
           ? `&projectPath=${encodeURIComponent(projectPathParam)}`
-          : '');
+          : "");
       const data = await fetch(fetchUrl).then((r) => r.json());
       if (!data || !data.files) {
-        console.error('project data not found');
+        console.error("project data not found");
         return;
       }
-      document.querySelector('h3').textContent = `${data.projectName} – プロジェクト全体`;
+      document.querySelector("h3").textContent =
+        `${data.projectName} – プロジェクト全体`;
       projectFiles = data.files;
       projectStorageResolution = data.storageResolution || {};
       visibleRelSet = new Set(projectFiles.map((f) => f.relativePath));
 
       buildFileFilterUI(projectFiles);
-      document.getElementById('project-tools').style.display = '';
+      document.getElementById("project-tools").style.display = "";
 
       document
-        .getElementById('btn-all-on')
-        .addEventListener('click', () => setAllChecks(true));
+        .getElementById("btn-all-on")
+        .addEventListener("click", () => setAllChecks(true));
       document
-        .getElementById('btn-all-off')
-        .addEventListener('click', () => setAllChecks(false));
+        .getElementById("btn-all-off")
+        .addEventListener("click", () => setAllChecks(false));
       document
-        .getElementById('btn-apply')
-        .addEventListener('click', async () => {
+        .getElementById("btn-apply")
+        .addEventListener("click", async () => {
           visibleRelSet = readVisibleFromUI();
           await renderProjectGraph();
         });
@@ -836,22 +834,22 @@
       let proceed = true;
       if (total > 1500) {
         proceed = await showConfirmDialog({
-          title: 'ノード数が多すぎます',
+          title: "ノード数が多すぎます",
           message: `合計 ${total} ノードあります。Mermaid は 1500 を超えるとレイアウトが崩れたり長時間応答しなくなる場合があります。<br>単一ファイル表示の利用、もしくは表示ファイルを絞り込むことを推奨します。<br><br>それでも今すぐ表示しますか？`,
-          confirmLabel: 'このまま表示',
-          cancelLabel: '絞り込む',
+          confirmLabel: "このまま表示",
+          cancelLabel: "絞り込む",
         });
       } else if (total > 500) {
         proceed = await showConfirmDialog({
-          title: 'ノード数が多めです',
+          title: "ノード数が多めです",
           message: `合計 ${total} ノードあります。表示には数秒かかる可能性があります。<br>表示するファイルを絞り込むこともできます。`,
-          confirmLabel: 'このまま表示',
-          cancelLabel: '絞り込む',
+          confirmLabel: "このまま表示",
+          cancelLabel: "絞り込む",
         });
       }
 
       if (!proceed) {
-        document.querySelector('details.file-filter').open = true;
+        document.querySelector("details.file-filter").open = true;
         return;
       }
       await renderProjectGraph();
@@ -860,18 +858,18 @@
 
     // 単一ファイルモード
     const data = await fetch(
-      `/get-transition-data?scenario=${encodeURIComponent(scenario || '')}`,
+      `/get-transition-data?scenario=${encodeURIComponent(scenario || "")}`,
     ).then((r) => r.json());
     if (!data) {
-      console.log('transitionData is not found');
+      console.log("transitionData is not found");
       return;
     }
-    document.querySelector('h3').textContent = data.projectName || '';
+    document.querySelector("h3").textContent = data.projectName || "";
     const transitionData = data.TransitionData;
     const labelData = data.LabelData || [];
     const storageResolution = data.storageResolution || {};
     const currentFile =
-      (scenario || '').replace(/\\/g, '/').split('data/scenario/').pop() || '';
+      (scenario || "").replace(/\\/g, "/").split("data/scenario/").pop() || "";
     const htmlContent = generateFlowchart(
       transitionData,
       labelData,
@@ -894,28 +892,139 @@
     <summary>凡例</summary>
     <div class="legend-body">
       <!-- 矢印用 marker 定義（共通） -->
-      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <svg width="0" height="0" style="position: absolute" aria-hidden="true">
         <defs>
-          <marker id="legendArrowJump" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8" /></marker>
-          <marker id="legendArrowButton" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c2410c" /></marker>
-          <marker id="legendArrowGlink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#15803d" /></marker>
-          <marker id="legendArrowCall" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed" /></marker>
-          <marker id="legendArrowScenario" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a16207" /></marker>
-          <marker id="legendArrowScript" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b91c1c" /></marker>
-          <marker id="legendArrowHtml" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a21caf" /></marker>
-          <marker id="legendArrowCss" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e7490" /></marker>
-          <marker id="legendArrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333" /></marker>
+          <marker
+            id="legendArrowJump"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8" />
+          </marker>
+          <marker
+            id="legendArrowButton"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#c2410c" />
+          </marker>
+          <marker
+            id="legendArrowGlink"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#15803d" />
+          </marker>
+          <marker
+            id="legendArrowCall"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed" />
+          </marker>
+          <marker
+            id="legendArrowScenario"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#a16207" />
+          </marker>
+          <marker
+            id="legendArrowScript"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#b91c1c" />
+          </marker>
+          <marker
+            id="legendArrowHtml"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#a21caf" />
+          </marker>
+          <marker
+            id="legendArrowCss"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#0e7490" />
+          </marker>
+          <marker
+            id="legendArrowGray"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M0,0 L10,5 L0,10 z" fill="#333" />
+          </marker>
         </defs>
       </svg>
 
       <div class="legend-section">
         <h5>矢印の種類</h5>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#333" stroke-width="2" marker-end="url(#legendArrowGray)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#333"
+              stroke-width="2"
+              marker-end="url(#legendArrowGray)"
+            />
+          </svg>
           <span>通常の遷移</span>
         </div>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#333" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#legendArrowGray)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#333"
+              stroke-width="2"
+              stroke-dasharray="5 5"
+              marker-end="url(#legendArrowGray)"
+            />
+          </svg>
           <span>条件分岐 (cond=...)</span>
         </div>
       </div>
@@ -923,32 +1032,84 @@
       <div class="legend-section">
         <h5>矢印の色（その他のタグ）</h5>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#a16207" stroke-width="2" marker-end="url(#legendArrowScenario)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#a16207"
+              stroke-width="2"
+              marker-end="url(#legendArrowScenario)"
+            />
+          </svg>
           <span>scenario</span>
         </div>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#b91c1c" stroke-width="2" marker-end="url(#legendArrowScript)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#b91c1c"
+              stroke-width="2"
+              marker-end="url(#legendArrowScript)"
+            />
+          </svg>
           <span>script</span>
         </div>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#a21caf" stroke-width="2" marker-end="url(#legendArrowHtml)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#a21caf"
+              stroke-width="2"
+              marker-end="url(#legendArrowHtml)"
+            />
+          </svg>
           <span>html</span>
         </div>
         <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#0e7490" stroke-width="2" marker-end="url(#legendArrowCss)" /></svg>
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#0e7490"
+              stroke-width="2"
+              marker-end="url(#legendArrowCss)"
+            />
+          </svg>
           <span>css</span>
         </div>
       </div>
 
       <div class="legend-section">
         <h5>ノードの色</h5>
-        <div class="legend-row"><span class="legend-swatch" style="background:#e9d5ff;border-color:#7c3aed"></span><span>同じファイルのラベル</span></div>
-        <div class="legend-row"><span class="legend-swatch" style="background:#e3faea;border-color:#333"></span><span>ほかの.ksファイル</span></div>
+        <div class="legend-row">
+          <span
+            class="legend-swatch"
+            style="background: #e9d5ff; border-color: #7c3aed"
+          ></span
+          ><span>同じファイルのラベル</span>
+        </div>
+        <div class="legend-row">
+          <span
+            class="legend-swatch"
+            style="background: #e3faea; border-color: #333"
+          ></span
+          ><span>ほかの.ksファイル</span>
+        </div>
       </div>
     </div>
   </details>
 
-  <div id="project-tools" style="display:none;">
+  <div id="project-tools" style="display: none">
     <details class="file-filter">
       <summary>表示するファイルを絞り込み</summary>
       <div class="file-filter-body">
