@@ -9,6 +9,7 @@ export class TransitionData {
     "html",
     "css",
     "jump",
+    "call",
     "button",
     "glink",
   ]; //tyranoJumpProviderでの定義と同じもの。重複なのでどこかで定義すべき？
