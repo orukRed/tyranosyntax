@@ -91,6 +91,22 @@
       .folder-content {
         padding: 10px 0 0 20px;
       }
+      .project-actions {
+        margin-bottom: 12px;
+      }
+      .project-actions a {
+        display: inline-block;
+        padding: 8px 14px;
+        background-color: #28a745;
+        color: #ffffff;
+        border-radius: 5px;
+        font-size: 13px;
+        transition: background-color 0.3s ease;
+      }
+      .project-actions a:hover {
+        background-color: #1e7e34;
+        color: #ffffff;
+      }
     </style>
   </head>
   <body>
@@ -103,6 +119,7 @@
 
     <script>
       let scenarioListData = null;
+      let projectPathsData = {};
       let sortAsc = true;
 
       const compare = (a, b) => {
@@ -174,9 +191,19 @@
         container.innerHTML = sortedProjectNames
           .map((projectName) => {
             const tree = buildTree(scenarioListData[projectName]);
+            const projectPath = projectPathsData[projectName] || '';
+            const projectAllUrl =
+              `/flowchart.html?scope=project` +
+              `&project=${encodeURIComponent(projectName)}` +
+              (projectPath
+                ? `&projectPath=${encodeURIComponent(projectPath)}`
+                : '');
             return `
               <div class="project-container">
                 <h3>${escapeHtml(projectName)}</h3>
+                <div class="project-actions">
+                  <a href="${projectAllUrl}">プロジェクト全体のフローチャート</a>
+                </div>
                 ${renderNode(tree)}
               </div>
             `;
@@ -208,6 +235,7 @@
         .then((response) => response.json())
         .then((data) => {
           scenarioListData = data.scenarioList;
+          projectPathsData = data.projectPaths || {};
           console.log('scenarioList', scenarioListData);
           render();
         })

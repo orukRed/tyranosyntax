@@ -1,6 +1,18 @@
 <!-- フローチャート表示ファイル -->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+<script>
+  // クリック遷移（click NODE "URL"）を有効化するため securityLevel を loose に
+  mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
+</script>
 <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 16px;
+  }
+
   .back-link-container {
     text-align: center;
     margin-top: 20px;
@@ -28,6 +40,7 @@
     margin: 10px 0;
     cursor: grab;
     user-select: none;
+    background-color: #ffffff;
   }
 
   .flowchart-container.dragging {
@@ -40,16 +53,190 @@
     padding-bottom: 50px;
     padding-right: 50px;
   }
+
+  /* ヘッダー */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .toolbar input[type="search"] {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+  }
+  .toolbar .match-count {
+    font-size: 12px;
+    color: #666;
+  }
+
+  /* 絞り込みパネル */
+  details.file-filter {
+    background-color: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  details.file-filter > summary {
+    cursor: pointer;
+    padding: 8px 12px;
+    font-weight: bold;
+    background-color: #d9e3f0;
+    border-radius: 6px 6px 0 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.file-filter > summary::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s ease;
+  }
+  details.file-filter[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  details.file-filter > summary::-webkit-details-marker {
+    display: none;
+  }
+  .file-filter-body {
+    padding: 10px 12px;
+  }
+  .file-filter-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .file-filter-controls button {
+    padding: 4px 10px;
+    font-size: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .file-filter-controls button.apply {
+    background-color: #28a745;
+  }
+  .file-filter-controls button:hover {
+    opacity: 0.9;
+  }
+  .file-filter-list {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: #fafbfc;
+  }
+  .file-filter-list label {
+    display: block;
+    font-size: 13px;
+    padding: 2px 0;
+    cursor: pointer;
+  }
+  .file-filter-list label input {
+    margin-right: 6px;
+  }
+
+  /* 検索ハイライト */
+  .match-highlight > rect,
+  .match-highlight > polygon,
+  .match-highlight > circle,
+  .match-highlight > path,
+  .match-highlight > ellipse {
+    stroke: #f1c40f !important;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0 0 4px rgba(241, 196, 15, 0.8));
+  }
+
+  /* ダイアログ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    max-width: 480px;
+  }
+  .modal h4 {
+    margin: 0 0 12px 0;
+    color: #cc6600;
+  }
+  .modal p {
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+  }
+  .modal-actions {
+    text-align: right;
+  }
+  .modal-actions button {
+    margin-left: 8px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .modal-actions button.primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+  .modal-actions button.secondary {
+    background-color: #6c757d;
+    color: #fff;
+  }
 </style>
 <script>
-  console.log("flowchart.html");
+  console.log('flowchart.html');
 
-  function generateFlowchart(obj, labels, currentFile) {
-    // フローチャートの定義を開始
+  const TAG_CLASS_MAP = {
+    jump: 'tagJump',
+    button: 'tagButton',
+    glink: 'tagGlink',
+    call: 'tagCall',
+    scenario: 'tagScenario',
+    script: 'tagScript',
+    html: 'tagHtml',
+    css: 'tagCss',
+  };
+
+  const COMMON_CLASS_DEFS = [
+    'classDef green fill:#e3faea,stroke:#333,stroke-width:2px;',
+    'classDef tagJump fill:#dbeafe,stroke:#1d4ed8;',
+    'classDef tagButton fill:#fed7aa,stroke:#c2410c;',
+    'classDef tagGlink fill:#bbf7d0,stroke:#15803d;',
+    'classDef tagCall fill:#e9d5ff,stroke:#7c3aed;',
+    'classDef tagScenario fill:#fde68a,stroke:#a16207;',
+    'classDef tagScript fill:#fecaca,stroke:#b91c1c;',
+    'classDef tagHtml fill:#f5d0fe,stroke:#a21caf;',
+    'classDef tagCss fill:#cffafe,stroke:#0e7490;',
+    'classDef external fill:#f3f4f6,stroke:#6b7280,stroke-dasharray:3 3;',
+  ];
+
+  const sanitizeId = (s) => (s || '').replace(/[^a-zA-Z0-9]/g, '_');
+  const escapeMermaidLabel = (s) =>
+    (s || '').replace(/"/g, '#quot;').replace(/\n/g, ' ');
+
+  // 単一ファイルモード（既存の挙動 + クリック遷移 + タグ色分け + 破線条件分岐）
+  function generateFlowchart(obj, labels, currentFile, storageResolution) {
     console.log(obj, labels);
-    let graphDefinition = "graph LR\n";
-    graphDefinition +=
-      "classDef green fill:#e3faea,stroke:#333,stroke-width:2px;\n";
+    let graphDefinition = 'graph LR\n';
+    graphDefinition += COMMON_CLASS_DEFS.join('\n') + '\n';
 
     const hasTransitions = obj && obj.length > 0;
     const hasLabels = labels && labels.length > 0;
@@ -63,74 +250,253 @@
     const subgraphLabel = hasTransitions ? obj[0].currentFile : currentFile;
     graphDefinition += `subgraph "\`**${subgraphLabel}**\`"\n`;
 
-    // ノードの重複を防ぐための追跡用オブジェクト
     const addedNodes = {};
-    const toNodeId = (label) => `node_${label.replace(/[^a-zA-Z0-9]/g, "_")}`;
+    const toNodeId = (label) => `node_${sanitizeId(label)}`;
+    const clickStatements = [];
 
     if (hasTransitions) {
-      for (key in obj) {
-        const condition = obj[key].condition ? `${obj[key].condition}` : "";
+      for (const key in obj) {
+        const t = obj[key];
+        const condition = t.condition ? `${t.condition}` : '';
+        const arrow = condition ? '-.->' : '-->';
+        const labelPart = condition
+          ? `|"${escapeMermaidLabel(condition)}"|`
+          : '';
+        const tagClass = TAG_CLASS_MAP[t.tag] || '';
+        const classSuffix = tagClass ? `:::${tagClass}` : '';
 
-        const currentLabel = obj[key].currentLabel;
-        // 一意のノードIDを作成
+        const currentLabel = t.currentLabel;
         const nodeId = toNodeId(currentLabel);
         addedNodes[nodeId] = true;
 
-        //storageもtargetもある場合
-        if (obj[key].storage && obj[key].target) {
-          const fileName = `${obj[key].storage}_${obj[key].target}`;
-          const fileId = `file_${obj[key].storage}_${obj[key].target}`.replace(
-            /[^a-zA-Z0-9]/g,
-            "_",
-          );
-          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
-        }
-        //storageのみある場合
-        else if (obj[key].storage) {
-          const fileName = `${obj[key].storage}_NONE`;
-          const fileId = `file_${obj[key].storage}_NONE`.replace(
-            /[^a-zA-Z0-9]/g,
-            "_",
-          );
-          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${fileId}["${fileName}"]:::green\n`;
-        }
-        //targetのみある場合
-        else if (obj[key].target) {
-          const targetLabel = obj[key].target;
+        // storage + target / storage only -> クロスファイル
+        if (t.storage) {
+          const targetPart = t.target ? `_${t.target}` : '_NONE';
+          const fileName = `${t.storage}${targetPart}`;
+          const fileId = sanitizeId(`file_${t.storage}${targetPart}`);
+          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${fileId}["${escapeMermaidLabel(fileName)}"]:::green\n`;
+          // クロスファイルクリック遷移
+          if (storageResolution) {
+            const resolvedAbs =
+              storageResolution[t.storage] ||
+              storageResolution[t.storage.replace(/\\/g, '/')];
+            if (resolvedAbs) {
+              const targetUrl = `/flowchart.html?scenario=${encodeURIComponent(resolvedAbs)}`;
+              clickStatements.push(
+                `click ${fileId} "${targetUrl}" "${escapeMermaidLabel(t.storage)} を開く"`,
+              );
+            }
+          }
+        } else if (t.target) {
+          const targetLabel = t.target;
           const targetId = toNodeId(targetLabel);
           addedNodes[targetId] = true;
-          graphDefinition += `${nodeId}["${currentLabel}"] --${condition}--> ${targetId}["${targetLabel}"]\n`;
-        }
-        //storageもtargetも指定しない場合はなにも追加しない
-        else if (!obj[key].storage && !obj[key].target) {
+          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${targetId}["${escapeMermaidLabel(targetLabel)}"]${classSuffix}\n`;
         }
       }
     }
 
-    // 遷移タグに登場しないラベルを孤立ノードとして追加
     if (hasLabels) {
       for (const labelName of labels) {
         const nodeId = toNodeId(labelName);
         if (!addedNodes[nodeId]) {
           addedNodes[nodeId] = true;
-          graphDefinition += `${nodeId}["${labelName}"]\n`;
+          graphDefinition += `${nodeId}["${escapeMermaidLabel(labelName)}"]\n`;
         }
       }
     }
 
     graphDefinition += `end\n`;
+    if (clickStatements.length) {
+      graphDefinition += clickStatements.join('\n') + '\n';
+    }
     console.log(graphDefinition);
-    // HTMLに描画するためのmermaidの定義を返す
     return `<pre class="mermaid">${graphDefinition}</pre>`;
   }
 
+  // プロジェクト全体モード
+  // files: [{filePath, relativePath, transitions, labels}]
+  // visibleSet: Set<relativePath> (絞り込み後の表示対象)
+  function generateProjectFlowchart(files, storageResolution, visibleSet) {
+    let graphDefinition = 'graph LR\n';
+    graphDefinition += COMMON_CLASS_DEFS.join('\n') + '\n';
+
+    if (!files || files.length === 0) {
+      graphDefinition += `subgraph "\`**このプロジェクトには遷移可能なシナリオがありません**\`"\nend\n`;
+      return `<pre class="mermaid">${graphDefinition}</pre>`;
+    }
+
+    // relativePath -> ファイル情報
+    const fileByRel = {};
+    for (const f of files) {
+      fileByRel[f.relativePath] = f;
+    }
+
+    // 絶対パス -> relativePath（クロスファイル解決用）
+    const absToRel = {};
+    for (const f of files) {
+      absToRel[f.filePath] = f.relativePath;
+    }
+
+    const fileHash = (rel) => sanitizeId(rel);
+    const nodeId = (rel, label) =>
+      `node_${fileHash(rel)}__${sanitizeId(label || 'ENTRY')}`;
+
+    // クロスファイル外部ノード（プロジェクト外、または非表示ファイル）
+    const externalEdges = []; // {from, storage, target, condition, tag}
+
+    // 1) すべての可視ファイルの subgraph と、内部・クロスファイルエッジを生成
+    const subgraphBlocks = []; // {rel, lines: string[]}
+    const subgraphLabelSet = {}; // rel -> Set<nodeId>（追加済み判定）
+    const ensureSubgraph = (rel) => {
+      if (!subgraphLabelSet[rel]) {
+        subgraphLabelSet[rel] = new Set();
+        subgraphBlocks.push({ rel, lines: [] });
+      }
+    };
+    const addNode = (rel, label) => {
+      const id = nodeId(rel, label);
+      ensureSubgraph(rel);
+      if (!subgraphLabelSet[rel].has(id)) {
+        subgraphLabelSet[rel].add(id);
+        const block = subgraphBlocks.find((b) => b.rel === rel);
+        block.lines.push(`${id}["${escapeMermaidLabel(label || 'ENTRY')}"]`);
+      }
+      return id;
+    };
+
+    for (const file of files) {
+      if (!visibleSet.has(file.relativePath)) continue;
+      ensureSubgraph(file.relativePath);
+      // ラベル先行追加（孤立ラベルも残す）
+      for (const label of file.labels || []) {
+        addNode(file.relativePath, label);
+      }
+    }
+
+    const edgeLines = [];
+
+    for (const file of files) {
+      if (!visibleSet.has(file.relativePath)) continue;
+      const rel = file.relativePath;
+
+      for (const t of file.transitions || []) {
+        const fromId = addNode(rel, t.currentLabel);
+        const condition = t.condition ? `${t.condition}` : '';
+        const arrow = condition ? '-.->' : '-->';
+        const labelPart = condition
+          ? `|"${escapeMermaidLabel(condition)}"|`
+          : '';
+        const tagClass = TAG_CLASS_MAP[t.tag] || '';
+
+        if (t.storage) {
+          // クロスファイル: target ファイルを解決
+          const storageNorm = t.storage.replace(/\\/g, '/');
+          const resolvedAbs =
+            storageResolution[t.storage] || storageResolution[storageNorm];
+          const targetRel = resolvedAbs ? absToRel[resolvedAbs] : undefined;
+
+          if (targetRel && visibleSet.has(targetRel)) {
+            // 表示対象内: target の subgraph 内ノードへ直接刺す
+            const targetLabel = t.target || 'ENTRY';
+            const targetFile = fileByRel[targetRel];
+            const labelExists =
+              t.target &&
+              targetFile &&
+              (targetFile.labels || []).includes(t.target);
+            // ラベルが存在しなければ合成ENTRY扱い
+            const useLabel = labelExists ? targetLabel : (t.target ? targetLabel : 'ENTRY');
+            const toId = addNode(targetRel, useLabel);
+            edgeLines.push(
+              `${fromId} ${arrow}${labelPart} ${toId}${tagClass ? ':::' + tagClass : ''}`,
+            );
+          } else {
+            // プロジェクト外 or 非表示: external として緑リーフ
+            externalEdges.push({
+              fromId,
+              storage: t.storage,
+              target: t.target,
+              condition,
+              tag: t.tag,
+              resolvedAbs,
+            });
+          }
+        } else if (t.target) {
+          // 同一ファイル内
+          const toId = addNode(rel, t.target);
+          edgeLines.push(
+            `${fromId} ${arrow}${labelPart} ${toId}${tagClass ? ':::' + tagClass : ''}`,
+          );
+        }
+      }
+    }
+
+    // 2) external subgraph を構築
+    const externalLines = [];
+    const externalSet = new Set();
+    const externalClicks = [];
+    if (externalEdges.length > 0) {
+      for (const e of externalEdges) {
+        const targetPart = e.target ? `_${e.target}` : '_NONE';
+        const extId = sanitizeId(`file_${e.storage}${targetPart}`);
+        const labelText = `${e.storage}${targetPart}`;
+        const arrow = e.condition ? '-.->' : '-->';
+        const labelPart = e.condition
+          ? `|"${escapeMermaidLabel(e.condition)}"|`
+          : '';
+        const tagClass = TAG_CLASS_MAP[e.tag] || '';
+        if (!externalSet.has(extId)) {
+          externalSet.add(extId);
+          externalLines.push(
+            `${extId}["${escapeMermaidLabel(labelText)}"]:::green`,
+          );
+          // 解決済み（=非表示なだけ）の場合は単一ファイルビューへ遷移できる
+          if (e.resolvedAbs) {
+            externalClicks.push(
+              `click ${extId} "/flowchart.html?scenario=${encodeURIComponent(e.resolvedAbs)}" "${escapeMermaidLabel(e.storage)} を開く"`,
+            );
+          }
+        }
+        edgeLines.push(
+          `${e.fromId} ${arrow}${labelPart} ${extId}${tagClass ? ':::' + tagClass : ''}`,
+        );
+      }
+    }
+
+    // 3) 出力組み立て
+    for (const block of subgraphBlocks) {
+      if (block.lines.length === 0) continue; // 空subgraphは出さない
+      graphDefinition += `subgraph sg_${fileHash(block.rel)}["${escapeMermaidLabel(block.rel)}"]\n`;
+      graphDefinition += block.lines.join('\n') + '\n';
+      graphDefinition += `end\n`;
+    }
+    if (externalLines.length > 0) {
+      graphDefinition += `subgraph sg__external["external"]\n`;
+      graphDefinition += externalLines.join('\n') + '\n';
+      graphDefinition += `end\n`;
+    }
+    if (edgeLines.length > 0) {
+      graphDefinition += edgeLines.join('\n') + '\n';
+    }
+    if (externalClicks.length > 0) {
+      graphDefinition += externalClicks.join('\n') + '\n';
+    }
+
+    return `<pre class="mermaid">${graphDefinition}</pre>`;
+  }
+
+  // ============== ズーム・パン ==============
   let currentScale = 1;
-  const MIN_SCALE = 0.3;
+  const MIN_SCALE = 0.2;
   const MAX_SCALE = 5;
+
+  function applyScale(container, flowchart) {
+    flowchart.style.transform = `scale(${currentScale})`;
+  }
 
   function setupWheelZoom(container, flowchart) {
     container.addEventListener(
-      "wheel",
+      'wheel',
       (e) => {
         e.preventDefault();
         const delta = e.deltaY < 0 ? 1.1 : 1 / 1.1;
@@ -163,18 +529,20 @@
     let startScrollLeft = 0;
     let startScrollTop = 0;
 
-    container.addEventListener("mousedown", (e) => {
+    container.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
+      // ノード（リンク）クリックはドラッグ扱いにしない
+      if (e.target.closest('a')) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
       startScrollLeft = container.scrollLeft;
       startScrollTop = container.scrollTop;
-      container.classList.add("dragging");
+      container.classList.add('dragging');
       e.preventDefault();
     });
 
-    document.addEventListener("mousemove", (e) => {
+    document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       container.scrollLeft = startScrollLeft - (e.clientX - startX);
       container.scrollTop = startScrollTop - (e.clientY - startY);
@@ -183,59 +551,246 @@
     const endDrag = () => {
       if (!isDragging) return;
       isDragging = false;
-      container.classList.remove("dragging");
+      container.classList.remove('dragging');
     };
-    document.addEventListener("mouseup", endDrag);
-    window.addEventListener("blur", endDrag);
+    document.addEventListener('mouseup', endDrag);
+    window.addEventListener('blur', endDrag);
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const scenario = urlParams.get("scenario");
-  console.log("scenario", scenario);
-  let transitionData = undefined;
-  // サーバーからデータ処理
-  fetch(`/get-transition-data?scenario=${scenario}`)
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(`call get-transition-data?scenario=${scenario}`);
-      if (data) {
-        //プロジェクト名表示
-        projectName = data.projectName;
-        document.querySelector("h3").textContent = projectName;
-
-        transitionData = data.TransitionData;
-        const labelData = data.LabelData || [];
-        // scenarioパスから data/scenario/ 以降のパスを抽出（遷移が無くファイル名を補完したい場合に使用）
-        const currentFile =
-          (scenario || "").replace(/\\/g, "/").split("data/scenario/").pop() ||
-          "";
-
-        const htmlContent = generateFlowchart(
-          transitionData,
-          labelData,
-          currentFile,
-        );
-        // HTMLに追加するためのコード
-        const element = document.getElementById("flowchart");
-        element.innerHTML += htmlContent;
-        // mermaidを初期化
-        mermaid.run();
-        // ホイールズーム・ドラッグパンの初期化
-        const flowchartContainer = document.querySelector(
-          ".flowchart-container",
-        );
-        const flowchartElement = document.getElementById("flowchart");
-        setupWheelZoom(flowchartContainer, flowchartElement);
-        setupDragPan(flowchartContainer);
-      } else {
-        console.log("transitionData is not found");
+  // ============== 検索ハイライト ==============
+  function setupSearch(searchInput, matchCountEl) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      const svg = document.querySelector('#flowchart svg');
+      if (!svg) return;
+      const nodes = svg.querySelectorAll('g.node');
+      let matchCount = 0;
+      let firstMatch = null;
+      nodes.forEach((n) => {
+        n.classList.remove('match-highlight');
+        if (!q) return;
+        const text = (n.textContent || '').toLowerCase();
+        if (text.includes(q)) {
+          n.classList.add('match-highlight');
+          matchCount++;
+          if (!firstMatch) firstMatch = n;
+        }
+      });
+      if (matchCountEl) {
+        matchCountEl.textContent = q
+          ? `${matchCount} 件一致`
+          : '';
       }
-    })
-    .catch((error) => console.error("Error:", error));
+      if (firstMatch) {
+        firstMatch.scrollIntoView({ block: 'center', inline: 'center' });
+      }
+    });
+  }
+
+  // ============== ダイアログ ==============
+  function showConfirmDialog({ title, message, confirmLabel, cancelLabel }) {
+    return new Promise((resolve) => {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      backdrop.innerHTML = `
+        <div class="modal" role="dialog">
+          <h4>${title}</h4>
+          <p>${message}</p>
+          <div class="modal-actions">
+            <button type="button" class="secondary" data-action="cancel">${cancelLabel}</button>
+            <button type="button" class="primary" data-action="confirm">${confirmLabel}</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(backdrop);
+      backdrop.addEventListener('click', (e) => {
+        const action = e.target?.dataset?.action;
+        if (action === 'confirm' || action === 'cancel') {
+          document.body.removeChild(backdrop);
+          resolve(action === 'confirm');
+        }
+      });
+    });
+  }
+
+  // ============== プロジェクト全体: 描画再実行 ==============
+  let projectFiles = [];
+  let projectStorageResolution = {};
+  let visibleRelSet = new Set();
+
+  async function renderProjectGraph() {
+    const flowchart = document.getElementById('flowchart');
+    flowchart.innerHTML = '';
+    const html = generateProjectFlowchart(
+      projectFiles,
+      projectStorageResolution,
+      visibleRelSet,
+    );
+    flowchart.innerHTML = html;
+    await mermaid.run();
+    currentScale = 0.7;
+    applyScale(
+      document.querySelector('.flowchart-container'),
+      flowchart,
+    );
+  }
+
+  function buildFileFilterUI(files) {
+    const list = document.getElementById('file-filter-list');
+    list.innerHTML = '';
+    const sorted = [...files].sort((a, b) =>
+      a.relativePath.localeCompare(b.relativePath),
+    );
+    for (const f of sorted) {
+      const id = `chk_${sanitizeId(f.relativePath)}`;
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" id="${id}" data-rel="${f.relativePath.replace(/"/g, '&quot;')}" checked> ${f.relativePath}`;
+      list.appendChild(label);
+    }
+  }
+
+  function readVisibleFromUI() {
+    const set = new Set();
+    document
+      .querySelectorAll('#file-filter-list input[type=checkbox]')
+      .forEach((c) => {
+        if (c.checked) {
+          set.add(c.dataset.rel);
+        }
+      });
+    return set;
+  }
+
+  function setAllChecks(checked) {
+    document
+      .querySelectorAll('#file-filter-list input[type=checkbox]')
+      .forEach((c) => (c.checked = checked));
+  }
+
+  // ============== エントリ ==============
+  const urlParams = new URLSearchParams(window.location.search);
+  const scope = urlParams.get('scope');
+  const project = urlParams.get('project');
+  const projectPathParam = urlParams.get('projectPath');
+  const scenario = urlParams.get('scenario');
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const flowchartContainer = document.querySelector('.flowchart-container');
+    const flowchartElement = document.getElementById('flowchart');
+
+    setupWheelZoom(flowchartContainer, flowchartElement);
+    setupDragPan(flowchartContainer);
+
+    const searchInput = document.getElementById('search-box');
+    const matchCount = document.getElementById('match-count');
+    setupSearch(searchInput, matchCount);
+
+    if (scope === 'project') {
+      // プロジェクト全体モード
+      const fetchUrl =
+        `/get-transition-data?scope=project&project=${encodeURIComponent(project || '')}` +
+        (projectPathParam
+          ? `&projectPath=${encodeURIComponent(projectPathParam)}`
+          : '');
+      const data = await fetch(fetchUrl).then((r) => r.json());
+      if (!data || !data.files) {
+        console.error('project data not found');
+        return;
+      }
+      document.querySelector('h3').textContent = `${data.projectName} – プロジェクト全体`;
+      projectFiles = data.files;
+      projectStorageResolution = data.storageResolution || {};
+      visibleRelSet = new Set(projectFiles.map((f) => f.relativePath));
+
+      buildFileFilterUI(projectFiles);
+      document.getElementById('project-tools').style.display = '';
+
+      document
+        .getElementById('btn-all-on')
+        .addEventListener('click', () => setAllChecks(true));
+      document
+        .getElementById('btn-all-off')
+        .addEventListener('click', () => setAllChecks(false));
+      document
+        .getElementById('btn-apply')
+        .addEventListener('click', async () => {
+          visibleRelSet = readVisibleFromUI();
+          await renderProjectGraph();
+        });
+
+      // 閾値判定
+      const total = data.totalNodes || 0;
+      let proceed = true;
+      if (total > 1500) {
+        proceed = await showConfirmDialog({
+          title: 'ノード数が多すぎます',
+          message: `合計 ${total} ノードあります。Mermaid は 1500 を超えるとレイアウトが崩れたり長時間応答しなくなる場合があります。<br>単一ファイル表示の利用、もしくは表示ファイルを絞り込むことを推奨します。<br><br>それでも今すぐ表示しますか？`,
+          confirmLabel: 'このまま表示',
+          cancelLabel: '絞り込む',
+        });
+      } else if (total > 500) {
+        proceed = await showConfirmDialog({
+          title: 'ノード数が多めです',
+          message: `合計 ${total} ノードあります。表示には数秒かかる可能性があります。<br>表示するファイルを絞り込むこともできます。`,
+          confirmLabel: 'このまま表示',
+          cancelLabel: '絞り込む',
+        });
+      }
+
+      if (!proceed) {
+        document.querySelector('details.file-filter').open = true;
+        return;
+      }
+      await renderProjectGraph();
+      return;
+    }
+
+    // 単一ファイルモード
+    const data = await fetch(
+      `/get-transition-data?scenario=${encodeURIComponent(scenario || '')}`,
+    ).then((r) => r.json());
+    if (!data) {
+      console.log('transitionData is not found');
+      return;
+    }
+    document.querySelector('h3').textContent = data.projectName || '';
+    const transitionData = data.TransitionData;
+    const labelData = data.LabelData || [];
+    const storageResolution = data.storageResolution || {};
+    const currentFile =
+      (scenario || '').replace(/\\/g, '/').split('data/scenario/').pop() || '';
+    const htmlContent = generateFlowchart(
+      transitionData,
+      labelData,
+      currentFile,
+      storageResolution,
+    );
+    flowchartElement.innerHTML += htmlContent;
+    await mermaid.run();
+  });
 </script>
 
 <body>
   <h3></h3>
+  <div class="toolbar">
+    <input type="search" id="search-box" placeholder="ラベル名で検索..." />
+    <span class="match-count" id="match-count"></span>
+  </div>
+
+  <div id="project-tools" style="display:none;">
+    <details class="file-filter">
+      <summary>表示するファイルを絞り込み</summary>
+      <div class="file-filter-body">
+        <div class="file-filter-controls">
+          <button type="button" id="btn-all-on">ON 全て</button>
+          <button type="button" id="btn-all-off">OFF 全て</button>
+          <button type="button" id="btn-apply" class="apply">更新</button>
+        </div>
+        <div class="file-filter-list" id="file-filter-list"></div>
+      </div>
+    </details>
+  </div>
+
   <div class="flowchart-container">
     <div id="flowchart"></div>
   </div>
