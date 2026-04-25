@@ -145,6 +145,69 @@
     margin-right: 6px;
   }
 
+  /* 凡例 */
+  details.legend {
+    background-color: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  details.legend > summary {
+    cursor: pointer;
+    padding: 8px 12px;
+    font-weight: bold;
+    background-color: #d9e3f0;
+    border-radius: 6px 6px 0 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.legend > summary::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s ease;
+  }
+  details.legend[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  details.legend > summary::-webkit-details-marker {
+    display: none;
+  }
+  .legend-body {
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .legend-section {
+    min-width: 180px;
+  }
+  .legend-section h5 {
+    margin: 0 0 6px 0;
+    font-size: 12px;
+    color: #555;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 3px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    padding: 2px 0;
+  }
+  .legend-swatch {
+    display: inline-block;
+    width: 24px;
+    height: 14px;
+    border: 2px solid #333;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-arrow {
+    flex-shrink: 0;
+  }
+
   /* 検索ハイライト */
   .match-highlight > rect,
   .match-highlight > polygon,
@@ -204,33 +267,61 @@
 <script>
   console.log('flowchart.html');
 
-  const TAG_CLASS_MAP = {
-    jump: 'tagJump',
-    button: 'tagButton',
-    glink: 'tagGlink',
-    call: 'tagCall',
-    scenario: 'tagScenario',
-    script: 'tagScript',
-    html: 'tagHtml',
-    css: 'tagCss',
+  // タグごとの「エッジ（矢印）色」。ノードではなく矢印に適用する。
+  const TAG_EDGE_COLOR = {
+    jump: '#1d4ed8',
+    button: '#c2410c',
+    glink: '#15803d',
+    call: '#7c3aed',
+    scenario: '#a16207',
+    script: '#b91c1c',
+    html: '#a21caf',
+    css: '#0e7490',
   };
 
   const COMMON_CLASS_DEFS = [
+    // 別ファイルへのリーフノード
     'classDef green fill:#e3faea,stroke:#333,stroke-width:2px;',
-    'classDef tagJump fill:#dbeafe,stroke:#1d4ed8;',
-    'classDef tagButton fill:#fed7aa,stroke:#c2410c;',
-    'classDef tagGlink fill:#bbf7d0,stroke:#15803d;',
-    'classDef tagCall fill:#e9d5ff,stroke:#7c3aed;',
-    'classDef tagScenario fill:#fde68a,stroke:#a16207;',
-    'classDef tagScript fill:#fecaca,stroke:#b91c1c;',
-    'classDef tagHtml fill:#f5d0fe,stroke:#a21caf;',
-    'classDef tagCss fill:#cffafe,stroke:#0e7490;',
-    'classDef external fill:#f3f4f6,stroke:#6b7280,stroke-dasharray:3 3;',
+    // 同じファイルのラベル（遷移元・遷移先のいずれか）
+    'classDef label fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px;',
   ];
 
   const sanitizeId = (s) => (s || '').replace(/[^a-zA-Z0-9]/g, '_');
   const escapeMermaidLabel = (s) =>
     (s || '').replace(/"/g, '#quot;').replace(/\n/g, ' ');
+
+  // nodeClasses (id -> className) を Mermaid の class ステートメントに整形
+  function emitClassStatements(nodeClasses) {
+    const byClass = {};
+    for (const [id, cls] of Object.entries(nodeClasses)) {
+      (byClass[cls] ||= []).push(id);
+    }
+    let out = '';
+    for (const [cls, ids] of Object.entries(byClass)) {
+      out += `class ${ids.join(',')} ${cls}\n`;
+    }
+    return out;
+  }
+
+  // edgeStyles ([{tag, dashed}, ...]) を Mermaid の linkStyle ステートメントに整形。
+  // tag→色は TAG_EDGE_COLOR を参照。dashed のときは stroke-dasharray も付与。
+  function emitLinkStyles(edgeStyles) {
+    const groups = {}; // "color|dashed" -> [edgeIndex,...]
+    for (let i = 0; i < edgeStyles.length; i++) {
+      const e = edgeStyles[i];
+      const color = TAG_EDGE_COLOR[e.tag];
+      if (!color) continue;
+      const key = `${color}|${e.dashed ? '1' : '0'}`;
+      (groups[key] ||= []).push(i);
+    }
+    let out = '';
+    for (const [key, idxs] of Object.entries(groups)) {
+      const [color, dashed] = key.split('|');
+      const dashPart = dashed === '1' ? ',stroke-dasharray:5 5' : '';
+      out += `linkStyle ${idxs.join(',')} stroke:${color},stroke-width:2px${dashPart}\n`;
+    }
+    return out;
+  }
 
   // 単一ファイルモード（既存の挙動 + クリック遷移 + タグ色分け + 破線条件分岐）
   function generateFlowchart(obj, labels, currentFile, storageResolution) {
@@ -253,28 +344,33 @@
     const addedNodes = {};
     const toNodeId = (label) => `node_${sanitizeId(label)}`;
     const clickStatements = [];
+    const nodeClasses = {};
+    const edgeStyles = []; // edgeIndex -> {tag, dashed}
 
     if (hasTransitions) {
       for (const key in obj) {
         const t = obj[key];
         const condition = t.condition ? `${t.condition}` : '';
-        const arrow = condition ? '-.->' : '-->';
+        const dashed = !!condition;
+        const arrow = dashed ? '-.->' : '-->';
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
           : '';
-        const tagClass = TAG_CLASS_MAP[t.tag] || '';
-        const classSuffix = tagClass ? `:::${tagClass}` : '';
 
         const currentLabel = t.currentLabel;
         const nodeId = toNodeId(currentLabel);
         addedNodes[nodeId] = true;
+        // 遷移元（=このファイルのラベル）にも label クラス
+        nodeClasses[nodeId] = 'label';
 
         // storage + target / storage only -> クロスファイル
         if (t.storage) {
           const targetPart = t.target ? `_${t.target}` : '_NONE';
           const fileName = `${t.storage}${targetPart}`;
           const fileId = sanitizeId(`file_${t.storage}${targetPart}`);
-          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${fileId}["${escapeMermaidLabel(fileName)}"]:::green\n`;
+          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${fileId}["${escapeMermaidLabel(fileName)}"]\n`;
+          nodeClasses[fileId] = 'green';
+          edgeStyles.push({ tag: t.tag, dashed });
           // クロスファイルクリック遷移
           if (storageResolution) {
             const resolvedAbs =
@@ -291,7 +387,10 @@
           const targetLabel = t.target;
           const targetId = toNodeId(targetLabel);
           addedNodes[targetId] = true;
-          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${targetId}["${escapeMermaidLabel(targetLabel)}"]${classSuffix}\n`;
+          graphDefinition += `${nodeId}["${escapeMermaidLabel(currentLabel)}"] ${arrow}${labelPart} ${targetId}["${escapeMermaidLabel(targetLabel)}"]\n`;
+          // 同じファイルの到達先ラベルは label クラス
+          nodeClasses[targetId] = 'label';
+          edgeStyles.push({ tag: t.tag, dashed });
         }
       }
     }
@@ -303,10 +402,14 @@
           addedNodes[nodeId] = true;
           graphDefinition += `${nodeId}["${escapeMermaidLabel(labelName)}"]\n`;
         }
+        // 孤立ラベル含めすべてのラベルを label クラスに
+        nodeClasses[nodeId] = 'label';
       }
     }
 
     graphDefinition += `end\n`;
+    graphDefinition += emitClassStatements(nodeClasses);
+    graphDefinition += emitLinkStyles(edgeStyles);
     if (clickStatements.length) {
       graphDefinition += clickStatements.join('\n') + '\n';
     }
@@ -345,6 +448,11 @@
     // クロスファイル外部ノード（プロジェクト外、または非表示ファイル）
     const externalEdges = []; // {from, storage, target, condition, tag}
 
+    // ノードクラス（id -> className）。最後に class ステートメントとして出力。
+    const nodeClasses = {};
+    // エッジスタイル（順序＝Mermaidのエッジindex）。最後に linkStyle で色を当てる。
+    const edgeStyles = [];
+
     // 1) すべての可視ファイルの subgraph と、内部・クロスファイルエッジを生成
     const subgraphBlocks = []; // {rel, lines: string[]}
     const subgraphLabelSet = {}; // rel -> Set<nodeId>（追加済み判定）
@@ -368,9 +476,10 @@
     for (const file of files) {
       if (!visibleSet.has(file.relativePath)) continue;
       ensureSubgraph(file.relativePath);
-      // ラベル先行追加（孤立ラベルも残す）
+      // ラベル先行追加（孤立ラベルも残す）。同じファイルのラベルなので label クラスに。
       for (const label of file.labels || []) {
-        addNode(file.relativePath, label);
+        const id = addNode(file.relativePath, label);
+        nodeClasses[id] = 'label';
       }
     }
 
@@ -382,12 +491,13 @@
 
       for (const t of file.transitions || []) {
         const fromId = addNode(rel, t.currentLabel);
+        nodeClasses[fromId] = 'label';
         const condition = t.condition ? `${t.condition}` : '';
-        const arrow = condition ? '-.->' : '-->';
+        const dashed = !!condition;
+        const arrow = dashed ? '-.->' : '-->';
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
           : '';
-        const tagClass = TAG_CLASS_MAP[t.tag] || '';
 
         if (t.storage) {
           // クロスファイル: target ファイルを解決
@@ -407,9 +517,9 @@
             // ラベルが存在しなければ合成ENTRY扱い
             const useLabel = labelExists ? targetLabel : (t.target ? targetLabel : 'ENTRY');
             const toId = addNode(targetRel, useLabel);
-            edgeLines.push(
-              `${fromId} ${arrow}${labelPart} ${toId}${tagClass ? ':::' + tagClass : ''}`,
-            );
+            edgeLines.push(`${fromId} ${arrow}${labelPart} ${toId}`);
+            nodeClasses[toId] = 'label';
+            edgeStyles.push({ tag: t.tag, dashed });
           } else {
             // プロジェクト外 or 非表示: external として緑リーフ
             externalEdges.push({
@@ -417,6 +527,7 @@
               storage: t.storage,
               target: t.target,
               condition,
+              dashed,
               tag: t.tag,
               resolvedAbs,
             });
@@ -424,9 +535,9 @@
         } else if (t.target) {
           // 同一ファイル内
           const toId = addNode(rel, t.target);
-          edgeLines.push(
-            `${fromId} ${arrow}${labelPart} ${toId}${tagClass ? ':::' + tagClass : ''}`,
-          );
+          edgeLines.push(`${fromId} ${arrow}${labelPart} ${toId}`);
+          nodeClasses[toId] = 'label';
+          edgeStyles.push({ tag: t.tag, dashed });
         }
       }
     }
@@ -440,16 +551,17 @@
         const targetPart = e.target ? `_${e.target}` : '_NONE';
         const extId = sanitizeId(`file_${e.storage}${targetPart}`);
         const labelText = `${e.storage}${targetPart}`;
-        const arrow = e.condition ? '-.->' : '-->';
+        const dashed = !!e.dashed;
+        const arrow = dashed ? '-.->' : '-->';
         const labelPart = e.condition
           ? `|"${escapeMermaidLabel(e.condition)}"|`
           : '';
-        const tagClass = TAG_CLASS_MAP[e.tag] || '';
         if (!externalSet.has(extId)) {
           externalSet.add(extId);
           externalLines.push(
-            `${extId}["${escapeMermaidLabel(labelText)}"]:::green`,
+            `${extId}["${escapeMermaidLabel(labelText)}"]`,
           );
+          nodeClasses[extId] = 'green';
           // 解決済み（=非表示なだけ）の場合は単一ファイルビューへ遷移できる
           if (e.resolvedAbs) {
             externalClicks.push(
@@ -457,9 +569,8 @@
             );
           }
         }
-        edgeLines.push(
-          `${e.fromId} ${arrow}${labelPart} ${extId}${tagClass ? ':::' + tagClass : ''}`,
-        );
+        edgeLines.push(`${e.fromId} ${arrow}${labelPart} ${extId}`);
+        edgeStyles.push({ tag: e.tag, dashed });
       }
     }
 
@@ -478,6 +589,8 @@
     if (edgeLines.length > 0) {
       graphDefinition += edgeLines.join('\n') + '\n';
     }
+    graphDefinition += emitClassStatements(nodeClasses);
+    graphDefinition += emitLinkStyles(edgeStyles);
     if (externalClicks.length > 0) {
       graphDefinition += externalClicks.join('\n') + '\n';
     }
@@ -776,6 +889,84 @@
     <input type="search" id="search-box" placeholder="ラベル名で検索..." />
     <span class="match-count" id="match-count"></span>
   </div>
+
+  <details class="legend" open>
+    <summary>凡例</summary>
+    <div class="legend-body">
+      <!-- 矢印用 marker 定義（共通） -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <marker id="legendArrowJump" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8" /></marker>
+          <marker id="legendArrowButton" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c2410c" /></marker>
+          <marker id="legendArrowGlink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#15803d" /></marker>
+          <marker id="legendArrowCall" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed" /></marker>
+          <marker id="legendArrowScenario" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a16207" /></marker>
+          <marker id="legendArrowScript" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b91c1c" /></marker>
+          <marker id="legendArrowHtml" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a21caf" /></marker>
+          <marker id="legendArrowCss" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0e7490" /></marker>
+          <marker id="legendArrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333" /></marker>
+        </defs>
+      </svg>
+
+      <div class="legend-section">
+        <h5>矢印の種類</h5>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#333" stroke-width="2" marker-end="url(#legendArrowGray)" /></svg>
+          <span>通常の遷移</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#333" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#legendArrowGray)" /></svg>
+          <span>条件分岐 (cond=...)</span>
+        </div>
+      </div>
+
+      <div class="legend-section">
+        <h5>矢印の色（タグ種別）</h5>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#1d4ed8" stroke-width="2" marker-end="url(#legendArrowJump)" /></svg>
+          <span>jump</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#c2410c" stroke-width="2" marker-end="url(#legendArrowButton)" /></svg>
+          <span>button</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#15803d" stroke-width="2" marker-end="url(#legendArrowGlink)" /></svg>
+          <span>glink</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#7c3aed" stroke-width="2" marker-end="url(#legendArrowCall)" /></svg>
+          <span>call</span>
+        </div>
+      </div>
+
+      <div class="legend-section">
+        <h5>矢印の色（その他のタグ）</h5>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#a16207" stroke-width="2" marker-end="url(#legendArrowScenario)" /></svg>
+          <span>scenario</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#b91c1c" stroke-width="2" marker-end="url(#legendArrowScript)" /></svg>
+          <span>script</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#a21caf" stroke-width="2" marker-end="url(#legendArrowHtml)" /></svg>
+          <span>html</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true"><line x1="2" y1="7" x2="50" y2="7" stroke="#0e7490" stroke-width="2" marker-end="url(#legendArrowCss)" /></svg>
+          <span>css</span>
+        </div>
+      </div>
+
+      <div class="legend-section">
+        <h5>ノードの色</h5>
+        <div class="legend-row"><span class="legend-swatch" style="background:#e9d5ff;border-color:#7c3aed"></span><span>同じファイルのラベル</span></div>
+        <div class="legend-row"><span class="legend-swatch" style="background:#e3faea;border-color:#333"></span><span>ほかの.ksファイル</span></div>
+      </div>
+    </div>
+  </details>
 
   <div id="project-tools" style="display:none;">
     <details class="file-filter">
