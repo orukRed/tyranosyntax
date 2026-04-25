@@ -11,7 +11,7 @@ suite("TransitionData", () => {
       // アサート
       assert.ok(Array.isArray(TransitionData.jumpTags), "jumpTagsは配列であるべき");
       assert.ok(TransitionData.jumpTags.length > 0, "jumpTagsは空でないべき");
-      
+
       const expectedTags = [
         "scenario",
         "script",
@@ -25,11 +25,11 @@ suite("TransitionData", () => {
         "link",
         "clickable"
       ];
-      
+
       expectedTags.forEach(tag => {
         assert.ok(TransitionData.jumpTags.includes(tag), `jumpTagsに${tag}が含まれるべき`);
       });
-      
+
       assert.strictEqual(TransitionData.jumpTags.length, expectedTags.length, "jumpTagsの要素数が期待値と一致するべき");
     });
   });
@@ -184,7 +184,7 @@ suite("TransitionData", () => {
     test("正常系 jumpTagsはstatic", () => {
       // アサート
       assert.ok(TransitionData.jumpTags, "jumpTagsはstaticプロパティとして存在するべき");
-      
+
       // インスタンスからはアクセスできない
       const instance = new TransitionData("jump", undefined, undefined, undefined, undefined, undefined);
       assert.strictEqual((instance as any).jumpTags, undefined, "jumpTagsはインスタンスプロパティではないべき");
