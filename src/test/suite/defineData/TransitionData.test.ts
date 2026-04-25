@@ -14,12 +14,16 @@ suite("TransitionData", () => {
       
       const expectedTags = [
         "scenario",
-        "script", 
+        "script",
         "html",
         "css",
         "jump",
+        "call",
         "button",
-        "glink"
+        "glink",
+        "sleepgame",
+        "link",
+        "clickable"
       ];
       
       expectedTags.forEach(tag => {
