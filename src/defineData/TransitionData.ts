@@ -12,7 +12,9 @@ export class TransitionData {
     "call",
     "button",
     "glink",
-    "sleepgame"
+    "sleepgame",
+    "link",
+    "clickable"
   ]; //tyranoJumpProviderでの定義と同じもの。重複なのでどこかで定義すべき？
 
   private storage: string | undefined; //storageタグで指定したファイルパス
