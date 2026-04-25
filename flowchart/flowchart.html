@@ -273,11 +273,17 @@
     button: "#c2410c",
     glink: "#15803d",
     call: "#7c3aed",
+    sleepgame: "#0891b2",
+    link: "#d97706",
+    clickable: "#be185d",
     scenario: "#a16207",
     script: "#b91c1c",
     html: "#a21caf",
     css: "#0e7490",
   };
+
+  // コールスタックが残るタグは破線で表示
+  const DASHED_TAGS = new Set(["call", "sleepgame"]);
 
   const COMMON_CLASS_DEFS = [
     // 別ファイルへのリーフノード
@@ -351,7 +357,7 @@
       for (const key in obj) {
         const t = obj[key];
         const condition = t.condition ? `${t.condition}` : "";
-        const dashed = !!condition;
+        const dashed = DASHED_TAGS.has(t.tag);
         const arrow = dashed ? "-.->" : "-->";
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
@@ -493,7 +499,7 @@
         const fromId = addNode(rel, t.currentLabel);
         nodeClasses[fromId] = "label";
         const condition = t.condition ? `${t.condition}` : "";
-        const dashed = !!condition;
+        const dashed = DASHED_TAGS.has(t.tag);
         const arrow = dashed ? "-.->" : "-->";
         const labelPart = condition
           ? `|"${escapeMermaidLabel(condition)}"|`
@@ -939,7 +945,7 @@
             <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed" />
           </marker>
           <marker
-            id="legendArrowScenario"
+            id="legendArrowSleepgame"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
@@ -947,10 +953,10 @@
             markerHeight="6"
             orient="auto"
           >
-            <path d="M0,0 L10,5 L0,10 z" fill="#a16207" />
+            <path d="M0,0 L10,5 L0,10 z" fill="#0891b2" />
           </marker>
           <marker
-            id="legendArrowScript"
+            id="legendArrowLink"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
@@ -958,10 +964,10 @@
             markerHeight="6"
             orient="auto"
           >
-            <path d="M0,0 L10,5 L0,10 z" fill="#b91c1c" />
+            <path d="M0,0 L10,5 L0,10 z" fill="#d97706" />
           </marker>
           <marker
-            id="legendArrowHtml"
+            id="legendArrowClickable"
             viewBox="0 0 10 10"
             refX="8"
             refY="5"
@@ -969,18 +975,7 @@
             markerHeight="6"
             orient="auto"
           >
-            <path d="M0,0 L10,5 L0,10 z" fill="#a21caf" />
-          </marker>
-          <marker
-            id="legendArrowCss"
-            viewBox="0 0 10 10"
-            refX="8"
-            refY="5"
-            markerWidth="6"
-            markerHeight="6"
-            orient="auto"
-          >
-            <path d="M0,0 L10,5 L0,10 z" fill="#0e7490" />
+            <path d="M0,0 L10,5 L0,10 z" fill="#be185d" />
           </marker>
           <marker
             id="legendArrowGray"
@@ -1010,7 +1005,7 @@
               marker-end="url(#legendArrowGray)"
             />
           </svg>
-          <span>通常の遷移</span>
+          <span>コールスタックなし</span>
         </div>
         <div class="legend-row">
           <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
@@ -1025,12 +1020,12 @@
               marker-end="url(#legendArrowGray)"
             />
           </svg>
-          <span>条件分岐 (cond=...)</span>
+          <span>コールスタックあり</span>
         </div>
       </div>
 
       <div class="legend-section">
-        <h5>矢印の色（タグ種別）</h5>
+        <h5>矢印の色（実線タグ）</h5>
         <div class="legend-row">
           <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
             <line
@@ -1080,17 +1075,46 @@
               y1="7"
               x2="50"
               y2="7"
+              stroke="#d97706"
+              stroke-width="2"
+              marker-end="url(#legendArrowLink)"
+            />
+          </svg>
+          <span>link</span>
+        </div>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
+              stroke="#be185d"
+              stroke-width="2"
+              marker-end="url(#legendArrowClickable)"
+            />
+          </svg>
+          <span>clickable</span>
+        </div>
+      </div>
+
+      <div class="legend-section">
+        <h5>矢印の色（破線タグ）</h5>
+        <div class="legend-row">
+          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
+            <line
+              x1="2"
+              y1="7"
+              x2="50"
+              y2="7"
               stroke="#7c3aed"
               stroke-width="2"
+              stroke-dasharray="5 5"
               marker-end="url(#legendArrowCall)"
             />
           </svg>
           <span>call</span>
         </div>
-      </div>
-
-      <div class="legend-section">
-        <h5>矢印の色（その他のタグ）</h5>
         <div class="legend-row">
           <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
             <line
@@ -1098,54 +1122,13 @@
               y1="7"
               x2="50"
               y2="7"
-              stroke="#a16207"
+              stroke="#0891b2"
               stroke-width="2"
-              marker-end="url(#legendArrowScenario)"
+              stroke-dasharray="5 5"
+              marker-end="url(#legendArrowSleepgame)"
             />
           </svg>
-          <span>scenario</span>
-        </div>
-        <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
-            <line
-              x1="2"
-              y1="7"
-              x2="50"
-              y2="7"
-              stroke="#b91c1c"
-              stroke-width="2"
-              marker-end="url(#legendArrowScript)"
-            />
-          </svg>
-          <span>script</span>
-        </div>
-        <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
-            <line
-              x1="2"
-              y1="7"
-              x2="50"
-              y2="7"
-              stroke="#a21caf"
-              stroke-width="2"
-              marker-end="url(#legendArrowHtml)"
-            />
-          </svg>
-          <span>html</span>
-        </div>
-        <div class="legend-row">
-          <svg class="legend-arrow" width="60" height="14" aria-hidden="true">
-            <line
-              x1="2"
-              y1="7"
-              x2="50"
-              y2="7"
-              stroke="#0e7490"
-              stroke-width="2"
-              marker-end="url(#legendArrowCss)"
-            />
-          </svg>
-          <span>css</span>
+          <span>sleepgame</span>
         </div>
       </div>
 
