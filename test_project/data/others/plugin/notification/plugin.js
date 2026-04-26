@@ -20,11 +20,14 @@ tyrano.plugin.kag.tag["notify"] = {
         anim_out: "300",
         style_class: "",
         bg_image: "",
+        storage: "",
+        target: "",
     },
     start: function (pm) {
         this.kag.ftag.nextOrder();
     },
 };
+
 
 tyrano.plugin.kag.tag["notify_clear"] = {
     pm: {

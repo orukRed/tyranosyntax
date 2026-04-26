@@ -275,25 +275,7 @@ export class TyranoCompletionItemProvider
         ["storage", "file", "path"].includes(lineParamName) &&
         this.isPluginDefinedTag(projectPath, lineTagName)
       ) {
-        // リソースタイプごとのサブフォルダを基準パスにすることで
-        // 補完テキストに "scenario/" "bgimage/" 等のプレフィックスが付かないようにする
-        const allResourceTypes = Object.keys(this.infoWs.resourceExtensions);
-        const completions: vscode.CompletionItem[] = [];
-        for (const resourceType of allResourceTypes) {
-          const refPath =
-            projectPath +
-            this.infoWs.DATA_DIRECTORY +
-            this.infoWs.pathDelimiter +
-            resourceType;
-          const items = await this.completionResource(
-            projectPath,
-            resourceType,
-            refPath,
-            undefined,
-          );
-          if (items) completions.push(...(items as vscode.CompletionItem[]));
-        }
-        return completions;
+        return this.completionAllResourcesForPlugin(projectPath);
       } else if (
         parsedData === undefined ||
         parsedData[tagIndex] === undefined ||
@@ -996,6 +978,57 @@ export class TyranoCompletionItemProvider
         TyranoLogger.printStackTrace(error);
       }
     }
+    return completions;
+  }
+
+  /**
+   * プラグインタグの storage/file/path パラメータ用リソース補完。
+   * 各リソースファイルが属するフォルダ（data/ 直下の最初のセグメント）を基準パスとして
+   * 挿入テキストを計算することで、"bgimage/room.jpg" のようなプレフィックスを除去する。
+   * @param projectPath プロジェクトパス
+   */
+  private completionAllResourcesForPlugin(
+    projectPath: string,
+  ): vscode.CompletionItem[] {
+    const completions: vscode.CompletionItem[] = [];
+    const dataDir =
+      projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.pathDelimiter;
+
+    this.infoWs.resourceFileMap.forEach((resourcesMap, key) => {
+      if (projectPath !== key) return;
+      resourcesMap.forEach((resource) => {
+        // data/ 以降の相対パス (例: "bgimage\room.jpg")
+        const relFromData = resource.filePath.startsWith(dataDir)
+          ? resource.filePath.slice(dataDir.length)
+          : path.relative(dataDir, resource.filePath);
+        const segments = relFromData.split(path.sep);
+        // 最初のセグメントがリソースフォルダ名 (例: "bgimage")
+        // 挿入テキストはそれ以降 (例: "room.jpg")
+        const insertText = segments.slice(1).join("/");
+        if (!insertText) return; // data直下のファイルは除外
+
+        const comp = new vscode.CompletionItem({
+          label: insertText,
+          description: relFromData.replace(/\\/g, "/"),
+        });
+        comp.kind = vscode.CompletionItemKind.File;
+        comp.insertText = new vscode.SnippetString(insertText);
+
+        const absoluteImagePath = vscode.Uri.file(resource.filePath).toString();
+        comp.documentation = new vscode.MarkdownString();
+        comp.documentation.baseUri = vscode.Uri.file(
+          path.dirname(resource.filePath) + path.sep,
+        );
+        comp.documentation.supportHtml = true;
+        comp.documentation.isTrusted = true;
+        comp.documentation.appendMarkdown(`${insertText}<br>`);
+        comp.documentation.appendMarkdown(
+          `<img src="${absoluteImagePath}" width=350>`,
+        );
+
+        completions.push(comp);
+      });
+    });
     return completions;
   }
 
