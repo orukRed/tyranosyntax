@@ -1373,7 +1373,7 @@ export class TyranoDiagnostic {
     const range = new vscode.Range(line, 0, line, labelName.length + 1);
     return new vscode.Diagnostic(
       range,
-      `ラベル "*${labelName}" は未使用です。`,
+      `ラベル "*${labelName}" はjumpやcallなどで直接呼ばれておらず、未使用の可能性があります。`,
       vscode.DiagnosticSeverity.Warning,
     );
   }
