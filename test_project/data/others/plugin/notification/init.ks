@@ -11,7 +11,3 @@ mp.offset_right = mp.offset_right || "10";
 ; [notify_init offset_top="&mp.offset_top" offset_right="&mp.offset_right"]
 
 [return]
-
-@bg storage="room.jpg"
-@notify storage="../bgimage/room.jpg" target=""
-@notify storage="button/log2.png" target=""

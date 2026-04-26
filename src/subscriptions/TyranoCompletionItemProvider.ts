@@ -267,12 +267,11 @@ export class TyranoCompletionItemProvider
           paramInfo,
         );
       }
-      // プラグインタグのstorage/file/pathパラメータ: 全リソースを補完
+      // プラグインタグのtarget以外のパラメータ: 全リソースを補完
       else if (
         parsedData[tagIndex] !== undefined &&
         lineTagName !== undefined &&
         lineParamName !== undefined &&
-        ["storage", "file", "path"].includes(lineParamName) &&
         this.isPluginDefinedTag(projectPath, lineTagName)
       ) {
         return this.completionAllResourcesForPlugin(projectPath);
