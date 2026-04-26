@@ -90,6 +90,16 @@ export class InformationWorkSpace {
   private readonly isParsePluginFolder: boolean = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.parser.read_plugin")!;
+  private readonly autoLoadPluginTags: boolean =
+    vscode.workspace
+      .getConfiguration()
+      .get<boolean>("TyranoScript syntax.parser.autoLoadPluginTags") ?? true;
+
+  // <projectPath, <pluginName, Set<paramName>>> プラグインフォルダのinit.ksから抽出したmp.*パラメータ
+  private _pluginParameterMap: Map<string, Map<string, Set<string>>> = new Map<
+    string,
+    Map<string, Set<string>>
+  >();
 
   private _extensionPath: string = "";
 
@@ -146,6 +156,10 @@ export class InformationWorkSpace {
         TyranoLogger.printStackTrace(error);
       }
       this.characterMap.set(projectPath, []);
+      this._pluginParameterMap.set(
+        projectPath,
+        new Map<string, Set<string>>(),
+      );
       TyranoLogger.print(`${projectPath} variable initialzie end`);
     }
 
@@ -177,6 +191,18 @@ export class InformationWorkSpace {
         absoluteScenarioFilePaths.map(async (i) => {
           await this.updateScenarioFileMap(i);
           await this.updateMacroLabelVariableDataMapByKs(i);
+        }),
+      );
+      // プラグインフォルダの init.ks から mp.* を抽出
+      TyranoLogger.print(`${projectPath}'s plugin init.ks is loading...`);
+      const pluginInitKsPaths = absoluteScenarioFilePaths.filter(
+        (p) =>
+          this.isPluginFile(p, projectPath) &&
+          path.basename(p) === "init.ks",
+      );
+      await Promise.all(
+        pluginInitKsPaths.map(async (p) => {
+          await this.updatePluginParamsFromInitKs(p);
         }),
       );
       //リソースファイルを取得
@@ -328,7 +354,17 @@ export class InformationWorkSpace {
       absoluteScenarioFilePath,
     );
 
-    if (this.isSkipParse(absoluteScenarioFilePath, projectPath)) {
+    // プラグインフォルダ配下の.jsは、isSkipParseで早期returnせずに
+    // タグ定義抽出のみを行う（read_pluginが既定falseでもタグを発見するため）。
+    const isPluginFile =
+      this.autoLoadPluginTags &&
+      !!projectPath &&
+      this.isPluginFile(absoluteScenarioFilePath, projectPath);
+
+    if (
+      !isPluginFile &&
+      this.isSkipParse(absoluteScenarioFilePath, projectPath)
+    ) {
       return;
     }
     const deleteTagList = await this.spliceMacroDataMapByFilePath(
@@ -341,15 +377,40 @@ export class InformationWorkSpace {
         enter: (path: any) => {
           try {
             //path.parentPathの値がTYRANO.kag.ftag.master_tag.MacroNameの形なら
-            if (
+            const dotMatch =
               path != null &&
               path.parentPath != null &&
               path.parentPath.type === "AssignmentExpression" &&
               (reg2.test(path.parentPath.toString()) ||
-                reg3.test(path.parentPath.toString()))
+                reg3.test(path.parentPath.toString()));
+
+            // tag["NAME"] 形式（computed string key）の代入も検出する
+            let computedTagName: string | undefined;
+            if (
+              !dotMatch &&
+              path != null &&
+              path.parentPath != null &&
+              path.parentPath.type === "AssignmentExpression" &&
+              path.node?.type === "MemberExpression" &&
+              path.node?.computed === true &&
+              (path.node?.property?.type === "StringLiteral" ||
+                path.node?.property?.type === "Literal")
             ) {
-              const macroName: string = path.toString().split(".")[4]; //MacroNameの部分を抽出
-              if (macroName != undefined && macroName != null) {
+              const objectStr = this.babelNodeToSource(path.node.object);
+              if (
+                objectStr === "tyrano.plugin.kag.tag" ||
+                objectStr === "TYRANO.kag.ftag.master_tag"
+              ) {
+                computedTagName = String(
+                  path.node.property.value ?? path.node.property.name ?? "",
+                );
+              }
+            }
+
+            if (dotMatch || computedTagName) {
+              const macroName: string =
+                computedTagName ?? path.toString().split(".")[4]; //MacroNameの部分を抽出
+              if (macroName) {
                 let description = path.parentPath.parentPath
                   .toString()
                   .replace(";", "")
@@ -372,9 +433,22 @@ export class InformationWorkSpace {
                   absoluteScenarioFilePath,
                   description,
                 );
-                macroData.parameter.push(
-                  new MacroParameterData("parameter", false, "description"),
-                ); //TODO:パーサーでパラメータの情報読み込んで追加する
+                // プラグインフォルダ配下のJSなら、代入式の右辺ObjectExpressionから
+                // pm（パラメータ）とvital（必須パラメータ）を抽出する。
+                const extracted = isPluginFile
+                  ? this.extractPmAndVitalFromAssignment(
+                      path.parentPath?.node,
+                    )
+                  : null;
+                if (extracted && extracted.params.length > 0) {
+                  for (const p of extracted.params) {
+                    macroData.parameter.push(p);
+                  }
+                } else {
+                  macroData.parameter.push(
+                    new MacroParameterData("parameter", false, "description"),
+                  ); //TODO:パーサーでパラメータの情報読み込んで追加する
+                }
 
                 const uuid = crypto.randomUUID();
                 this.defineMacroMap.get(projectPath)?.set(uuid, macroData);
@@ -407,6 +481,119 @@ export class InformationWorkSpace {
       TyranoLogger.printStackTrace(error);
       // traverseでエラーが発生しても処理を続行
     }
+  }
+
+  /**
+   * Babel ASTのMemberExpression/Identifierをドット区切り文字列に変換する。
+   * 例: tyrano.plugin.kag.tag のASTノードを "tyrano.plugin.kag.tag" にする。
+   * 認識できないノードは空文字を返す。
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private babelNodeToSource(node: any): string {
+    if (!node) return "";
+    if (node.type === "Identifier") return node.name;
+    if (node.type === "MemberExpression" && !node.computed) {
+      const obj = this.babelNodeToSource(node.object);
+      const prop = node.property?.name ?? "";
+      return obj && prop ? `${obj}.${prop}` : "";
+    }
+    return "";
+  }
+
+  /**
+   * tyrano.plugin.kag.tag["NAME"] = { pm: {...}, vital: [...] } のような代入式の
+   * 右辺ObjectExpressionから、pmのキー・vitalの要素を抽出してパラメータ配列を返す。
+   * 認識できないシェイプは黙ってスキップする。
+   */
+  private extractPmAndVitalFromAssignment(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    assignmentNode: any,
+  ): { params: MacroParameterData[] } | null {
+    if (!assignmentNode) return null;
+    const right = assignmentNode.right;
+    if (!right || right.type !== "ObjectExpression") return null;
+
+    const vitalSet = new Set<string>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let pmObject: any = null;
+
+    for (const prop of right.properties ?? []) {
+      try {
+        if (!prop || prop.type !== "ObjectProperty") continue;
+        const keyName =
+          prop.key?.name ??
+          (prop.key?.type === "StringLiteral" ? prop.key.value : undefined);
+        if (keyName === "vital" && prop.value?.type === "ArrayExpression") {
+          for (const el of prop.value.elements ?? []) {
+            if (el && (el.type === "StringLiteral" || el.type === "Literal")) {
+              const v = el.value;
+              if (typeof v === "string" && v.length > 0) {
+                vitalSet.add(v);
+              }
+            }
+          }
+        } else if (
+          keyName === "pm" &&
+          prop.value?.type === "ObjectExpression"
+        ) {
+          pmObject = prop.value;
+        }
+      } catch (_e) {
+        // 1キーの失敗で他キーが落ちないようスキップ
+      }
+    }
+
+    const params: MacroParameterData[] = [];
+    const seen = new Set<string>();
+
+    if (pmObject?.type === "ObjectExpression") {
+      for (const prop of pmObject.properties ?? []) {
+        try {
+          if (!prop || prop.type !== "ObjectProperty") continue;
+          const paramName =
+            prop.key?.name ??
+            (prop.key?.type === "StringLiteral" ? prop.key.value : undefined);
+          if (typeof paramName !== "string" || paramName.length === 0) continue;
+          if (seen.has(paramName)) continue;
+          seen.add(paramName);
+
+          let defaultValue: string | undefined;
+          if (
+            prop.value?.type === "StringLiteral" ||
+            prop.value?.type === "NumericLiteral" ||
+            prop.value?.type === "BooleanLiteral"
+          ) {
+            defaultValue = String(prop.value.value);
+          }
+
+          const required = vitalSet.has(paramName);
+          const description = required
+            ? `プラグインタグの必須パラメータ: ${paramName}`
+            : defaultValue !== undefined
+              ? `プラグインタグのパラメータ: ${paramName}（デフォルト値: ${defaultValue}）`
+              : `プラグインタグのパラメータ: ${paramName}`;
+          params.push(new MacroParameterData(paramName, required, description));
+        } catch (_e) {
+          // 1キーの失敗で他キーが落ちないようスキップ
+        }
+      }
+    }
+
+    // pmに列挙されていなくてもvitalに書かれているパラメータは追加する
+    for (const v of vitalSet) {
+      if (!seen.has(v)) {
+        params.push(
+          new MacroParameterData(
+            v,
+            true,
+            `プラグインタグの必須パラメータ: ${v}`,
+          ),
+        );
+        seen.add(v);
+      }
+    }
+
+    return { params };
   }
 
   /**
@@ -1049,6 +1236,103 @@ export class InformationWorkSpace {
     return ret;
   }
 
+  /**
+   * 引数のファイルパスが、プロジェクトの data/others/plugin/ 配下にあるかを判定する。
+   * isSkipParse が「診断・パース全般をスキップするか」を表すのに対し、
+   * こちらは「プラグインの自動タグ抽出のためにパース対象としてOKか」を表す。
+   * read_plugin の値には影響されない。
+   * @param filePath
+   * @param directory プロジェクトルート
+   * @returns プラグインフォルダ配下ならtrue
+   */
+  public isPluginFile(filePath: string, directory: string): boolean {
+    const pluginFolder = path.resolve(directory + "/data/others/plugin");
+    const normalizedFilePath = path.resolve(filePath);
+    const normalizedFolderPath = path.resolve(pluginFolder);
+    return normalizedFilePath.startsWith(normalizedFolderPath + path.sep);
+  }
+
+  /**
+   * data/others/plugin/<pluginName>/init.ks 形式のファイルパスから pluginName を抽出する。
+   * 形式に合致しない場合は undefined を返す。
+   * @param filePath
+   * @param directory プロジェクトルート
+   */
+  public extractPluginNameFromInitKs(
+    filePath: string,
+    directory: string,
+  ): string | undefined {
+    const normalizedFilePath = path.resolve(filePath);
+    const pluginFolder = path.resolve(directory + "/data/others/plugin");
+    if (!normalizedFilePath.startsWith(pluginFolder + path.sep)) {
+      return undefined;
+    }
+    if (path.basename(normalizedFilePath) !== "init.ks") {
+      return undefined;
+    }
+    const relative = normalizedFilePath.substring(pluginFolder.length + 1);
+    // <pluginName>/init.ks の形のみ受理（さらに深い階層は対象外）
+    const segments = relative.split(path.sep);
+    if (segments.length !== 2) {
+      return undefined;
+    }
+    return segments[0];
+  }
+
+  /**
+   * プラグインフォルダの init.ks をスキャンして mp.<param> 参照を _pluginParameterMap に登録する。
+   * 形式に合致しないファイルは何もしない。
+   * @param filePath
+   */
+  public async updatePluginParamsFromInitKs(filePath: string): Promise<void> {
+    if (!this.autoLoadPluginTags) {
+      return;
+    }
+    if (path.extname(filePath) !== ".ks") {
+      return;
+    }
+    const projectPath = await this.getProjectPathByFilePath(filePath);
+    if (!projectPath) {
+      return;
+    }
+    const pluginName = this.extractPluginNameFromInitKs(filePath, projectPath);
+    if (!pluginName) {
+      return;
+    }
+    let text: string;
+    try {
+      text = fs.readFileSync(filePath, "utf-8");
+    } catch (_error) {
+      // ファイルが読めない場合は登録を解除
+      this._pluginParameterMap.get(projectPath)?.delete(pluginName);
+      return;
+    }
+
+    const params = new Set<string>();
+    const regex = /mp\.([a-zA-Z0-9_]+)/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(text)) !== null) {
+      params.add(match[1]);
+    }
+
+    if (!this._pluginParameterMap.has(projectPath)) {
+      this._pluginParameterMap.set(projectPath, new Map<string, Set<string>>());
+    }
+    this._pluginParameterMap.get(projectPath)!.set(pluginName, params);
+  }
+
+  /**
+   * 指定した init.ks ファイルパスに対応するプラグインのパラメータ登録を削除する。
+   * @param filePath
+   */
+  public async splicePluginParamsByInitKsPath(filePath: string): Promise<void> {
+    const projectPath = await this.getProjectPathByFilePath(filePath);
+    if (!projectPath) return;
+    const pluginName = this.extractPluginNameFromInitKs(filePath, projectPath);
+    if (!pluginName) return;
+    this._pluginParameterMap.get(projectPath)?.delete(pluginName);
+  }
+
   public get scriptFileMap(): Map<string, string> {
     return this._scriptFileMap;
   }
@@ -1096,5 +1380,8 @@ export class InformationWorkSpace {
   }
   public set characterMap(value: Map<string, CharacterData[]>) {
     this._characterMap = value;
+  }
+  public get pluginParameterMap(): Map<string, Map<string, Set<string>>> {
+    return this._pluginParameterMap;
   }
 }

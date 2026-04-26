@@ -5,7 +5,7 @@
 @bg storage ="title.jpg" time=100
 @wait time = 200
 
-*start 
+*start
 @glink text="issue-6-test" storage="test/issue-6-test.ks"
 
 
