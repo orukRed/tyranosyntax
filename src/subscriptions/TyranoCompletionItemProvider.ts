@@ -186,6 +186,17 @@ export class TyranoCompletionItemProvider
         lineTagName !== undefined &&
         lineParamName === "target"
       ) {
+        // プラグインタグの場合: storage/file/pathに.ksファイルへの参照がある場合のみラベル補完
+        if (this.isPluginDefinedTag(projectPath, lineTagName)) {
+          const ksRef: string | undefined =
+            parsedData[tagIndex]["pm"]["storage"] ??
+            parsedData[tagIndex]["pm"]["file"] ??
+            parsedData[tagIndex]["pm"]["path"];
+          if (ksRef && String(ksRef).toLowerCase().endsWith(".ks")) {
+            return this.completionLabel(projectPath, ksRef);
+          }
+          return undefined;
+        }
         //leftSideTextの最後の文字が*ならラベルの予測変換を出す //FIXME:「参照paramがtargetなら」の方がよさそう
         return this.completionLabel(
           projectPath,
@@ -255,6 +266,34 @@ export class TyranoCompletionItemProvider
           projectPath + this.infoWs.pathDelimiter + (paramInfo.path || ""),
           paramInfo,
         );
+      }
+      // プラグインタグのstorage/file/pathパラメータ: 全リソースを補完
+      else if (
+        parsedData[tagIndex] !== undefined &&
+        lineTagName !== undefined &&
+        lineParamName !== undefined &&
+        ["storage", "file", "path"].includes(lineParamName) &&
+        this.isPluginDefinedTag(projectPath, lineTagName)
+      ) {
+        // リソースタイプごとのサブフォルダを基準パスにすることで
+        // 補完テキストに "scenario/" "bgimage/" 等のプレフィックスが付かないようにする
+        const allResourceTypes = Object.keys(this.infoWs.resourceExtensions);
+        const completions: vscode.CompletionItem[] = [];
+        for (const resourceType of allResourceTypes) {
+          const refPath =
+            projectPath +
+            this.infoWs.DATA_DIRECTORY +
+            this.infoWs.pathDelimiter +
+            resourceType;
+          const items = await this.completionResource(
+            projectPath,
+            resourceType,
+            refPath,
+            undefined,
+          );
+          if (items) completions.push(...(items as vscode.CompletionItem[]));
+        }
+        return completions;
       } else if (
         parsedData === undefined ||
         parsedData[tagIndex] === undefined ||
@@ -959,6 +998,27 @@ export class TyranoCompletionItemProvider
     }
     return completions;
   }
+
+  /**
+   * 指定したタグがプラグインフォルダのJSファイルで定義されたタグかどうかを判定する。
+   * @param projectPath プロジェクトパス
+   * @param tagName タグ名
+   */
+  private isPluginDefinedTag(projectPath: string, tagName: string): boolean {
+    const macroMap = this.infoWs.defineMacroMap.get(projectPath);
+    if (!macroMap) return false;
+    for (const [, macroData] of macroMap) {
+      if (
+        macroData.macroName === tagName &&
+        macroData.filePath &&
+        this.infoWs.isPluginFile(macroData.filePath, projectPath)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private findLayerParts(
     projectPath: string,
     tagIndex: number,
