@@ -368,6 +368,7 @@ export function activate(context: ExtensionContext) {
             scenarioFileSystemWatcher.onDidCreate(async (e) => {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
+              await infoWs.updatePluginParamsFromInitKs(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -376,6 +377,7 @@ export function activate(context: ExtensionContext) {
               );
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
+              await infoWs.updatePluginParamsFromInitKs(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
@@ -384,6 +386,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.spliceVariableMapByFilePath(e.fsPath);
               await infoWs.spliceCharacterMapByFilePath(e.fsPath);
               await infoWs.spliceTransitionMapByFilePath(e.fsPath);
+              await infoWs.splicePluginParamsByInitKsPath(e.fsPath);
             });
 
             //scriptFileの値
