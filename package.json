@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -206,7 +206,7 @@
           "TyranoScript syntax.plugin.parameter": {
             "type": "object",
             "default": {},
-            "description": "追加でタグ補完したいものを設定します"
+            "description": "非推奨。後方互換性のために残されていますが、v3.0.0のアプデによる不要となりました。追加でタグ補完したいものを設定します。"
           },
           "TyranoScript syntax.parser.read_plugin": {
             "type": "boolean",

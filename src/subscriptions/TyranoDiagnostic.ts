@@ -1373,7 +1373,7 @@ export class TyranoDiagnostic {
     const range = new vscode.Range(line, 0, line, labelName.length + 1);
     return new vscode.Diagnostic(
       range,
-      `ラベル "*${labelName}" は未使用です。`,
+      `ラベル "*${labelName}" はjumpやcallなどで直接呼ばれておらず、未使用の可能性があります。`,
       vscode.DiagnosticSeverity.Warning,
     );
   }
@@ -1731,6 +1731,19 @@ export class TyranoDiagnostic {
 
     // condパラメータの場合、なくてもOKとするためにあらかじめ追加しておく
     validParameterNames.push("cond");
+
+    // [plugin name="<X>" ...] の場合は <X>/init.ks に登場する mp.* を有効パラメータとして許可する
+    if (tagName === "plugin") {
+      const pluginName = data["pm"]?.["name"];
+      if (typeof pluginName === "string" && pluginName.length > 0) {
+        const set = this.infoWs.pluginParameterMap
+          .get(projectPathOfDiagFile)
+          ?.get(pluginName);
+        if (set) {
+          validParameterNames.push(...set);
+        }
+      }
+    }
 
     let charaName = "";
     // chara_partタグの場合、characterMap._layerのキーに登録されている値も有効なパラメータ名として扱う

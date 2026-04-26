@@ -4,6 +4,11 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [3.0.0] 2026-04-26
+
+- プロジェクト内の `data/others/plugin/` フォルダに配置されたプラグインのタグ・パラメータが自動的に補完されるようになりました。[issue#391](https://github.com/orukRed/tyranosyntax/issues/391)
+- 未使用ラベルの警告メッセージを修正しました。
+
 ## [2.1.0] 2026-04-25
 
 - 未使用マクロを警告として検出するようにしました。[issue#324](https://github.com/orukRed/tyranosyntax/issues/324)

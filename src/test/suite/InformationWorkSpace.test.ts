@@ -329,3 +329,151 @@ suite("InformationWorkSpace.convertToAbsolutePathFromRelativePath", () => {
     assert.ok(typeof result === "string", "戻り値は文字列であるべき");
   });
 });
+
+suite("InformationWorkSpace plugin auto-detection", () => {
+  test("isPluginFile はプラグインフォルダ配下のファイルでtrueを返す", () => {
+    const info = InformationWorkSpace.getInstance();
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const pluginFile = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notification",
+      "plugin.js",
+    );
+    const nonPluginFile = path.join(
+      workspaceFolder,
+      "data",
+      "scenario",
+      "first.ks",
+    );
+
+    assert.strictEqual(info.isPluginFile(pluginFile, workspaceFolder), true);
+    assert.strictEqual(
+      info.isPluginFile(nonPluginFile, workspaceFolder),
+      false,
+    );
+  });
+
+  test("extractPluginNameFromInitKs は init.ks からプラグイン名を取得する", () => {
+    const info = InformationWorkSpace.getInstance();
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const initKs = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notification",
+      "init.ks",
+    );
+    const otherKs = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notification",
+      "sub",
+      "init.ks",
+    );
+
+    assert.strictEqual(
+      info.extractPluginNameFromInitKs(initKs, workspaceFolder),
+      "notification",
+    );
+    assert.strictEqual(
+      info.extractPluginNameFromInitKs(otherKs, workspaceFolder),
+      undefined,
+    );
+  });
+
+  test("updatePluginParamsFromInitKs は mp.* 参照を抽出する", async () => {
+    const info = InformationWorkSpace.getInstance();
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const initKs = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notification",
+      "init.ks",
+    );
+
+    await info.updatePluginParamsFromInitKs(initKs);
+
+    const set = info.pluginParameterMap
+      .get(workspaceFolder)
+      ?.get("notification");
+    assert.ok(set, "notification プラグインのパラメータセットが存在する");
+    assert.strictEqual(set!.has("offset_top"), true);
+    assert.strictEqual(set!.has("offset_right"), true);
+  });
+
+  test("updateMacroDataMapByJs は plugin.js から pm/vital を抽出する", async () => {
+    const info = InformationWorkSpace.getInstance();
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const pluginJs = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notification",
+      "plugin.js",
+    );
+
+    // 必要な事前状態を直接セットアップ（initializeMaps全体を呼ばない）
+    if (!info.suggestions.get(workspaceFolder)) {
+      info.suggestions.set(workspaceFolder, {});
+    }
+    if (!info.defineMacroMap.get(workspaceFolder)) {
+      info.defineMacroMap.set(workspaceFolder, new Map());
+    }
+
+    await info.updateScriptFileMap(pluginJs);
+    await info.updateMacroDataMapByJs(pluginJs);
+
+    // suggestionsに登録されているか
+    const suggestions = info.suggestions.get(workspaceFolder) as Record<
+      string,
+      { name: string; parameters: { name: string; required: boolean }[] }
+    >;
+    assert.ok(suggestions, "suggestions が存在する");
+    assert.ok(
+      suggestions["notify"],
+      "notify タグが suggestions に登録されている",
+    );
+
+    const params = suggestions["notify"].parameters;
+    const paramNames = params.map((p) => p.name);
+    assert.ok(paramNames.includes("text"), "text パラメータが登録されている");
+    assert.ok(
+      paramNames.includes("duration"),
+      "duration パラメータが登録されている",
+    );
+
+    const textParam = params.find((p) => p.name === "text");
+    assert.strictEqual(
+      textParam?.required,
+      true,
+      "vital に含まれる text は required=true",
+    );
+    const durationParam = params.find((p) => p.name === "duration");
+    assert.strictEqual(
+      durationParam?.required,
+      false,
+      "vital に含まれない duration は required=false",
+    );
+
+    // notify_init / notify_clear も登録される
+    assert.ok(suggestions["notify_init"], "notify_init が登録されている");
+    assert.ok(suggestions["notify_clear"], "notify_clear が登録されている");
+  });
+});
