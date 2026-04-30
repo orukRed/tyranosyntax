@@ -717,7 +717,87 @@ export function registerEmbeddedJavaScriptSupport(
     }),
   );
 
+  // --- ファイル/フォルダリネームへの追従 ---
+  // 各キャッシュは旧URI文字列をキーにしているため、リネームで新しいパスに
+  // 切り替わった後も旧キーが残り続ける（メモリリークと診断UIの古い表示の原因）。
+  // ここで明示的に旧キーを掃除する。
+  context.subscriptions.push(
+    vscode.workspace.onDidRenameFiles(async (event) => {
+      for (const { oldUri, newUri } of event.files) {
+        let isDirectory = false;
+        try {
+          const stat = await vscode.workspace.fs.stat(newUri);
+          isDirectory = (stat.type & vscode.FileType.Directory) !== 0;
+        } catch {
+          continue;
+        }
+        cleanupCachesForRenamedPath(oldUri, isDirectory, diagnosticCollection);
+      }
+    }),
+  );
+
+  // --- ワークスペースフォルダ追加/削除への追従 ---
+  // crossFileContext は activate 時に1回しか init() しないため、
+  // 後から追加されたフォルダの .ks がキャッシュに乗らない。明示的にスキャンする。
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+      for (const removed of event.removed) {
+        crossFileContext.removeFolder(removed.uri);
+      }
+      for (const added of event.added) {
+        await crossFileContext.addFolder(added.uri);
+      }
+    }),
+  );
+
   console.log("[iscript] Embedded JavaScript Support registered");
+}
+
+/**
+ * リネーム対象のドキュメント/フォルダに紐づく全てのキャッシュエントリを削除する。
+ * documentCacheMap / debounceTimers は元ドキュメント URI をキー、
+ * virtualContentMap / virtualToOriginalMap / openedVirtualDocs は仮想 URI をキーとする。
+ * 仮想 URI 側は virtualToOriginalMap を逆引きして対応するエントリを掃除する。
+ */
+function cleanupCachesForRenamedPath(
+  oldUri: vscode.Uri,
+  isDirectory: boolean,
+  diagnosticCollection: vscode.DiagnosticCollection,
+): void {
+  const oldUriStr = oldUri.toString();
+  const oldUriPrefix = isDirectory ? oldUriStr + "/" : null;
+
+  const matches = (key: string) =>
+    key === oldUriStr || (oldUriPrefix !== null && key.startsWith(oldUriPrefix));
+
+  for (const key of [...documentCacheMap.keys()]) {
+    if (matches(key)) {
+      documentCacheMap.delete(key);
+    }
+  }
+
+  for (const key of [...debounceTimers.keys()]) {
+    if (matches(key)) {
+      const timer = debounceTimers.get(key);
+      if (timer) clearTimeout(timer);
+      debounceTimers.delete(key);
+    }
+  }
+
+  for (const [virtualKey, originalUriStr] of [
+    ...virtualToOriginalMap.entries(),
+  ]) {
+    if (matches(originalUriStr)) {
+      virtualContentMap.delete(virtualKey);
+      virtualToOriginalMap.delete(virtualKey);
+      openedVirtualDocs.delete(virtualKey);
+      try {
+        diagnosticCollection.delete(vscode.Uri.parse(originalUriStr));
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
 }
 
 /**

@@ -4,6 +4,7 @@
  * ファイルをまたいだ変数補完を実現する。
  */
 import * as vscode from "vscode";
+import * as path from "path";
 
 // [iscript] は属性付き (例: [iscript cond="..."]) にも対応、大文字小文字不問
 const ISCRIPT_TAG_REGEX = /^\s*\[iscript(\s.*?)?\]\s*$/i;
@@ -161,6 +162,44 @@ export class CrossFileContextManager implements vscode.Disposable {
       // ファイル読み込みエラー（削除済み等）は無視
       this.fileJsCache.delete(uri.toString());
       this.otherContentCache.clear();
+    }
+  }
+
+  /**
+   * 新しく追加されたワークスペースフォルダ配下の data/.ks をスキャンしてキャッシュに取り込む。
+   * 既存の FileSystemWatcher は workspace 全体に適用されるため、新規ファイル追加自体は
+   * 自動で拾えるが、既存ファイルの初回スキャンはこのメソッドで明示的に行う必要がある。
+   */
+  async addFolder(folderUri: vscode.Uri): Promise<void> {
+    const files = await vscode.workspace.findFiles(
+      new vscode.RelativePattern(folderUri, "**/data/**/*.ks"),
+    );
+    await Promise.all(files.map((uri) => this.loadFile(uri)));
+    this.fireChangeDebounced();
+  }
+
+  /**
+   * 取り除かれたワークスペースフォルダ配下のキャッシュエントリを削除する。
+   */
+  removeFolder(folderUri: vscode.Uri): void {
+    const folderPath = folderUri.fsPath;
+    let changed = false;
+    for (const key of [...this.fileJsCache.keys()]) {
+      let cachedPath: string;
+      try {
+        cachedPath = vscode.Uri.parse(key).fsPath;
+      } catch {
+        continue;
+      }
+      const rel = path.relative(folderPath, cachedPath);
+      if (!rel.startsWith("..") && !path.isAbsolute(rel)) {
+        this.fileJsCache.delete(key);
+        changed = true;
+      }
+    }
+    if (changed) {
+      this.otherContentCache.clear();
+      this.fireChangeDebounced();
     }
   }
 
