@@ -933,16 +933,32 @@ export class InformationWorkSpace {
   }
 
   /**
+   * 指定されたプロジェクトパス上の resourceFileMap から、対象ファイルパスのエントリを削除する。
+   * 旧パスがディスク上に存在しない（リネーム後の旧側）ケースで getProjectPathByFilePath が
+   * 失敗するのを避けるため、projectPath を呼び出し側から渡せるようにしたバリアント。
+   */
+  public spliceResourceFileMapByFilePathInProject(
+    projectPath: string,
+    filePath: string,
+  ) {
+    const insertValue: ResourceFileData[] | undefined = this.resourceFileMap
+      .get(projectPath)
+      ?.filter((obj) => obj.filePath !== filePath);
+    if (insertValue) {
+      this.resourceFileMap.set(projectPath, insertValue);
+    }
+  }
+
+  /**
    * 引数で指定したファイルパスを、リソースファイルのマップから削除
-   * @param absoluteProjectPath
    * @param filePath
    */
   public async spliceResourceFileMapByFilePath(filePath: string) {
     const absoluteProjectPath = await this.getProjectPathByFilePath(filePath);
-    const insertValue: ResourceFileData[] | undefined = this.resourceFileMap
-      .get(absoluteProjectPath)
-      ?.filter((obj) => obj.filePath !== filePath);
-    this.resourceFileMap.set(absoluteProjectPath, insertValue!);
+    this.spliceResourceFileMapByFilePathInProject(
+      absoluteProjectPath,
+      filePath,
+    );
   }
 
   /**
@@ -962,14 +978,16 @@ export class InformationWorkSpace {
   }
 
   /**
-   *  引数で指定したファイルパスを、マクロデータのマップから削除
-   * @param filePath
+   * spliceMacroDataMapByFilePath の projectPath を呼び出し側から渡せるバリアント。
+   * リネーム後の旧パスはディスク上に存在しないため、getProjectPathByFilePath では
+   * projectPath を解決できない。そうしたケースで使用する。
    */
-  public async spliceMacroDataMapByFilePath(filePath: string) {
+  public spliceMacroDataMapByFilePathInProject(
+    projectPath: string,
+    filePath: string,
+  ): string[] {
     const deleteTagList: string[] = [];
-    const projectPath = await this.getProjectPathByFilePath(filePath);
 
-    // 逆引きMapを使ってO(1)で該当マクロのUUIDを取得
     const macroUuids = this._macroByFilePath.get(filePath);
     if (!macroUuids || macroUuids.size === 0) {
       return deleteTagList;
@@ -981,7 +999,6 @@ export class InformationWorkSpace {
       return deleteTagList;
     }
 
-    // UUIDを使って直接削除
     for (const uuid of macroUuids) {
       const macroData = projectMacroMap.get(uuid);
       if (macroData) {
@@ -990,10 +1007,18 @@ export class InformationWorkSpace {
       }
     }
 
-    // 逆引きMapからも削除
     this._macroByFilePath.delete(filePath);
 
     return deleteTagList;
+  }
+
+  /**
+   *  引数で指定したファイルパスを、マクロデータのマップから削除
+   * @param filePath
+   */
+  public async spliceMacroDataMapByFilePath(filePath: string) {
+    const projectPath = await this.getProjectPathByFilePath(filePath);
+    return this.spliceMacroDataMapByFilePathInProject(projectPath, filePath);
   }
 
   /**
@@ -1005,11 +1030,12 @@ export class InformationWorkSpace {
   }
 
   /**
-   * 引数で指定したファイルパス（キー)の変数データマップを削除
-   * @param fsPath
+   * spliceVariableMapByFilePath の projectPath を呼び出し側から渡せるバリアント。
    */
-  public spliceVariableMapByFilePath(fsPath: string) {
-    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+  public spliceVariableMapByFilePathInProject(
+    projectPath: string,
+    fsPath: string,
+  ) {
     const projectVariableMap = this.variableMap.get(projectPath);
     if (!projectVariableMap) return;
 
@@ -1024,6 +1050,15 @@ export class InformationWorkSpace {
   }
 
   /**
+   * 引数で指定したファイルパス（キー)の変数データマップを削除
+   * @param fsPath
+   */
+  public spliceVariableMapByFilePath(fsPath: string) {
+    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+    this.spliceVariableMapByFilePathInProject(projectPath, fsPath);
+  }
+
+  /**
    * 引数で指定したファイルパス（キー）のトランジションデータマップを削除
    * @param fsPath
    */
@@ -1032,11 +1067,12 @@ export class InformationWorkSpace {
   }
 
   /**
-   *  引数で指定したファイルパス（Mapのキー）のCharacterDataをマップから削除
-   * @param fsPath
+   * spliceCharacterMapByFilePath の projectPath を呼び出し側から渡せるバリアント。
    */
-  public spliceCharacterMapByFilePath(fsPath: string) {
-    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+  public spliceCharacterMapByFilePathInProject(
+    projectPath: string,
+    fsPath: string,
+  ) {
     const characterMap = this.characterMap.get(projectPath);
     if (!characterMap) return;
 
@@ -1056,6 +1092,15 @@ export class InformationWorkSpace {
     });
 
     this.characterMap.set(projectPath, updatedCharacterData);
+  }
+
+  /**
+   *  引数で指定したファイルパス（Mapのキー）のCharacterDataをマップから削除
+   * @param fsPath
+   */
+  public spliceCharacterMapByFilePath(fsPath: string) {
+    const projectPath: string = this.getProjectPathByFilePathSync(fsPath);
+    this.spliceCharacterMapByFilePathInProject(projectPath, fsPath);
   }
 
   /**
@@ -1322,15 +1367,25 @@ export class InformationWorkSpace {
   }
 
   /**
+   * splicePluginParamsByInitKsPath の projectPath を呼び出し側から渡せるバリアント。
+   */
+  public splicePluginParamsByInitKsPathInProject(
+    projectPath: string,
+    filePath: string,
+  ): void {
+    if (!projectPath) return;
+    const pluginName = this.extractPluginNameFromInitKs(filePath, projectPath);
+    if (!pluginName) return;
+    this._pluginParameterMap.get(projectPath)?.delete(pluginName);
+  }
+
+  /**
    * 指定した init.ks ファイルパスに対応するプラグインのパラメータ登録を削除する。
    * @param filePath
    */
   public async splicePluginParamsByInitKsPath(filePath: string): Promise<void> {
     const projectPath = await this.getProjectPathByFilePath(filePath);
-    if (!projectPath) return;
-    const pluginName = this.extractPluginNameFromInitKs(filePath, projectPath);
-    if (!pluginName) return;
-    this._pluginParameterMap.get(projectPath)?.delete(pluginName);
+    this.splicePluginParamsByInitKsPathInProject(projectPath, filePath);
   }
 
   public get scriptFileMap(): Map<string, string> {

@@ -430,6 +430,19 @@ export function activate(context: ExtensionContext) {
               infoWs.spliceResourceFileMapByFilePath(e.fsPath);
             });
 
+            // VS Code の FileSystemWatcher はフォルダリネーム時に子ファイルの個別
+            // create/delete を発火しないため、リネームは onDidRenameFiles で捕捉する。
+            context.subscriptions.push(
+              vscode.workspace.onDidRenameFiles(async (event) => {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, FILE_SYNC_DELAY_MS),
+                );
+                for (const { oldUri, newUri } of event.files) {
+                  await handleRenamedPath(infoWs, oldUri, newUri);
+                }
+              }),
+            );
+
             //すべてのプロジェクトに対して初回診断実行
             for (const i of infoWs.getTyranoScriptProjectRootPaths()) {
               tyranoDiagnostic.createDiagnostics(i + infoWs.pathDelimiter);
@@ -495,4 +508,114 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined;
   }
   return client.stop();
+}
+
+/**
+ * Handle a single rename pair from `vscode.workspace.onDidRenameFiles`.
+ * Determines whether the new path is a directory; for directories, expands
+ * to all child files and reconstructs the corresponding old child paths so
+ * each splice/update pair targets the correct cache entry.
+ */
+async function handleRenamedPath(
+  infoWs: InformationWorkSpace,
+  oldUri: vscode.Uri,
+  newUri: vscode.Uri,
+): Promise<void> {
+  const newProjectPath = await infoWs.getProjectPathByFilePath(newUri.fsPath);
+  if (!newProjectPath) return;
+
+  // 旧パスはディスク上に存在しないため getProjectPathByFilePath は使えない。
+  // 既知のプロジェクトルートからプレフィックス一致で求める。
+  const oldProjectPath = resolveProjectPathByPrefix(infoWs, oldUri.fsPath);
+
+  let isDirectory = false;
+  try {
+    const stat = await vscode.workspace.fs.stat(newUri);
+    isDirectory = (stat.type & vscode.FileType.Directory) !== 0;
+  } catch {
+    return;
+  }
+
+  const effectiveOldProjectPath = oldProjectPath || newProjectPath;
+  if (isDirectory) {
+    const children = await vscode.workspace.findFiles(
+      new vscode.RelativePattern(newUri, "**/*"),
+    );
+    for (const child of children) {
+      const rel = path.relative(newUri.fsPath, child.fsPath);
+      const oldChildPath = oldUri.fsPath + infoWs.pathDelimiter + rel;
+      await handleRenamedFile(
+        infoWs,
+        oldChildPath,
+        child.fsPath,
+        effectiveOldProjectPath,
+      );
+    }
+  } else {
+    await handleRenamedFile(
+      infoWs,
+      oldUri.fsPath,
+      newUri.fsPath,
+      effectiveOldProjectPath,
+    );
+  }
+}
+
+/**
+ * For a single renamed file, splice the old path out of all relevant caches
+ * (using project-path-aware variants because the old path no longer exists
+ * on disk after the rename), then repopulate caches from the new path.
+ */
+async function handleRenamedFile(
+  infoWs: InformationWorkSpace,
+  oldPath: string,
+  newPath: string,
+  oldProjectPath: string,
+): Promise<void> {
+  const ext = path.extname(newPath);
+  if (ext === ".ks") {
+    await infoWs.spliceScenarioFileMapByFilePath(oldPath);
+    infoWs.spliceMacroDataMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.spliceLabelMapByFilePath(oldPath);
+    infoWs.spliceVariableMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceCharacterMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.spliceTransitionMapByFilePath(oldPath);
+    infoWs.splicePluginParamsByInitKsPathInProject(oldProjectPath, oldPath);
+
+    await infoWs.updateScenarioFileMap(newPath);
+    await infoWs.updateMacroLabelVariableDataMapByKs(newPath);
+    await infoWs.updatePluginParamsFromInitKs(newPath);
+  } else if (ext === ".js") {
+    await infoWs.spliceScriptFileMapByFilePath(oldPath);
+    infoWs.spliceMacroDataMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceVariableMapByFilePathInProject(oldProjectPath, oldPath);
+
+    await infoWs.updateScriptFileMap(newPath);
+    await infoWs.updateMacroDataMapByJs(newPath);
+  } else if (infoWs.resourceExtensionsArrays.includes(ext)) {
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.addResourceFileMap(newPath);
+  }
+}
+
+/**
+ * Resolve the Tyrano project root that contains the given (possibly
+ * non-existent) file path by prefix-matching against known project roots.
+ * Returns "" when no match — the caller is expected to fall back to the
+ * new path's project root.
+ */
+function resolveProjectPathByPrefix(
+  infoWs: InformationWorkSpace,
+  fsPath: string,
+): string {
+  const delimiter = infoWs.pathDelimiter;
+  for (const root of infoWs.getTyranoScriptProjectRootPaths()) {
+    if (
+      fsPath === root ||
+      fsPath.startsWith(root + delimiter)
+    ) {
+      return root;
+    }
+  }
+  return "";
 }
