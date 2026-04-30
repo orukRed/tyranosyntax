@@ -228,7 +228,8 @@
               "unusedMacro": true,
               "unusedLabel": true,
               "unusedVariable": true,
-              "missingReturnInCalledFile": true
+              "missingReturnInCalledFile": true,
+              "iscriptJumpWithoutEndscriptStop": true
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },

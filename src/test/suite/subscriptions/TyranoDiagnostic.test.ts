@@ -798,4 +798,224 @@ suite("TyranoDiagnostic", () => {
         );
       });
     });
+
+    suite("containsIscriptJumpInvocation", () => {
+      test("正常系 startTag('jump',...) を検出", () => {
+        const diagnostic = new TyranoDiagnostic();
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(
+            "TYRANO.kag.ftag.startTag('jump', {storage: 'foo.ks'});",
+          ),
+          true,
+        );
+      });
+
+      test('正常系 startTag("call",...) を検出', () => {
+        const diagnostic = new TyranoDiagnostic();
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(
+            'kag.ftag.startTag("call", {storage: "foo.ks"});',
+          ),
+          true,
+        );
+      });
+
+      test("対象外 jumpを呼んでいない普通のJSはfalse", () => {
+        const diagnostic = new TyranoDiagnostic();
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(
+            "f.score = 10; tf.flag = true;",
+          ),
+          false,
+        );
+      });
+
+      test("対象外 文字列にjumpという単語があるだけならfalse", () => {
+        const diagnostic = new TyranoDiagnostic();
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(
+            "var jumpCount = 0;",
+          ),
+          false,
+        );
+      });
+
+      test("対象外 stringでない値はfalse", () => {
+        const diagnostic = new TyranoDiagnostic();
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(undefined),
+          false,
+        );
+        assert.strictEqual(
+          (diagnostic as any).containsIscriptJumpInvocation(123),
+          false,
+        );
+      });
+    });
+
+    suite("detectIscriptJumpWithoutEndscriptStop", () => {
+      const buildScenarioDoc = (lines: string[]): vscode.TextDocument => {
+        return {
+          lineAt: (line: number) => ({
+            text: lines[line] ?? "",
+          }),
+        } as unknown as vscode.TextDocument;
+      };
+
+      test("異常系 jump検出かつendscript stop未指定で警告", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          iscriptJumpWithoutEndscriptStop: true,
+        };
+        const scope = { isInIscript: false, iscriptHasJump: false };
+        const diagnostics: vscode.Diagnostic[] = [];
+        const doc = buildScenarioDoc([
+          "[iscript]",
+          "TYRANO.kag.ftag.startTag('jump', {storage: 'foo.ks'});",
+          "[endscript]",
+        ]);
+
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "iscript", pm: {}, line: 0 },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          {
+            name: "text",
+            pm: { val: "TYRANO.kag.ftag.startTag('jump', {});" },
+            line: 1,
+          },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "endscript", pm: {}, line: 2 },
+          doc,
+          diagnostics,
+          scope,
+        );
+
+        assert.strictEqual(diagnostics.length, 1, "警告が1件出るべき");
+        assert.strictEqual(
+          diagnostics[0].severity,
+          vscode.DiagnosticSeverity.Warning,
+        );
+      });
+
+      test("正常系 endscript stop=trueなら警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          iscriptJumpWithoutEndscriptStop: true,
+        };
+        const scope = { isInIscript: false, iscriptHasJump: false };
+        const diagnostics: vscode.Diagnostic[] = [];
+        const doc = buildScenarioDoc([
+          "[iscript]",
+          "kag.ftag.startTag('jump', {});",
+          '[endscript stop="true"]',
+        ]);
+
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "iscript", pm: {}, line: 0 },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          {
+            name: "text",
+            pm: { val: "kag.ftag.startTag('jump', {});" },
+            line: 1,
+          },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "endscript", pm: { stop: "true" }, line: 2 },
+          doc,
+          diagnostics,
+          scope,
+        );
+
+        assert.strictEqual(diagnostics.length, 0);
+      });
+
+      test("正常系 jumpを呼ばないiscriptブロックでは警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          iscriptJumpWithoutEndscriptStop: true,
+        };
+        const scope = { isInIscript: false, iscriptHasJump: false };
+        const diagnostics: vscode.Diagnostic[] = [];
+        const doc = buildScenarioDoc([
+          "[iscript]",
+          "f.score = 10;",
+          "[endscript]",
+        ]);
+
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "iscript", pm: {}, line: 0 },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "text", pm: { val: "f.score = 10;" }, line: 1 },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "endscript", pm: {}, line: 2 },
+          doc,
+          diagnostics,
+          scope,
+        );
+
+        assert.strictEqual(diagnostics.length, 0);
+      });
+
+      test("対象外 設定で無効化されていれば警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          iscriptJumpWithoutEndscriptStop: false,
+        };
+        const scope = { isInIscript: false, iscriptHasJump: false };
+        const diagnostics: vscode.Diagnostic[] = [];
+        const doc = buildScenarioDoc([
+          "[iscript]",
+          "kag.ftag.startTag('jump', {});",
+          "[endscript]",
+        ]);
+
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "iscript", pm: {}, line: 0 },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          {
+            name: "text",
+            pm: { val: "kag.ftag.startTag('jump', {});" },
+            line: 1,
+          },
+          doc,
+          diagnostics,
+          scope,
+        );
+        (diagnostic as any).detectIscriptJumpWithoutEndscriptStop(
+          { name: "endscript", pm: {}, line: 2 },
+          doc,
+          diagnostics,
+          scope,
+        );
+
+        assert.strictEqual(diagnostics.length, 0);
+      });
+    });
   });

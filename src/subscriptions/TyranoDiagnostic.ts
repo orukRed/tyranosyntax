@@ -36,6 +36,8 @@ export class TyranoDiagnostic {
   private readonly unusedLabel = "unusedLabel";
   private readonly unusedVariable = "unusedVariable";
   private readonly missingReturnInCalledFile = "missingReturnInCalledFile";
+  private readonly iscriptJumpWithoutEndscriptStop =
+    "iscriptJumpWithoutEndscriptStop";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -266,12 +268,22 @@ export class TyranoDiagnostic {
     //-----------------------------------------
 
     let isInIf: boolean = false; // if文の中にいるかどうか（detectJumpAndCallInIfStatement用）
+    const iscriptScope = { isInIscript: false, iscriptHasJump: false };
 
     for (const data of parsedData) {
       //early return
       if (data["name"] === "comment") {
         continue;
       }
+
+      // iscriptブロック内のJSにjump発火が含まれているか追跡し、
+      // endscriptにstop="true"が無ければ警告
+      this.detectIscriptJumpWithoutEndscriptStop(
+        data,
+        scenarioDocument,
+        diagnostics,
+        iscriptScope,
+      );
 
       // 1. 未定義マクロの検出（元のdetectionUndefineMacro）
       if (this.isExecuteDiagnostic(this.undefinedMacro)) {
@@ -751,6 +763,74 @@ export class TyranoDiagnostic {
     const parsed = this.parser.parseText(calledDocument.getText());
     parsedDataCache.set(absoluteFilePath, parsed);
     return parsed;
+  }
+
+  /**
+   * iscript内のJSコード文字列にjump/call発火の慣用句が含まれているかを判定します。
+   * 現状は `kag.ftag.startTag('jump', ...)` / `startTag('call', ...)` 系をマッチします。
+   */
+  private containsIscriptJumpInvocation(text: unknown): boolean {
+    if (typeof text !== "string" || text === "") {
+      return false;
+    }
+    return /startTag\s*\(\s*['"](?:jump|call)['"]/.test(text);
+  }
+
+  /**
+   * iscript〜endscriptブロックのスコープを追跡し、JS内でjump発火が
+   * 検出されたのに endscript に stop="true" が無い場合に警告を出します。
+   * @param data 統合ループで処理中のタグデータ
+   * @param scenarioDocument 診断対象ドキュメント
+   * @param diagnostics 診断結果配列
+   * @param scope 呼び出し側で保持するスコープ状態 (ループをまたいで使い回す)
+   */
+  private detectIscriptJumpWithoutEndscriptStop(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    diagnostics: vscode.Diagnostic[],
+    scope: { isInIscript: boolean; iscriptHasJump: boolean },
+  ): void {
+    if (!this.isExecuteDiagnostic(this.iscriptJumpWithoutEndscriptStop)) {
+      return;
+    }
+
+    const name = data["name"];
+    if (name === "iscript") {
+      scope.isInIscript = true;
+      scope.iscriptHasJump = false;
+      return;
+    }
+    if (
+      scope.isInIscript &&
+      name === "text" &&
+      this.containsIscriptJumpInvocation(data["pm"]?.["val"] ?? data["val"])
+    ) {
+      scope.iscriptHasJump = true;
+      return;
+    }
+    if (name !== "endscript") {
+      return;
+    }
+
+    if (scope.iscriptHasJump && data["pm"]?.["stop"] !== "true") {
+      const tagFirstIndex = scenarioDocument
+        .lineAt(data["line"])
+        .text.indexOf("endscript");
+      const range = new vscode.Range(
+        data["line"],
+        tagFirstIndex,
+        data["line"],
+        tagFirstIndex + "endscript".length,
+      );
+      const diag = new vscode.Diagnostic(
+        range,
+        `[iscript]内でjump/callが呼び出されていますが、[endscript]にstop="true"が指定されていません。JavaScriptから発火したジャンプが意図通り動作しない可能性があります。`,
+        vscode.DiagnosticSeverity.Warning,
+      );
+      diagnostics.push(diag);
+    }
+    scope.isInIscript = false;
+    scope.iscriptHasJump = false;
   }
 
   /**
