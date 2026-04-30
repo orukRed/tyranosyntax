@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+- アクティビティバーに「マクロ」「変数」「キャラクター」のサイドバービューを追加し、それぞれ定義箇所・使用箇所・コメントを一覧表示できるようにしました。[issue#322](https://github.com/orukRed/tyranosyntax/issues/322)
+
 ## [3.0.0] 2026-04-26
 
 - プロジェクト内の `data/others/plugin/` フォルダに配置されたプラグインのタグ・パラメータが自動的に補完されるようになりました。[issue#391](https://github.com/orukRed/tyranosyntax/issues/391)
