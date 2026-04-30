@@ -4,6 +4,7 @@
  * ファイルをまたいだ変数補完を実現する。
  */
 import * as vscode from "vscode";
+import * as path from "path";
 
 // [iscript] は属性付き (例: [iscript cond="..."]) にも対応、大文字小文字不問
 const ISCRIPT_TAG_REGEX = /^\s*\[iscript(\s.*?)?\]\s*$/i;
@@ -17,6 +18,15 @@ const HAS_ISCRIPT_REGEX = /\[iscript[\s\]]|@iscript(?:\s|$)/i;
  */
 function hasScriptBlocksInText(text: string): boolean {
   return HAS_ISCRIPT_REGEX.test(text);
+}
+
+/**
+ * `**\/data/**\/*.ks` グロブと同じ判定を絶対パスに対して行う。
+ * Tyrano プロジェクトの data/ 配下にあるファイルかどうかを返す。
+ */
+function isUnderDataFolder(fsPath: string): boolean {
+  const normalized = fsPath.replace(/\\/g, "/");
+  return /\/data\//.test(normalized);
 }
 
 interface TextScriptBlock {
@@ -136,6 +146,50 @@ export class CrossFileContextManager implements vscode.Disposable {
     );
 
     this.disposables.push(this.watcher);
+
+    // VS Code の FileSystemWatcher はフォルダリネーム時に子ファイルの個別
+    // create/delete を発火しないため、リネーム反映は onDidRenameFiles で行う。
+    this.disposables.push(
+      vscode.workspace.onDidRenameFiles(async (event) => {
+        let changed = false;
+        for (const { oldUri, newUri } of event.files) {
+          let isDirectory = false;
+          try {
+            const stat = await vscode.workspace.fs.stat(newUri);
+            isDirectory = (stat.type & vscode.FileType.Directory) !== 0;
+          } catch {
+            continue;
+          }
+
+          if (isDirectory) {
+            const children = await vscode.workspace.findFiles(
+              new vscode.RelativePattern(newUri, "**/*.ks"),
+            );
+            for (const childNew of children) {
+              if (!isUnderDataFolder(childNew.fsPath)) continue;
+              const rel = path.relative(newUri.fsPath, childNew.fsPath);
+              const oldChildUri = vscode.Uri.file(
+                path.join(oldUri.fsPath, rel),
+              );
+              this.fileJsCache.delete(oldChildUri.toString());
+              await this.loadFile(childNew);
+              changed = true;
+            }
+          } else if (
+            path.extname(newUri.fsPath) === ".ks" &&
+            isUnderDataFolder(newUri.fsPath)
+          ) {
+            this.fileJsCache.delete(oldUri.toString());
+            await this.loadFile(newUri);
+            changed = true;
+          }
+        }
+        if (changed) {
+          this.otherContentCache.clear();
+          this.fireChangeDebounced();
+        }
+      }),
+    );
   }
 
   /**
