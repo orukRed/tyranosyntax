@@ -1798,6 +1798,21 @@
           "icon": ""
         },
         {
+          "id": "tyrano-macros",
+          "name": "マクロ",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-variables",
+          "name": "変数",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-characters",
+          "name": "キャラクター",
+          "icon": ""
+        },
+        {
           "id": "tyrano-links",
           "name": "リンク",
           "icon": ""
@@ -1871,8 +1886,46 @@
         "command": "tyrano.sidebar.openOfuse",
         "title": "OFUSE（寄付）",
         "icon": "$(heart)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshMacros",
+        "title": "マクロ一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshVariables",
+        "title": "変数一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshCharacters",
+        "title": "キャラクター一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.openLocation",
+        "title": "定義箇所/使用箇所を開く"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "tyrano.sidebar.refreshMacros",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.refreshVariables",
+          "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.refreshCharacters",
+          "when": "view == tyrano-characters",
+          "group": "navigation"
+        }
+      ]
+    },
     "breakpoints": [
       {
         "language": "tyrano"
