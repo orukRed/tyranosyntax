@@ -227,7 +227,8 @@
               "missingAmpersandInVariable": true,
               "unusedMacro": true,
               "unusedLabel": true,
-              "unusedVariable": true
+              "unusedVariable": true,
+              "missingReturnInCalledFile": true
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },

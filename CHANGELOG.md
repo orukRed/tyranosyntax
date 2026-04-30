@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+- callタグや`fix="true"`を指定したbuttonタグで呼び出されているシナリオファイルに`[return]`タグが存在しない場合、警告として検出するようにしました。[issue#295](https://github.com/orukRed/tyranosyntax/issues/295)
+
 ## [3.0.0] 2026-04-26
 
 - プロジェクト内の `data/others/plugin/` フォルダに配置されたプラグインのタグ・パラメータが自動的に補完されるようになりました。[issue#391](https://github.com/orukRed/tyranosyntax/issues/391)

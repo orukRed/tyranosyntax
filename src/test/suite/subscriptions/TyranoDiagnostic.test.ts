@@ -685,4 +685,117 @@ suite("TyranoDiagnostic", () => {
         assert.ok(!hasAmpersand, "&がないことが検出されるべき");
       });
     });
+
+    suite("detectionMissingReturnInCalledFile", () => {
+      test("正常系 メソッドが存在する", () => {
+        const diagnostic = new TyranoDiagnostic();
+
+        assert.ok(
+          typeof (diagnostic as any).detectionMissingReturnInCalledFile ===
+            "function",
+          "detectionMissingReturnInCalledFileメソッドが存在するべき",
+        );
+      });
+
+      test("対象外 callでもfixボタンでもないタグはスキップされる", () => {
+        const diagnostic = new TyranoDiagnostic();
+        // 設定で診断ON相当に
+        (diagnostic as any).executeDiagnostic = {
+          missingReturnInCalledFile: true,
+        };
+        const data = {
+          name: "jump",
+          pm: { storage: "fuga.ks" },
+          line: 0,
+        };
+        const diagnostics: vscode.Diagnostic[] = [];
+        (diagnostic as any).detectionMissingReturnInCalledFile(
+          data,
+          undefined,
+          "/dummy/project/",
+          diagnostics,
+          new Map(),
+        );
+        assert.strictEqual(
+          diagnostics.length,
+          0,
+          "jumpタグでは警告が出ないべき",
+        );
+      });
+
+      test("対象外 storageが変数の場合は警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          missingReturnInCalledFile: true,
+        };
+        const data = {
+          name: "call",
+          pm: { storage: "&f.target_file" },
+          line: 0,
+        };
+        const diagnostics: vscode.Diagnostic[] = [];
+        (diagnostic as any).detectionMissingReturnInCalledFile(
+          data,
+          undefined,
+          "/dummy/project/",
+          diagnostics,
+          new Map(),
+        );
+        assert.strictEqual(
+          diagnostics.length,
+          0,
+          "storageが変数の場合は警告が出ないべき",
+        );
+      });
+
+      test("対象外 button fix=falseは警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          missingReturnInCalledFile: true,
+        };
+        const data = {
+          name: "button",
+          pm: { fix: "false", storage: "fuga.ks" },
+          line: 0,
+        };
+        const diagnostics: vscode.Diagnostic[] = [];
+        (diagnostic as any).detectionMissingReturnInCalledFile(
+          data,
+          undefined,
+          "/dummy/project/",
+          diagnostics,
+          new Map(),
+        );
+        assert.strictEqual(
+          diagnostics.length,
+          0,
+          "fix=falseのbuttonでは警告が出ないべき",
+        );
+      });
+
+      test("対象外 設定で無効化されている場合は警告が出ない", () => {
+        const diagnostic = new TyranoDiagnostic();
+        (diagnostic as any).executeDiagnostic = {
+          missingReturnInCalledFile: false,
+        };
+        const data = {
+          name: "call",
+          pm: { storage: "fuga.ks" },
+          line: 0,
+        };
+        const diagnostics: vscode.Diagnostic[] = [];
+        (diagnostic as any).detectionMissingReturnInCalledFile(
+          data,
+          undefined,
+          "/dummy/project/",
+          diagnostics,
+          new Map(),
+        );
+        assert.strictEqual(
+          diagnostics.length,
+          0,
+          "設定で無効化されていれば警告が出ないべき",
+        );
+      });
+    });
   });

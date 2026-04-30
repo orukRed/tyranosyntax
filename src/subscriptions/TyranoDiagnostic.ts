@@ -35,6 +35,7 @@ export class TyranoDiagnostic {
   private readonly unusedMacro = "unusedMacro";
   private readonly unusedLabel = "unusedLabel";
   private readonly unusedVariable = "unusedVariable";
+  private readonly missingReturnInCalledFile = "missingReturnInCalledFile";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -493,6 +494,15 @@ export class TyranoDiagnostic {
         projectPathOfDiagFile,
         diagnostics,
       );
+
+      //call/fixボタンで呼ばれているファイルにreturnタグがあるかチェック
+      this.detectionMissingReturnInCalledFile(
+        data,
+        scenarioDocument,
+        projectPathOfDiagFile,
+        diagnostics,
+        parsedDataCache,
+      );
     }
 
     //-----------------------------------------
@@ -607,6 +617,140 @@ export class TyranoDiagnostic {
         diagnostics.push(diag);
       }
     }
+  }
+
+  /**
+   * call タグや fix ボタンで呼ばれているシナリオファイルに return タグが
+   * 含まれていない場合に警告を出します。
+   * - 対象は `call` タグ、または `button fix="true"` のうち、
+   *   `role` が指定されておらず、`storage` が静的なファイルパスのもの。
+   * - storage が変数(&,%)を含む場合や、ファイルが存在しない場合はスキップ。
+   * - 解析対象ファイル内のいずれかの位置に `return` タグが存在すれば警告は出しません。
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   */
+  private detectionMissingReturnInCalledFile(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+    parsedDataCache: Map<string, any>,
+  ): void {
+    if (!this.isExecuteDiagnostic(this.missingReturnInCalledFile)) {
+      return;
+    }
+    if (!this.isCallStyleTag(data)) {
+      return;
+    }
+
+    const storage = data["pm"]?.["storage"];
+    if (!this.isStaticKsFilePath(storage)) {
+      return;
+    }
+
+    const calledParsedData = this.getOrParseScenario(
+      storage,
+      projectPathOfDiagFile,
+      parsedDataCache,
+    );
+    if (!calledParsedData) {
+      return;
+    }
+
+    // ファイル内に return タグが1つでも存在すれば警告しない
+    const hasReturn = calledParsedData.some(
+      (tag: any) => tag && tag["name"] === "return",
+    );
+    if (hasReturn) {
+      return;
+    }
+
+    const range = this.getParameterRange(
+      "storage",
+      storage,
+      data,
+      scenarioDocument,
+    );
+    const diag = new vscode.Diagnostic(
+      range,
+      `${storage} には [return] タグがありません。${data["name"]}で呼び出した場合、呼び出し元へ正しく戻れない可能性があります。`,
+      vscode.DiagnosticSeverity.Warning,
+    );
+    diagnostics.push(diag);
+  }
+
+  /**
+   * call タグ、または button fix="true" (role 指定なし) のいずれかであるか判定します。
+   */
+  private isCallStyleTag(data: any): boolean {
+    const tagName = data?.["name"];
+    const pm = data?.["pm"];
+    if (!pm) {
+      return false;
+    }
+    if (tagName === "call") {
+      return true;
+    }
+    if (tagName !== "button") {
+      return false;
+    }
+    if (pm["fix"] !== "true") {
+      return false;
+    }
+    return pm["role"] === undefined || pm["role"] === "";
+  }
+
+  /**
+   * storage の値が、静的に解決可能な .ks ファイルパスであるかを判定します。
+   */
+  private isStaticKsFilePath(storage: unknown): storage is string {
+    if (typeof storage !== "string" || storage === "") {
+      return false;
+    }
+    if (
+      this.isExistAmpersandAtBeginning(storage) ||
+      this.isExistPercentAtBeginning(storage) ||
+      this.isValueIsIncludeVariable(storage)
+    ) {
+      return false;
+    }
+    return storage.endsWith(".ks");
+  }
+
+  /**
+   * storage で指定されたファイルのパース結果をキャッシュ優先で取得します。
+   * ファイルが存在しない、もしくは scenarioFileMap に登録されていない場合は undefined を返します。
+   */
+  private getOrParseScenario(
+    storage: string,
+    projectPathOfDiagFile: string,
+    parsedDataCache: Map<string, any>,
+  ): any | undefined {
+    const absoluteFilePath = this.infoWs.convertToAbsolutePathFromRelativePath(
+      projectPathOfDiagFile +
+        this.infoWs.DATA_DIRECTORY +
+        this.infoWs.DATA_SCENARIO +
+        this.infoWs.pathDelimiter +
+        storage,
+    );
+    if (!fs.existsSync(absoluteFilePath)) {
+      return undefined;
+    }
+
+    const cached = parsedDataCache.get(absoluteFilePath);
+    if (cached) {
+      return cached;
+    }
+    const calledDocument = this.infoWs.scenarioFileMap.get(absoluteFilePath);
+    if (!calledDocument) {
+      return undefined;
+    }
+    const parsed = this.parser.parseText(calledDocument.getText());
+    parsedDataCache.set(absoluteFilePath, parsed);
+    return parsed;
   }
 
   /**
