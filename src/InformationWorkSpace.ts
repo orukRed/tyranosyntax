@@ -72,14 +72,29 @@ export class InformationWorkSpace {
   >(); //ファイル名、TransitionDataの配列
   private defaultTagList: string[] = [];
 
-  private readonly _resourceExtensions: object = vscode.workspace
+  private _resourceExtensions: object = vscode.workspace
     .getConfiguration()
     .get("TyranoScript syntax.resource.extension")!;
-  private readonly _resourceExtensionsArrays = Object.keys(
+  private _resourceExtensionsArrays: string[] = Object.keys(
     this.resourceExtensions,
   )
     .map((key) => this.resourceExtensions[key])
     .flat(); //resourceExtensionsをオブジェクトからstring型の一次配列にする
+
+  /**
+   * `TyranoScript syntax.resource.extension` 設定を読み直して
+   * `_resourceExtensions` / `_resourceExtensionsArrays` を再構築する。
+   * 設定変更時に呼び出す。
+   */
+  public reloadResourceExtensions(): void {
+    this._resourceExtensions =
+      vscode.workspace
+        .getConfiguration()
+        .get("TyranoScript syntax.resource.extension") ?? {};
+    this._resourceExtensionsArrays = Object.keys(this._resourceExtensions)
+      .map((key) => this._resourceExtensions[key])
+      .flat();
+  }
   private readonly pluginTags: object = JSON.parse(
     JSON.stringify(
       vscode.workspace
@@ -129,95 +144,130 @@ export class InformationWorkSpace {
       TyranoLogger.print(`Opening workspace is ${value.uri.fsPath}`);
     });
 
-    //最初のキーをプロジェクト名で初期化
+    this._macroByFilePath.clear();
     for (const projectPath of this.getTyranoScriptProjectRootPaths()) {
-      TyranoLogger.print(`${projectPath} variable initialzie start`);
-      this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
-      this._macroByFilePath.clear(); // 逆引きMapも初期化
-      this._resourceFileMap.set(projectPath, []);
-      this.variableMap.set(projectPath, new Map<string, VariableData>());
-      try {
-        const passJoined = this.getSnippetPath();
-        const jsonData = fs.readFileSync(passJoined, "utf8");
-        const parsedJson = JSON.parse(jsonData);
-        const combinedObject = { ...parsedJson, ...this.pluginTags };
-
-        this.defaultTagList = Object.keys(parsedJson);
-        this.defaultTagList.push(...Object.keys(this.pluginTags)); //pluginTagsをdefaultTagListに追加
-        this.suggestions.set(projectPath, combinedObject);
-        if (Object.keys(this.suggestions.get(projectPath)!).length === 0) {
-          throw new Error("suggestions is empty");
-        }
-      } catch (error) {
-        TyranoLogger.print(
-          "passJoin or JSON.parse or readFile Sync failed",
-          ErrorLevel.ERROR,
-        );
-        TyranoLogger.printStackTrace(error);
-      }
-      this.characterMap.set(projectPath, []);
-      this._pluginParameterMap.set(
-        projectPath,
-        new Map<string, Set<string>>(),
-      );
-      TyranoLogger.print(`${projectPath} variable initialzie end`);
+      await this.addProject(projectPath);
     }
+  }
 
-    for (const projectPath of this.getTyranoScriptProjectRootPaths()) {
-      TyranoLogger.print(`${projectPath} is loading...`);
-      //スクリプトファイルパスを初期化
-      TyranoLogger.print(`${projectPath}'s scripts is loading...`);
-      const absoluteScriptFilePaths = this.getProjectFiles(
-        projectPath + this.DATA_DIRECTORY,
-        [".js"],
-        true,
-      ); //dataディレクトリ内の.jsファイルを取得
-      // 並列処理で高速化
-      await Promise.all(
-        absoluteScriptFilePaths.map(async (i) => {
-          await this.updateScriptFileMap(i);
-          await this.updateMacroDataMapByJs(i);
-        }),
+  /**
+   * 単一プロジェクトのキャッシュを初期化し、data/配下のファイルをロードする。
+   * すでに初期化済み（resourceFileMapにキーが存在）であれば何もしない。
+   * ワークスペースフォルダ追加時のキャッチアップに用いる。
+   */
+  public async addProject(projectPath: string): Promise<void> {
+    if (this._resourceFileMap.has(projectPath)) {
+      return;
+    }
+    TyranoLogger.print(`${projectPath} variable initialzie start`);
+    this.defineMacroMap.set(projectPath, new Map<string, DefineMacroData>());
+    this._resourceFileMap.set(projectPath, []);
+    this.variableMap.set(projectPath, new Map<string, VariableData>());
+    try {
+      const passJoined = this.getSnippetPath();
+      const jsonData = fs.readFileSync(passJoined, "utf8");
+      const parsedJson = JSON.parse(jsonData);
+      const combinedObject = { ...parsedJson, ...this.pluginTags };
+
+      this.defaultTagList = Object.keys(parsedJson);
+      this.defaultTagList.push(...Object.keys(this.pluginTags));
+      this.suggestions.set(projectPath, combinedObject);
+      if (Object.keys(this.suggestions.get(projectPath)!).length === 0) {
+        throw new Error("suggestions is empty");
+      }
+    } catch (error) {
+      TyranoLogger.print(
+        "passJoin or JSON.parse or readFile Sync failed",
+        ErrorLevel.ERROR,
       );
-      //シナリオファイルを初期化
-      TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
-      const absoluteScenarioFilePaths = await this.getProjectFiles(
-        projectPath + this.DATA_DIRECTORY,
-        [".ks"],
-        true,
-      ); //dataディレクトリ内の.ksファイルを取得
-      // 並列処理で高速化
-      await Promise.all(
-        absoluteScenarioFilePaths.map(async (i) => {
-          await this.updateScenarioFileMap(i);
-          await this.updateMacroLabelVariableDataMapByKs(i);
-        }),
-      );
-      // プラグインフォルダの init.ks から mp.* を抽出
-      TyranoLogger.print(`${projectPath}'s plugin init.ks is loading...`);
-      const pluginInitKsPaths = absoluteScenarioFilePaths.filter(
-        (p) =>
-          this.isPluginFile(p, projectPath) &&
-          path.basename(p) === "init.ks",
-      );
-      await Promise.all(
-        pluginInitKsPaths.map(async (p) => {
-          await this.updatePluginParamsFromInitKs(p);
-        }),
-      );
-      //リソースファイルを取得
-      TyranoLogger.print(`${projectPath}'s resource file is loading...`);
-      const absoluteResourceFilePaths = this.getProjectFiles(
-        projectPath + this.DATA_DIRECTORY,
-        this.resourceExtensionsArrays,
-        true,
-      ); //dataディレクトリのファイル取得
-      // 並列処理で高速化
-      await Promise.all(
-        absoluteResourceFilePaths.map(async (i) => {
-          await this.addResourceFileMap(i);
-        }),
-      );
+      TyranoLogger.printStackTrace(error);
+    }
+    this.characterMap.set(projectPath, []);
+    this._pluginParameterMap.set(projectPath, new Map<string, Set<string>>());
+    TyranoLogger.print(`${projectPath} variable initialzie end`);
+
+    TyranoLogger.print(`${projectPath} is loading...`);
+    TyranoLogger.print(`${projectPath}'s scripts is loading...`);
+    const absoluteScriptFilePaths = this.getProjectFiles(
+      projectPath + this.DATA_DIRECTORY,
+      [".js"],
+      true,
+    );
+    await Promise.all(
+      absoluteScriptFilePaths.map(async (i) => {
+        await this.updateScriptFileMap(i);
+        await this.updateMacroDataMapByJs(i);
+      }),
+    );
+    TyranoLogger.print(`${projectPath}'s scenarios is loading...`);
+    const absoluteScenarioFilePaths = await this.getProjectFiles(
+      projectPath + this.DATA_DIRECTORY,
+      [".ks"],
+      true,
+    );
+    await Promise.all(
+      absoluteScenarioFilePaths.map(async (i) => {
+        await this.updateScenarioFileMap(i);
+        await this.updateMacroLabelVariableDataMapByKs(i);
+      }),
+    );
+    TyranoLogger.print(`${projectPath}'s plugin init.ks is loading...`);
+    const pluginInitKsPaths = absoluteScenarioFilePaths.filter(
+      (p) =>
+        this.isPluginFile(p, projectPath) && path.basename(p) === "init.ks",
+    );
+    await Promise.all(
+      pluginInitKsPaths.map(async (p) => {
+        await this.updatePluginParamsFromInitKs(p);
+      }),
+    );
+    TyranoLogger.print(`${projectPath}'s resource file is loading...`);
+    const absoluteResourceFilePaths = this.getProjectFiles(
+      projectPath + this.DATA_DIRECTORY,
+      this.resourceExtensionsArrays,
+      true,
+    );
+    await Promise.all(
+      absoluteResourceFilePaths.map(
+        async (i) => await this.addResourceFileMap(i),
+      ),
+    );
+    TyranoLogger.print(`${projectPath} is loaded.`);
+  }
+
+  /**
+   * プロジェクトに紐づくキャッシュを全て削除する。
+   * ワークスペースフォルダから外されたプロジェクトのクリーンアップに用いる。
+   */
+  public removeProject(projectPath: string): void {
+    if (!projectPath) return;
+    TyranoLogger.print(`removeProject: ${projectPath}`);
+
+    this.defineMacroMap.delete(projectPath);
+    this._resourceFileMap.delete(projectPath);
+    this.variableMap.delete(projectPath);
+    this.characterMap.delete(projectPath);
+    this._pluginParameterMap.delete(projectPath);
+    this.suggestions.delete(projectPath);
+
+    const projectPrefix = projectPath + this.pathDelimiter;
+    const isUnderProject = (key: string) =>
+      key === projectPath || key.startsWith(projectPrefix);
+
+    for (const key of [...this._scenarioFileMap.keys()]) {
+      if (isUnderProject(key)) this._scenarioFileMap.delete(key);
+    }
+    for (const key of [...this._scriptFileMap.keys()]) {
+      if (isUnderProject(key)) this._scriptFileMap.delete(key);
+    }
+    for (const key of [...this._labelMap.keys()]) {
+      if (isUnderProject(key)) this._labelMap.delete(key);
+    }
+    for (const key of [...this._transitionMap.keys()]) {
+      if (isUnderProject(key)) this._transitionMap.delete(key);
+    }
+    for (const key of [...this._macroByFilePath.keys()]) {
+      if (isUnderProject(key)) this._macroByFilePath.delete(key);
     }
   }
 

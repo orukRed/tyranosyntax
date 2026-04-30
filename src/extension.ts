@@ -415,20 +415,112 @@ export function activate(context: ExtensionContext) {
               await infoWs.spliceVariableMapByFilePath(e.fsPath);
             });
 
-            const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
-            const resourceFileSystemWatcher: vscode.FileSystemWatcher =
-              vscode.workspace.createFileSystemWatcher(
+            // リソースファイルウォッチャー。`resource.extension` 設定変更時に
+            // 再生成できるようローカル変数に保持する。
+            let resourceWatcherBundle: vscode.Disposable[] = [];
+            const createResourceWatcher = () => {
+              for (const d of resourceWatcherBundle) d.dispose();
+              const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`;
+              const watcher = vscode.workspace.createFileSystemWatcher(
                 resourceGlob,
                 false,
                 false,
                 false,
               );
-            resourceFileSystemWatcher.onDidCreate(async (e) => {
-              infoWs.addResourceFileMap(e.fsPath);
+              const onCreate = watcher.onDidCreate(async (e) => {
+                infoWs.addResourceFileMap(e.fsPath);
+              });
+              const onDelete = watcher.onDidDelete(async (e) => {
+                infoWs.spliceResourceFileMapByFilePath(e.fsPath);
+              });
+              resourceWatcherBundle = [watcher, onCreate, onDelete];
+            };
+            createResourceWatcher();
+            context.subscriptions.push({
+              dispose: () => {
+                for (const d of resourceWatcherBundle) d.dispose();
+              },
             });
-            resourceFileSystemWatcher.onDidDelete(async (e) => {
-              infoWs.spliceResourceFileMapByFilePath(e.fsPath);
-            });
+
+            // ワークスペースフォルダ追加/削除に追従。
+            // フォルダ追加時は新しい Tyrano プロジェクトをスキャンしてキャッシュを構築。
+            // フォルダ削除時は対象プロジェクト配下のキャッシュをクリーンアップ。
+            context.subscriptions.push(
+              vscode.workspace.onDidChangeWorkspaceFolders(async () => {
+                const currentProjects = new Set(
+                  infoWs.getTyranoScriptProjectRootPaths(),
+                );
+                const knownProjects = new Set(infoWs.resourceFileMap.keys());
+
+                for (const projectPath of knownProjects) {
+                  if (!currentProjects.has(projectPath)) {
+                    infoWs.removeProject(projectPath);
+                  }
+                }
+                for (const projectPath of currentProjects) {
+                  if (!knownProjects.has(projectPath)) {
+                    await infoWs.addProject(projectPath);
+                    tyranoDiagnostic.createDiagnostics(
+                      projectPath + infoWs.pathDelimiter,
+                    );
+                  }
+                }
+              }),
+            );
+
+            // 設定変更への追従。
+            // `resource.extension` はウォッチャーのglob・補完候補に直結するので
+            // ライブで再構築する。それ以外の挙動系設定はリロード推奨に留める。
+            context.subscriptions.push(
+              vscode.workspace.onDidChangeConfiguration(async (event) => {
+                if (
+                  event.affectsConfiguration(
+                    "TyranoScript syntax.resource.extension",
+                  )
+                ) {
+                  infoWs.reloadResourceExtensions();
+                  createResourceWatcher();
+                  // 既存プロジェクトのリソースキャッシュを新拡張子で再構築
+                  for (const projectPath of infoWs.getTyranoScriptProjectRootPaths()) {
+                    infoWs.resourceFileMap.set(projectPath, []);
+                    const resources = infoWs.getProjectFiles(
+                      projectPath + infoWs.DATA_DIRECTORY,
+                      infoWs.resourceExtensionsArrays,
+                      true,
+                    );
+                    await Promise.all(
+                      resources.map((p) => infoWs.addResourceFileMap(p)),
+                    );
+                  }
+                }
+
+                if (
+                  event.affectsConfiguration(
+                    "TyranoScript syntax.plugin.parameter",
+                  ) ||
+                  event.affectsConfiguration(
+                    "TyranoScript syntax.parser.read_plugin",
+                  ) ||
+                  event.affectsConfiguration(
+                    "TyranoScript syntax.parser.autoLoadPluginTags",
+                  )
+                ) {
+                  const reloadLabel = "再読み込み";
+                  vscode.window
+                    .showInformationMessage(
+                      "TyranoScript syntax: 設定を反映するにはウィンドウを再読み込みしてください。",
+                      reloadLabel,
+                    )
+                    .then((choice) => {
+                      if (choice === reloadLabel) {
+                        vscode.commands.executeCommand(
+                          "workbench.action.reloadWindow",
+                        );
+                      }
+                    });
+                }
+              }),
+            );
 
             //すべてのプロジェクトに対して初回診断実行
             for (const i of infoWs.getTyranoScriptProjectRootPaths()) {
