@@ -26,6 +26,7 @@ import {
 import { TyranoDebugConfigProvider } from "./debug/TyranoDebugConfigProvider";
 import { TyranoDebugSession } from "./debug/TyranoDebugSession";
 import { TyranoSidebarProvider } from "./subscriptions/TyranoSidebarProvider";
+import { TyranoReferenceProvider } from "./subscriptions/TyranoReferenceProvider";
 import { CharacterTreeProvider } from "./subscriptions/sidebar/CharacterTreeProvider";
 import { MacroTreeProvider } from "./subscriptions/sidebar/MacroTreeProvider";
 import { SidebarRefresher } from "./subscriptions/sidebar/SidebarRefresher";
@@ -352,6 +353,13 @@ export function activate(context: ExtensionContext) {
                 new TyranoDefinitionProvider(),
               ),
             ); //定義元への移動
+            context.subscriptions.push(
+              vscode.languages.registerReferenceProvider(
+                TYRANO_MODE,
+                new TyranoReferenceProvider(),
+              ),
+            ); //参照先の表示
+            TyranoLogger.print("TyranoReferenceProvider activate");
             //renameproviderの追加
             const renameProvider = new TyranoRenameProvider();
             context.subscriptions.push(
@@ -360,8 +368,6 @@ export function activate(context: ExtensionContext) {
                 renameProvider,
               ),
             );
-            // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
-            // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
 
             //設定で診断機能の自動実行ONにしてるなら許可
             if (
