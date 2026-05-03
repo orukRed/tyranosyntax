@@ -7,13 +7,15 @@ class MockTextDocument implements vscode.TextDocument {
   private text: string;
   private lines: string[];
 
-  constructor(content: string) {
+  constructor(content: string, uri?: vscode.Uri) {
     this.text = content;
     this.lines = content.split("\n");
+    this.uri = uri ?? vscode.Uri.file("/test.ks");
+    this.fileName = this.uri.fsPath;
   }
 
-  uri!: vscode.Uri;
-  fileName!: string;
+  uri: vscode.Uri;
+  fileName: string;
   isUntitled!: boolean;
   languageId!: string;
   version!: number;
@@ -153,19 +155,58 @@ suite("TyranoRenameProvider", () => {
       }
     });
 
-    test("ラベル行（*）のリネームが不可能", async () => {
+    test("ラベル定義（*）のリネームが可能", async () => {
       const document = new MockTextDocument("*test_label");
-      const position = new vscode.Position(0, 5);
+      const position = new vscode.Position(0, 5); // "test_label"内
       const token = new vscode.CancellationTokenSource().token;
 
-      try {
-        await provider.prepareRename(document, position, token);
-        assert.fail("ラベル行でリネームが許可されてしまいました");
-      } catch (error) {
-        assert.strictEqual(
-          (error as Error).message,
-          "ラベルはリネーム不可です",
-        );
+      const result = await provider.prepareRename(document, position, token);
+      assert.ok(result instanceof vscode.Range);
+      if (result instanceof vscode.Range) {
+        assert.strictEqual(document.getText(result), "test_label");
+      }
+    });
+
+    test("ラベル参照（target=\"*name\"）のリネームが可能", async () => {
+      const document = new MockTextDocument(
+        '[jump storage="hoge.ks" target="*test_label"]',
+      );
+      // "*test_label" の "label" 内をカーソル指定
+      const charIndex = '[jump storage="hoge.ks" target="*test_l'.length;
+      const position = new vscode.Position(0, charIndex);
+      const token = new vscode.CancellationTokenSource().token;
+
+      const result = await provider.prepareRename(document, position, token);
+      assert.ok(result instanceof vscode.Range);
+      if (result instanceof vscode.Range) {
+        assert.strictEqual(document.getText(result), "test_label");
+      }
+    });
+
+    test("ラベル参照（target=\"name\" *なし）のリネームが可能", async () => {
+      const document = new MockTextDocument('[jump target="test_label"]');
+      const charIndex = '[jump target="test_l'.length;
+      const position = new vscode.Position(0, charIndex);
+      const token = new vscode.CancellationTokenSource().token;
+
+      const result = await provider.prepareRename(document, position, token);
+      assert.ok(result instanceof vscode.Range);
+      if (result instanceof vscode.Range) {
+        assert.strictEqual(document.getText(result), "test_label");
+      }
+    });
+
+    test("target= 内の変数指定はラベル扱いされず変数として処理される", async () => {
+      const document = new MockTextDocument('[jump target="&f.label_var"]');
+      const charIndex = '[jump target="&f.lab'.length; // "f.label_var" 内
+      const position = new vscode.Position(0, charIndex);
+      const token = new vscode.CancellationTokenSource().token;
+
+      const result = await provider.prepareRename(document, position, token);
+      assert.ok(result instanceof vscode.Range);
+      if (result instanceof vscode.Range) {
+        // ラベル名 "label_var" ではなく変数全体 "f.label_var" の Range
+        assert.strictEqual(document.getText(result), "f.label_var");
       }
     });
   });
@@ -430,6 +471,39 @@ suite("TyranoRenameProvider", () => {
         edit.newText.includes("test_var"),
       );
       assert.strictEqual(hasTestVar, false);
+    });
+
+    test("ラベル定義のリネームでエラーが発生しない", async () => {
+      const document = new MockTextDocument(
+        '*start\n[jump target="*start"]\n',
+      );
+      const position = new vscode.Position(0, 3); // "*start"の中
+      const token = new vscode.CancellationTokenSource().token;
+
+      const workspaceEdit = await provider.provideRenameEdits(
+        document,
+        position,
+        "new_label",
+        token,
+      );
+      assert.ok(workspaceEdit instanceof vscode.WorkspaceEdit);
+    });
+
+    test("ラベル参照（target）のリネームでエラーが発生しない", async () => {
+      const document = new MockTextDocument(
+        '*start\n[jump target="*start"]\n',
+      );
+      // 2行目 [jump target="*start"] の "start" 内
+      const position = new vscode.Position(1, '[jump target="*sta'.length);
+      const token = new vscode.CancellationTokenSource().token;
+
+      const workspaceEdit = await provider.provideRenameEdits(
+        document,
+        position,
+        "new_label",
+        token,
+      );
+      assert.ok(workspaceEdit instanceof vscode.WorkspaceEdit);
     });
   });
 });
