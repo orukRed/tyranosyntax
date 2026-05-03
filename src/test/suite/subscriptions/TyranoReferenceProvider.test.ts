@@ -340,7 +340,7 @@ suite("TyranoReferenceProvider", () => {
         assert.ok(Array.isArray(result));
         const includesDef = (result as vscode.Location[]).some(
           (loc) =>
-            loc.uri.fsPath === "/proj/macro.ks" &&
+            loc.uri.fsPath === macroDefLocation.uri.fsPath &&
             loc.range.start.line === 0 &&
             loc.range.start.character === 7,
         );
