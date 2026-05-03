@@ -17,6 +17,7 @@ import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
 import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
+import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
@@ -308,6 +309,13 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoFlowchart activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.macroTable",
+              MacroTablePanel.openMacroTable,
+            ),
+          );
+          TyranoLogger.print("MacroTablePanel activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
