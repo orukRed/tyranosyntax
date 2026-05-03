@@ -59,7 +59,7 @@ export class MacroTablePanel {
                   const defs = macro.location
                     ? [
                         {
-                          file: path.basename(macro.filePath),
+                          file: path.relative(path.join(projectPath, "data", "scenario"), macro.filePath).replace(/\\/g, "/"),
                           line: macro.location.range.start.line + 1,
                           fullPath: macro.filePath,
                         },
@@ -72,7 +72,7 @@ export class MacroTablePanel {
                   }
                   if (macro.location) {
                     existing.defs.push({
-                      file: path.basename(macro.filePath),
+                      file: path.relative(path.join(projectPath, "data", "scenario"), macro.filePath).replace(/\\/g, "/"),
                       line: macro.location.range.start.line + 1,
                       fullPath: macro.filePath,
                     });

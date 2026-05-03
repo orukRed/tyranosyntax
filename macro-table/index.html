@@ -120,35 +120,11 @@
         word-break: break-word;
       }
       .col-deffile {
-        width: 20%;
-        min-width: 100px;
+        width: 45%;
+        min-width: 150px;
         font-family: monospace;
         font-size: 13px;
         color: #555;
-      }
-      .col-def {
-        width: 35%;
-        min-width: 150px;
-      }
-      .def-link {
-        display: inline-block;
-        padding: 3px 8px;
-        margin: 2px 2px 2px 0;
-        background-color: #e7f0ff;
-        color: #007bff;
-        border-radius: 4px;
-        font-size: 13px;
-        cursor: pointer;
-        text-decoration: none;
-        transition:
-          background-color 0.2s,
-          color 0.2s;
-        font-family: monospace;
-        white-space: nowrap;
-      }
-      .def-link:hover {
-        background-color: #007bff;
-        color: #fff;
       }
       .no-data {
         padding: 40px;
@@ -202,7 +178,6 @@
             <th class="sortable" data-col="defFile">
               定義ファイル<span class="sort-icon"></span>
             </th>
-            <th>定義箇所</th>
           </tr>
         </thead>
         <tbody id="macro-tbody"></tbody>
@@ -258,19 +233,10 @@
 
         const tbody = document.getElementById("macro-tbody");
         if (filtered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="no-data">マクロが見つかりません</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="3" class="no-data">マクロが見つかりません</td></tr>`;
         } else {
           tbody.innerHTML = filtered
             .map((m) => {
-              const defHtml =
-                m.definitions.length > 0
-                  ? m.definitions
-                      .map(
-                        (d) =>
-                          `<a class="def-link" onclick="openFile(${JSON.stringify(d.fullPath)}, ${d.line})">${escapeHtml(d.file)}:${d.line}</a>`,
-                      )
-                      .join("")
-                  : `<span class="empty-cell">—</span>`;
               const defFileHtml = m.definitions[0]
                 ? escapeHtml(m.definitions[0].file)
                 : `<span class="empty-cell">—</span>`;
@@ -282,7 +248,6 @@
                 <td class="col-name">${escapeHtml(m.name)}</td>
                 <td class="col-comment">${commentHtml}</td>
                 <td class="col-deffile">${defFileHtml}</td>
-                <td class="col-def">${defHtml}</td>
               </tr>
             `;
             })
@@ -291,12 +256,6 @@
 
         document.getElementById("count").textContent =
           `${filtered.length} / ${allMacros.length} 件`;
-      }
-
-      function openFile(filePath, line) {
-        fetch(
-          `/open-file?path=${encodeURIComponent(filePath)}&line=${line}`,
-        ).catch((e) => console.error("open-file error", e));
       }
 
       // ソートヘッダークリック
