@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: #f0f2f5;
         color: #333;
         margin: 0;
@@ -114,10 +114,17 @@
         color: #1a1a2e;
       }
       .col-comment {
-        width: 45%;
+        width: 35%;
         color: #444;
         white-space: pre-wrap;
         word-break: break-word;
+      }
+      .col-deffile {
+        width: 20%;
+        min-width: 100px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #555;
       }
       .col-def {
         width: 35%;
@@ -133,7 +140,9 @@
         font-size: 13px;
         cursor: pointer;
         text-decoration: none;
-        transition: background-color 0.2s, color 0.2s;
+        transition:
+          background-color 0.2s,
+          color 0.2s;
         font-family: monospace;
         white-space: nowrap;
       }
@@ -169,7 +178,11 @@
   <body>
     <h1>マクロ一覧</h1>
     <div id="toolbar">
-      <input type="text" id="search" placeholder="マクロ名またはコメントで検索..." />
+      <input
+        type="text"
+        id="search"
+        placeholder="マクロ名またはコメントで検索..."
+      />
       <select id="project-filter">
         <option value="">すべてのプロジェクト</option>
       </select>
@@ -177,11 +190,18 @@
     </div>
     <div class="table-wrapper">
       <div class="loading" id="loading">読み込み中...</div>
-      <table id="macro-table" style="display:none">
+      <table id="macro-table" style="display: none">
         <thead>
           <tr>
-            <th class="sortable" data-col="name">マクロ名<span class="sort-icon">▲</span></th>
-            <th class="sortable" data-col="comment">コメント<span class="sort-icon"></span></th>
+            <th class="sortable" data-col="name">
+              マクロ名<span class="sort-icon">▲</span>
+            </th>
+            <th class="sortable" data-col="comment">
+              コメント<span class="sort-icon"></span>
+            </th>
+            <th class="sortable" data-col="defFile">
+              定義ファイル<span class="sort-icon"></span>
+            </th>
             <th>定義箇所</th>
           </tr>
         </thead>
@@ -191,17 +211,25 @@
 
     <script>
       let allMacros = [];
-      let sortCol = 'name';
+      let sortCol = "name";
       let sortAsc = true;
 
       const escapeHtml = (str) =>
-        String(str).replace(/[&<>"']/g, (c) => ({
-          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-        }[c]));
+        String(str).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
 
       function renderTable() {
-        const searchVal = document.getElementById('search').value.toLowerCase();
-        const projectVal = document.getElementById('project-filter').value;
+        const searchVal = document.getElementById("search").value.toLowerCase();
+        const projectVal = document.getElementById("project-filter").value;
 
         let filtered = allMacros.filter((m) => {
           if (projectVal && m.projectName !== projectVal) return false;
@@ -215,46 +243,65 @@
         });
 
         filtered.sort((a, b) => {
-          const va = sortCol === 'name' ? a.name : a.comment;
-          const vb = sortCol === 'name' ? b.name : b.comment;
-          const cmp = va.localeCompare(vb, 'ja');
+          let va, vb;
+          if (sortCol === "name") {
+            va = a.name; vb = b.name;
+          } else if (sortCol === "comment") {
+            va = a.comment; vb = b.comment;
+          } else {
+            va = a.definitions[0]?.file ?? "";
+            vb = b.definitions[0]?.file ?? "";
+          }
+          const cmp = va.localeCompare(vb, "ja");
           return sortAsc ? cmp : -cmp;
         });
 
-        const tbody = document.getElementById('macro-tbody');
+        const tbody = document.getElementById("macro-tbody");
         if (filtered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" class="no-data">マクロが見つかりません</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="4" class="no-data">マクロが見つかりません</td></tr>`;
         } else {
-          tbody.innerHTML = filtered.map((m) => {
-            const defHtml = m.definitions.length > 0
-              ? m.definitions.map((d) =>
-                  `<a class="def-link" onclick="openFile(${JSON.stringify(d.fullPath)}, ${d.line})">${escapeHtml(d.file)}:${d.line}</a>`
-                ).join('')
-              : `<span class="empty-cell">—</span>`;
-            const commentHtml = m.comment
-              ? escapeHtml(m.comment)
-              : `<span class="empty-cell">—</span>`;
-            return `
+          tbody.innerHTML = filtered
+            .map((m) => {
+              const defHtml =
+                m.definitions.length > 0
+                  ? m.definitions
+                      .map(
+                        (d) =>
+                          `<a class="def-link" onclick="openFile(${JSON.stringify(d.fullPath)}, ${d.line})">${escapeHtml(d.file)}:${d.line}</a>`,
+                      )
+                      .join("")
+                  : `<span class="empty-cell">—</span>`;
+              const defFileHtml = m.definitions[0]
+                ? escapeHtml(m.definitions[0].file)
+                : `<span class="empty-cell">—</span>`;
+              const commentHtml = m.comment
+                ? escapeHtml(m.comment)
+                : `<span class="empty-cell">—</span>`;
+              return `
               <tr>
                 <td class="col-name">${escapeHtml(m.name)}</td>
                 <td class="col-comment">${commentHtml}</td>
+                <td class="col-deffile">${defFileHtml}</td>
                 <td class="col-def">${defHtml}</td>
               </tr>
             `;
-          }).join('');
+            })
+            .join("");
         }
 
-        document.getElementById('count').textContent = `${filtered.length} / ${allMacros.length} 件`;
+        document.getElementById("count").textContent =
+          `${filtered.length} / ${allMacros.length} 件`;
       }
 
       function openFile(filePath, line) {
-        fetch(`/open-file?path=${encodeURIComponent(filePath)}&line=${line}`)
-          .catch((e) => console.error('open-file error', e));
+        fetch(
+          `/open-file?path=${encodeURIComponent(filePath)}&line=${line}`,
+        ).catch((e) => console.error("open-file error", e));
       }
 
       // ソートヘッダークリック
-      document.querySelectorAll('thead th.sortable').forEach((th) => {
-        th.addEventListener('click', () => {
+      document.querySelectorAll("thead th.sortable").forEach((th) => {
+        th.addEventListener("click", () => {
           const col = th.dataset.col;
           if (sortCol === col) {
             sortAsc = !sortAsc;
@@ -262,56 +309,60 @@
             sortCol = col;
             sortAsc = true;
           }
-          document.querySelectorAll('thead th').forEach((h) => {
-            h.classList.remove('active');
-            const icon = h.querySelector('.sort-icon');
-            if (icon) icon.textContent = '';
+          document.querySelectorAll("thead th").forEach((h) => {
+            h.classList.remove("active");
+            const icon = h.querySelector(".sort-icon");
+            if (icon) icon.textContent = "";
           });
-          th.classList.add('active');
-          const icon = th.querySelector('.sort-icon');
-          if (icon) icon.textContent = sortAsc ? '▲' : '▼';
+          th.classList.add("active");
+          const icon = th.querySelector(".sort-icon");
+          if (icon) icon.textContent = sortAsc ? "▲" : "▼";
           renderTable();
         });
       });
 
       // 検索・フィルタ
-      document.getElementById('search').addEventListener('input', renderTable);
-      document.getElementById('project-filter').addEventListener('change', renderTable);
+      document.getElementById("search").addEventListener("input", renderTable);
+      document
+        .getElementById("project-filter")
+        .addEventListener("change", renderTable);
 
       // データ取得
-      fetch('/get-macro-list')
+      fetch("/get-macro-list")
         .then((r) => r.json())
         .then((data) => {
           allMacros = data.macros ?? [];
           const projects = data.projects ?? [];
 
-          const sel = document.getElementById('project-filter');
+          const sel = document.getElementById("project-filter");
           projects.forEach((p) => {
-            const opt = document.createElement('option');
+            const opt = document.createElement("option");
             opt.value = p;
             opt.textContent = p;
             sel.appendChild(opt);
           });
           if (projects.length <= 1) {
-            sel.style.display = 'none';
+            sel.style.display = "none";
           }
 
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('macro-table').style.display = 'table';
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("macro-table").style.display = "table";
 
           // 初期アクティブヘッダー
-          const nameHeader = document.querySelector('thead th[data-col="name"]');
+          const nameHeader = document.querySelector(
+            'thead th[data-col="name"]',
+          );
           if (nameHeader) {
-            nameHeader.classList.add('active');
-            const icon = nameHeader.querySelector('.sort-icon');
-            if (icon) icon.textContent = '▲';
+            nameHeader.classList.add("active");
+            const icon = nameHeader.querySelector(".sort-icon");
+            if (icon) icon.textContent = "▲";
           }
 
           renderTable();
         })
         .catch((e) => {
           console.error(e);
-          document.getElementById('loading').outerHTML =
+          document.getElementById("loading").outerHTML =
             `<div class="error">データの取得に失敗しました。<br>${e.message}</div>`;
         });
     </script>

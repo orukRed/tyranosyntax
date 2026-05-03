@@ -52,13 +52,13 @@ suite("VariableTreeProvider", () => {
       const symbols = provider.getChildren();
       assert.strictEqual(symbols.length, 1);
       assert.strictEqual((symbols[0] as any).name, "f.hp");
-      assert.strictEqual((symbols[0] as any).description, "kind=f");
+      assert.strictEqual((symbols[0] as any).description, undefined);
     } finally {
       restore();
     }
   });
 
-  test("正常系 SymbolNode 配下に定義・使用カテゴリが現れる", () => {
+  test("正常系 SymbolNode 配下に write・read カテゴリが現れる", () => {
     const restore = setProjectVariables("/proj", [
       {
         name: "hp",
@@ -78,8 +78,8 @@ suite("VariableTreeProvider", () => {
       const symbols = provider.getChildren();
       const cats = provider.getChildren(symbols[0]);
       const categories = cats.map((c: any) => c.category);
-      assert.ok(categories.includes("definition"));
-      assert.ok(categories.includes("usage"));
+      assert.ok(categories.includes("write"));
+      assert.ok(categories.includes("read"));
     } finally {
       restore();
     }

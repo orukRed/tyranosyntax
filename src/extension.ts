@@ -147,20 +147,19 @@ export function activate(context: ExtensionContext) {
     sidebarInfoWs,
     sidebarUsageIndexer,
   );
+  const macroTreeView = vscode.window.createTreeView("tyrano-macros", {
+    treeDataProvider: macroTreeProvider,
+  });
+  const variableTreeView = vscode.window.createTreeView("tyrano-variables", {
+    treeDataProvider: variableTreeProvider,
+  });
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider(
-      "tyrano-macros",
-      macroTreeProvider,
-    ),
-    vscode.window.registerTreeDataProvider(
-      "tyrano-variables",
-      variableTreeProvider,
-    ),
     vscode.window.registerTreeDataProvider(
       "tyrano-characters",
       characterTreeProvider,
     ),
   );
+  context.subscriptions.push(macroTreeView, variableTreeView);
   const sidebarRefresher = new SidebarRefresher(sidebarUsageIndexer, [
     macroTreeProvider,
     variableTreeProvider,
@@ -176,6 +175,32 @@ export function activate(context: ExtensionContext) {
     ),
     vscode.commands.registerCommand("tyrano.sidebar.refreshCharacters", () =>
       characterTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandMacros",
+      async () => {
+        const children = macroTreeProvider.getChildren();
+        for (const child of children) {
+          await macroTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandVariables",
+      async () => {
+        const children = variableTreeProvider.getChildren();
+        for (const child of children) {
+          await variableTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
     ),
     vscode.commands.registerCommand(
       "tyrano.sidebar.openLocation",

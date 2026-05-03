@@ -78,7 +78,7 @@ suite("MacroTreeProvider", () => {
     }
   });
 
-  test("正常系 SymbolNode 配下にコメント・定義箇所・使用箇所カテゴリが現れる", () => {
+  test("正常系 SymbolNode 配下に定義箇所・使用箇所カテゴリが現れ、コメントカテゴリは現れない", () => {
     const restore = setProjectMacros("/proj", [
       new DefineMacroData(
         "my_macro",
@@ -98,7 +98,7 @@ suite("MacroTreeProvider", () => {
       assert.strictEqual(symbols.length, 1);
       const cats = provider.getChildren(symbols[0]);
       const labels = cats.map((c: any) => c.category);
-      assert.ok(labels.includes("comment"), "comment が含まれる");
+      assert.ok(!labels.includes("comment"), "comment は含まれない");
       assert.ok(labels.includes("definition"), "definition が含まれる");
       assert.ok(labels.includes("usage"), "usage が含まれる");
     } finally {

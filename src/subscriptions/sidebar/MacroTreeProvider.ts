@@ -111,13 +111,6 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
   private getSymbolChildren(symbol: SymbolNode): CategoryNode[] {
     const categories: CategoryNode[] = [];
     const defs = this.getDefinitionsForSymbol(symbol);
-    if (symbol.comment) {
-      categories.push({
-        kind: "category",
-        parent: symbol,
-        category: "comment",
-      });
-    }
     if (defs.length > 0) {
       categories.push({
         kind: "category",
@@ -139,15 +132,6 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
   private getCategoryChildren(category: CategoryNode): SidebarNode[] {
     const symbol = category.parent;
     switch (category.category) {
-      case "comment":
-        if (!symbol.comment) {
-          return [];
-        }
-        return symbol.comment
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0)
-          .map<SidebarNode>((line) => ({ kind: "text", text: line }));
       case "definition":
         return this.getDefinitionsForSymbol(symbol);
       case "usage":

@@ -31,7 +31,7 @@ export interface SymbolNode {
 export interface CategoryNode {
   kind: "category";
   parent: SymbolNode;
-  category: "definition" | "usage" | "comment" | "face" | "layer";
+  category: "definition" | "usage" | "comment" | "face" | "layer" | "write" | "read";
   count?: number;
 }
 
@@ -145,6 +145,10 @@ function categoryLabel(category: CategoryNode["category"]): string {
       return "定義箇所";
     case "usage":
       return "使用箇所";
+    case "write":
+      return "値の変更";
+    case "read":
+      return "値の使用";
     case "comment":
       return "コメント";
     case "face":
@@ -160,6 +164,10 @@ function categoryIconId(category: CategoryNode["category"]): string {
       return "symbol-class";
     case "usage":
       return "references";
+    case "write":
+      return "edit";
+    case "read":
+      return "eye";
     case "comment":
       return "comment";
     case "face":

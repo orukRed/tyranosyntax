@@ -16,8 +16,7 @@ export class MacroTablePanel {
       try {
         TyranoLogger.print("port 3400 server start");
         const app = express();
-        const filePath =
-          InformationExtension.path + path.sep + "macro-table";
+        const filePath = InformationExtension.path + path.sep + "macro-table";
         app.use(express.static(filePath));
 
         app.get("/get-macro-list", (_req, res) => {
@@ -45,7 +44,10 @@ export class MacroTablePanel {
               // 同名マクロをグループ化
               const groups = new Map<
                 string,
-                { comment: string; defs: { file: string; line: number; fullPath: string }[] }
+                {
+                  comment: string;
+                  defs: { file: string; line: number; fullPath: string }[];
+                }
               >();
               for (const macro of macroMap.values()) {
                 if (!macro.macroName) {

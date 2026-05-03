@@ -1897,9 +1897,19 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "tyrano.sidebar.expandMacros",
+        "title": "マクロ一覧をすべて開く",
+        "icon": "$(expand-all)"
+      },
+      {
         "command": "tyrano.sidebar.refreshVariables",
         "title": "変数一覧をリフレッシュ",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.expandVariables",
+        "title": "変数一覧をすべて開く",
+        "icon": "$(expand-all)"
       },
       {
         "command": "tyrano.sidebar.refreshCharacters",
@@ -1914,8 +1924,28 @@
     "menus": {
       "view/title": [
         {
+          "command": "tyrano.sidebar.expandMacros",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "workbench.actions.treeView.tyrano-macros.collapseAll",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
           "command": "tyrano.sidebar.refreshMacros",
           "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.expandVariables",
+          "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "workbench.actions.treeView.tyrano-variables.collapseAll",
+          "when": "view == tyrano-variables",
           "group": "navigation"
         },
         {
