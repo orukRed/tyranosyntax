@@ -35,6 +35,9 @@ export class TyranoDiagnostic {
   private readonly unusedMacro = "unusedMacro";
   private readonly unusedLabel = "unusedLabel";
   private readonly unusedVariable = "unusedVariable";
+  private readonly missingReturnInCalledFile = "missingReturnInCalledFile";
+  private readonly iscriptJumpWithoutEndscriptStop =
+    "iscriptJumpWithoutEndscriptStop";
 
   //パーサー
   private readonly JUMP_TAG = [
@@ -265,12 +268,22 @@ export class TyranoDiagnostic {
     //-----------------------------------------
 
     let isInIf: boolean = false; // if文の中にいるかどうか（detectJumpAndCallInIfStatement用）
+    const iscriptScope = { isInIscript: false, iscriptHasJump: false };
 
     for (const data of parsedData) {
       //early return
       if (data["name"] === "comment") {
         continue;
       }
+
+      // iscriptブロック内のJSにjump発火が含まれているか追跡し、
+      // endscriptにstop="true"が無ければ警告
+      this.detectIscriptJumpWithoutEndscriptStop(
+        data,
+        scenarioDocument,
+        diagnostics,
+        iscriptScope,
+      );
 
       // 1. 未定義マクロの検出（元のdetectionUndefineMacro）
       if (this.isExecuteDiagnostic(this.undefinedMacro)) {
@@ -493,6 +506,15 @@ export class TyranoDiagnostic {
         projectPathOfDiagFile,
         diagnostics,
       );
+
+      //call/fixボタンで呼ばれているファイルにreturnタグがあるかチェック
+      this.detectionMissingReturnInCalledFile(
+        data,
+        scenarioDocument,
+        projectPathOfDiagFile,
+        diagnostics,
+        parsedDataCache,
+      );
     }
 
     //-----------------------------------------
@@ -607,6 +629,208 @@ export class TyranoDiagnostic {
         diagnostics.push(diag);
       }
     }
+  }
+
+  /**
+   * call タグや fix ボタンで呼ばれているシナリオファイルに return タグが
+   * 含まれていない場合に警告を出します。
+   * - 対象は `call` タグ、または `button fix="true"` のうち、
+   *   `role` が指定されておらず、`storage` が静的なファイルパスのもの。
+   * - storage が変数(&,%)を含む場合や、ファイルが存在しない場合はスキップ。
+   * - 解析対象ファイル内のいずれかの位置に `return` タグが存在すれば警告は出しません。
+   * @param data パース済みのタグデータ
+   * @param scenarioDocument 診断対象のドキュメント
+   * @param projectPathOfDiagFile 診断対象ファイルのプロジェクトパス
+   * @param diagnostics 診断結果を格納する配列
+   * @param parsedDataCache 各 .ks ファイルのパース結果キャッシュ
+   */
+  private detectionMissingReturnInCalledFile(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    projectPathOfDiagFile: string,
+    diagnostics: vscode.Diagnostic[],
+    parsedDataCache: Map<string, any>,
+  ): void {
+    if (!this.isExecuteDiagnostic(this.missingReturnInCalledFile)) {
+      return;
+    }
+    if (!this.isCallStyleTag(data)) {
+      return;
+    }
+
+    const storage = data["pm"]?.["storage"];
+    if (!this.isStaticKsFilePath(storage)) {
+      return;
+    }
+
+    const calledParsedData = this.getOrParseScenario(
+      storage,
+      projectPathOfDiagFile,
+      parsedDataCache,
+    );
+    if (!calledParsedData) {
+      return;
+    }
+
+    // ファイル内に return タグが1つでも存在すれば警告しない
+    const hasReturn = calledParsedData.some(
+      (tag: any) => tag && tag["name"] === "return",
+    );
+    if (hasReturn) {
+      return;
+    }
+
+    const range = this.getParameterRange(
+      "storage",
+      storage,
+      data,
+      scenarioDocument,
+    );
+    const diag = new vscode.Diagnostic(
+      range,
+      `${storage} には [return] タグがありません。${data["name"]}で呼び出した場合、呼び出し元へ正しく戻れない可能性があります。`,
+      vscode.DiagnosticSeverity.Warning,
+    );
+    diagnostics.push(diag);
+  }
+
+  /**
+   * call タグ、または button fix="true" (role 指定なし) のいずれかであるか判定します。
+   */
+  private isCallStyleTag(data: any): boolean {
+    const tagName = data?.["name"];
+    const pm = data?.["pm"];
+    if (!pm) {
+      return false;
+    }
+    if (tagName === "call") {
+      return true;
+    }
+    if (tagName !== "button") {
+      return false;
+    }
+    if (pm["fix"] !== "true") {
+      return false;
+    }
+    return pm["role"] === undefined || pm["role"] === "";
+  }
+
+  /**
+   * storage の値が、静的に解決可能な .ks ファイルパスであるかを判定します。
+   */
+  private isStaticKsFilePath(storage: unknown): storage is string {
+    if (typeof storage !== "string" || storage === "") {
+      return false;
+    }
+    if (
+      this.isExistAmpersandAtBeginning(storage) ||
+      this.isExistPercentAtBeginning(storage) ||
+      this.isValueIsIncludeVariable(storage)
+    ) {
+      return false;
+    }
+    return storage.endsWith(".ks");
+  }
+
+  /**
+   * storage で指定されたファイルのパース結果をキャッシュ優先で取得します。
+   * ファイルが存在しない、もしくは scenarioFileMap に登録されていない場合は undefined を返します。
+   */
+  private getOrParseScenario(
+    storage: string,
+    projectPathOfDiagFile: string,
+    parsedDataCache: Map<string, any>,
+  ): any | undefined {
+    const absoluteFilePath = this.infoWs.convertToAbsolutePathFromRelativePath(
+      projectPathOfDiagFile +
+        this.infoWs.DATA_DIRECTORY +
+        this.infoWs.DATA_SCENARIO +
+        this.infoWs.pathDelimiter +
+        storage,
+    );
+    if (!fs.existsSync(absoluteFilePath)) {
+      return undefined;
+    }
+
+    const cached = parsedDataCache.get(absoluteFilePath);
+    if (cached) {
+      return cached;
+    }
+    const calledDocument = this.infoWs.scenarioFileMap.get(absoluteFilePath);
+    if (!calledDocument) {
+      return undefined;
+    }
+    const parsed = this.parser.parseText(calledDocument.getText());
+    parsedDataCache.set(absoluteFilePath, parsed);
+    return parsed;
+  }
+
+  /**
+   * iscript内のJSコード文字列にjump/call発火の慣用句が含まれているかを判定します。
+   * 現状は `kag.ftag.startTag('jump', ...)` / `startTag('call', ...)` 系をマッチします。
+   */
+  private containsIscriptJumpInvocation(text: unknown): boolean {
+    if (typeof text !== "string" || text === "") {
+      return false;
+    }
+    return /startTag\s*\(\s*['"](?:jump|call)['"]/.test(text);
+  }
+
+  /**
+   * iscript〜endscriptブロックのスコープを追跡し、JS内でjump発火が
+   * 検出されたのに endscript に stop="true" が無い場合に警告を出します。
+   * @param data 統合ループで処理中のタグデータ
+   * @param scenarioDocument 診断対象ドキュメント
+   * @param diagnostics 診断結果配列
+   * @param scope 呼び出し側で保持するスコープ状態 (ループをまたいで使い回す)
+   */
+  private detectIscriptJumpWithoutEndscriptStop(
+    data: any,
+    scenarioDocument: vscode.TextDocument,
+    diagnostics: vscode.Diagnostic[],
+    scope: { isInIscript: boolean; iscriptHasJump: boolean },
+  ): void {
+    if (!this.isExecuteDiagnostic(this.iscriptJumpWithoutEndscriptStop)) {
+      return;
+    }
+
+    const name = data["name"];
+    if (name === "iscript") {
+      scope.isInIscript = true;
+      scope.iscriptHasJump = false;
+      return;
+    }
+    if (
+      scope.isInIscript &&
+      name === "text" &&
+      this.containsIscriptJumpInvocation(data["pm"]?.["val"] ?? data["val"])
+    ) {
+      scope.iscriptHasJump = true;
+      return;
+    }
+    if (name !== "endscript") {
+      return;
+    }
+
+    if (scope.iscriptHasJump && data["pm"]?.["stop"] !== "true") {
+      const tagFirstIndex = scenarioDocument
+        .lineAt(data["line"])
+        .text.indexOf("endscript");
+      const range = new vscode.Range(
+        data["line"],
+        tagFirstIndex,
+        data["line"],
+        tagFirstIndex + "endscript".length,
+      );
+      const diag = new vscode.Diagnostic(
+        range,
+        `[iscript]内でjump/callが呼び出されていますが、[endscript]にstop="true"が指定されていません。JavaScriptから発火したジャンプが意図通り動作しない可能性があります。`,
+        vscode.DiagnosticSeverity.Warning,
+      );
+      diagnostics.push(diag);
+    }
+    scope.isInIscript = false;
+    scope.iscriptHasJump = false;
   }
 
   /**

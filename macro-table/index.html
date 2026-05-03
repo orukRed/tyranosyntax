@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>マクロ一覧</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        margin: 0 0 16px 0;
+        font-size: 22px;
+        color: #007bff;
+      }
+      #toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      #toolbar input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+        padding: 7px 12px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      #toolbar input[type="text"]:focus {
+        border-color: #007bff;
+      }
+      #toolbar select {
+        padding: 7px 12px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #fff;
+        outline: none;
+        cursor: pointer;
+      }
+      #count {
+        font-size: 13px;
+        color: #666;
+        margin-left: auto;
+      }
+      .table-wrapper {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #007bff;
+        color: #fff;
+      }
+      thead th {
+        padding: 11px 14px;
+        text-align: left;
+        user-select: none;
+        white-space: nowrap;
+      }
+      thead th.sortable {
+        cursor: pointer;
+      }
+      thead th.sortable:hover {
+        background-color: #0056b3;
+      }
+      thead th .sort-icon {
+        margin-left: 5px;
+        opacity: 0.6;
+        font-size: 11px;
+      }
+      thead th.active .sort-icon {
+        opacity: 1;
+      }
+      tbody tr {
+        border-bottom: 1px solid #e8eaed;
+        transition: background-color 0.15s;
+      }
+      tbody tr:last-child {
+        border-bottom: none;
+      }
+      tbody tr:hover {
+        background-color: #f5f7ff;
+      }
+      td {
+        padding: 10px 14px;
+        vertical-align: top;
+      }
+      .col-name {
+        width: 20%;
+        min-width: 120px;
+        font-weight: 600;
+        font-family: monospace;
+        color: #1a1a2e;
+      }
+      .col-comment {
+        width: 35%;
+        color: #444;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .col-deffile {
+        width: 45%;
+        min-width: 150px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #555;
+      }
+      .no-data {
+        padding: 40px;
+        text-align: center;
+        color: #888;
+        font-size: 15px;
+      }
+      .loading {
+        padding: 40px;
+        text-align: center;
+        color: #888;
+        font-size: 15px;
+      }
+      .error {
+        padding: 40px;
+        text-align: center;
+        color: #cc0000;
+        font-size: 15px;
+      }
+      .empty-cell {
+        color: #bbb;
+        font-style: italic;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>マクロ一覧</h1>
+    <div id="toolbar">
+      <input
+        type="text"
+        id="search"
+        placeholder="マクロ名またはコメントで検索..."
+      />
+      <select id="project-filter">
+        <option value="">すべてのプロジェクト</option>
+      </select>
+      <span id="count"></span>
+    </div>
+    <div class="table-wrapper">
+      <div class="loading" id="loading">読み込み中...</div>
+      <table id="macro-table" style="display: none">
+        <thead>
+          <tr>
+            <th class="sortable" data-col="name">
+              マクロ名<span class="sort-icon">▲</span>
+            </th>
+            <th class="sortable" data-col="comment">
+              コメント<span class="sort-icon"></span>
+            </th>
+            <th class="sortable" data-col="defFile">
+              定義ファイル<span class="sort-icon"></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="macro-tbody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      let allMacros = [];
+      let sortCol = "name";
+      let sortAsc = true;
+
+      const escapeHtml = (str) =>
+        String(str).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+
+      function renderTable() {
+        const searchVal = document.getElementById("search").value.toLowerCase();
+        const projectVal = document.getElementById("project-filter").value;
+
+        let filtered = allMacros.filter((m) => {
+          if (projectVal && m.projectName !== projectVal) return false;
+          if (searchVal) {
+            return (
+              m.name.toLowerCase().includes(searchVal) ||
+              m.comment.toLowerCase().includes(searchVal)
+            );
+          }
+          return true;
+        });
+
+        filtered.sort((a, b) => {
+          let va, vb;
+          if (sortCol === "name") {
+            va = a.name; vb = b.name;
+          } else if (sortCol === "comment") {
+            va = a.comment; vb = b.comment;
+          } else {
+            va = a.definitions[0]?.file ?? "";
+            vb = b.definitions[0]?.file ?? "";
+          }
+          const cmp = va.localeCompare(vb, "ja");
+          return sortAsc ? cmp : -cmp;
+        });
+
+        const tbody = document.getElementById("macro-tbody");
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="no-data">マクロが見つかりません</td></tr>`;
+        } else {
+          tbody.innerHTML = filtered
+            .map((m) => {
+              const defFileHtml = m.definitions[0]
+                ? escapeHtml(m.definitions[0].file)
+                : `<span class="empty-cell">—</span>`;
+              const commentHtml = m.comment
+                ? escapeHtml(m.comment)
+                : `<span class="empty-cell">—</span>`;
+              return `
+              <tr>
+                <td class="col-name">${escapeHtml(m.name)}</td>
+                <td class="col-comment">${commentHtml}</td>
+                <td class="col-deffile">${defFileHtml}</td>
+              </tr>
+            `;
+            })
+            .join("");
+        }
+
+        document.getElementById("count").textContent =
+          `${filtered.length} / ${allMacros.length} 件`;
+      }
+
+      // ソートヘッダークリック
+      document.querySelectorAll("thead th.sortable").forEach((th) => {
+        th.addEventListener("click", () => {
+          const col = th.dataset.col;
+          if (sortCol === col) {
+            sortAsc = !sortAsc;
+          } else {
+            sortCol = col;
+            sortAsc = true;
+          }
+          document.querySelectorAll("thead th").forEach((h) => {
+            h.classList.remove("active");
+            const icon = h.querySelector(".sort-icon");
+            if (icon) icon.textContent = "";
+          });
+          th.classList.add("active");
+          const icon = th.querySelector(".sort-icon");
+          if (icon) icon.textContent = sortAsc ? "▲" : "▼";
+          renderTable();
+        });
+      });
+
+      // 検索・フィルタ
+      document.getElementById("search").addEventListener("input", renderTable);
+      document
+        .getElementById("project-filter")
+        .addEventListener("change", renderTable);
+
+      // データ取得
+      fetch("/get-macro-list")
+        .then((r) => r.json())
+        .then((data) => {
+          allMacros = data.macros ?? [];
+          const projects = data.projects ?? [];
+
+          const sel = document.getElementById("project-filter");
+          projects.forEach((p) => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            sel.appendChild(opt);
+          });
+          if (projects.length <= 1) {
+            sel.style.display = "none";
+          }
+
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("macro-table").style.display = "table";
+
+          // 初期アクティブヘッダー
+          const nameHeader = document.querySelector(
+            'thead th[data-col="name"]',
+          );
+          if (nameHeader) {
+            nameHeader.classList.add("active");
+            const icon = nameHeader.querySelector(".sort-icon");
+            if (icon) icon.textContent = "▲";
+          }
+
+          renderTable();
+        })
+        .catch((e) => {
+          console.error(e);
+          document.getElementById("loading").outerHTML =
+            `<div class="error">データの取得に失敗しました。<br>${e.message}</div>`;
+        });
+    </script>
+  </body>
+</html>

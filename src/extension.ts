@@ -17,6 +17,7 @@ import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
 import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
+import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
@@ -147,20 +148,16 @@ export function activate(context: ExtensionContext) {
     sidebarInfoWs,
     sidebarUsageIndexer,
   );
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider(
-      "tyrano-macros",
-      macroTreeProvider,
-    ),
-    vscode.window.registerTreeDataProvider(
-      "tyrano-variables",
-      variableTreeProvider,
-    ),
-    vscode.window.registerTreeDataProvider(
-      "tyrano-characters",
-      characterTreeProvider,
-    ),
-  );
+  const macroTreeView = vscode.window.createTreeView("tyrano-macros", {
+    treeDataProvider: macroTreeProvider,
+  });
+  const variableTreeView = vscode.window.createTreeView("tyrano-variables", {
+    treeDataProvider: variableTreeProvider,
+  });
+  const characterTreeView = vscode.window.createTreeView("tyrano-characters", {
+    treeDataProvider: characterTreeProvider,
+  });
+  context.subscriptions.push(macroTreeView, variableTreeView, characterTreeView);
   const sidebarRefresher = new SidebarRefresher(sidebarUsageIndexer, [
     macroTreeProvider,
     variableTreeProvider,
@@ -176,6 +173,54 @@ export function activate(context: ExtensionContext) {
     ),
     vscode.commands.registerCommand("tyrano.sidebar.refreshCharacters", () =>
       characterTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseMacros", () =>
+      macroTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseVariables", () =>
+      variableTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseCharacters", () =>
+      characterTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandMacros",
+      async () => {
+        const children = macroTreeProvider.getChildren();
+        for (const child of children) {
+          await macroTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandVariables",
+      async () => {
+        const children = variableTreeProvider.getChildren();
+        for (const child of children) {
+          await variableTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandCharacters",
+      async () => {
+        const children = characterTreeProvider.getChildren();
+        for (const child of children) {
+          await characterTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
     ),
     vscode.commands.registerCommand(
       "tyrano.sidebar.openLocation",
@@ -309,6 +354,13 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoFlowchart activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.macroTable",
+              MacroTablePanel.openMacroTable,
+            ),
+          );
+          TyranoLogger.print("MacroTablePanel activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();

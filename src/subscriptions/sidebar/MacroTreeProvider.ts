@@ -24,6 +24,7 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
 
   /** Provider 内ローカルキャッシュ: 同じ symbol を再展開する際の使用箇所結果 */
   private readonly usageCache: Map<string, LocationNode[]> = new Map();
+  private _collapseGeneration = 0;
 
   constructor(
     private readonly infoWs: InformationWorkSpace,
@@ -35,8 +36,31 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  public collapseAll(): void {
+    this._collapseGeneration++;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
   public getTreeItem(element: SidebarNode): vscode.TreeItem {
-    return toTreeItem(element);
+    const item = toTreeItem(element);
+    if (element.kind === "symbol") {
+      item.id = `g${this._collapseGeneration}::${element.projectPath}::${element.name}`;
+    }
+    return item;
+  }
+
+  public getParent(element: SidebarNode): SidebarNode | undefined {
+    if (element.kind === "symbol") {
+      const projectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
+      if (projectPaths.length > 1) {
+        return { kind: "root", projectPath: element.projectPath };
+      }
+      return undefined;
+    }
+    if (element.kind === "category") {
+      return element.parent;
+    }
+    return undefined;
   }
 
   public getChildren(element?: SidebarNode): SidebarNode[] {
@@ -111,13 +135,6 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
   private getSymbolChildren(symbol: SymbolNode): CategoryNode[] {
     const categories: CategoryNode[] = [];
     const defs = this.getDefinitionsForSymbol(symbol);
-    if (symbol.comment) {
-      categories.push({
-        kind: "category",
-        parent: symbol,
-        category: "comment",
-      });
-    }
     if (defs.length > 0) {
       categories.push({
         kind: "category",
@@ -139,15 +156,6 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
   private getCategoryChildren(category: CategoryNode): SidebarNode[] {
     const symbol = category.parent;
     switch (category.category) {
-      case "comment":
-        if (!symbol.comment) {
-          return [];
-        }
-        return symbol.comment
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0)
-          .map<SidebarNode>((line) => ({ kind: "text", text: line }));
       case "definition":
         return this.getDefinitionsForSymbol(symbol);
       case "usage":

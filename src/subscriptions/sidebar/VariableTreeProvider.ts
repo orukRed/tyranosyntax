@@ -23,6 +23,7 @@ export class VariableTreeProvider
     this._onDidChangeTreeData.event;
 
   private readonly usageCache: Map<string, LocationNode[]> = new Map();
+  private _collapseGeneration = 0;
 
   constructor(
     private readonly infoWs: InformationWorkSpace,
@@ -34,8 +35,31 @@ export class VariableTreeProvider
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  public collapseAll(): void {
+    this._collapseGeneration++;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
   public getTreeItem(element: SidebarNode): vscode.TreeItem {
-    return toTreeItem(element);
+    const item = toTreeItem(element);
+    if (element.kind === "symbol") {
+      item.id = `g${this._collapseGeneration}::${element.projectPath}::${element.name}`;
+    }
+    return item;
+  }
+
+  public getParent(element: SidebarNode): SidebarNode | undefined {
+    if (element.kind === "symbol") {
+      const projectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
+      if (projectPaths.length > 1) {
+        return { kind: "root", projectPath: element.projectPath };
+      }
+      return undefined;
+    }
+    if (element.kind === "category") {
+      return element.parent;
+    }
+    return undefined;
   }
 
   public getChildren(element?: SidebarNode): SidebarNode[] {
@@ -87,7 +111,6 @@ export class VariableTreeProvider
         symbolType: "variable",
         projectPath,
         name: kind ? `${kind}.${name}` : name,
-        description: kind ? `kind=${kind}` : undefined,
       });
     }
     symbols.sort((a, b) => a.name.localeCompare(b.name));
@@ -96,31 +119,31 @@ export class VariableTreeProvider
 
   private getSymbolChildren(symbol: SymbolNode): CategoryNode[] {
     const categories: CategoryNode[] = [];
-    const defs = this.getDefinitionsForSymbol(symbol);
-    if (defs.length > 0) {
+    const writes = this.getWritesForSymbol(symbol);
+    if (writes.length > 0) {
       categories.push({
         kind: "category",
         parent: symbol,
-        category: "definition",
-        count: defs.length,
+        category: "write",
+        count: writes.length,
       });
     }
-    const usages = this.getUsagesForSymbol(symbol);
+    const reads = this.getReadsForSymbol(symbol);
     categories.push({
       kind: "category",
       parent: symbol,
-      category: "usage",
-      count: usages.length,
+      category: "read",
+      count: reads.length,
     });
     return categories;
   }
 
   private getCategoryChildren(category: CategoryNode): SidebarNode[] {
     switch (category.category) {
-      case "definition":
-        return this.getDefinitionsForSymbol(category.parent);
-      case "usage":
-        return this.getUsagesForSymbol(category.parent);
+      case "write":
+        return this.getWritesForSymbol(category.parent);
+      case "read":
+        return this.getReadsForSymbol(category.parent);
       default:
         return [];
     }
@@ -132,7 +155,7 @@ export class VariableTreeProvider
     return dot >= 0 ? symbol.name.slice(dot + 1) : symbol.name;
   }
 
-  private getDefinitionsForSymbol(symbol: SymbolNode): LocationNode[] {
+  private getWritesForSymbol(symbol: SymbolNode): LocationNode[] {
     const variableMap = this.infoWs.variableMap.get(symbol.projectPath);
     if (!variableMap) {
       return [];
@@ -150,15 +173,18 @@ export class VariableTreeProvider
     }));
   }
 
-  private getUsagesForSymbol(symbol: SymbolNode): LocationNode[] {
+  private getReadsForSymbol(symbol: SymbolNode): LocationNode[] {
     const cacheKey = `${symbol.projectPath}::${symbol.name}`;
     const cached = this.usageCache.get(cacheKey);
     if (cached) {
       return cached;
     }
     const baseName = this.baseNameOf(symbol);
-    const usages = this.indexer.findVariableUses(baseName);
-    this.usageCache.set(cacheKey, usages);
-    return usages;
+    const allUses = this.indexer.findVariableUses(baseName);
+    const writes = this.getWritesForSymbol(symbol);
+    const writeSet = new Set(writes.map((w) => `${w.uri}::${w.line}`));
+    const reads = allUses.filter((u) => !writeSet.has(`${u.uri}::${u.line}`));
+    this.usageCache.set(cacheKey, reads);
+    return reads;
   }
 }
