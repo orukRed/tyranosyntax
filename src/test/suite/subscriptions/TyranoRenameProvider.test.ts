@@ -196,20 +196,17 @@ suite("TyranoRenameProvider", () => {
       }
     });
 
-    test("変数を使ったラベル参照はリネーム不可", async () => {
+    test("target= 内の変数指定はラベル扱いされず変数として処理される", async () => {
       const document = new MockTextDocument('[jump target="&f.label_var"]');
-      const charIndex = '[jump target="&f.lab'.length;
+      const charIndex = '[jump target="&f.lab'.length; // "f.label_var" 内
       const position = new vscode.Position(0, charIndex);
       const token = new vscode.CancellationTokenSource().token;
 
-      try {
-        await provider.prepareRename(document, position, token);
-        assert.fail("変数指定のtargetでリネームが許可されてしまいました");
-      } catch (error) {
-        assert.strictEqual(
-          (error as Error).message,
-          "選択箇所はリネーム不可です",
-        );
+      const result = await provider.prepareRename(document, position, token);
+      assert.ok(result instanceof vscode.Range);
+      if (result instanceof vscode.Range) {
+        // ラベル名 "label_var" ではなく変数全体 "f.label_var" の Range
+        assert.strictEqual(document.getText(result), "f.label_var");
       }
     });
   });
