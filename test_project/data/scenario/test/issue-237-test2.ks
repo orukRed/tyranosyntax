@@ -18,16 +18,8 @@
 別ファイルから issue-237-test.ks のラベルを参照する。[p]
 
 ; --- 別ファイル (issue-237-test.ks) のラベルを storage で参照 ---
-[link
-  storage="test/issue-237-test.ks"
-  target="*issue237_start"
-  text="test.ks の start へ"
-]
-[link
-  storage="test/issue-237-test.ks"
-  target="issue237_link_target"
-  text="* なし参照"
-]
+[link  storage="test/issue-237-test.ks" target="*issue237_start"]aaa[endlink]
+[link  storage="test/issue-237-test.ks"  target="issue237_link_target"]bbb[endlink]
 [s]
 
 ; --- jump / call で別ファイルのラベルへ ---

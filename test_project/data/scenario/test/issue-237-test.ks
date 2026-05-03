@@ -24,8 +24,8 @@
 これは issue-237 ラベルリネームのテストシナリオです。[p]
 
 ; --- 同一ファイル内のラベル参照（jump / link / button / glink / call） ---
-[link target="issue237_branch_a" text="A へ"]
-[link target="issue237_branch_b" text="B へ"]
+[link target="issue237_branch_a"]a[endlink] 
+[link target="issue237_branch_b"]b[endlink]
 [s]
 
 *issue237_branch_a
