@@ -227,7 +227,9 @@
               "missingAmpersandInVariable": true,
               "unusedMacro": true,
               "unusedLabel": true,
-              "unusedVariable": true
+              "unusedVariable": true,
+              "missingReturnInCalledFile": true,
+              "iscriptJumpWithoutEndscriptStop": true
             },
             "description": "診断機能を実行するかどうかを選択します。項目ごとにtrue/falseを設定してください。"
           },
@@ -1798,6 +1800,21 @@
           "icon": ""
         },
         {
+          "id": "tyrano-macros",
+          "name": "マクロ",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-variables",
+          "name": "変数",
+          "icon": ""
+        },
+        {
+          "id": "tyrano-characters",
+          "name": "キャラクター",
+          "icon": ""
+        },
+        {
           "id": "tyrano-links",
           "name": "リンク",
           "icon": ""
@@ -1807,7 +1824,7 @@
     "viewsWelcome": [
       {
         "view": "tyrano-dev-tools",
-        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)"
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)"
       },
       {
         "view": "tyrano-links",
@@ -1848,6 +1865,10 @@
         "title": "tyrano.flowchart"
       },
       {
+        "command": "tyrano.macroTable",
+        "title": "tyrano.macroTable"
+      },
+      {
         "command": "tyrano.sidebar.debug",
         "title": "デバッグ実行（β版）",
         "icon": "$(debug-alt)"
@@ -1871,8 +1892,106 @@
         "command": "tyrano.sidebar.openOfuse",
         "title": "OFUSE（寄付）",
         "icon": "$(heart)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshMacros",
+        "title": "マクロ一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.expandMacros",
+        "title": "マクロ一覧をすべて開く",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "tyrano.sidebar.collapseMacros",
+        "title": "マクロ一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshVariables",
+        "title": "変数一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.expandVariables",
+        "title": "変数一覧をすべて開く",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "tyrano.sidebar.collapseVariables",
+        "title": "変数一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "tyrano.sidebar.refreshCharacters",
+        "title": "キャラクター一覧をリフレッシュ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.expandCharacters",
+        "title": "キャラクター一覧をすべて開く",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "tyrano.sidebar.collapseCharacters",
+        "title": "キャラクター一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
+      },
+      {
+        "command": "tyrano.sidebar.openLocation",
+        "title": "定義箇所/使用箇所を開く"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "tyrano.sidebar.expandMacros",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.collapseMacros",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.refreshMacros",
+          "when": "view == tyrano-macros",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.expandVariables",
+          "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.collapseVariables",
+          "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.refreshVariables",
+          "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.expandCharacters",
+          "when": "view == tyrano-characters",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.collapseCharacters",
+          "when": "view == tyrano-characters",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.refreshCharacters",
+          "when": "view == tyrano-characters",
+          "group": "navigation"
+        }
+      ]
+    },
     "breakpoints": [
       {
         "language": "tyrano"
