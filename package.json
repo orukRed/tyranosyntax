@@ -1902,6 +1902,11 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "tyrano.sidebar.collapseMacros",
+        "title": "マクロ一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
+      },
+      {
         "command": "tyrano.sidebar.refreshVariables",
         "title": "変数一覧をリフレッシュ",
         "icon": "$(refresh)"
@@ -1912,9 +1917,24 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "tyrano.sidebar.collapseVariables",
+        "title": "変数一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
+      },
+      {
         "command": "tyrano.sidebar.refreshCharacters",
         "title": "キャラクター一覧をリフレッシュ",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "tyrano.sidebar.expandCharacters",
+        "title": "キャラクター一覧をすべて開く",
+        "icon": "$(expand-all)"
+      },
+      {
+        "command": "tyrano.sidebar.collapseCharacters",
+        "title": "キャラクター一覧をすべて閉じる",
+        "icon": "$(collapse-all)"
       },
       {
         "command": "tyrano.sidebar.openLocation",
@@ -1929,7 +1949,7 @@
           "group": "navigation"
         },
         {
-          "command": "workbench.actions.treeView.tyrano-macros.collapseAll",
+          "command": "tyrano.sidebar.collapseMacros",
           "when": "view == tyrano-macros",
           "group": "navigation"
         },
@@ -1944,13 +1964,23 @@
           "group": "navigation"
         },
         {
-          "command": "workbench.actions.treeView.tyrano-variables.collapseAll",
+          "command": "tyrano.sidebar.collapseVariables",
           "when": "view == tyrano-variables",
           "group": "navigation"
         },
         {
           "command": "tyrano.sidebar.refreshVariables",
           "when": "view == tyrano-variables",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.expandCharacters",
+          "when": "view == tyrano-characters",
+          "group": "navigation"
+        },
+        {
+          "command": "tyrano.sidebar.collapseCharacters",
+          "when": "view == tyrano-characters",
           "group": "navigation"
         },
         {

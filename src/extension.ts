@@ -153,13 +153,10 @@ export function activate(context: ExtensionContext) {
   const variableTreeView = vscode.window.createTreeView("tyrano-variables", {
     treeDataProvider: variableTreeProvider,
   });
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider(
-      "tyrano-characters",
-      characterTreeProvider,
-    ),
-  );
-  context.subscriptions.push(macroTreeView, variableTreeView);
+  const characterTreeView = vscode.window.createTreeView("tyrano-characters", {
+    treeDataProvider: characterTreeProvider,
+  });
+  context.subscriptions.push(macroTreeView, variableTreeView, characterTreeView);
   const sidebarRefresher = new SidebarRefresher(sidebarUsageIndexer, [
     macroTreeProvider,
     variableTreeProvider,
@@ -175,6 +172,15 @@ export function activate(context: ExtensionContext) {
     ),
     vscode.commands.registerCommand("tyrano.sidebar.refreshCharacters", () =>
       characterTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseMacros", () =>
+      macroTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseVariables", () =>
+      variableTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseCharacters", () =>
+      characterTreeProvider.collapseAll(),
     ),
     vscode.commands.registerCommand(
       "tyrano.sidebar.expandMacros",
@@ -195,6 +201,19 @@ export function activate(context: ExtensionContext) {
         const children = variableTreeProvider.getChildren();
         for (const child of children) {
           await variableTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandCharacters",
+      async () => {
+        const children = characterTreeProvider.getChildren();
+        for (const child of children) {
+          await characterTreeView.reveal(child, {
             expand: 3,
             select: false,
             focus: false,

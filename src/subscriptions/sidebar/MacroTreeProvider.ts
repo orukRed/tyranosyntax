@@ -24,6 +24,7 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
 
   /** Provider 内ローカルキャッシュ: 同じ symbol を再展開する際の使用箇所結果 */
   private readonly usageCache: Map<string, LocationNode[]> = new Map();
+  private _collapseGeneration = 0;
 
   constructor(
     private readonly infoWs: InformationWorkSpace,
@@ -35,8 +36,31 @@ export class MacroTreeProvider implements vscode.TreeDataProvider<SidebarNode> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  public collapseAll(): void {
+    this._collapseGeneration++;
+    this._onDidChangeTreeData.fire(undefined);
+  }
+
   public getTreeItem(element: SidebarNode): vscode.TreeItem {
-    return toTreeItem(element);
+    const item = toTreeItem(element);
+    if (element.kind === "symbol") {
+      item.id = `g${this._collapseGeneration}::${element.projectPath}::${element.name}`;
+    }
+    return item;
+  }
+
+  public getParent(element: SidebarNode): SidebarNode | undefined {
+    if (element.kind === "symbol") {
+      const projectPaths = this.infoWs.getTyranoScriptProjectRootPaths();
+      if (projectPaths.length > 1) {
+        return { kind: "root", projectPath: element.projectPath };
+      }
+      return undefined;
+    }
+    if (element.kind === "category") {
+      return element.parent;
+    }
+    return undefined;
   }
 
   public getChildren(element?: SidebarNode): SidebarNode[] {
