@@ -17,6 +17,7 @@ import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
 import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
+import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
@@ -26,6 +27,11 @@ import {
 import { TyranoDebugConfigProvider } from "./debug/TyranoDebugConfigProvider";
 import { TyranoDebugSession } from "./debug/TyranoDebugSession";
 import { TyranoSidebarProvider } from "./subscriptions/TyranoSidebarProvider";
+import { CharacterTreeProvider } from "./subscriptions/sidebar/CharacterTreeProvider";
+import { MacroTreeProvider } from "./subscriptions/sidebar/MacroTreeProvider";
+import { SidebarRefresher } from "./subscriptions/sidebar/SidebarRefresher";
+import { UsageIndexer } from "./subscriptions/sidebar/UsageIndexer";
+import { VariableTreeProvider } from "./subscriptions/sidebar/VariableTreeProvider";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -124,6 +130,124 @@ export function activate(context: ExtensionContext) {
         vscode.Uri.parse("https://ofuse.me/orukred/letter"),
       );
     }),
+  );
+
+  // 変数・マクロ・キャラクターのシンボル一覧 TreeView 登録
+  const sidebarInfoWs = InformationWorkSpace.getInstance();
+  const sidebarUsageIndexer = new UsageIndexer(sidebarInfoWs);
+  const macroTreeProvider = new MacroTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const variableTreeProvider = new VariableTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const characterTreeProvider = new CharacterTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const macroTreeView = vscode.window.createTreeView("tyrano-macros", {
+    treeDataProvider: macroTreeProvider,
+  });
+  const variableTreeView = vscode.window.createTreeView("tyrano-variables", {
+    treeDataProvider: variableTreeProvider,
+  });
+  const characterTreeView = vscode.window.createTreeView("tyrano-characters", {
+    treeDataProvider: characterTreeProvider,
+  });
+  context.subscriptions.push(macroTreeView, variableTreeView, characterTreeView);
+  const sidebarRefresher = new SidebarRefresher(sidebarUsageIndexer, [
+    macroTreeProvider,
+    variableTreeProvider,
+    characterTreeProvider,
+  ]);
+  context.subscriptions.push({ dispose: () => sidebarRefresher.dispose() });
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.refreshMacros", () =>
+      macroTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.refreshVariables", () =>
+      variableTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.refreshCharacters", () =>
+      characterTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseMacros", () =>
+      macroTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseVariables", () =>
+      variableTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseCharacters", () =>
+      characterTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandMacros",
+      async () => {
+        const children = macroTreeProvider.getChildren();
+        for (const child of children) {
+          await macroTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandVariables",
+      async () => {
+        const children = variableTreeProvider.getChildren();
+        for (const child of children) {
+          await variableTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandCharacters",
+      async () => {
+        const children = characterTreeProvider.getChildren();
+        for (const child of children) {
+          await characterTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.openLocation",
+      async (arg: { uri: string; line: number; character: number }) => {
+        if (!arg || typeof arg.uri !== "string") {
+          return;
+        }
+        try {
+          const doc = await vscode.workspace.openTextDocument(
+            vscode.Uri.file(arg.uri),
+          );
+          const position = new vscode.Position(
+            arg.line ?? 0,
+            arg.character ?? 0,
+          );
+          await vscode.window.showTextDocument(doc, {
+            selection: new vscode.Range(position, position),
+            preserveFocus: false,
+          });
+        } catch (error) {
+          TyranoLogger.print(
+            `tyrano.sidebar.openLocation failed for ${arg.uri}`,
+            ErrorLevel.WARN,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
+      },
+    ),
   );
   TyranoLogger.print("TyranoSidebarProvider activate");
 
@@ -229,6 +353,13 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoFlowchart activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.macroTable",
+              MacroTablePanel.openMacroTable,
+            ),
+          );
+          TyranoLogger.print("MacroTablePanel activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
@@ -249,6 +380,9 @@ export function activate(context: ExtensionContext) {
             TyranoLogger.print(
               "Initial macro and variable data loading completed",
             );
+
+            // 初期ロード完了後にサイドバーを反映
+            sidebarRefresher.refreshAll();
 
             TyranoLogger.print("TyranoDiagnostic activate");
             const tyranoJumpProvider = new TyranoJumpProvider();
@@ -369,6 +503,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -378,6 +513,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
             scenarioFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
@@ -387,6 +523,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.spliceCharacterMapByFilePath(e.fsPath);
               await infoWs.spliceTransitionMapByFilePath(e.fsPath);
               await infoWs.splicePluginParamsByInitKsPath(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
 
             //scriptFileの値
@@ -400,6 +537,7 @@ export function activate(context: ExtensionContext) {
             scriptFileSystemWatcher.onDidCreate(async (e) => {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -408,11 +546,13 @@ export function activate(context: ExtensionContext) {
               );
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
               await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
               await infoWs.spliceVariableMapByFilePath(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
             });
 
             const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
