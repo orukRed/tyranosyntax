@@ -2,6 +2,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 import { ExtensionContext } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 
@@ -530,8 +531,7 @@ async function handleRenamedPath(
 
   let isDirectory = false;
   try {
-    const stat = await vscode.workspace.fs.stat(newUri);
-    isDirectory = (stat.type & vscode.FileType.Directory) !== 0;
+    isDirectory = fs.statSync(newUri.fsPath).isDirectory();
   } catch {
     return;
   }
@@ -579,17 +579,21 @@ async function handleRenamedFile(
     infoWs.spliceCharacterMapByFilePathInProject(oldProjectPath, oldPath);
     await infoWs.spliceTransitionMapByFilePath(oldPath);
     infoWs.splicePluginParamsByInitKsPathInProject(oldProjectPath, oldPath);
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
 
     await infoWs.updateScenarioFileMap(newPath);
     await infoWs.updateMacroLabelVariableDataMapByKs(newPath);
     await infoWs.updatePluginParamsFromInitKs(newPath);
+    await infoWs.addResourceFileMap(newPath);
   } else if (ext === ".js") {
     await infoWs.spliceScriptFileMapByFilePath(oldPath);
     infoWs.spliceMacroDataMapByFilePathInProject(oldProjectPath, oldPath);
     infoWs.spliceVariableMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
 
     await infoWs.updateScriptFileMap(newPath);
     await infoWs.updateMacroDataMapByJs(newPath);
+    await infoWs.addResourceFileMap(newPath);
   } else if (infoWs.resourceExtensionsArrays.includes(ext)) {
     infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
     await infoWs.addResourceFileMap(newPath);
