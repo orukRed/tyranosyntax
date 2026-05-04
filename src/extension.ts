@@ -510,6 +510,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -520,6 +521,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scenarioFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
@@ -530,6 +532,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.spliceTransitionMapByFilePath(e.fsPath);
               await infoWs.splicePluginParamsByInitKsPath(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
 
             //scriptFileの値
@@ -544,6 +547,7 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -553,12 +557,14 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
               await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
               await infoWs.spliceVariableMapByFilePath(e.fsPath);
               sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
 
             const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
@@ -571,9 +577,11 @@ export function activate(context: ExtensionContext) {
               );
             resourceFileSystemWatcher.onDidCreate(async (e) => {
               infoWs.addResourceFileMap(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             resourceFileSystemWatcher.onDidDelete(async (e) => {
               infoWs.spliceResourceFileMapByFilePath(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
 
             //すべてのプロジェクトに対して初回診断実行
