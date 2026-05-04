@@ -538,16 +538,14 @@ async function handleRenamedPath(
 
   const effectiveOldProjectPath = oldProjectPath || newProjectPath;
   if (isDirectory) {
-    const children = await vscode.workspace.findFiles(
-      new vscode.RelativePattern(newUri, "**/*"),
-    );
-    for (const child of children) {
-      const rel = path.relative(newUri.fsPath, child.fsPath);
-      const oldChildPath = oldUri.fsPath + infoWs.pathDelimiter + rel;
+    const children = infoWs.getProjectFiles(newUri.fsPath, [], true);
+    for (const childFsPath of children) {
+      const rel = path.relative(newUri.fsPath, childFsPath);
+      const oldChildPath = path.join(oldUri.fsPath, rel);
       await handleRenamedFile(
         infoWs,
         oldChildPath,
-        child.fsPath,
+        childFsPath,
         effectiveOldProjectPath,
       );
     }

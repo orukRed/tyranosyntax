@@ -927,9 +927,10 @@ export class InformationWorkSpace {
         this.resourceExtensions[key].includes(path.extname(filePath)),
       )
       .toString(); //プロジェクトパスの拡張子からどのリソースタイプなのかを取得
-    this._resourceFileMap
-      .get(absoluteProjectPath)
-      ?.push(new ResourceFileData(filePath, resourceType));
+    const arr = this._resourceFileMap.get(absoluteProjectPath);
+    if (arr && !arr.some((r) => r.filePath === filePath)) {
+      arr.push(new ResourceFileData(filePath, resourceType));
+    }
   }
 
   /**
