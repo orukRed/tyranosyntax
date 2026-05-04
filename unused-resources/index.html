@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>未使用リソース検出</title>
     <style>
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: #f0f2f5;
@@ -13,7 +15,11 @@
         margin: 0;
         padding: 20px;
       }
-      h1 { margin: 0 0 6px 0; font-size: 22px; color: #c0392b; }
+      h1 {
+        margin: 0 0 6px 0;
+        font-size: 22px;
+        color: #c0392b;
+      }
       .subtitle {
         font-size: 13px;
         color: #666;
@@ -37,7 +43,9 @@
         outline: none;
         transition: border-color 0.2s;
       }
-      #toolbar input[type="text"]:focus { border-color: #c0392b; }
+      #toolbar input[type="text"]:focus {
+        border-color: #c0392b;
+      }
       #toolbar select {
         padding: 7px 12px;
         font-size: 14px;
@@ -47,7 +55,11 @@
         outline: none;
         cursor: pointer;
       }
-      #count { font-size: 13px; color: #666; margin-left: auto; }
+      #count {
+        font-size: 13px;
+        color: #666;
+        margin-left: auto;
+      }
       .btn {
         padding: 7px 14px;
         font-size: 13px;
@@ -56,7 +68,9 @@
         cursor: pointer;
         transition: opacity 0.2s;
       }
-      .btn:hover { opacity: 0.85; }
+      .btn:hover {
+        opacity: 0.85;
+      }
       .btn-outline {
         background: #fff;
         border: 1px solid #ccc;
@@ -71,11 +85,14 @@
         cursor: not-allowed;
         opacity: 1;
       }
-      .btn-refresh { background: #3498db; color: #fff; }
+      .btn-refresh {
+        background: #3498db;
+        color: #fff;
+      }
       .table-wrapper {
         background: #fff;
         border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         overflow: auto;
       }
       table {
@@ -96,9 +113,17 @@
         user-select: none;
         white-space: nowrap;
       }
-      tbody tr:nth-child(even) { background: #fdf4f4; }
-      tbody tr:hover { background: #fce8e8; }
-      tbody td { padding: 8px 12px; border-bottom: 1px solid #f0e0e0; vertical-align: middle; }
+      tbody tr:nth-child(even) {
+        background: #fdf4f4;
+      }
+      tbody tr:hover {
+        background: #fce8e8;
+      }
+      tbody td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0e0e0;
+        vertical-align: middle;
+      }
       .thumb {
         width: 56px;
         height: 42px;
@@ -125,14 +150,32 @@
         text-transform: uppercase;
         color: #fff;
       }
-      .tag-image    { background: #27ae60; }
-      .tag-bgimage  { background: #2980b9; }
-      .tag-fgimage  { background: #8e44ad; }
-      .tag-sound    { background: #e67e22; }
-      .tag-bgm      { background: #16a085; }
-      .tag-video    { background: #d35400; }
-      .tag-others   { background: #7f8c8d; }
-      .path-text { font-family: monospace; font-size: 12px; word-break: break-all; }
+      .tag-image {
+        background: #27ae60;
+      }
+      .tag-bgimage {
+        background: #2980b9;
+      }
+      .tag-fgimage {
+        background: #8e44ad;
+      }
+      .tag-sound {
+        background: #e67e22;
+      }
+      .tag-bgm {
+        background: #16a085;
+      }
+      .tag-video {
+        background: #d35400;
+      }
+      .tag-others {
+        background: #7f8c8d;
+      }
+      .path-text {
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+      }
       #empty-msg {
         text-align: center;
         padding: 40px;
@@ -144,23 +187,37 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 100;
         align-items: center;
         justify-content: center;
       }
-      #modal-overlay.active { display: flex; }
+      #modal-overlay.active {
+        display: flex;
+      }
       #modal {
         background: #fff;
         border-radius: 8px;
         padding: 28px 32px;
         max-width: 480px;
         width: 90%;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       }
-      #modal h2 { margin: 0 0 12px 0; font-size: 18px; color: #c0392b; }
-      #modal p { font-size: 14px; line-height: 1.7; margin: 0 0 20px 0; }
-      #modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      #modal h2 {
+        margin: 0 0 12px 0;
+        font-size: 18px;
+        color: #c0392b;
+      }
+      #modal p {
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 0 0 20px 0;
+      }
+      #modal .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
       #loading {
         text-align: center;
         padding: 40px;
@@ -172,12 +229,17 @@
   <body>
     <h1>⚠️ 未使用リソース検出</h1>
     <p class="subtitle">
-      シナリオ・スクリプトファイルから参照されていないリソースファイルの一覧です。<br>
-      変数による動的参照は検出できないため、削除前に必ずご確認ください。<br>
+      シナリオ・スクリプトファイルから参照されていないリソースファイルの一覧です。<br />
+      変数による動的参照は検出できないため、削除前に必ずご確認ください。<br />
     </p>
 
     <div id="toolbar">
-      <input type="text" id="search" placeholder="ファイル名で絞り込み..." oninput="applyFilter()" />
+      <input
+        type="text"
+        id="search"
+        placeholder="ファイル名で絞り込み..."
+        oninput="applyFilter()"
+      />
       <select id="type-filter" onchange="applyFilter()">
         <option value="">すべてのリソースタイプ</option>
         <option value="image">image</option>
@@ -193,19 +255,32 @@
       </select>
       <button class="btn btn-outline" onclick="selectAll()">全選択</button>
       <button class="btn btn-outline" onclick="deselectAll()">全解除</button>
-      <button class="btn btn-refresh" onclick="loadData()">🔄 最新の情報に更新</button>
-      <button class="btn btn-danger" id="delete-btn" disabled onclick="confirmDelete()">
+      <button class="btn btn-refresh" onclick="loadData()">
+        🔄 最新の情報に更新
+      </button>
+      <button
+        class="btn btn-danger"
+        id="delete-btn"
+        disabled
+        onclick="confirmDelete()"
+      >
         選択したファイルをゴミ箱に移動
       </button>
       <span id="count"></span>
     </div>
 
     <div id="loading">読み込み中...</div>
-    <div class="table-wrapper" id="table-wrapper" style="display:none">
+    <div class="table-wrapper" id="table-wrapper" style="display: none">
       <table>
         <thead>
           <tr>
-            <th><input type="checkbox" id="check-all" onchange="toggleAll(this)" /></th>
+            <th>
+              <input
+                type="checkbox"
+                id="check-all"
+                onchange="toggleAll(this)"
+              />
+            </th>
             <th>サムネイル</th>
             <th>ファイル名</th>
             <th>相対パス</th>
@@ -215,7 +290,9 @@
         </thead>
         <tbody id="tbody"></tbody>
       </table>
-      <div id="empty-msg" style="display:none">未使用リソースは見つかりませんでした。</div>
+      <div id="empty-msg" style="display: none">
+        未使用リソースは見つかりませんでした。
+      </div>
     </div>
 
     <!-- 削除確認モーダル -->
@@ -224,8 +301,12 @@
         <h2>⚠️ ゴミ箱に移動する前に確認</h2>
         <p id="modal-body"></p>
         <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
-          <button class="btn btn-danger" onclick="executeDelete()">ゴミ箱に移動する</button>
+          <button class="btn btn-outline" onclick="closeModal()">
+            キャンセル
+          </button>
+          <button class="btn btn-danger" onclick="executeDelete()">
+            ゴミ箱に移動する
+          </button>
         </div>
       </div>
     </div>
@@ -244,14 +325,22 @@
           allResources = data.resources || [];
 
           // プロジェクトフィルターを更新
-          const projects = [...new Set(allResources.map(r => r.projectName))].sort();
+          const projects = [
+            ...new Set(allResources.map((r) => r.projectName)),
+          ].sort();
           const projectFilter = document.getElementById("project-filter");
-          projectFilter.innerHTML = '<option value="">すべてのプロジェクト</option>' +
-            projects.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join("");
+          projectFilter.innerHTML =
+            '<option value="">すべてのプロジェクト</option>' +
+            projects
+              .map(
+                (p) => `<option value="${escHtml(p)}">${escHtml(p)}</option>`,
+              )
+              .join("");
 
           applyFilter();
         } catch (e) {
-          document.getElementById("loading").textContent = "エラー: 取得に失敗しました。";
+          document.getElementById("loading").textContent =
+            "エラー: 取得に失敗しました。";
           console.error(e);
         }
       }
@@ -261,8 +350,9 @@
         const typeVal = document.getElementById("type-filter").value;
         const projVal = document.getElementById("project-filter").value;
 
-        filteredResources = allResources.filter(r => {
-          if (searchVal && !r.fileName.toLowerCase().includes(searchVal)) return false;
+        filteredResources = allResources.filter((r) => {
+          if (searchVal && !r.fileName.toLowerCase().includes(searchVal))
+            return false;
           if (typeVal && r.resourceType !== typeVal) return false;
           if (projVal && r.projectName !== projVal) return false;
           return true;
@@ -285,10 +375,20 @@
         }
         document.getElementById("empty-msg").style.display = "none";
 
-        const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"]);
+        const IMAGE_EXTS = new Set([
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+          ".bmp",
+          ".svg",
+          ".webp",
+        ]);
 
-        resources.forEach(r => {
-          const ext = r.fileName.substring(r.fileName.lastIndexOf(".")).toLowerCase();
+        resources.forEach((r) => {
+          const ext = r.fileName
+            .substring(r.fileName.lastIndexOf("."))
+            .toLowerCase();
           const isImage = IMAGE_EXTS.has(ext);
           const encodedPath = btoa(unescape(encodeURIComponent(r.filePath)));
 
@@ -317,38 +417,53 @@
       function fileIcon(type) {
         switch ((type || "").toLowerCase()) {
           case "sound":
-          case "bgm":    return "🎵";
-          case "video":  return "🎬";
-          default:       return "📄";
+          case "bgm":
+            return "🎵";
+          case "video":
+            return "🎬";
+          default:
+            return "📄";
         }
       }
 
       function updateCount() {
         const checked = document.querySelectorAll(".row-check:checked").length;
         const total = filteredResources.length;
-        document.getElementById("count").textContent = `${total} 件 / 選択: ${checked} 件`;
+        document.getElementById("count").textContent =
+          `${total} 件 / 選択: ${checked} 件`;
         document.getElementById("delete-btn").disabled = checked === 0;
         document.getElementById("check-all").checked =
-          total > 0 && checked === document.querySelectorAll(".row-check").length;
+          total > 0 &&
+          checked === document.querySelectorAll(".row-check").length;
       }
 
-      function updateDeleteBtn() { updateCount(); }
+      function updateDeleteBtn() {
+        updateCount();
+      }
 
       function selectAll() {
-        document.querySelectorAll(".row-check").forEach(cb => cb.checked = true);
+        document
+          .querySelectorAll(".row-check")
+          .forEach((cb) => (cb.checked = true));
         updateCount();
       }
       function deselectAll() {
-        document.querySelectorAll(".row-check").forEach(cb => cb.checked = false);
+        document
+          .querySelectorAll(".row-check")
+          .forEach((cb) => (cb.checked = false));
         updateCount();
       }
       function toggleAll(master) {
-        document.querySelectorAll(".row-check").forEach(cb => cb.checked = master.checked);
+        document
+          .querySelectorAll(".row-check")
+          .forEach((cb) => (cb.checked = master.checked));
         updateCount();
       }
 
       function getCheckedPaths() {
-        return [...document.querySelectorAll(".row-check:checked")].map(cb => cb.dataset.path);
+        return [...document.querySelectorAll(".row-check:checked")].map(
+          (cb) => cb.dataset.path,
+        );
       }
 
       function confirmDelete() {
@@ -379,12 +494,17 @@
           const result = await res.json();
 
           if (result.errors && result.errors.length > 0) {
-            alert("一部のファイルの削除に失敗しました:\n" + result.errors.join("\n"));
+            alert(
+              "一部のファイルの削除に失敗しました:\n" +
+                result.errors.join("\n"),
+            );
           }
 
           // 削除済みファイルを allResources から除去して再描画
           const deletedSet = new Set(result.deleted || []);
-          allResources = allResources.filter(r => !deletedSet.has(r.filePath));
+          allResources = allResources.filter(
+            (r) => !deletedSet.has(r.filePath),
+          );
           applyFilter();
         } catch (e) {
           alert("削除処理中にエラーが発生しました: " + e);
@@ -400,7 +520,9 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
       }
-      function escAttr(str) { return escHtml(str); }
+      function escAttr(str) {
+        return escHtml(str);
+      }
 
       loadData();
     </script>

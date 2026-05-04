@@ -67,11 +67,7 @@ function detectUnusedResources(
   const resources = infoWs.resourceFileMap.get(projectPath) ?? [];
   const projectName = projectPath.split(path.sep).pop() ?? projectPath;
 
-  const scenarioDirPath =
-    projectPath +
-    path.sep +
-    "data" +
-    path.sep;
+  const scenarioDirPath = projectPath + path.sep + "data" + path.sep;
 
   return resources
     .filter((res) => !referencedFileNames.has(res.fileName))
@@ -99,7 +95,8 @@ export class UnusedResourcePanel {
       try {
         TyranoLogger.print("port 3500 server start");
         const app = express();
-        const staticDir = InformationExtension.path + path.sep + "unused-resources";
+        const staticDir =
+          InformationExtension.path + path.sep + "unused-resources";
         app.use(express.static(staticDir));
         app.use(express.json());
 
@@ -113,7 +110,11 @@ export class UnusedResourcePanel {
             const result: UnusedResourceEntry[] = [];
 
             for (const projectPath of projectPaths) {
-              const unused = detectUnusedResources(projectPath, infoWs, referencedFileNames);
+              const unused = detectUnusedResources(
+                projectPath,
+                infoWs,
+                referencedFileNames,
+              );
               result.push(...unused);
             }
 
@@ -128,7 +129,9 @@ export class UnusedResourcePanel {
         app.get("/serve-file", (req, res) => {
           try {
             const encodedPath =
-              typeof req.query["path"] === "string" ? req.query.path : undefined;
+              typeof req.query["path"] === "string"
+                ? req.query.path
+                : undefined;
             if (!encodedPath) {
               res.status(400).send("path is required");
               return;
@@ -193,7 +196,9 @@ export class UnusedResourcePanel {
               // セキュリティ: パスを正規化して、プロジェクト内ファイルのみ削除許可
               const normalizedPath = path.normalize(filePath);
               const isAllowed = projectPaths.some((projectPath) =>
-                normalizedPath.startsWith(path.normalize(projectPath) + path.sep),
+                normalizedPath.startsWith(
+                  path.normalize(projectPath) + path.sep,
+                ),
               );
               if (!isAllowed) {
                 errors.push(`forbidden: ${filePath}`);
