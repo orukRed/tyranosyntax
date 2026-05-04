@@ -230,7 +230,8 @@
     <h1>⚠️ 未使用リソース検出</h1>
     <p class="subtitle">
       シナリオ・スクリプトファイルから参照されていないリソースファイルの一覧です。<br />
-      変数による動的参照は検出できないため、削除前に必ずご確認ください。<br />
+      変数などで動的に参照されている可能性があります。ご注意ください。<br />
+      <strong style="color:#c0392b; font-size:14px;">削除したファイルは元に戻せません。必ずバックアップを取ったうえで実行してください。</strong>
     </p>
 
     <div id="toolbar">
@@ -248,6 +249,7 @@
         <option value="sound">sound</option>
         <option value="bgm">bgm</option>
         <option value="video">video</option>
+        <option value="scenario">scenario</option>
         <option value="others">others</option>
       </select>
       <select id="project-filter" onchange="applyFilter()">
@@ -471,7 +473,8 @@
         if (paths.length === 0) return;
         document.getElementById("modal-body").innerHTML =
           `<strong>${paths.length} 件</strong> のファイルをゴミ箱に移動します。<br><br>` +
-          `<strong style="color:#c0392b">⚠ 変数による動的参照がある場合、実際には使用されているファイルが含まれる可能性があります。</strong><br><br>` +
+          `<strong style="color:#c0392b">⚠ 変数などで動的に参照されている可能性があります。ご注意ください。</strong><br><br>` +
+          `<strong style="color:#c0392b">⚠ 削除したファイルは元に戻せません。必ずバックアップを取ったうえで実行してください。</strong><br><br>` +
           `削除したファイルは OS のゴミ箱から元に戻すことができます。本当に移動しますか？`;
         document.getElementById("modal-overlay").classList.add("active");
       }

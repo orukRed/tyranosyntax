@@ -68,9 +68,14 @@ function detectUnusedResources(
   const projectName = projectPath.split(path.sep).pop() ?? projectPath;
 
   const scenarioDirPath = projectPath + path.sep + "data" + path.sep;
+  const systemDir = projectPath + path.sep + "data" + path.sep + "system";
 
   return resources
-    .filter((res) => !referencedFileNames.has(res.fileName))
+    .filter((res) => {
+      // data/system フォルダ内のファイルは検出対象外
+      if (res.filePath.startsWith(systemDir + path.sep)) return false;
+      return !referencedFileNames.has(res.fileName);
+    })
     .map((res) => ({
       filePath: res.filePath,
       fileName: res.fileName,
