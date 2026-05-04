@@ -130,6 +130,13 @@ export class TyranoDebugRuntime extends EventEmitter {
   }
 
   /**
+   * ゲームブリッジにホットリロードを指示する
+   */
+  public hotReload(): void {
+    this.send({ type: "hotReload" });
+  }
+
+  /**
    * ブリッジから変数一覧を取得する（リクエスト/レスポンス方式）
    */
   public getVariables(scope: string): Promise<TyranoVariable[]> {
