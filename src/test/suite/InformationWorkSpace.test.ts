@@ -26,9 +26,12 @@ suite("InformationWorkSpace.getProjectRootPath", () => {
   test("正常系", async () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-    const workspaceFolder = vscode.workspace.workspaceFolders
-      ? vscode.workspace.workspaceFolders[0].uri.fsPath
-      : "";
+    // ワークスペースが開かれていない環境（runTest.tsの第2回実行など）ではスキップ
+    const wsFolders = vscode.workspace.workspaceFolders;
+    if (!wsFolders || wsFolders.length === 0) {
+      return;
+    }
+    const workspaceFolder = wsFolders[0].uri.fsPath;
     const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks");
     const expect = path.join(workspaceFolder);
     //実行
@@ -51,11 +54,13 @@ suite("InformationWorkSpace.getProjectFiles", () => {
   test("正常系 プロジェクトパスだとファイル多すぎるのでbgimageフォルダを指定", async () => {
     //値定義
     const info = InformationWorkSpace.getInstance();
-
+    // ワークスペースが開かれていない環境（runTest.tsの第2回実行など）ではスキップ
+    const wsFolders = vscode.workspace.workspaceFolders;
+    if (!wsFolders || wsFolders.length === 0) {
+      return;
+    }
     const expect = ["room.jpg", "rouka.jpg", "title.jpg"];
-    const workspaceFolder = vscode.workspace.workspaceFolders
-      ? vscode.workspace.workspaceFolders[0].uri.fsPath
-      : "";
+    const workspaceFolder = wsFolders[0].uri.fsPath;
     const filePath = path.join(workspaceFolder, "data", "scenario", "first.ks");
     const projectRootPath = await info.getProjectPathByFilePath(filePath);
     const bgimagePath = path.join(projectRootPath, "data", "bgimage");

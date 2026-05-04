@@ -10,6 +10,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - `[iscript]`〜`[endscript]`内のJavaScriptで`startTag('jump', ...)`や`startTag('call', ...)`を呼び出しているにもかかわらず、`[endscript]`に`stop="true"`が指定されていない場合、警告として検出するようにしました。[issue#134](https://github.com/orukRed/tyranosyntax/issues/134)
 
 - アクティビティバーに「マクロ」「変数」「キャラクター」のサイドバービューを追加し、それぞれ定義箇所・使用箇所・コメントを一覧表示できるようにしました。[issue#322](https://github.com/orukRed/tyranosyntax/issues/322)
+- 変数・マクロ・キャラクターに対して VSCode 標準の参照表示（Shift+F12「すべての参照を検索」、参照のピーク等）が動作するようになりました。[issue#56](https://github.com/orukRed/tyranosyntax/issues/56)
 
 ## [3.0.0] 2026-04-26
 
