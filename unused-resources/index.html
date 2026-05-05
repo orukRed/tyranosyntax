@@ -261,8 +261,12 @@
         width: 14px;
         text-align: center;
       }
-      .accordion-icon.open::before { content: "▼"; }
-      .accordion-icon.closed::before { content: "▶"; }
+      .accordion-icon.open::before {
+        content: "▼";
+      }
+      .accordion-icon.closed::before {
+        content: "▶";
+      }
       /* ソート可能な列ヘッダー */
       thead th.sortable {
         cursor: pointer;
@@ -275,9 +279,18 @@
         font-size: 10px;
         opacity: 0.6;
       }
-      thead th.sort-asc .sort-icon::after  { content: "▲"; opacity: 1; }
-      thead th.sort-desc .sort-icon::after { content: "▼"; opacity: 1; }
-      thead th:not(.sort-asc):not(.sort-desc) .sort-icon::after { content: "⇅"; opacity: 0.5; }
+      thead th.sort-asc .sort-icon::after {
+        content: "▲";
+        opacity: 1;
+      }
+      thead th.sort-desc .sort-icon::after {
+        content: "▼";
+        opacity: 1;
+      }
+      thead th:not(.sort-asc):not(.sort-desc) .sort-icon::after {
+        content: "⇅";
+        opacity: 0.5;
+      }
     </style>
   </head>
   <body>
@@ -314,7 +327,9 @@
       <button class="btn btn-outline" onclick="selectAll()">全選択</button>
       <button class="btn btn-outline" onclick="deselectAll()">全解除</button>
       <button class="btn btn-outline" onclick="expandAll()">すべて開く</button>
-      <button class="btn btn-outline" onclick="collapseAll()">すべて閉じる</button>
+      <button class="btn btn-outline" onclick="collapseAll()">
+        すべて閉じる
+      </button>
       <button class="btn btn-refresh" onclick="loadData()">
         🔄 最新の情報に更新
       </button>
@@ -342,8 +357,12 @@
               />
             </th>
             <th>サムネイル</th>
-            <th class="sortable" onclick="setSort('fileName')">ファイル名<span class="sort-icon"></span></th>
-            <th class="sortable" onclick="setSort('relativePath')">相対パス<span class="sort-icon"></span></th>
+            <th class="sortable" onclick="setSort('fileName')">
+              ファイル名<span class="sort-icon"></span>
+            </th>
+            <th class="sortable" onclick="setSort('relativePath')">
+              相対パス<span class="sort-icon"></span>
+            </th>
             <th>リソースタイプ</th>
             <th>プロジェクト</th>
           </tr>
@@ -660,7 +679,8 @@
         if (!headerRow) return;
         const groupCb = headerRow.querySelector(".group-check");
         if (!groupCb) return;
-        const allChecked = checks.length > 0 && checks.every((cb) => cb.checked);
+        const allChecked =
+          checks.length > 0 && checks.every((cb) => cb.checked);
         const someChecked = checks.some((cb) => cb.checked);
         groupCb.checked = allChecked;
         groupCb.indeterminate = someChecked && !allChecked;
