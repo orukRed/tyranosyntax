@@ -42,6 +42,9 @@ export class TyranoDebugSession extends DebugSession {
   private breakpointMap = new Map<string, DebugProtocol.Breakpoint[]>();
   private browserProcess: any;
 
+  /** 現在アクティブなデバッグセッション。extension.ts のファイルウォッチャーからホットリロードをトリガーするために使用 */
+  public static currentInstance: TyranoDebugSession | undefined;
+
   // スコープ参照ID
   private static SCOPE_F = 1;
   private static SCOPE_SF = 2;
@@ -121,6 +124,9 @@ export class TyranoDebugSession extends DebugSession {
       this.sendEvent(
         new OutputEvent(`Debug server started: ${url}\n`, "console"),
       );
+
+      // ファイルウォッチャーからホットリロードをトリガーできるように、現在のセッションを登録する
+      TyranoDebugSession.currentInstance = this;
 
       // ブラウザでゲームを起動
       this.browserProcess = await open(url);
@@ -391,12 +397,21 @@ export class TyranoDebugSession extends DebugSession {
     response: DebugProtocol.DisconnectResponse,
     _args: DebugProtocol.DisconnectArguments,
   ): void {
+    TyranoDebugSession.currentInstance = undefined;
     this.runtime.stop();
     if (this.server) {
       this.server.stop();
       this.server = undefined;
     }
     this.sendResponse(response);
+  }
+
+  /**
+   * プロジェクト内のファイルが変更された際にゲームブラウザをリロードさせる。
+   * ブリッジが未接続の場合は何もしない。
+   */
+  public triggerHotReload(): void {
+    this.runtime.hotReload();
   }
 
   /**

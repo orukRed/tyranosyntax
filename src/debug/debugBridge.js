@@ -107,6 +107,9 @@
       case "evaluate":
         evaluateExpression(msg.data.expression, msg.requestId);
         break;
+      case "hotReload":
+        location.reload();
+        break;
     }
   }
 

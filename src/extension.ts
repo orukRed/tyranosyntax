@@ -2,6 +2,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 import { ExtensionContext } from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 
@@ -17,6 +18,8 @@ import { TyranoJumpProvider } from "./subscriptions/TyranoJumpProvider";
 import { InformationExtension } from "./InformationExtension";
 import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
+import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
+import { UnusedResourcePanel } from "./subscriptions/UnusedResourcePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
@@ -26,6 +29,12 @@ import {
 import { TyranoDebugConfigProvider } from "./debug/TyranoDebugConfigProvider";
 import { TyranoDebugSession } from "./debug/TyranoDebugSession";
 import { TyranoSidebarProvider } from "./subscriptions/TyranoSidebarProvider";
+import { TyranoReferenceProvider } from "./subscriptions/TyranoReferenceProvider";
+import { CharacterTreeProvider } from "./subscriptions/sidebar/CharacterTreeProvider";
+import { MacroTreeProvider } from "./subscriptions/sidebar/MacroTreeProvider";
+import { SidebarRefresher } from "./subscriptions/sidebar/SidebarRefresher";
+import { UsageIndexer } from "./subscriptions/sidebar/UsageIndexer";
+import { VariableTreeProvider } from "./subscriptions/sidebar/VariableTreeProvider";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -124,6 +133,124 @@ export function activate(context: ExtensionContext) {
         vscode.Uri.parse("https://ofuse.me/orukred/letter"),
       );
     }),
+  );
+
+  // 変数・マクロ・キャラクターのシンボル一覧 TreeView 登録
+  const sidebarInfoWs = InformationWorkSpace.getInstance();
+  const sidebarUsageIndexer = new UsageIndexer(sidebarInfoWs);
+  const macroTreeProvider = new MacroTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const variableTreeProvider = new VariableTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const characterTreeProvider = new CharacterTreeProvider(
+    sidebarInfoWs,
+    sidebarUsageIndexer,
+  );
+  const macroTreeView = vscode.window.createTreeView("tyrano-macros", {
+    treeDataProvider: macroTreeProvider,
+  });
+  const variableTreeView = vscode.window.createTreeView("tyrano-variables", {
+    treeDataProvider: variableTreeProvider,
+  });
+  const characterTreeView = vscode.window.createTreeView("tyrano-characters", {
+    treeDataProvider: characterTreeProvider,
+  });
+  context.subscriptions.push(macroTreeView, variableTreeView, characterTreeView);
+  const sidebarRefresher = new SidebarRefresher(sidebarUsageIndexer, [
+    macroTreeProvider,
+    variableTreeProvider,
+    characterTreeProvider,
+  ]);
+  context.subscriptions.push({ dispose: () => sidebarRefresher.dispose() });
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.sidebar.refreshMacros", () =>
+      macroTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.refreshVariables", () =>
+      variableTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.refreshCharacters", () =>
+      characterTreeProvider.refresh(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseMacros", () =>
+      macroTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseVariables", () =>
+      variableTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand("tyrano.sidebar.collapseCharacters", () =>
+      characterTreeProvider.collapseAll(),
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandMacros",
+      async () => {
+        const children = macroTreeProvider.getChildren();
+        for (const child of children) {
+          await macroTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandVariables",
+      async () => {
+        const children = variableTreeProvider.getChildren();
+        for (const child of children) {
+          await variableTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.expandCharacters",
+      async () => {
+        const children = characterTreeProvider.getChildren();
+        for (const child of children) {
+          await characterTreeView.reveal(child, {
+            expand: 3,
+            select: false,
+            focus: false,
+          });
+        }
+      },
+    ),
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.openLocation",
+      async (arg: { uri: string; line: number; character: number }) => {
+        if (!arg || typeof arg.uri !== "string") {
+          return;
+        }
+        try {
+          const doc = await vscode.workspace.openTextDocument(
+            vscode.Uri.file(arg.uri),
+          );
+          const position = new vscode.Position(
+            arg.line ?? 0,
+            arg.character ?? 0,
+          );
+          await vscode.window.showTextDocument(doc, {
+            selection: new vscode.Range(position, position),
+            preserveFocus: false,
+          });
+        } catch (error) {
+          TyranoLogger.print(
+            `tyrano.sidebar.openLocation failed for ${arg.uri}`,
+            ErrorLevel.WARN,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
+      },
+    ),
   );
   TyranoLogger.print("TyranoSidebarProvider activate");
 
@@ -229,6 +356,20 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoFlowchart activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.macroTable",
+              MacroTablePanel.openMacroTable,
+            ),
+          );
+          TyranoLogger.print("MacroTablePanel activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.unusedResources",
+              UnusedResourcePanel.openUnusedResources,
+            ),
+          );
+          TyranoLogger.print("UnusedResourcePanel activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
@@ -250,6 +391,9 @@ export function activate(context: ExtensionContext) {
               "Initial macro and variable data loading completed",
             );
 
+            // 初期ロード完了後にサイドバーを反映
+            sidebarRefresher.refreshAll();
+
             TyranoLogger.print("TyranoDiagnostic activate");
             const tyranoJumpProvider = new TyranoJumpProvider();
             context.subscriptions.push(
@@ -270,6 +414,13 @@ export function activate(context: ExtensionContext) {
                 new TyranoDefinitionProvider(),
               ),
             ); //定義元への移動
+            context.subscriptions.push(
+              vscode.languages.registerReferenceProvider(
+                TYRANO_MODE,
+                new TyranoReferenceProvider(),
+              ),
+            ); //参照先の表示
+            TyranoLogger.print("TyranoReferenceProvider activate");
             //renameproviderの追加
             const renameProvider = new TyranoRenameProvider();
             context.subscriptions.push(
@@ -278,8 +429,6 @@ export function activate(context: ExtensionContext) {
                 renameProvider,
               ),
             );
-            // context.subscriptions.push(vscode.languages.registerReferenceProvider(TYRANO_MODE, new TyranoReferenceProvider()));//参照先の表示
-            // context.subscriptions.push(vscode.languages.registerRenameProvider(TYRANO_MODE, new TyranoRenameProvider()));//シンボルの名前変更
 
             //設定で診断機能の自動実行ONにしてるなら許可
             if (
@@ -369,6 +518,8 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scenarioFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -378,6 +529,8 @@ export function activate(context: ExtensionContext) {
               await infoWs.updateScenarioFileMap(e.fsPath);
               await infoWs.updateMacroLabelVariableDataMapByKs(e.fsPath);
               await infoWs.updatePluginParamsFromInitKs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scenarioFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScenarioFileMapByFilePath(e.fsPath);
@@ -387,6 +540,8 @@ export function activate(context: ExtensionContext) {
               await infoWs.spliceCharacterMapByFilePath(e.fsPath);
               await infoWs.spliceTransitionMapByFilePath(e.fsPath);
               await infoWs.splicePluginParamsByInitKsPath(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
 
             //scriptFileの値
@@ -400,6 +555,8 @@ export function activate(context: ExtensionContext) {
             scriptFileSystemWatcher.onDidCreate(async (e) => {
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scriptFileSystemWatcher.onDidChange(async (e) => {
               // Wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -408,11 +565,15 @@ export function activate(context: ExtensionContext) {
               );
               await infoWs.updateScriptFileMap(e.fsPath);
               await infoWs.updateMacroDataMapByJs(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             scriptFileSystemWatcher.onDidDelete(async (e) => {
               await infoWs.spliceScriptFileMapByFilePath(e.fsPath);
               await infoWs.spliceMacroDataMapByFilePath(e.fsPath);
               await infoWs.spliceVariableMapByFilePath(e.fsPath);
+              sidebarRefresher.scheduleRefresh(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
 
             const resourceGlob = `**/*{${infoWs.resourceExtensionsArrays.toString()}}`; //TyranoScript syntax.resource.extensionで指定したすべての拡張子を取得
@@ -425,10 +586,25 @@ export function activate(context: ExtensionContext) {
               );
             resourceFileSystemWatcher.onDidCreate(async (e) => {
               infoWs.addResourceFileMap(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
             resourceFileSystemWatcher.onDidDelete(async (e) => {
               infoWs.spliceResourceFileMapByFilePath(e.fsPath);
+              TyranoDebugSession.currentInstance?.triggerHotReload();
             });
+
+            // VS Code の FileSystemWatcher はフォルダリネーム時に子ファイルの個別
+            // create/delete を発火しないため、リネームは onDidRenameFiles で捕捉する。
+            context.subscriptions.push(
+              vscode.workspace.onDidRenameFiles(async (event) => {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, FILE_SYNC_DELAY_MS),
+                );
+                for (const { oldUri, newUri } of event.files) {
+                  await handleRenamedPath(infoWs, oldUri, newUri);
+                }
+              }),
+            );
 
             //すべてのプロジェクトに対して初回診断実行
             for (const i of infoWs.getTyranoScriptProjectRootPaths()) {
@@ -495,4 +671,115 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined;
   }
   return client.stop();
+}
+
+/**
+ * Handle a single rename pair from `vscode.workspace.onDidRenameFiles`.
+ * Determines whether the new path is a directory; for directories, expands
+ * to all child files and reconstructs the corresponding old child paths so
+ * each splice/update pair targets the correct cache entry.
+ */
+async function handleRenamedPath(
+  infoWs: InformationWorkSpace,
+  oldUri: vscode.Uri,
+  newUri: vscode.Uri,
+): Promise<void> {
+  const newProjectPath = await infoWs.getProjectPathByFilePath(newUri.fsPath);
+  if (!newProjectPath) return;
+
+  // 旧パスはディスク上に存在しないため getProjectPathByFilePath は使えない。
+  // 既知のプロジェクトルートからプレフィックス一致で求める。
+  const oldProjectPath = resolveProjectPathByPrefix(infoWs, oldUri.fsPath);
+
+  let isDirectory = false;
+  try {
+    isDirectory = fs.statSync(newUri.fsPath).isDirectory();
+  } catch {
+    return;
+  }
+
+  const effectiveOldProjectPath = oldProjectPath || newProjectPath;
+  if (isDirectory) {
+    const children = infoWs.getProjectFiles(newUri.fsPath, [], true);
+    for (const childFsPath of children) {
+      const rel = path.relative(newUri.fsPath, childFsPath);
+      const oldChildPath = path.join(oldUri.fsPath, rel);
+      await handleRenamedFile(
+        infoWs,
+        oldChildPath,
+        childFsPath,
+        effectiveOldProjectPath,
+      );
+    }
+  } else {
+    await handleRenamedFile(
+      infoWs,
+      oldUri.fsPath,
+      newUri.fsPath,
+      effectiveOldProjectPath,
+    );
+  }
+}
+
+/**
+ * For a single renamed file, splice the old path out of all relevant caches
+ * (using project-path-aware variants because the old path no longer exists
+ * on disk after the rename), then repopulate caches from the new path.
+ */
+async function handleRenamedFile(
+  infoWs: InformationWorkSpace,
+  oldPath: string,
+  newPath: string,
+  oldProjectPath: string,
+): Promise<void> {
+  const ext = path.extname(newPath);
+  if (ext === ".ks") {
+    await infoWs.spliceScenarioFileMapByFilePath(oldPath);
+    infoWs.spliceMacroDataMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.spliceLabelMapByFilePath(oldPath);
+    infoWs.spliceVariableMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceCharacterMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.spliceTransitionMapByFilePath(oldPath);
+    infoWs.splicePluginParamsByInitKsPathInProject(oldProjectPath, oldPath);
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
+
+    await infoWs.updateScenarioFileMap(newPath);
+    await infoWs.updateMacroLabelVariableDataMapByKs(newPath);
+    await infoWs.updatePluginParamsFromInitKs(newPath);
+    await infoWs.addResourceFileMap(newPath);
+  } else if (ext === ".js") {
+    await infoWs.spliceScriptFileMapByFilePath(oldPath);
+    infoWs.spliceMacroDataMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceVariableMapByFilePathInProject(oldProjectPath, oldPath);
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
+
+    await infoWs.updateScriptFileMap(newPath);
+    await infoWs.updateMacroDataMapByJs(newPath);
+    await infoWs.addResourceFileMap(newPath);
+  } else if (infoWs.resourceExtensionsArrays.includes(ext)) {
+    infoWs.spliceResourceFileMapByFilePathInProject(oldProjectPath, oldPath);
+    await infoWs.addResourceFileMap(newPath);
+  }
+}
+
+/**
+ * Resolve the Tyrano project root that contains the given (possibly
+ * non-existent) file path by prefix-matching against known project roots.
+ * Returns "" when no match — the caller is expected to fall back to the
+ * new path's project root.
+ */
+function resolveProjectPathByPrefix(
+  infoWs: InformationWorkSpace,
+  fsPath: string,
+): string {
+  const delimiter = infoWs.pathDelimiter;
+  for (const root of infoWs.getTyranoScriptProjectRootPaths()) {
+    if (
+      fsPath === root ||
+      fsPath.startsWith(root + delimiter)
+    ) {
+      return root;
+    }
+  }
+  return "";
 }

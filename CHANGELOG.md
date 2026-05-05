@@ -4,6 +4,19 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+## [3.1.0] 2026-05-05
+
+- アクティビティバーに「マクロ」「変数」「キャラクター」のサイドバービューを追加し、それぞれ定義箇所・使用箇所を一覧表示できるようにしました。[issue#322](https://github.com/orukRed/tyranosyntax/issues/322)
+- 変数・マクロ・キャラクターに対して VSCode 標準の参照表示（Shift+F12「すべての参照を検索」、参照のピーク等）が動作するようになりました。[issue#56](https://github.com/orukRed/tyranosyntax/issues/56)
+- callタグや`fix="true"`を指定したbuttonタグで呼び出されているシナリオファイルに`[return]`タグが存在しない場合、警告として検出するようにしました。[issue#295](https://github.com/orukRed/tyranosyntax/issues/295)
+- `[iscript]`〜`[endscript]`内のJavaScriptで`startTag('jump', ...)`や`startTag('call', ...)`を呼び出しているにもかかわらず、`[endscript]`に`stop="true"`が指定されていない場合、警告として検出するようにしました。[issue#134](https://github.com/orukRed/tyranosyntax/issues/134)
+- ラベルをリネームできるようにしました。[issue#237](https://github.com/orukRed/tyranosyntax/issues/237)
+- プロジェクト内で未使用のリソースファイル（画像・音声等）を一覧表示・削除できるようにしました。[issue#400](https://github.com/orukRed/tyranosyntax/issues/400)
+- デバッグ中にファイルを変更した場合、自動的にリロードされるようになりました。[issue#401](https://github.com/orukRed/tyranosyntax/issues/401)
+- ファイルやフォルダをリネームした際に補完候補が正しく追従するよう修正しました。[issue#176](https://github.com/orukRed/tyranosyntax/issues/176)
+
 ## [3.0.0] 2026-04-26
 
 - プロジェクト内の `data/others/plugin/` フォルダに配置されたプラグインのタグ・パラメータが自動的に補完されるようになりました。[issue#391](https://github.com/orukRed/tyranosyntax/issues/391)
