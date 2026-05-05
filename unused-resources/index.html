@@ -171,6 +171,15 @@
       .tag-others {
         background: #7f8c8d;
       }
+      .tag-scenario {
+        background: #c0392b;
+      }
+      .tag-script {
+        background: #2c3e50;
+      }
+      .tag-text {
+        background: #5d6d7e;
+      }
       .path-text {
         font-family: monospace;
         font-size: 12px;
@@ -224,6 +233,51 @@
         color: #888;
         font-size: 15px;
       }
+      /* アコーディオンヘッダー行 */
+      tr.accordion-header {
+        background: #f5d5d3 !important;
+        cursor: pointer;
+        user-select: none;
+      }
+      tr.accordion-header:hover {
+        background: #eebab7 !important;
+      }
+      tr.accordion-header td {
+        padding: 7px 12px;
+        font-weight: bold;
+        font-size: 13px;
+        border-bottom: 2px solid #c0392b;
+      }
+      .accordion-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .accordion-icon {
+        font-style: normal;
+        font-size: 11px;
+        transition: transform 0.15s;
+        display: inline-block;
+        width: 14px;
+        text-align: center;
+      }
+      .accordion-icon.open::before { content: "▼"; }
+      .accordion-icon.closed::before { content: "▶"; }
+      /* ソート可能な列ヘッダー */
+      thead th.sortable {
+        cursor: pointer;
+      }
+      thead th.sortable:hover {
+        background: #a93226;
+      }
+      thead th .sort-icon {
+        margin-left: 4px;
+        font-size: 10px;
+        opacity: 0.6;
+      }
+      thead th.sort-asc .sort-icon::after  { content: "▲"; opacity: 1; }
+      thead th.sort-desc .sort-icon::after { content: "▼"; opacity: 1; }
+      thead th:not(.sort-asc):not(.sort-desc) .sort-icon::after { content: "⇅"; opacity: 0.5; }
     </style>
   </head>
   <body>
@@ -259,6 +313,8 @@
       </select>
       <button class="btn btn-outline" onclick="selectAll()">全選択</button>
       <button class="btn btn-outline" onclick="deselectAll()">全解除</button>
+      <button class="btn btn-outline" onclick="expandAll()">すべて開く</button>
+      <button class="btn btn-outline" onclick="collapseAll()">すべて閉じる</button>
       <button class="btn btn-refresh" onclick="loadData()">
         🔄 最新の情報に更新
       </button>
@@ -286,8 +342,8 @@
               />
             </th>
             <th>サムネイル</th>
-            <th>ファイル名</th>
-            <th>相対パス</th>
+            <th class="sortable" onclick="setSort('fileName')">ファイル名<span class="sort-icon"></span></th>
+            <th class="sortable" onclick="setSort('relativePath')">相対パス<span class="sort-icon"></span></th>
             <th>リソースタイプ</th>
             <th>プロジェクト</th>
           </tr>
@@ -318,6 +374,9 @@
     <script>
       let allResources = [];
       let filteredResources = [];
+      let sortState = { key: null, dir: "asc" };
+      const openGroups = new Set(); // 現在開いているグループキーのセット（フィルタ再描画を跨いで保持）
+      const seenGroups = new Set(); // 一度でも描画されたグループキー（新規グループのデフォルト開閉判定用）
 
       async function loadData() {
         document.getElementById("loading").style.display = "block";
@@ -354,7 +413,7 @@
         const typeVal = document.getElementById("type-filter").value;
         const projVal = document.getElementById("project-filter").value;
 
-        filteredResources = allResources.filter((r) => {
+        let result = allResources.filter((r) => {
           if (searchVal && !r.fileName.toLowerCase().includes(searchVal))
             return false;
           if (typeVal && r.resourceType !== typeVal) return false;
@@ -362,8 +421,60 @@
           return true;
         });
 
+        // ソート適用
+        if (sortState.key) {
+          const key = sortState.key;
+          const dir = sortState.dir === "asc" ? 1 : -1;
+          result = [...result].sort(
+            (a, b) => dir * a[key].localeCompare(b[key]),
+          );
+        }
+
+        filteredResources = result;
         renderTable(filteredResources);
       }
+
+      // ---- ソート ----
+
+      function setSort(key) {
+        if (sortState.key === key) {
+          sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+        } else {
+          sortState.key = key;
+          sortState.dir = "asc";
+        }
+        updateSortHeaders();
+        applyFilter();
+      }
+
+      function updateSortHeaders() {
+        document.querySelectorAll("thead th.sortable").forEach((th) => {
+          th.classList.remove("sort-asc", "sort-desc");
+          const m = (th.getAttribute("onclick") || "").match(
+            /setSort\('([^']+)'\)/,
+          );
+          if (m && m[1] === sortState.key) {
+            th.classList.add(
+              sortState.dir === "asc" ? "sort-asc" : "sort-desc",
+            );
+          }
+        });
+      }
+
+      // ---- グループ化ヘルパー ----
+
+      function groupByFolder(resources) {
+        const map = new Map();
+        for (const r of resources) {
+          const folder = r.relativePath.split("/")[0] || "others";
+          const key = r.projectName + "/" + folder;
+          if (!map.has(key)) map.set(key, []);
+          map.get(key).push(r);
+        }
+        return map;
+      }
+
+      // ---- 描画 ----
 
       function renderTable(resources) {
         document.getElementById("loading").style.display = "none";
@@ -389,34 +500,173 @@
           ".webp",
         ]);
 
-        resources.forEach((r) => {
-          const ext = r.fileName
-            .substring(r.fileName.lastIndexOf("."))
-            .toLowerCase();
-          const isImage = IMAGE_EXTS.has(ext);
-          const encodedPath = btoa(unescape(encodeURIComponent(r.filePath)));
+        const groups = groupByFolder(resources);
 
-          const thumbCell = isImage
-            ? `<img class="thumb" src="/serve-file?path=${encodeURIComponent(encodedPath)}" alt="${escHtml(r.fileName)}" loading="lazy" />`
-            : `<div class="icon-file">${fileIcon(r.resourceType)}</div>`;
+        for (const [groupKey, entries] of groups) {
+          // 初回登場グループはデフォルトで開く
+          if (!seenGroups.has(groupKey)) {
+            seenGroups.add(groupKey);
+            openGroups.add(groupKey);
+          }
+          const isOpen = openGroups.has(groupKey);
 
-          const typeClass = "tag-" + (r.resourceType || "others").toLowerCase();
+          // --- グループヘッダー行 ---
+          const headerTr = document.createElement("tr");
+          headerTr.className = "accordion-header";
+          headerTr.dataset.groupKey = groupKey;
 
-          const tr = document.createElement("tr");
-          tr.dataset.path = r.filePath;
-          tr.innerHTML = `
-            <td><input type="checkbox" class="row-check" data-path="${escAttr(r.filePath)}" onchange="updateDeleteBtn()" /></td>
-            <td>${thumbCell}</td>
-            <td class="path-text">${escHtml(r.fileName)}</td>
-            <td class="path-text">${escHtml(r.relativePath)}</td>
-            <td><span class="tag ${escAttr(typeClass)}">${escHtml(r.resourceType || "others")}</span></td>
-            <td>${escHtml(r.projectName)}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+          // グループ全選択チェックボックス
+          const checkTd = document.createElement("td");
+          const groupCb = document.createElement("input");
+          groupCb.type = "checkbox";
+          groupCb.className = "group-check";
+          groupCb.addEventListener("change", (e) => {
+            e.stopPropagation();
+            toggleGroupCheck(groupKey, e.target.checked);
+          });
+          checkTd.appendChild(groupCb);
+
+          // ラベル（クリックで開閉）
+          const labelTd = document.createElement("td");
+          labelTd.colSpan = 5;
+          labelTd.style.cursor = "pointer";
+          const labelDiv = document.createElement("div");
+          labelDiv.className = "accordion-label";
+          const iconEl = document.createElement("i");
+          iconEl.className = "accordion-icon " + (isOpen ? "open" : "closed");
+          const textNode = document.createElement("span");
+          textNode.innerHTML =
+            `📁 <strong>${escHtml(groupKey)}</strong>` +
+            ` <span style="font-weight:normal;color:#888">(${entries.length} 件)</span>`;
+          labelDiv.appendChild(iconEl);
+          labelDiv.appendChild(textNode);
+          labelTd.appendChild(labelDiv);
+          labelTd.addEventListener("click", () => toggleGroup(groupKey));
+
+          headerTr.appendChild(checkTd);
+          headerTr.appendChild(labelTd);
+          tbody.appendChild(headerTr);
+
+          // --- 子行 ---
+          for (const r of entries) {
+            const ext = r.fileName
+              .substring(r.fileName.lastIndexOf("."))
+              .toLowerCase();
+            const isImage = IMAGE_EXTS.has(ext);
+            const encodedPath = btoa(unescape(encodeURIComponent(r.filePath)));
+            const thumbCell = isImage
+              ? `<img class="thumb" src="/serve-file?path=${encodeURIComponent(encodedPath)}" alt="${escHtml(r.fileName)}" loading="lazy" />`
+              : `<div class="icon-file">${fileIcon(r.resourceType)}</div>`;
+            const typeClass =
+              "tag-" + (r.resourceType || "others").toLowerCase();
+
+            const tr = document.createElement("tr");
+            tr.className = "data-row";
+            tr.dataset.groupKey = groupKey;
+            if (!isOpen) tr.style.display = "none";
+
+            // チェックボックスは DOM API で作成（パスに特殊文字があっても安全）
+            const cbTd = document.createElement("td");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.className = "row-check";
+            cb.dataset.path = r.filePath;
+            cb.addEventListener("change", () => {
+              updateGroupHeaderCheck(groupKey);
+              updateDeleteBtn();
+            });
+            cbTd.appendChild(cb);
+            tr.appendChild(cbTd);
+
+            tr.insertAdjacentHTML(
+              "beforeend",
+              `<td>${thumbCell}</td>` +
+                `<td class="path-text">${escHtml(r.fileName)}</td>` +
+                `<td class="path-text">${escHtml(r.relativePath)}</td>` +
+                `<td><span class="tag ${escAttr(typeClass)}">${escHtml(r.resourceType || "others")}</span></td>` +
+                `<td>${escHtml(r.projectName)}</td>`,
+            );
+            tbody.appendChild(tr);
+          }
+        }
 
         updateCount();
       }
+
+      // ---- アコーディオン操作 ----
+
+      function setGroupVisibility(groupKey, open) {
+        const tbody = document.getElementById("tbody");
+        if (open) {
+          openGroups.add(groupKey);
+        } else {
+          openGroups.delete(groupKey);
+        }
+        // アイコン更新
+        const headerRow = Array.from(
+          tbody.querySelectorAll("tr.accordion-header"),
+        ).find((tr) => tr.dataset.groupKey === groupKey);
+        if (headerRow) {
+          const icon = headerRow.querySelector(".accordion-icon");
+          if (icon)
+            icon.className = "accordion-icon " + (open ? "open" : "closed");
+        }
+        // 子行の表示切り替え
+        Array.from(tbody.querySelectorAll("tr.data-row"))
+          .filter((tr) => tr.dataset.groupKey === groupKey)
+          .forEach((tr) => {
+            tr.style.display = open ? "" : "none";
+          });
+      }
+
+      function toggleGroup(groupKey) {
+        setGroupVisibility(groupKey, !openGroups.has(groupKey));
+      }
+
+      function expandAll() {
+        document.querySelectorAll("tr.accordion-header").forEach((tr) => {
+          setGroupVisibility(tr.dataset.groupKey, true);
+        });
+      }
+
+      function collapseAll() {
+        document.querySelectorAll("tr.accordion-header").forEach((tr) => {
+          setGroupVisibility(tr.dataset.groupKey, false);
+        });
+      }
+
+      // ---- グループ内チェックボックス ----
+
+      function toggleGroupCheck(groupKey, checked) {
+        const tbody = document.getElementById("tbody");
+        Array.from(tbody.querySelectorAll("tr.data-row"))
+          .filter((tr) => tr.dataset.groupKey === groupKey)
+          .forEach((tr) => {
+            const cb = tr.querySelector(".row-check");
+            if (cb) cb.checked = checked;
+          });
+        updateDeleteBtn();
+      }
+
+      function updateGroupHeaderCheck(groupKey) {
+        const tbody = document.getElementById("tbody");
+        const checks = Array.from(tbody.querySelectorAll("tr.data-row"))
+          .filter((tr) => tr.dataset.groupKey === groupKey)
+          .map((tr) => tr.querySelector(".row-check"))
+          .filter(Boolean);
+        const headerRow = Array.from(
+          tbody.querySelectorAll("tr.accordion-header"),
+        ).find((tr) => tr.dataset.groupKey === groupKey);
+        if (!headerRow) return;
+        const groupCb = headerRow.querySelector(".group-check");
+        if (!groupCb) return;
+        const allChecked = checks.length > 0 && checks.every((cb) => cb.checked);
+        const someChecked = checks.some((cb) => cb.checked);
+        groupCb.checked = allChecked;
+        groupCb.indeterminate = someChecked && !allChecked;
+      }
+
+      // ---- ユーティリティ ----
 
       function fileIcon(type) {
         switch ((type || "").toLowerCase()) {
@@ -436,9 +686,9 @@
         document.getElementById("count").textContent =
           `${total} 件 / 選択: ${checked} 件`;
         document.getElementById("delete-btn").disabled = checked === 0;
+        const allChecks = document.querySelectorAll(".row-check");
         document.getElementById("check-all").checked =
-          total > 0 &&
-          checked === document.querySelectorAll(".row-check").length;
+          total > 0 && checked === allChecks.length;
       }
 
       function updateDeleteBtn() {
@@ -449,18 +699,30 @@
         document
           .querySelectorAll(".row-check")
           .forEach((cb) => (cb.checked = true));
+        document.querySelectorAll(".group-check").forEach((cb) => {
+          cb.checked = true;
+          cb.indeterminate = false;
+        });
         updateCount();
       }
       function deselectAll() {
         document
           .querySelectorAll(".row-check")
           .forEach((cb) => (cb.checked = false));
+        document.querySelectorAll(".group-check").forEach((cb) => {
+          cb.checked = false;
+          cb.indeterminate = false;
+        });
         updateCount();
       }
       function toggleAll(master) {
         document
           .querySelectorAll(".row-check")
           .forEach((cb) => (cb.checked = master.checked));
+        document.querySelectorAll(".group-check").forEach((cb) => {
+          cb.checked = master.checked;
+          cb.indeterminate = false;
+        });
         updateCount();
       }
 
@@ -476,7 +738,7 @@
         document.getElementById("modal-body").innerHTML =
           `<strong>${paths.length} 件</strong> のファイルをゴミ箱に移動します。<br><br>` +
           `<strong style="color:#c0392b">⚠ 変数などで動的に参照されている可能性があります。ご注意ください。</strong><br><br>` +
-          `<strong style="color:#c0392b">⚠ 削除したファイルは元に戻せません。必ずバックアップを取ったうえで実行してください。</strong><br><br>`
+          `<strong style="color:#c0392b">⚠ 削除したファイルは元に戻せません。必ずバックアップを取ったうえで実行してください。</strong><br><br>`;
         document.getElementById("modal-overlay").classList.add("active");
       }
 
