@@ -4,7 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [3.1.1] 2026-05-05
+
+- 未使用リソース検出にて、特定のファイル名の場合使用していても未使用と表示されてしまうバグを修正しました。
+- readmeに画像を追加しました。
 
 ## [3.1.0] 2026-05-05
 

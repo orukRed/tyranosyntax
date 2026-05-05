@@ -41,11 +41,12 @@ function collectReferencedFileNames(infoWs: InformationWorkSpace): Set<string> {
 
 /**
  * テキスト中に現れるファイル名（拡張子付き）を Set に追加する。
- * ファイル名は英数字・アンダースコア・ハイフン・ドット・スペースの組み合わせと想定する。
+ * Windows のファイル名禁止文字（< > : " / \ | ? *）と改行を除く任意の文字を許可する。
+ * 日本語・記号（+, ⑧ 等）を含むファイル名にも対応する。
  */
 function extractFileNames(text: string, out: Set<string>): void {
-  // 拡張子を含むファイル名パターン: word.ext 形式
-  const re = /[\w\-. ]+\.[a-zA-Z0-9]{1,10}/g;
+  // 拡張子を含むファイル名パターン: Windowsファイル名禁止文字・改行以外 + .拡張子
+  const re = /[^\r\n/\\<>:"|?*]+\.[a-zA-Z0-9]{1,10}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
     // パスセパレータ以降のファイル名部分のみを取得
@@ -69,11 +70,14 @@ function detectUnusedResources(
 
   const scenarioDirPath = projectPath + path.sep + "data" + path.sep;
   const systemDir = projectPath + path.sep + "data" + path.sep + "system";
+  const scenarioDir = projectPath + path.sep + "data" + path.sep + "scenario";
 
   return resources
     .filter((res) => {
       // data/system フォルダ内のファイルは検出対象外
       if (res.filePath.startsWith(systemDir + path.sep)) return false;
+      // data/scenario フォルダ内の make.ks は検出対象外
+      if (res.fileName === "make.ks" && res.filePath.startsWith(scenarioDir + path.sep)) return false;
       return !referencedFileNames.has(res.fileName);
     })
     .map((res) => ({
