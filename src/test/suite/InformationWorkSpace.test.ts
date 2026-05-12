@@ -481,4 +481,65 @@ suite("InformationWorkSpace plugin auto-detection", () => {
     assert.ok(suggestions["notify_init"], "notify_init が登録されている");
     assert.ok(suggestions["notify_clear"], "notify_clear が登録されている");
   });
+
+  test("updateMacroDataMapByJs は object(varname) ラッパパターンからも pm/vital を抽出する", async () => {
+    const info = InformationWorkSpace.getInstance();
+    const workspaceFolder = vscode.workspace.workspaceFolders
+      ? vscode.workspace.workspaceFolders[0].uri.fsPath
+      : "";
+    const pluginJs = path.join(
+      workspaceFolder,
+      "data",
+      "others",
+      "plugin",
+      "notify_show",
+      "main.js",
+    );
+
+    if (!info.suggestions.get(workspaceFolder)) {
+      info.suggestions.set(workspaceFolder, {});
+    }
+    if (!info.defineMacroMap.get(workspaceFolder)) {
+      info.defineMacroMap.set(workspaceFolder, new Map());
+    }
+
+    await info.updateScriptFileMap(pluginJs);
+    await info.updateMacroDataMapByJs(pluginJs);
+
+    const suggestions = info.suggestions.get(workspaceFolder) as Record<
+      string,
+      { name: string; parameters: { name: string; required: boolean }[] }
+    >;
+    assert.ok(suggestions, "suggestions が存在する");
+    assert.ok(
+      suggestions["p_notify"],
+      "p_notify タグが suggestions に登録されている",
+    );
+
+    const params = suggestions["p_notify"].parameters;
+    assert.ok(
+      Array.isArray(params),
+      "object(cfg) パターンでも parameters が配列として抽出される",
+    );
+    const paramNames = params.map((p) => p.name);
+    for (const expected of ["name", "text", "height", "delay"]) {
+      assert.ok(
+        paramNames.includes(expected),
+        `${expected} パラメータが登録されている`,
+      );
+    }
+
+    const textParam = params.find((p) => p.name === "text");
+    assert.strictEqual(
+      textParam?.required,
+      true,
+      "vital に含まれる text は required=true",
+    );
+    const nameParam = params.find((p) => p.name === "name");
+    assert.strictEqual(
+      nameParam?.required,
+      false,
+      "vital に含まれない name は required=false",
+    );
+  });
 });

@@ -7,6 +7,10 @@ export class DefineMacroData {
   private _location: vscode.Location | null = null; //定義ジャンプに使う位置情報
   private _parameter: MacroParameterData[] = []; //TODO:まだ未実装だけどそのうち追加する。マクロのパラメータ
   private _description: string = ""; //マクロの説明
+  // プラグインのJSからパラメータを抽出できなかった場合にtrue。
+  // trueのときparseToJsonObjectはparametersキー自体を省略し、
+  // TyranoDiagnosticのパラメータ検証は当該タグでスキップされる。
+  private _hasUnknownParameters: boolean = false;
 
   public constructor(
     macroName: string,
@@ -34,9 +38,16 @@ export class DefineMacroData {
 
   /**
    * 入力補完に使うjsonオブジェクトへと変換します。
+   * hasUnknownParametersがtrueの場合はparametersキーを省略する。
    * @returns
    */
   public parseToJsonObject(): object {
+    if (this._hasUnknownParameters) {
+      return {
+        name: this.macroName,
+        description: this.description,
+      };
+    }
     return {
       name: this.macroName,
       description: this.description,
@@ -61,5 +72,11 @@ export class DefineMacroData {
   }
   public get parameter(): MacroParameterData[] {
     return this._parameter;
+  }
+  public get hasUnknownParameters(): boolean {
+    return this._hasUnknownParameters;
+  }
+  public set hasUnknownParameters(value: boolean) {
+    this._hasUnknownParameters = value;
   }
 }
