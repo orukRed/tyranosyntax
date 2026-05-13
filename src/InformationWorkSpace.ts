@@ -433,11 +433,12 @@ export class InformationWorkSpace {
                   absoluteScenarioFilePath,
                   description,
                 );
-                // プラグインフォルダ配下のJSなら、代入式の右辺ObjectExpressionから
+                // プラグインフォルダ配下のJSなら、代入式の右辺から到達可能なObjectExpressionを辿って
                 // pm（パラメータ）とvital（必須パラメータ）を抽出する。
                 const extracted = isPluginFile
                   ? this.extractPmAndVitalFromAssignment(
                       path.parentPath?.node,
+                      path.parentPath?.scope,
                     )
                   : null;
                 if (extracted && extracted.params.length > 0) {
@@ -445,9 +446,10 @@ export class InformationWorkSpace {
                     macroData.parameter.push(p);
                   }
                 } else {
-                  macroData.parameter.push(
-                    new MacroParameterData("parameter", false, "description"),
-                  ); //TODO:パーサーでパラメータの情報読み込んで追加する
+                  // 抽出失敗時は「パラメータ未知」フラグを立て、parseToJsonObjectでは
+                  // parametersキー自体を省略する。これによりTyranoDiagnosticの
+                  // パラメータ検証が当該タグでスキップされ、誤検出を防げる。
+                  macroData.hasUnknownParameters = true;
                 }
 
                 const uuid = crypto.randomUUID();
@@ -501,23 +503,97 @@ export class InformationWorkSpace {
   }
 
   /**
+   * 任意のASTノードを最終的なObjectExpressionに解決する。
+   * - ObjectExpressionはそのまま返す。
+   * - Identifierはscope.getBinding経由でVariableDeclaratorのinitを辿る。
+   * - CallExpressionは引数を順に解決し、最初に到達できたものを返す
+   *   （`object(cfg)` / `Object.assign({}, cfg)` / `_.cloneDeep(cfg)` 等のラッパパターン対応）。
+   * 再代入される変数 / 引数 / サイクルは安全側に倒して null を返す。
+   */
+  private resolveToObjectExpression(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    node: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    scope: any,
+    visited: Set<string>,
+    depth: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any {
+    if (!node || depth > 3) return null;
+
+    if (node.type === "ObjectExpression") {
+      return node;
+    }
+
+    if (node.type === "Identifier" && scope) {
+      const name = node.name;
+      if (visited.has(name)) return null;
+      const binding = scope.getBinding(name);
+      if (
+        !binding ||
+        binding.kind === "param" ||
+        (binding.constantViolations &&
+          binding.constantViolations.length > 0)
+      ) {
+        return null;
+      }
+      const declNode = binding.path?.node;
+      if (declNode?.type === "VariableDeclarator" && declNode.init) {
+        const nextVisited = new Set(visited);
+        nextVisited.add(name);
+        return this.resolveToObjectExpression(
+          declNode.init,
+          binding.scope ?? scope,
+          nextVisited,
+          depth + 1,
+        );
+      }
+      return null;
+    }
+
+    if (node.type === "CallExpression") {
+      for (const arg of node.arguments ?? []) {
+        const resolved = this.resolveToObjectExpression(
+          arg,
+          scope,
+          visited,
+          depth + 1,
+        );
+        if (resolved) return resolved;
+      }
+      return null;
+    }
+
+    return null;
+  }
+
+  /**
    * tyrano.plugin.kag.tag["NAME"] = { pm: {...}, vital: [...] } のような代入式の
-   * 右辺ObjectExpressionから、pmのキー・vitalの要素を抽出してパラメータ配列を返す。
+   * 右辺から、pmのキー・vitalの要素を抽出してパラメータ配列を返す。
+   * 右辺がObjectExpressionでない場合は、scope経由でIdentifier/CallExpressionを
+   * 辿って到達可能なObjectExpressionを探す（`TYRANO.kag.ftag.master_tag.X = object(cfg)` 等に対応）。
    * 認識できないシェイプは黙ってスキップする。
    */
   private extractPmAndVitalFromAssignment(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     assignmentNode: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    scope?: any,
   ): { params: MacroParameterData[] } | null {
     if (!assignmentNode) return null;
-    const right = assignmentNode.right;
-    if (!right || right.type !== "ObjectExpression") return null;
+    const resolved = this.resolveToObjectExpression(
+      assignmentNode.right,
+      scope,
+      new Set<string>(),
+      0,
+    );
+    if (!resolved) return null;
 
     const vitalSet = new Set<string>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let pmObject: any = null;
 
-    for (const prop of right.properties ?? []) {
+    for (const prop of resolved.properties ?? []) {
       try {
         if (!prop || prop.type !== "ObjectProperty") continue;
         const keyName =
