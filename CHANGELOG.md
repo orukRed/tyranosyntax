@@ -4,9 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [3.1.2] 2026-05-xx
+## [3.1.2] 2026-05-13
 
-- xxxx
+- 「タグ[text]のパラメータ "val" はタグ "text" に定義されていません。」というエラーが表示されてしまうことがある不具合を修正しました。
+- 特定のプラグインでパラメータがエラー扱いになってしまう不具合を修正しました。
 
 ## [3.1.1] 2026-05-05
 
