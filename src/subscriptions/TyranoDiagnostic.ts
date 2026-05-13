@@ -1923,6 +1923,12 @@ export class TyranoDiagnostic {
 
     // タグ名を取得
     const tagName = data["name"];
+    // text / comment は Parser が地の文・コメント行を暗黙的に変換した擬似タグで、
+    // pm.val には本文がそのまま入る。ユーザー定義マクロ "text" 等で suggestions が
+    // 上書きされた場合に地の文がすべて誤検出されるため、診断対象外とする。
+    if (tagName === "text" || tagName === "comment") {
+      return;
+    }
     //ティラノビルダーが有効でティラノビルダーで定義されているタグ（マクロ）ならスキップ
     if (
       this.tyranoBuilderEnabled &&
