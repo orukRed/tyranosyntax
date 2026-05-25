@@ -1824,7 +1824,7 @@
     "viewsWelcome": [
       {
         "view": "tyrano-dev-tools",
-        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)"
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)\n\n[$(star) 有料新機能サンプル](command:tyrano.sidebar.paidSample)"
       },
       {
         "view": "tyrano-links",
@@ -1896,6 +1896,11 @@
         "command": "tyrano.sidebar.openOfuse",
         "title": "OFUSE（寄付）",
         "icon": "$(heart)"
+      },
+      {
+        "command": "tyrano.sidebar.paidSample",
+        "title": "有料新機能サンプル",
+        "icon": "$(star)"
       },
       {
         "command": "tyrano.sidebar.refreshMacros",
@@ -2133,6 +2138,8 @@
   "dependencies": {
     "@babel/parser": "^7.24.6",
     "@babel/traverse": "^7.24.6",
+    "@riff-tech/code-checkout-vscode": "^1.5.1",
+    "@vscode/debugadapter": "^1.65.0",
     "@vscode/vsce": "^2.19.0",
     "express": "^4.18.2",
     "jquery": "^3.7.0",
@@ -2141,7 +2148,6 @@
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.8",
-    "@vscode/debugadapter": "^1.65.0",
     "ws": "^8.17.0"
   }
 }

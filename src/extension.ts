@@ -35,6 +35,7 @@ import { MacroTreeProvider } from "./subscriptions/sidebar/MacroTreeProvider";
 import { SidebarRefresher } from "./subscriptions/sidebar/SidebarRefresher";
 import { UsageIndexer } from "./subscriptions/sidebar/UsageIndexer";
 import { VariableTreeProvider } from "./subscriptions/sidebar/VariableTreeProvider";
+import { getLicense, getCheckoutUrl } from "@riff-tech/code-checkout-vscode";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -133,6 +134,40 @@ export function activate(context: ExtensionContext) {
         vscode.Uri.parse("https://ofuse.me/orukred/letter"),
       );
     }),
+  );
+  // 有料新機能サンプル（riff-tech code-checkout によるライセンスゲート）
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "tyrano.sidebar.paidSample",
+      async () => {
+        try {
+          const license = await getLicense(context);
+          if (license?.isValid && !license.isExpired) {
+            vscode.window.showInformationMessage(
+              "有料新機能サンプルが実行されました",
+            );
+            return;
+          }
+          const purchaseLabel = "購入する";
+          const selected = await vscode.window.showInformationMessage(
+            "この機能を使うには有効なライセンスが必要です。",
+            purchaseLabel,
+          );
+          if (selected === purchaseLabel) {
+            const url = await getCheckoutUrl(context);
+            if (url) {
+              await vscode.env.openExternal(vscode.Uri.parse(url));
+            }
+          }
+        } catch (error) {
+          TyranoLogger.print(
+            "有料新機能サンプルのライセンス検証に失敗しました",
+            ErrorLevel.ERROR,
+          );
+          TyranoLogger.printStackTrace(error);
+        }
+      },
+    ),
   );
 
   // 変数・マクロ・キャラクターのシンボル一覧 TreeView 登録
