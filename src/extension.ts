@@ -23,6 +23,10 @@ import { UnusedResourcePanel } from "./subscriptions/UnusedResourcePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
+  batchFormat,
+  TyranoFormattingProvider,
+} from "./subscriptions/TyranoFormatter";
+import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
 } from "./embeddedJavaScriptSupport";
@@ -310,6 +314,13 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoCompletionItemProvider activate");
+          context.subscriptions.push(
+            vscode.languages.registerDocumentFormattingEditProvider(
+              TYRANO_MODE,
+              new TyranoFormattingProvider(),
+            ),
+          );
+          TyranoLogger.print("TyranoFormattingProvider activate");
 
           //ショートカットコマンドの登録
           const _ctbs = new TyranoCreateTagByShortcutKey();
@@ -370,6 +381,10 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("UnusedResourcePanel activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand("tyrano.batchFormat", batchFormat),
+          );
+          TyranoLogger.print("TyranoBatchFormat activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
