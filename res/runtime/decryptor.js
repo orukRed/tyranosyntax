@@ -8,9 +8,14 @@
  * 注意: 復号鍵はこのファイルに埋め込まれて配布されるため、これは「カジュアルな抽出を
  * 防ぐ難読化」であり、解析を完全に防ぐものではない。
  *
- * フォーマット (1ファイル = 1 Buffer):
- *   [ magic 4B = "TYEN" ][ version 1B = 0x01 ][ iv 16B ][ ciphertext ... ]
- *   salt はパッケージング単位で1個。鍵導出済みのため実行時は scrypt 不要(高速)。
+ * data/ の中身は単一の data.pak に束ねられている。起動時に索引を復号し、各アセットは
+ * data.pak から範囲読み込み＆復号して供給する。除外ファイル(KeyConfig.js 等)は平文の
+ * まま data/ に残り、索引に無いものはディスクから直接読む。
+ *
+ * data.pak フォーマット:
+ *   [ magic 4B = "TYPK" ][ version 1B ][ salt 16B ][ indexIv 16B ][ indexLen 4B(LE) ]
+ *   [ 暗号化索引(JSON) ][ DATAセクション ]。各 blob = [ iv 16B ][ ciphertext ]。
+ *   鍵導出済みのため実行時は scrypt 不要(高速)。
  */
 (function () {
   "use strict";
@@ -34,10 +39,11 @@
     return;
   }
 
-  var MAGIC = Buffer.from("TYEN");
-  var VERSION = 1;
   // パッケージングコマンドが導出した鍵(hex)をトークン置換で埋め込む
   var KEY = Buffer.from("__INJECTED_KEY_HEX__", "hex");
+  var PAK_MAGIC = Buffer.from("TYPK");
+  var PAK_VERSION = 1;
+  var PAK_HEADER_LENGTH = 4 + 1 + 16 + 16 + 4; // magic+version+salt+indexIv+indexLen
 
   // data/ パスは index.html のあるディレクトリ基準で解決する
   // (getExePath() はインストールディレクトリを返すため使わない)
@@ -54,23 +60,56 @@
     return nodePath.join(APP_DIR, clean);
   }
 
-  function decryptBuffer(buf) {
-    // 暗号化されていない(除外ファイル等)ならそのまま返す
-    if (
-      buf.length < 21 ||
-      !buf.subarray(0, 4).equals(MAGIC) ||
-      buf[4] !== VERSION
-    ) {
-      return buf;
+  // data.pak を開いて索引を復号する
+  var pakFd = -1;
+  var pakIndex = null;
+  var pakDataStart = 0;
+  try {
+    pakFd = fs.openSync(nodePath.join(APP_DIR, "data.pak"), "r");
+    var head = Buffer.alloc(PAK_HEADER_LENGTH);
+    fs.readSync(pakFd, head, 0, PAK_HEADER_LENGTH, 0);
+    if (head.subarray(0, 4).equals(PAK_MAGIC) && head[4] === PAK_VERSION) {
+      var indexIv = head.subarray(21, 37);
+      var indexLen = head.readUInt32LE(37);
+      var encIndex = Buffer.alloc(indexLen);
+      fs.readSync(pakFd, encIndex, 0, indexLen, PAK_HEADER_LENGTH);
+      var di = crypto.createDecipheriv("aes-256-cbc", KEY, indexIv);
+      var indexJson = Buffer.concat([di.update(encIndex), di.final()]).toString(
+        "utf8",
+      );
+      pakIndex = JSON.parse(indexJson);
+      pakDataStart = PAK_HEADER_LENGTH + indexLen;
     }
-    var iv = buf.subarray(5, 21);
-    var ct = buf.subarray(21);
+  } catch (e) {
+    console.error("[tyrano_decryptor] data.pak を開けませんでした", e);
+    pakIndex = null;
+  }
+
+  function dataKey(rel) {
+    return String(rel)
+      .replace(/^\.?\//, "")
+      .replace(/^data\//, "")
+      .split("?")[0];
+  }
+
+  function decryptBlob(blob) {
+    var iv = blob.subarray(0, 16);
+    var ct = blob.subarray(16);
     var d = crypto.createDecipheriv("aes-256-cbc", KEY, iv);
     return Buffer.concat([d.update(ct), d.final()]);
   }
 
   function readDecrypted(rel) {
-    return decryptBuffer(fs.readFileSync(toAbs(rel)));
+    if (pakIndex) {
+      var ent = pakIndex[dataKey(rel)];
+      if (ent) {
+        var blob = Buffer.alloc(ent.l);
+        fs.readSync(pakFd, blob, 0, ent.l, pakDataStart + ent.o);
+        return decryptBlob(blob);
+      }
+    }
+    // フォールバック: 除外された平文ファイル等
+    return fs.readFileSync(toAbs(rel));
   }
 
   function isData(s) {

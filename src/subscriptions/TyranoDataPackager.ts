@@ -8,33 +8,36 @@ import { InformationExtension } from "../InformationExtension";
 import { TyranoLogger } from "../TyranoLogger";
 
 /**
- * data フォルダを AES 暗号化して配布用ビルドを作る「パッケージング機能」。
+ * data フォルダを単一の暗号化パッケージ(data.pak)に束ねる「パッケージング機能」。
  *
  * - 選択された TyranoScript プロジェクトを出力フォルダにコピーし、コピー側の
- *   data/ を AES-256-CBC で暗号化する。
+ *   data/ の中身(除外ファイルを除く)を 1 つの data.pak に束ねて AES-256-CBC で暗号化する。
+ *   束ねたファイルはビルドの data/ から削除し、除外ファイル(KeyConfig.js 等)だけ平文で残す。
  * - ゲームバンドル(tyrano/ + index.html)に実行時復号スクリプト(decryptor.js)を
  *   自動注入する。復号は TyranoErectron(Electron) のレンダラーで行われる。
  *
  * 重要: 復号鍵はビルドに同梱されるため、これは「カジュアルな抽出を防ぐ難読化」であり
  * 解析を完全に防ぐ DRM ではない。
  *
- * 暗号化ファイルフォーマット (1ファイル = 1 Buffer):
- *   [ magic 4B = "TYEN" ][ version 1B ][ iv 16B ][ ciphertext ... ]
- * salt はパッケージング単位で1個生成し、鍵は scrypt で導出する。
+ * data.pak フォーマット:
+ *   [ magic 4B = "TYPK" ][ version 1B ][ salt 16B ][ indexIv 16B ][ indexLen 4B(LE) ]
+ *   [ 暗号化索引(JSON) ][ DATAセクション(各blobを連結) ]
+ *   各 blob = [ iv 16B ][ ciphertext ]。索引 = { "<dataからの相対パス>": {o,l} }。
  */
 export class TyranoDataPackager {
-  private static readonly MAGIC = Buffer.from("TYEN");
-  private static readonly VERSION = 1;
+  private static readonly PAK_MAGIC = Buffer.from("TYPK");
+  private static readonly PAK_VERSION = 1;
+  private static readonly PAK_NAME = "data.pak";
+  // magic(4) + version(1) + salt(16) + indexIv(16) + indexLen(4)
+  private static readonly PAK_HEADER_LENGTH = 4 + 1 + 16 + 16 + 4;
   private static readonly ALGORITHM = "aes-256-cbc";
   private static readonly KEY_LENGTH = 32;
   private static readonly IV_LENGTH = 16;
-  private static readonly HEADER_LENGTH = 5 + 16; // magic(4) + version(1) + iv(16)
-  private static readonly MANIFEST_NAME = ".tyrano_package.json";
   private static readonly TOKEN = "__INJECTED_KEY_HEX__";
   private static readonly SENTINEL = "TYRANO_DECRYPTOR";
 
   /**
-   * data フォルダを暗号化してビルドフォルダを生成する。
+   * data フォルダを data.pak に束ねて暗号化したビルドフォルダを生成する。
    */
   public static async packageData(): Promise<void> {
     try {
@@ -62,7 +65,7 @@ export class TyranoDataPackager {
       }
 
       const proceed = await vscode.window.showWarningMessage(
-        "data フォルダを暗号化します。復号鍵はゲームに同梱されるため、これは解析を完全に防ぐものではなく『カジュアルな抽出を防ぐ難読化』です。続行しますか？",
+        "data フォルダを単一パッケージ(data.pak)に束ねて暗号化します。復号鍵はゲームに同梱されるため、これは解析を完全に防ぐものではなく『カジュアルな抽出を防ぐ難読化』です。続行しますか？",
         { modal: true },
         "続行",
       );
@@ -91,18 +94,17 @@ export class TyranoDataPackager {
         fs.rmSync(buildDir, { recursive: true, force: true });
       }
 
-      const salt = crypto.randomBytes(16);
+      const salt = crypto.randomBytes(TyranoDataPackager.IV_LENGTH);
       const key = TyranoDataPackager.deriveKey(passphrase, salt);
 
-      let encryptedCount = 0;
+      let packedCount = 0;
       let excludedCount = 0;
-      const encryptedFiles: string[] = [];
       const failures: string[] = [];
 
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: "data フォルダを暗号化中...",
+          title: "data フォルダをパッケージング中...",
           cancellable: false,
         },
         async (progress) => {
@@ -116,67 +118,54 @@ export class TyranoDataPackager {
           const dataDir = path.join(buildDir, "data");
           const infoWs = InformationWorkSpace.getInstance();
           const files = infoWs.getProjectFiles(dataDir, [], true);
-          const total = files.length || 1;
-          let done = 0;
 
+          // 収録対象を読み込み、除外ファイルは平文のまま残す
+          progress.report({ message: "ファイルを収集中..." });
+          const entries: { key: string; data: Buffer }[] = [];
+          const packedAbsPaths: string[] = [];
           for (const file of files) {
-            done++;
-            if (done % 20 === 0) {
-              progress.report({
-                message: `暗号化中... (${done}/${total})`,
-                increment: (20 / total) * 100,
-              });
-            }
-
             const relFromData = path
               .relative(dataDir, file)
               .split(path.sep)
               .join("/");
-            if (relFromData === TyranoDataPackager.MANIFEST_NAME) {
-              continue;
-            }
             const relFromRoot = "data/" + relFromData;
-
             if (TyranoDataPackager.isExcluded(relFromRoot, excludeGlobs)) {
               excludedCount++;
-              continue; // 平文のまま(コピー済み)
+              continue;
             }
-
             try {
-              const buf = fs.readFileSync(file);
-              if (TyranoDataPackager.isEncrypted(buf)) {
-                continue; // 二重暗号化を防ぐ
-              }
-              fs.writeFileSync(file, TyranoDataPackager.encryptBuffer(buf, key));
-              encryptedFiles.push(relFromRoot);
-              encryptedCount++;
+              entries.push({ key: relFromData, data: fs.readFileSync(file) });
+              packedAbsPaths.push(file);
             } catch (error) {
               TyranoLogger.printStackTrace(error);
               failures.push(relFromRoot);
             }
           }
 
+          // data.pak を構築して書き出す
+          progress.report({ message: "data.pak を構築中..." });
+          const pak = TyranoDataPackager.buildPak(entries, key, salt);
+          fs.writeFileSync(path.join(buildDir, TyranoDataPackager.PAK_NAME), pak);
+          packedCount = entries.length;
+
+          // 束ねた平文ファイルをビルドの data/ から削除し、空ディレクトリを整理する
+          progress.report({ message: "平文ファイルを削除中..." });
+          for (const abs of packedAbsPaths) {
+            try {
+              fs.rmSync(abs);
+            } catch (error) {
+              TyranoLogger.printStackTrace(error);
+            }
+          }
+          TyranoDataPackager.pruneEmptyDirs(dataDir);
+
           progress.report({ message: "復号スクリプトを注入中..." });
           TyranoDataPackager.injectDecryptor(buildDir, key);
           TyranoDataPackager.injectIndexHtml(buildDir);
-
-          const manifest = {
-            scheme: TyranoDataPackager.MAGIC.toString("latin1"),
-            version: TyranoDataPackager.VERSION,
-            algorithm: TyranoDataPackager.ALGORITHM,
-            saltHex: salt.toString("hex"),
-            exclude: excludeGlobs,
-            encryptedFiles,
-          };
-          fs.writeFileSync(
-            path.join(dataDir, TyranoDataPackager.MANIFEST_NAME),
-            JSON.stringify(manifest, null, 2),
-            "utf8",
-          );
         },
       );
 
-      let message = `暗号化完了: ${encryptedCount} ファイルを暗号化、${excludedCount} ファイルを除外。出力: ${buildDir}`;
+      let message = `パッケージング完了: ${packedCount} ファイルを data.pak に束ねて暗号化、${excludedCount} ファイルを除外。出力: ${buildDir}`;
       if (failures.length > 0) {
         message += ` / 失敗 ${failures.length} 件（ログ参照）`;
         vscode.window.showWarningMessage(message);
@@ -195,14 +184,14 @@ export class TyranoDataPackager {
     } catch (error) {
       TyranoLogger.printStackTrace(error);
       vscode.window.showErrorMessage(
-        "暗号化中にエラーが発生しました: " +
+        "パッケージング中にエラーが発生しました: " +
           (error instanceof Error ? error.message : String(error)),
       );
     }
   }
 
   /**
-   * 暗号化済みビルドの data/ を復号して data_decrypted フォルダに書き戻す(復旧用)。
+   * data.pak を復号して data_decrypted フォルダに書き戻す(復旧用)。
    */
   public static async unpackageData(): Promise<void> {
     try {
@@ -213,19 +202,14 @@ export class TyranoDataPackager {
         return;
       }
 
-      const manifestPath = path.join(
-        buildDir,
-        "data",
-        TyranoDataPackager.MANIFEST_NAME,
-      );
-      if (!fs.existsSync(manifestPath)) {
+      const pakPath = path.join(buildDir, TyranoDataPackager.PAK_NAME);
+      if (!fs.existsSync(pakPath)) {
         vscode.window.showErrorMessage(
-          "マニフェスト(data/.tyrano_package.json)が見つかりません。暗号化済みのビルドフォルダを選択してください。",
+          "data.pak が見つかりません。パッケージング済みのビルドフォルダを選択してください。",
         );
         return;
       }
 
-      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
       const passphrase = await TyranoDataPackager.askPassphrase(
         "データ暗号化の解除",
         "暗号化時のパスフレーズを入力してください。",
@@ -234,31 +218,51 @@ export class TyranoDataPackager {
         return;
       }
 
-      const salt = Buffer.from(String(manifest.saltHex), "hex");
+      const pak = fs.readFileSync(pakPath);
+      const salt = TyranoDataPackager.readPakSalt(pak);
+      if (!salt) {
+        vscode.window.showErrorMessage(
+          "data.pak のフォーマットが不正です。",
+        );
+        return;
+      }
       const key = TyranoDataPackager.deriveKey(passphrase, salt);
+
+      let index: Record<string, { o: number; l: number }>;
+      try {
+        index = TyranoDataPackager.readPakIndex(pak, key);
+      } catch (error) {
+        TyranoLogger.printStackTrace(error);
+        vscode.window.showErrorMessage(
+          "索引の復号に失敗しました。パスフレーズが間違っている可能性があります。",
+        );
+        return;
+      }
+
+      const dataStart =
+        TyranoDataPackager.PAK_HEADER_LENGTH + pak.readUInt32LE(37);
       const outDir = path.join(path.dirname(buildDir), "data_decrypted");
-      const files: string[] = Array.isArray(manifest.encryptedFiles)
-        ? manifest.encryptedFiles
-        : [];
+      const keys = Object.keys(index);
 
       let okCount = 0;
       const failures: string[] = [];
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: "暗号化を解除中...",
+          title: "data.pak を解除中...",
           cancellable: false,
         },
         async (progress) => {
           let done = 0;
-          for (const rel of files) {
+          for (const rel of keys) {
             done++;
             if (done % 20 === 0) {
-              progress.report({ message: `${done}/${files.length}` });
+              progress.report({ message: `${done}/${keys.length}` });
             }
             try {
-              const buf = fs.readFileSync(path.join(buildDir, rel));
-              const dec = TyranoDataPackager.decryptBuffer(buf, key);
+              const { o, l } = index[rel];
+              const blob = pak.subarray(dataStart + o, dataStart + o + l);
+              const dec = TyranoDataPackager.decryptBlob(blob, key);
               const dest = path.join(outDir, rel);
               fs.mkdirSync(path.dirname(dest), { recursive: true });
               fs.writeFileSync(dest, dec);
@@ -273,7 +277,7 @@ export class TyranoDataPackager {
 
       let message = `解除完了: ${okCount} ファイルを ${outDir} に出力しました。`;
       if (failures.length > 0) {
-        message += ` / 失敗 ${failures.length} 件（パスフレーズ誤り等、ログ参照）`;
+        message += ` / 失敗 ${failures.length} 件（ログ参照）`;
         vscode.window.showWarningMessage(message);
       } else {
         vscode.window.showInformationMessage(message);
@@ -288,35 +292,25 @@ export class TyranoDataPackager {
   }
 
   // ------------------------------------------------------------------
-  // 暗号コア(decryptor.js と完全に一致させること)
+  // 暗号コア / pak 組立・分解 (decryptor.js と完全に一致させること)
   // ------------------------------------------------------------------
 
   public static deriveKey(passphrase: string, salt: Buffer): Buffer {
     return crypto.scryptSync(passphrase, salt, TyranoDataPackager.KEY_LENGTH);
   }
 
-  public static encryptBuffer(plain: Buffer, key: Buffer): Buffer {
+  /** 1 ファイル分を [iv][ciphertext] に暗号化する。 */
+  public static encryptBlob(plain: Buffer, key: Buffer): Buffer {
     const iv = crypto.randomBytes(TyranoDataPackager.IV_LENGTH);
-    const cipher = crypto.createCipheriv(
-      TyranoDataPackager.ALGORITHM,
-      key,
-      iv,
-    );
+    const cipher = crypto.createCipheriv(TyranoDataPackager.ALGORITHM, key, iv);
     const ct = Buffer.concat([cipher.update(plain), cipher.final()]);
-    return Buffer.concat([
-      TyranoDataPackager.MAGIC,
-      Buffer.from([TyranoDataPackager.VERSION]),
-      iv,
-      ct,
-    ]);
+    return Buffer.concat([iv, ct]);
   }
 
-  public static decryptBuffer(buf: Buffer, key: Buffer): Buffer {
-    if (!TyranoDataPackager.isEncrypted(buf)) {
-      return buf;
-    }
-    const iv = buf.subarray(5, TyranoDataPackager.HEADER_LENGTH);
-    const ct = buf.subarray(TyranoDataPackager.HEADER_LENGTH);
+  /** [iv][ciphertext] を復号する。 */
+  public static decryptBlob(blob: Buffer, key: Buffer): Buffer {
+    const iv = blob.subarray(0, TyranoDataPackager.IV_LENGTH);
+    const ct = blob.subarray(TyranoDataPackager.IV_LENGTH);
     const decipher = crypto.createDecipheriv(
       TyranoDataPackager.ALGORITHM,
       key,
@@ -325,12 +319,80 @@ export class TyranoDataPackager {
     return Buffer.concat([decipher.update(ct), decipher.final()]);
   }
 
-  public static isEncrypted(buf: Buffer): boolean {
-    return (
-      buf.length >= TyranoDataPackager.HEADER_LENGTH &&
-      buf.subarray(0, 4).equals(TyranoDataPackager.MAGIC) &&
-      buf[4] === TyranoDataPackager.VERSION
+  /** entries を 1 つの data.pak バッファに束ねる。 */
+  public static buildPak(
+    entries: { key: string; data: Buffer }[],
+    key: Buffer,
+    salt: Buffer,
+  ): Buffer {
+    const index: Record<string, { o: number; l: number }> = {};
+    const dataParts: Buffer[] = [];
+    let offset = 0;
+    for (const entry of entries) {
+      const blob = TyranoDataPackager.encryptBlob(entry.data, key);
+      index[entry.key] = { o: offset, l: blob.length };
+      dataParts.push(blob);
+      offset += blob.length;
+    }
+
+    const indexIv = crypto.randomBytes(TyranoDataPackager.IV_LENGTH);
+    const indexCipher = crypto.createCipheriv(
+      TyranoDataPackager.ALGORITHM,
+      key,
+      indexIv,
     );
+    const encIndex = Buffer.concat([
+      indexCipher.update(Buffer.from(JSON.stringify(index), "utf8")),
+      indexCipher.final(),
+    ]);
+
+    const indexLen = Buffer.alloc(4);
+    indexLen.writeUInt32LE(encIndex.length, 0);
+
+    return Buffer.concat([
+      TyranoDataPackager.PAK_MAGIC,
+      Buffer.from([TyranoDataPackager.PAK_VERSION]),
+      salt,
+      indexIv,
+      indexLen,
+      encIndex,
+      ...dataParts,
+    ]);
+  }
+
+  /** pak ヘッダから salt を取り出す(フォーマット不正なら undefined)。 */
+  public static readPakSalt(pak: Buffer): Buffer | undefined {
+    if (
+      pak.length < TyranoDataPackager.PAK_HEADER_LENGTH ||
+      !pak.subarray(0, 4).equals(TyranoDataPackager.PAK_MAGIC) ||
+      pak[4] !== TyranoDataPackager.PAK_VERSION
+    ) {
+      return undefined;
+    }
+    return pak.subarray(5, 21);
+  }
+
+  /** pak の暗号化索引を復号して返す。 */
+  public static readPakIndex(
+    pak: Buffer,
+    key: Buffer,
+  ): Record<string, { o: number; l: number }> {
+    const indexIv = pak.subarray(21, 37);
+    const indexLen = pak.readUInt32LE(37);
+    const encIndex = pak.subarray(
+      TyranoDataPackager.PAK_HEADER_LENGTH,
+      TyranoDataPackager.PAK_HEADER_LENGTH + indexLen,
+    );
+    const decipher = crypto.createDecipheriv(
+      TyranoDataPackager.ALGORITHM,
+      key,
+      indexIv,
+    );
+    const json = Buffer.concat([
+      decipher.update(encIndex),
+      decipher.final(),
+    ]).toString("utf8");
+    return JSON.parse(json);
   }
 
   // ------------------------------------------------------------------
@@ -410,6 +472,29 @@ export class TyranoDataPackager {
         path.join(buildDir, entry.name),
         { recursive: true },
       );
+    }
+  }
+
+  /** dir 配下の空ディレクトリを再帰的に削除する(dir 自身は残す)。 */
+  private static pruneEmptyDirs(dir: string): void {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (_error) {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const child = path.join(dir, entry.name);
+        TyranoDataPackager.pruneEmptyDirs(child);
+        try {
+          if (fs.readdirSync(child).length === 0) {
+            fs.rmdirSync(child);
+          }
+        } catch (_error) {
+          // 空でない/削除不可なら無視
+        }
+      }
     }
   }
 
