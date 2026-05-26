@@ -91,6 +91,19 @@ export function activate(context: ExtensionContext) {
   // // 言語サーバーの開始
   // client.start();
 
+  // フォーマット機能の登録
+  // 初期化処理(run)の成否やタイミングに依存しないよう、activate直後に同期登録する。
+  context.subscriptions.push(
+    vscode.languages.registerDocumentFormattingEditProvider(
+      TYRANO_MODE,
+      new TyranoFormattingProvider(),
+    ),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.batchFormat", batchFormat),
+  );
+  TyranoLogger.print("TyranoFormattingProvider activate");
+
   // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
   registerEmbeddedJavaScriptSupport(context);
 
@@ -314,13 +327,6 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("TyranoCompletionItemProvider activate");
-          context.subscriptions.push(
-            vscode.languages.registerDocumentFormattingEditProvider(
-              TYRANO_MODE,
-              new TyranoFormattingProvider(),
-            ),
-          );
-          TyranoLogger.print("TyranoFormattingProvider activate");
 
           //ショートカットコマンドの登録
           const _ctbs = new TyranoCreateTagByShortcutKey();
@@ -381,10 +387,6 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("UnusedResourcePanel activate");
-          context.subscriptions.push(
-            vscode.commands.registerCommand("tyrano.batchFormat", batchFormat),
-          );
-          TyranoLogger.print("TyranoBatchFormat activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
