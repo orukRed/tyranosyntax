@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as prettier from "prettier";
 import {
   PAIRED_TAGS,
   END_TO_START,
@@ -63,6 +62,8 @@ async function formatEmbedded(
     return [];
   }
   try {
+    // prettier は遅延ロード（拡張の起動を巻き込まないため）
+    const prettier = await import("prettier");
     const result = await prettier.format(innerSource, { parser });
     return result.replace(/\n+$/, "").split("\n");
   } catch (e) {
@@ -325,6 +326,12 @@ export async function batchFormat(): Promise<void> {
       const files = await vscode.workspace.findFiles(
         "**/data/scenario/**/*.ks",
       );
+      if (files.length === 0) {
+        vscode.window.showInformationMessage(
+          "フォーマット対象（data/scenario 配下の .ks）が見つかりませんでした。",
+        );
+        return;
+      }
       let formattedCount = 0;
       const allWarnings: string[] = [];
 
