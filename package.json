@@ -67,6 +67,21 @@
       {
         "title": "TyranoScript syntax",
         "properties": {
+          "TyranoScript syntax.packaging.outputFolderName": {
+            "type": "string",
+            "default": "data_encrypted_build",
+            "description": "データ暗号化（パッケージング）の出力先フォルダ名。プロジェクトルート直下に作成されます。"
+          },
+          "TyranoScript syntax.packaging.excludeGlobs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "data/system/KeyConfig.js"
+            ],
+            "description": "暗号化から除外するファイル（プロジェクトルートからの相対パス）。index.htmlで<script>/<link>として直接読み込まれるファイルや、[loadcss]/[loadjs type=module]で読み込むファイルは復号フックを通らないため除外してください。* と ** のワイルドカードが使えます。"
+          },
           "TyranoScript syntax.keyboard.shift + enter": {
             "type": "string",
             "default": "[l][r]",
@@ -1824,7 +1839,7 @@
     "viewsWelcome": [
       {
         "view": "tyrano-dev-tools",
-        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)"
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)\n\n[$(lock) データ暗号化（パッケージング）](command:tyrano.packageData)\n\n[$(unlock) データ暗号化の解除](command:tyrano.unpackageData)"
       },
       {
         "view": "tyrano-links",
@@ -1871,6 +1886,15 @@
       {
         "command": "tyrano.unusedResources",
         "title": "tyrano.unusedResources"
+      },
+      {
+        "command": "tyrano.packageData",
+        "title": "データ暗号化（パッケージング）",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "tyrano.unpackageData",
+        "title": "データ暗号化の解除"
       },
       {
         "command": "tyrano.sidebar.debug",

@@ -116,6 +116,7 @@
     "test_project/**/*",
     "webpack.config.js",
     "test_project/**/*",
-    "preview/**/*"
+    "preview/**/*",
+    "res/**/*"
   ]
 }

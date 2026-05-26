@@ -20,6 +20,7 @@ import { TyranoPreview } from "./subscriptions/TyranoPreview";
 import { TyranoFlowchart } from "./subscriptions/TyranoFlowchart";
 import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
 import { UnusedResourcePanel } from "./subscriptions/UnusedResourcePanel";
+import { TyranoDataPackager } from "./subscriptions/TyranoDataPackager";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
@@ -370,6 +371,19 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("UnusedResourcePanel activate");
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.packageData",
+              TyranoDataPackager.packageData,
+            ),
+          );
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.unpackageData",
+              TyranoDataPackager.unpackageData,
+            ),
+          );
+          TyranoLogger.print("TyranoDataPackager activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();
