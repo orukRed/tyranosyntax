@@ -95,7 +95,7 @@ export function activate(context: ExtensionContext) {
   // 初期化処理(run)の成否やタイミングに依存しないよう、activate直後に同期登録する。
   context.subscriptions.push(
     vscode.languages.registerDocumentFormattingEditProvider(
-      TYRANO_MODE,
+      [{ language: "tyrano" }],
       new TyranoFormattingProvider(),
     ),
   );
