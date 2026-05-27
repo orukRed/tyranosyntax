@@ -1880,6 +1880,10 @@
         "title": "一括フォーマット"
       },
       {
+        "command": "tyrano.toggleLineComment",
+        "title": "行コメントの切り替え (TyranoScript)"
+      },
+      {
         "command": "tyrano.sidebar.debug",
         "title": "デバッグ実行（β版）",
         "icon": "$(debug-alt)"
@@ -1955,6 +1959,12 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "tyrano.toggleLineComment",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "tyrano.sidebar.expandMacros",
@@ -2067,6 +2077,13 @@
       }
     ],
     "keybindings": [
+      {
+        "command": "tyrano.toggleLineComment",
+        "key": "ctrl+/",
+        "win": "ctrl+/",
+        "mac": "cmd+/",
+        "when": "editorLangId == tyrano && editorTextFocus && !editorReadonly"
+      },
       {
         "command": "tyrano.shiftEnter",
         "key": "shift+enter",

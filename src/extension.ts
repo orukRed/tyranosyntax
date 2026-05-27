@@ -26,6 +26,7 @@ import {
   batchFormat,
   TyranoFormattingProvider,
 } from "./subscriptions/TyranoFormatter";
+import { toggleLineComment } from "./subscriptions/TyranoToggleComment";
 import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
@@ -101,6 +102,9 @@ export function activate(context: ExtensionContext) {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("tyrano.batchFormat", batchFormat),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.toggleLineComment", toggleLineComment),
   );
   TyranoLogger.print("TyranoFormattingProvider activate");
 

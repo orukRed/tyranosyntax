@@ -61,17 +61,26 @@ async function formatEmbedded(
   if (innerSource.trim() === "") {
     return [];
   }
+  // iscript(JS) 内の行頭 ; コメントを JS の // コメントへ変換する。
+  // これにより無効JSが解消し prettier で整形できる。行末/行中の ; は対象外。
+  let source = innerSource;
+  if (parser === "babel") {
+    source = source
+      .split(/\r?\n/)
+      .map((line) => line.replace(/^(\s*);/, "$1//"))
+      .join("\n");
+  }
   try {
     // prettier は遅延ロード（拡張の起動を巻き込まないため）
     const prettier = await import("prettier");
-    const result = await prettier.format(innerSource, { parser });
-    return result.replace(/\n+$/, "").split("\n");
+    const result = await prettier.format(source, { parser, endOfLine: "lf" });
+    return result.replace(/(\r?\n)+$/, "").split(/\r?\n/);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     warnings.push(
       `${startLineNo + 1}行目付近の${parser === "babel" ? "JavaScript" : "HTML"}整形に失敗しました: ${message}`,
     );
-    return innerSource.split("\n").map((l) => l.replace(/\s+$/, ""));
+    return source.split(/\r?\n/).map((l) => l.replace(/\s+$/, ""));
   }
 }
 
@@ -247,9 +256,12 @@ async function processLine(
  */
 export async function formatText(
   text: string,
+  eolOverride?: "\r\n" | "\n",
 ): Promise<{ text: string; warnings: string[] }> {
   const warnings: string[] = [];
-  const { body, hasBom, eol, hasFinalNewline } = analyzeText(text);
+  const { body, hasBom, eol: detectedEol, hasFinalNewline } = analyzeText(text);
+  // 文書の改行設定（document.eol）が渡された場合はそれを優先し、改行コードを保持する。
+  const eol = eolOverride ?? detectedEol;
 
   const lines = body.split(/\r?\n/);
   if (hasFinalNewline) {
@@ -287,7 +299,8 @@ export class TyranoFormattingProvider
     document: vscode.TextDocument,
   ): Promise<vscode.TextEdit[]> {
     const original = document.getText();
-    const { text, warnings } = await formatText(original);
+    const eol = document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
+    const { text, warnings } = await formatText(original, eol);
     if (warnings.length > 0) {
       vscode.window.showWarningMessage(warnings[0]);
     }
@@ -340,7 +353,8 @@ export async function batchFormat(): Promise<void> {
         try {
           const document = await vscode.workspace.openTextDocument(uri);
           const original = document.getText();
-          const { text, warnings } = await formatText(original);
+          const eol = document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
+          const { text, warnings } = await formatText(original, eol);
           allWarnings.push(...warnings);
           if (text !== original) {
             const edit = new vscode.WorkspaceEdit();
