@@ -22,6 +22,7 @@ import { MacroTablePanel } from "./subscriptions/MacroTablePanel";
 import { UnusedResourcePanel } from "./subscriptions/UnusedResourcePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
+import { TyranoExportExe } from "./subscriptions/TyranoExportExe";
 import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
@@ -370,6 +371,15 @@ export function activate(context: ExtensionContext) {
             ),
           );
           TyranoLogger.print("UnusedResourcePanel activate");
+
+          // 暗号化済みdata + Electronラッパーで Windows exe を書き出すコマンド
+          context.subscriptions.push(
+            vscode.commands.registerCommand(
+              "tyrano.exportExe",
+              TyranoExportExe.execute,
+            ),
+          );
+          TyranoLogger.print("TyranoExportExe activate");
 
           const infoWs: InformationWorkSpace =
             InformationWorkSpace.getInstance();

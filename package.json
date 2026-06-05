@@ -1824,7 +1824,7 @@
     "viewsWelcome": [
       {
         "view": "tyrano-dev-tools",
-        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)"
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)\n\n[$(package) 実行ファイル(exe)書き出し](command:tyrano.exportExe)"
       },
       {
         "view": "tyrano-links",
@@ -1871,6 +1871,10 @@
       {
         "command": "tyrano.unusedResources",
         "title": "tyrano.unusedResources"
+      },
+      {
+        "command": "tyrano.exportExe",
+        "title": "実行ファイル(exe)書き出し"
       },
       {
         "command": "tyrano.sidebar.debug",

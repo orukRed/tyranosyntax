@@ -1,0 +1,36 @@
+{
+  "name": "__APP_NAME__",
+  "productName": "__PRODUCT_NAME__",
+  "version": "1.0.0",
+  "description": "__PRODUCT_NAME__",
+  "main": "main.js",
+  "author": "TyranoScript",
+  "scripts": {
+    "dist": "electron-builder --win"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.2"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "__APP_ID__",
+    "productName": "__PRODUCT_NAME__",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "data/**/*",
+      "tyrano/**/*"
+    ],
+    "win": {
+      "target": "__WIN_TARGET__"
+    }
+  }
+}

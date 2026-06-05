@@ -1,0 +1,216 @@
+// TyranoScript exe書き出し機能で生成される Electron メインプロセス。
+// このファイルはテンプレートであり、ビルド時に以下のプレースホルダが置換されます。
+//   __AES_KEY_HEX__    : data/ 復号用の AES-256 鍵 (hex)
+//   __PRODUCT_NAME__   : 製品名（ウィンドウタイトル等）
+//   __ENCRYPT_EXCLUDE__: 暗号化を除外するトップレベルフォルダ名の配列 (例: ["video"])
+//
+// data/ 配下のアセットは AES-256-CBC で暗号化されてディスク上に存在し、
+// カスタムプロトコル app:// のハンドラ内で実行時に復号してレンダラへ渡します。
+// これにより「ファイルを直接開く / コマンドを叩く」だけでは中身を閲覧できません。
+
+const { app, BrowserWindow, protocol, net } = require("electron");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+const { pathToFileURL } = require("url");
+
+// ===== ビルド時に置換されるプレースホルダ =====
+const AES_KEY = Buffer.from("__AES_KEY_HEX__", "hex");
+const PRODUCT_NAME = "__PRODUCT_NAME__";
+const ENCRYPT_EXCLUDE_DIRS = __ENCRYPT_EXCLUDE__;
+// =============================================
+
+const SCHEME = "app";
+const APP_HOST = "bundle";
+// asar 同梱時も __dirname は app(.asar) のルートを指し、index.html / data / tyrano と同階層。
+const APP_ROOT = __dirname;
+const DATA_DIR = path.join(APP_ROOT, "data");
+// $.isElectron() (tyrano/libs.js) は userAgent に "TyranoErectron" が含まれるかで判定する。
+// これが無いと音声がクリック必須になる等、エンジンの挙動が壊れるため必須。
+const USER_AGENT_SUFFIX = "TyranoErectron";
+
+const MIME_TYPES = {
+  ".html": "text/html",
+  ".htm": "text/html",
+  ".js": "application/javascript",
+  ".mjs": "application/javascript",
+  ".json": "application/json",
+  ".css": "text/css",
+  ".ks": "text/plain",
+  ".txt": "text/plain",
+  ".csv": "text/plain",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".bmp": "image/bmp",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".ogv": "video/ogg",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".otf": "font/otf",
+  ".gltf": "model/gltf+json",
+  ".glb": "model/gltf-binary",
+  ".obj": "text/plain",
+};
+
+function mimeTypeFor(filePath) {
+  return (
+    MIME_TYPES[path.extname(filePath).toLowerCase()] ||
+    "application/octet-stream"
+  );
+}
+
+// data/ 配下かつ除外ディレクトリ(トップレベル)でないファイルが暗号化対象。
+function isEncryptedTarget(absPath) {
+  const rel = path.relative(DATA_DIR, absPath);
+  if (rel === "" || rel.startsWith("..") || path.isAbsolute(rel)) {
+    return false; // data/ の外
+  }
+  const top = rel.split(path.sep)[0];
+  return !ENCRYPT_EXCLUDE_DIRS.includes(top);
+}
+
+// [IV(16)][ciphertext] 形式のバッファを復号。
+function decryptBuffer(buf) {
+  const iv = buf.subarray(0, 16);
+  const ciphertext = buf.subarray(16);
+  const decipher = crypto.createDecipheriv("aes-256-cbc", AES_KEY, iv);
+  return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+}
+
+function resolveRequestPath(requestUrl) {
+  // ?乱数 (libs.js の $.loadText が付与) は url.search に入り pathname には含まれない。
+  const url = new URL(requestUrl);
+  const decoded = decodeURIComponent(url.pathname);
+  // パストラバーサル防止（先頭の / や ../ を除去してから APP_ROOT に結合）
+  const normalized = path
+    .normalize(decoded)
+    .replace(/^([/\\]|\.\.[/\\])+/, "");
+  return path.join(APP_ROOT, normalized);
+}
+
+// 復号済みバッファを Range 対応で返す（HTML5 audio のシーク等に対応）。
+function bufferResponse(body, mime, rangeHeader) {
+  const total = body.length;
+  if (!rangeHeader) {
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "Content-Type": mime,
+        "Content-Length": String(total),
+        "Accept-Ranges": "bytes",
+      },
+    });
+  }
+  const m = /bytes=(\d*)-(\d*)/.exec(rangeHeader);
+  let start = m && m[1] ? parseInt(m[1], 10) : 0;
+  let end = m && m[2] ? parseInt(m[2], 10) : total - 1;
+  if (isNaN(start) || start < 0) start = 0;
+  if (isNaN(end) || end >= total) end = total - 1;
+  if (start > end) {
+    return new Response(null, {
+      status: 416,
+      headers: { "Content-Range": `bytes */${total}` },
+    });
+  }
+  const chunk = body.subarray(start, end + 1);
+  return new Response(chunk, {
+    status: 206,
+    headers: {
+      "Content-Type": mime,
+      "Content-Length": String(chunk.length),
+      "Accept-Ranges": "bytes",
+      "Content-Range": `bytes ${start}-${end}/${total}`,
+    },
+  });
+}
+
+function handleRequest(request) {
+  let absPath;
+  try {
+    absPath = resolveRequestPath(request.url);
+  } catch (_e) {
+    return new Response("Bad Request", { status: 400 });
+  }
+
+  // 非暗号化（エンジン・index.html・除外メディア）は file:// で素通し。
+  // net.fetch はネイティブにストリーミング/Range に対応するため大容量動画に有利。
+  if (!isEncryptedTarget(absPath)) {
+    return net.fetch(pathToFileURL(absPath).toString());
+  }
+
+  let plaintext;
+  try {
+    plaintext = decryptBuffer(fs.readFileSync(absPath));
+  } catch (_e) {
+    return new Response("Not Found", { status: 404 });
+  }
+  return bufferResponse(
+    plaintext,
+    mimeTypeFor(absPath),
+    request.headers.get("Range"),
+  );
+}
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: SCHEME,
+    privileges: {
+      standard: true, // 相対パス解決と正しい origin のために必須
+      secure: true, // https 相当として扱い CSP / mixed-content を回避
+      supportFetchAPI: true, // $.ajax / Howler(Web Audio) の XHR 対応
+      stream: true, // audio/video の Range / ストリーミング対応
+      corsEnabled: true,
+    },
+  },
+]);
+
+app.whenReady().then(() => {
+  // エンジンの $.getExePath() が require("electron").remote.app を使うため初期化。
+  try {
+    require("@electron/remote/main").initialize();
+  } catch (_e) {
+    /* remote が無い構成でも起動は継続 */
+  }
+
+  protocol.handle(SCHEME, handleRequest);
+
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 720,
+    title: PRODUCT_NAME,
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true, // エンジンが require("fs") / require("electron") を使う
+      contextIsolation: false,
+      webSecurity: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  try {
+    require("@electron/remote/main").enable(win.webContents);
+  } catch (_e) {
+    /* ignore */
+  }
+
+  const ua = win.webContents.getUserAgent() + " " + USER_AGENT_SUFFIX;
+  win.webContents.setUserAgent(ua);
+  win.loadURL(`${SCHEME}://${APP_HOST}/index.html`, { userAgent: ua });
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});

@@ -1,0 +1,12 @@
+// TyranoScript エンジン (tyrano/libs.js) は require("electron").remote.app を参照するが、
+// Electron v14 以降 remote モジュールはコアから分離された。
+// @electron/remote を electron モジュールの remote プロパティとして注入し、互換性を保つ。
+// nodeIntegration: true / contextIsolation: false の前提で動作する。
+try {
+  const electron = require("electron");
+  if (!electron.remote) {
+    electron.remote = require("@electron/remote");
+  }
+} catch (_e) {
+  /* remote 非対応構成でも続行 */
+}
