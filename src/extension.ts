@@ -23,6 +23,11 @@ import { UnusedResourcePanel } from "./subscriptions/UnusedResourcePanel";
 import { TyranoRenameProvider } from "./subscriptions/TyranoRenameProvider";
 import { TyranoAddRAndPCommand } from "./subscriptions/TyranoAddRAndPCommand";
 import {
+  batchFormat,
+  TyranoFormattingProvider,
+} from "./subscriptions/TyranoFormatter";
+import { toggleLineComment } from "./subscriptions/TyranoToggleComment";
+import {
   registerEmbeddedJavaScriptSupport,
   cleanupEmbeddedJavaScript,
 } from "./embeddedJavaScriptSupport";
@@ -86,6 +91,22 @@ export function activate(context: ExtensionContext) {
 
   // // 言語サーバーの開始
   // client.start();
+
+  // フォーマット機能の登録
+  // 初期化処理(run)の成否やタイミングに依存しないよう、activate直後に同期登録する。
+  context.subscriptions.push(
+    vscode.languages.registerDocumentFormattingEditProvider(
+      [{ language: "tyrano" }],
+      new TyranoFormattingProvider(),
+    ),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.batchFormat", batchFormat),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("tyrano.toggleLineComment", toggleLineComment),
+  );
+  TyranoLogger.print("TyranoFormattingProvider activate");
 
   // [iscript]〜[endscript] ブロック内での JavaScript 補完・ホバー・定義ジャンプ等のサポート
   registerEmbeddedJavaScriptSupport(context);

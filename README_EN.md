@@ -40,6 +40,8 @@ Please report using one of the following methods.
   - [Display Flowchart](#display-flowchart)
   - [Folding a process](#folding-a-process)
   - [Variable Rename Function](#variable-rename-function)
+  - [Code Formatting (Format Document)](#code-formatting-format-document)
+  - [Batch Format](#batch-format)
 - [List of shortcuts](#list-of-shortcuts)
 - [About the configuration file](#about-the-configuration-file)
   - [Language Settings](#language-settings)
@@ -424,6 +426,22 @@ The following can be renamed:
 - Variables
 - Macros
 
+### Code Formatting (Format Document)
+
+Press `Shift+Alt+F` to format the active .ks file.
+
+- **Indentation**: Indent lines between paired tags (`macro`/`endmacro`, `if`/`endif`, etc.) with 2 spaces per nesting level
+- **JavaScript formatting**: Format JavaScript code inside `[iscript]`〜`[endscript]` blocks with prettier
+- **HTML formatting**: Format HTML code inside `[html]`〜`[endhtml]` blocks with prettier
+- **Blank line insertion**: Insert one blank line after lines containing `[p]` / `@p` (consecutive blank lines are normalized to one)
+
+### Batch Format
+
+Use the "Batch Format" button in the activity bar sidebar to format all .ks files under `data/scenario` at once, after a confirmation dialog.
+
+> [!WARNING]
+> Always back up your files before running batch format.
+
 ## List of shortcuts
 
 - Ctrl + Space : Complete tags and variables
@@ -431,7 +449,8 @@ The following can be renamed:
 - Alt + J : Go to jump destination of jump tag
 - Ctrl + Alt + P : Preview function (beta version)
 - Ctrl + Alt + F : Display flow chart
-- Ctrl + / : Comment out
+- Ctrl + / : Toggle line comment (`;` in TyranoScript lines, `//` inside `[iscript]` blocks)
+- Shift + Alt + F : Format Document
 
 ## About the configuration file
 
