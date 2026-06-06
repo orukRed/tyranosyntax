@@ -111,8 +111,11 @@ export class TyranoExportExe {
               return;
             }
             if (!exePath) {
+              const hint = packager.getBuildErrorHint();
               vscode.window.showErrorMessage(
-                "exe の生成に失敗しました。出力チャンネル「TyranoScript exe書き出し」のログを確認してください。",
+                hint
+                  ? `exe の生成に失敗しました。${hint}`
+                  : "exe の生成に失敗しました。出力チャンネル「TyranoScript exe書き出し」のログを確認してください。",
               );
               return;
             }

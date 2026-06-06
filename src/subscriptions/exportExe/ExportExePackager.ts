@@ -48,6 +48,15 @@ export class ExportExePackager {
   private static readonly COPY_IGNORE_NAMES = new Set([".DS_Store"]);
 
   private outputChannel: vscode.OutputChannel | undefined;
+  // ビルド失敗時に、ユーザーへ提示する具体的な対処メッセージを格納する。
+  private buildErrorHint: string | undefined;
+
+  /**
+   * 直近のビルド失敗に対する対処ヒント（あれば）を返す。
+   */
+  public getBuildErrorHint(): string | undefined {
+    return this.buildErrorHint;
+  }
 
   /**
    * プロジェクトをビルド用一時ディレクトリへコピーし、data/ を暗号化し、
@@ -103,6 +112,7 @@ export class ExportExePackager {
   ): Promise<string | undefined> {
     const channel = this.getOutputChannel();
     channel.show(true);
+    this.buildErrorHint = undefined;
 
     progress?.report({ message: "依存パッケージを取得中...（初回は時間がかかります）" });
     const installOk = await this.runCommand(
@@ -116,11 +126,15 @@ export class ExportExePackager {
     }
 
     progress?.report({ message: "exeをビルド中..." });
+    // CSC_IDENTITY_AUTO_DISCOVERY=false: コード署名IDの自動探索を無効化する。
+    // これを指定しないと electron-builder が winCodeSign を取得・展開し、その中の
+    // macOS 用シンボリックリンクを Windows 上で作成しようとして権限エラーで失敗する。
     const buildOk = await this.runCommand(
       "npx",
       ["electron-builder", "--win"],
       buildDir,
       token,
+      { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: "false" },
     );
     if (!buildOk || token?.isCancellationRequested) {
       return undefined;
@@ -253,6 +267,7 @@ export class ExportExePackager {
     args: string[],
     cwd: string,
     token?: vscode.CancellationToken,
+    env?: NodeJS.ProcessEnv,
   ): Promise<boolean> {
     const channel = this.getOutputChannel();
     channel.appendLine(`\n$ ${command} ${args.join(" ")}  (cwd: ${cwd})`);
@@ -263,6 +278,7 @@ export class ExportExePackager {
         cwd,
         shell: true,
         windowsHide: true,
+        env: env ?? process.env,
       });
 
       const cancelSub = token?.onCancellationRequested(() => {
@@ -271,8 +287,29 @@ export class ExportExePackager {
         resolve(false);
       });
 
-      child.stdout.on("data", (data) => channel.append(data.toString()));
-      child.stderr.on("data", (data) => channel.append(data.toString()));
+      const scanForKnownErrors = (text: string) => {
+        if (
+          this.buildErrorHint === undefined &&
+          (text.includes("Cannot create symbolic link") ||
+            text.includes("winCodeSign"))
+        ) {
+          this.buildErrorHint =
+            "winCodeSign の展開に失敗しました（シンボリックリンク作成権限の不足）。" +
+            "Windowsの「開発者モード」を有効化する（設定 → プライバシーとセキュリティ → 開発者向け → 開発者モード をオン）、" +
+            "またはVS Codeを管理者として実行してから、再度お試しください。";
+        }
+      };
+
+      child.stdout.on("data", (data) => {
+        const text = data.toString();
+        scanForKnownErrors(text);
+        channel.append(text);
+      });
+      child.stderr.on("data", (data) => {
+        const text = data.toString();
+        scanForKnownErrors(text);
+        channel.append(text);
+      });
       child.on("error", (err) => {
         TyranoLogger.print(
           `exe書き出し: コマンド実行エラー ${err}`,
