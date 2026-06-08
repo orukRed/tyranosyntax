@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [Unreleased]
+
+- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[html]`〜`[endhtml]`ブロック内でも対応しました。ブロック内では`<!-- -->`（HTMLコメント）でコメントアウト／解除されます。
+
 ## [3.2.0] 2026-05-28
 
 - .ksファイルのコードフォーマット機能を追加しました。VS Code標準の「ドキュメントのフォーマット」（`Shift+Alt+F`）で以下の整形が行われます。
