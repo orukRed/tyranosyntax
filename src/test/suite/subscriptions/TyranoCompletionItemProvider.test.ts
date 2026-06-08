@@ -3,6 +3,7 @@
 // as well as import your extension to test it
 import * as assert from "assert";
 import * as vscode from "vscode";
+import * as path from "path";
 import { TyranoCompletionItemProvider } from "../../../subscriptions/TyranoCompletionItemProvider";
 // import * as path from "path";
 
@@ -537,10 +538,8 @@ suite("TyranoCompletionItemProvider", () => {
         labelMap,
         transitionMap,
         getProjectPathByFilePath: async (_: string) => PROJECT_PATH,
-        isSamePath: (p1: string, p2: string) => {
-          const path = require("path");
-          return path.resolve(p1) === path.resolve(p2);
-        },
+        isSamePath: (p1: string, p2: string) =>
+          path.resolve(p1) === path.resolve(p2),
         DATA_DIRECTORY: "/data",
         DATA_SCENARIO: "/scenario",
         pathDelimiter: "/",
@@ -699,6 +698,100 @@ suite("TyranoCompletionItemProvider", () => {
       assert.ok(
         labels.includes("test2"),
         "storage指定ありのtargetはstorage先ファイルの補完候補に含まれるべき",
+      );
+    });
+  });
+
+  // storage先のラベル補完（completionLabel）テスト
+  suite("completionLabel", () => {
+    const PROJECT_PATH = "/project";
+
+    /** location.uri.fsPath を持つラベルデータを作る */
+    function makeLabel(name: string, fsPath: string) {
+      return {
+        name,
+        description: `${name}の説明`,
+        location: { uri: { fsPath } },
+      };
+    }
+
+    function makeInfoWsMock(
+      labelMap: Map<string, ReturnType<typeof makeLabel>[]>,
+      projectOf: (key: string) => string = () => PROJECT_PATH,
+    ) {
+      return {
+        labelMap,
+        // 実際の I/O のように 1 ティック以上遅延する真の非同期にする。
+        // これにより「forEach(async) で await されない」実装では push 前に
+        // 空配列が返ってしまい、テストが失敗する（＝バグを検出できる）。
+        getProjectPathByFilePath: async (key: string) => {
+          await new Promise((r) => setTimeout(r, 0));
+          return projectOf(key);
+        },
+        isSamePath: (p1: string, p2: string) =>
+          p1 !== undefined &&
+          p2 !== undefined &&
+          path.resolve(p1) === path.resolve(p2),
+        DATA_DIRECTORY: "/data",
+        DATA_SCENARIO: "/scenario",
+        pathDelimiter: "/",
+      };
+    }
+
+    test("正常系 storage先ファイルのラベルが候補に出る（async forEach の await 漏れ回帰）", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      const STORAGE_FILE = `${PROJECT_PATH}/data/scenario/test.ks`;
+      const OTHER_FILE = `${PROJECT_PATH}/data/scenario/other.ks`;
+      const labelMap = new Map([
+        [
+          STORAGE_FILE,
+          [
+            makeLabel("chapter1", STORAGE_FILE),
+            makeLabel("chapter2", STORAGE_FILE),
+          ],
+        ],
+        [OTHER_FILE, [makeLabel("other_label", OTHER_FILE)]],
+      ]);
+      providerAny.infoWs = makeInfoWsMock(labelMap);
+
+      // storage="test.ks" → storagePath = /project/data/scenario/test.ks
+      const result = await providerAny.completionLabel(PROJECT_PATH, "test.ks");
+
+      assert.ok(Array.isArray(result), "配列が返されるべき");
+      const labels = result.map((item: any) => item.label);
+      // 以前は await されず常に空配列だった
+      assert.ok(
+        labels.includes("chapter1") && labels.includes("chapter2"),
+        "storage先ファイルのラベルが候補に含まれるべき",
+      );
+      assert.ok(
+        !labels.includes("other_label"),
+        "別ファイルのラベルは候補に含まれないべき",
+      );
+    });
+
+    test("正常系 別プロジェクトのラベルは候補に含まれない", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+
+      const STORAGE_FILE = `${PROJECT_PATH}/data/scenario/test.ks`;
+      const OTHER_PROJECT_FILE = "/other_project/data/scenario/test.ks";
+      const labelMap = new Map([
+        [STORAGE_FILE, [makeLabel("mine", STORAGE_FILE)]],
+        [OTHER_PROJECT_FILE, [makeLabel("theirs", OTHER_PROJECT_FILE)]],
+      ]);
+      providerAny.infoWs = makeInfoWsMock(labelMap, (key) =>
+        key.startsWith("/other_project") ? "/other_project" : PROJECT_PATH,
+      );
+
+      const result = await providerAny.completionLabel(PROJECT_PATH, "test.ks");
+      const labels = result.map((item: any) => item.label);
+      assert.ok(labels.includes("mine"), "同一プロジェクトのラベルは含まれるべき");
+      assert.ok(
+        !labels.includes("theirs"),
+        "別プロジェクトのラベルは含まれないべき",
       );
     });
   });

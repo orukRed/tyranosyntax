@@ -151,7 +151,12 @@ export class Parser {
       if (flag_comment === true && line_str === "*/") {
         flag_comment = false;
       } else if (line_str === "/*" || line_str.startsWith("/**")) {
-        flag_comment = true;
+        // 「/** 説明 */」のように同一行で閉じている場合はブロックコメントを継続しない。
+        // 継続させると以降の全行がコメント扱いになり、診断・補完・ブレークポイントが
+        // 効かなくなる不具合があった。
+        if (!line_str.slice(2).includes("*/")) {
+          flag_comment = true;
+        }
         // } else if (flag_comment == true || first_char === ";") {
       } else if (first_char === "#") {
         var tmp_line = line_str.replace("#", "").trim();

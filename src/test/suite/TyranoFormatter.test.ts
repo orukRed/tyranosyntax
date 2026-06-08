@@ -243,4 +243,51 @@ suite("TyranoFormatter.formatText", () => {
     const twice = await fmt(once);
     assert.strictEqual(twice, once);
   });
+
+  test("冪等性: 整形に失敗する iscript でもインデントが増殖しない", async () => {
+    const input = ["[iscript]", "this is (((not valid js", "[endscript]"].join(
+      "\n",
+    );
+    const expected = [
+      "[iscript]",
+      "  this is (((not valid js",
+      "[endscript]",
+    ].join("\n");
+    // 何度フォーマットしても 2 スペースのまま（以前は実行のたびに 2 スペースずつ増えていた）
+    let cur = input;
+    for (let i = 0; i < 3; i++) {
+      cur = await fmt(cur);
+      assert.strictEqual(cur, expected, `${i + 1}回目`);
+    }
+  });
+
+  test("冪等性: 整形に失敗する html でもインデントが増殖しない", async () => {
+    const input = ["[html]", "<div><span>hi</div>", "[endhtml]"].join("\n");
+    const once = await fmt(input);
+    const twice = await fmt(once);
+    assert.strictEqual(twice, once);
+    assert.strictEqual(once, ["[html]", "  <div><span>hi</div>", "[endhtml]"].join("\n"));
+  });
+
+  test("冪等性: 失敗する iscript 内の相対インデントは保持される", async () => {
+    const input = [
+      "[iscript]",
+      "function f() {",
+      "  return",
+      "  oops oops",
+      "}",
+      "[endscript]",
+    ].join("\n");
+    const expected = [
+      "[iscript]",
+      "  function f() {",
+      "    return",
+      "    oops oops",
+      "  }",
+      "[endscript]",
+    ].join("\n");
+    const once = await fmt(input);
+    assert.strictEqual(once, expected);
+    assert.strictEqual(await fmt(once), expected);
+  });
 });

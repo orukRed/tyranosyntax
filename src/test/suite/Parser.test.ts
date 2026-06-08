@@ -131,4 +131,40 @@ suite("Parser.parseText", () => {
     assert.strictEqual(macroEntry.pm.name, "multiple_brackets");
   });
 
+  test("1行で閉じる /** */ コメントが以降の行をコメント扱いにしない", () => {
+    const parser = Parser.getInstance();
+    const text = '/** 説明 */\n[jump target="*x"]';
+    const result = parser.parseText(text);
+
+    // /** 説明 */ 自体はコメントとして無視され、配列には入らない
+    // 次行の [jump] はコメントではなく jump タグとして解析されるべき
+    const jumpEntry = result.find((item: any) => item.name === "jump");
+    assert.ok(jumpEntry, "jumpタグがコメント扱いされず解析されるべき");
+    assert.strictEqual(jumpEntry.pm.target, "*x");
+  });
+
+  test("複数行 /* */ ブロックコメント内のタグはコメント扱いになり、閉じた後は通常解析される", () => {
+    const parser = Parser.getInstance();
+    const text = "/*\n[macro name=\"x\"]\n[endmacro]\n*/\n[bg storage=\"a.jpg\"]";
+    const result = parser.parseText(text);
+
+    // コメントブロックを閉じた後の [bg] は通常タグとして解析される
+    const bgEntry = result.find((item: any) => item.name === "bg");
+    assert.ok(bgEntry, "コメントを閉じた後の[bg]が解析されるべき");
+    assert.strictEqual(bgEntry.pm.storage, "a.jpg");
+    // ブロックコメント内の macro はタグとして解析されない
+    const macroEntry = result.find((item: any) => item.name === "macro");
+    assert.ok(!macroEntry, "ブロックコメント内のmacroはタグ扱いされないべき");
+  });
+
+  test("複数行 /** */ ドキュメントコメントも閉じた後は通常解析される", () => {
+    const parser = Parser.getInstance();
+    const text = "/**\nコメント本文\n*/\n[bg storage=\"a.jpg\"]";
+    const result = parser.parseText(text);
+
+    const bgEntry = result.find((item: any) => item.name === "bg");
+    assert.ok(bgEntry, "ドキュメントコメントを閉じた後の[bg]が解析されるべき");
+    assert.strictEqual(bgEntry.pm.storage, "a.jpg");
+  });
+
 });

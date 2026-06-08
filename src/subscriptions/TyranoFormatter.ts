@@ -24,6 +24,28 @@ function indent(depth: number): string {
 }
 
 /**
+ * 非空行の共通最小インデント（先頭空白文字数）を取り除く。
+ * captureEmbedded 側で改めてインデントが付与されるため、前回付与分をここで
+ * 取り除いておくことで、複数回フォーマットしても段が増殖しない（冪等になる）。
+ */
+function dedentCommon(lines: string[]): string[] {
+  let min = Infinity;
+  for (const line of lines) {
+    if (line.trim() === "") {
+      continue;
+    }
+    const lead = line.length - line.trimStart().length;
+    if (lead < min) {
+      min = lead;
+    }
+  }
+  if (!Number.isFinite(min) || min === 0) {
+    return lines;
+  }
+  return lines.map((line) => (line.trim() === "" ? line : line.slice(min)));
+}
+
+/**
  * 行の先頭タグ名（小文字）を返す。タグでなければ null。
  * @記法は行頭の @tag、[]記法は最初に現れる [tag を対象とする。
  */
@@ -80,7 +102,12 @@ async function formatEmbedded(
     warnings.push(
       `${startLineNo + 1}行目付近の${parser === "babel" ? "JavaScript" : "HTML"}整形に失敗しました: ${message}`,
     );
-    return source.split(/\r?\n/).map((l) => l.replace(/\s+$/, ""));
+    // 整形失敗時は元テキストを返す（; → // 変換も行わない）。
+    // 前回付与済みの共通インデントを取り除いてから返すことで、captureEmbedded 側で
+    // 再びインデントが付与されても段が増殖せず、複数回フォーマットしても安定する。
+    return dedentCommon(innerSource.split(/\r?\n/)).map((l) =>
+      l.replace(/\s+$/, ""),
+    );
   }
 }
 

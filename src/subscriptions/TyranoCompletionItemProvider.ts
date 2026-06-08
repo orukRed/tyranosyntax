@@ -550,32 +550,33 @@ export class TyranoCompletionItemProvider
   > {
     //タグ内のstorage先参照して、そのstorage先にのみ存在するラベルを出力するようにする
     const completions: vscode.CompletionItem[] = [];
-    this.infoWs.labelMap.forEach(async (label, key) => {
+    // forEach に async コールバックを渡すと await されず、push 前に空配列を返してしまうため
+    // for...of で逐次 await する。
+    for (const [key, label] of this.infoWs.labelMap) {
       const labelProjectPath = await this.infoWs.getProjectPathByFilePath(key);
-      if (projectPath === labelProjectPath) {
-        label.forEach((value) => {
-          // storageで指定したファイルに存在するラベルのみ候補に出す
-          // storageがundefinedなら今開いているファイルを指定
-          const storagePath =
-            storage === undefined
-              ? vscode.window.activeTextEditor?.document.uri.fsPath
-              : projectPath +
-                this.infoWs.DATA_DIRECTORY +
-                this.infoWs.DATA_SCENARIO +
-                this.infoWs.pathDelimiter +
-                storage;
-          if (this.infoWs.isSamePath(value.location.uri.fsPath, storagePath!)) {
-            const comp = new vscode.CompletionItem(value.name);
-            comp.kind = vscode.CompletionItemKind.Interface;
-            comp.insertText = "*" + value.name;
-            comp.documentation = new vscode.MarkdownString(
-              `${value.description}`,
-            );
-            completions.push(comp);
-          }
-        });
+      if (projectPath !== labelProjectPath) {
+        continue;
       }
-    });
+      label.forEach((value) => {
+        // storageで指定したファイルに存在するラベルのみ候補に出す
+        // storageがundefinedなら今開いているファイルを指定
+        const storagePath =
+          storage === undefined
+            ? vscode.window.activeTextEditor?.document.uri.fsPath
+            : projectPath +
+              this.infoWs.DATA_DIRECTORY +
+              this.infoWs.DATA_SCENARIO +
+              this.infoWs.pathDelimiter +
+              storage;
+        if (this.infoWs.isSamePath(value.location.uri.fsPath, storagePath!)) {
+          const comp = new vscode.CompletionItem(value.name);
+          comp.kind = vscode.CompletionItemKind.Interface;
+          comp.insertText = "*" + value.name;
+          comp.documentation = new vscode.MarkdownString(`${value.description}`);
+          completions.push(comp);
+        }
+      });
+    }
     return completions;
   }
 
