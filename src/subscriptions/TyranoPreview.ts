@@ -308,7 +308,7 @@ export class TyranoPreview {
         cancellable: true,
       },
       async (_progress, _token) => {
-        createServer();
+        await createServer();
       },
     );
   }

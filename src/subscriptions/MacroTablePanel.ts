@@ -118,7 +118,7 @@ export class MacroTablePanel {
               preserveFocus: false,
             });
             res.json({ ok: true });
-          } catch (error) {
+          } catch (_error) {
             TyranoLogger.print(
               `MacroTablePanel open-file failed for ${filePath}`,
               ErrorLevel.WARN,
@@ -138,7 +138,7 @@ export class MacroTablePanel {
 
     if (MacroTablePanel.serverInstance) {
       MacroTablePanel.serverInstance.close(() => {
-        console.log("port 3300 server closed");
+        console.log("port 3400 server closed");
       });
     }
 
@@ -149,7 +149,7 @@ export class MacroTablePanel {
         cancellable: true,
       },
       async () => {
-        createServer();
+        await createServer();
       },
     );
   }
