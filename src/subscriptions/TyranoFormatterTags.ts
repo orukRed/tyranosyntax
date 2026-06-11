@@ -44,6 +44,3 @@ export const RAW_CAPTURE_TAGS: ReadonlyMap<string, "babel" | "html"> = new Map([
   ["iscript", "babel"],
   ["html", "html"],
 ]);
-
-/** この後に空行を1行入れるタグ。 */
-export const BLANK_AFTER_TAGS: ReadonlySet<string> = new Set(["p"]);

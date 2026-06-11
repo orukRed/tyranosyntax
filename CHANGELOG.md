@@ -10,7 +10,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - 対になるタグ（`macro`/`endmacro`、`if`/`endif` 等）の間を半角スペース2つ×ネスト段数でインデント
   - `[iscript]`〜`[endscript]`内のJavaScriptをprettierで整形
   - `[html]`〜`[endhtml]`内のHTMLをprettierで整形
-  - `[p]`/`@p`を含む行の直後に空行を1行追加
 - アクティビティバーのサイドバーに「一括フォーマット」ボタンを追加しました。確認ダイアログ後に`data/scenario`配下のすべての.ksファイルを一括整形します。
 - `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[iscript]`〜`[endscript]`ブロック内では`//`でコメントアウトされます。
 - `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[html]`〜`[endhtml]`ブロック内では`<!-- -->`（HTMLコメント）でコメントアウトされます。

@@ -4,19 +4,10 @@ import {
   END_TO_START,
   MID_TAGS,
   RAW_CAPTURE_TAGS,
-  BLANK_AFTER_TAGS,
 } from "./TyranoFormatterTags";
 
 /** インデント1段分（半角スペース2つ）。 */
 const INDENT_UNIT = "  ";
-
-/** [p] / @p のように直後に空行を入れるタグを検出する正規表現。 */
-const BLANK_AFTER_REGEX = new RegExp(
-  Array.from(BLANK_AFTER_TAGS)
-    .map((t) => `\\[${t}(?=[\\]\\s])|^@${t}(?=$|\\s)`)
-    .join("|"),
-  "i",
-);
 
 /** depth 段分のインデント文字列を返す。 */
 function indent(depth: number): string {
@@ -215,7 +206,7 @@ async function processLine(
     return i;
   }
 
-  // コメント・ラベル・キャラ名行：現 depth で出力（深さ・[p]規則の対象外）
+  // コメント・ラベル・キャラ名行：現 depth で出力（深さの対象外）
   const firstChar = trimmed[0];
   if (firstChar === ";" || firstChar === "*" || firstChar === "#") {
     out.push(indent(state.depth) + trimmed);
@@ -234,16 +225,6 @@ async function processLine(
   }
 
   emitTagLine(trimmed, tag, out, state);
-
-  // [p] / @p を含む行の直後に空行を1行（連続空行は1行へ正規化）
-  if (BLANK_AFTER_REGEX.test(trimmed)) {
-    out.push("");
-    let last = i;
-    while (last + 1 < lines.length && lines[last + 1].trim() === "") {
-      last++;
-    }
-    return last;
-  }
   return i;
 }
 
@@ -251,7 +232,6 @@ async function processLine(
  * TyranoScript シナリオテキストを整形する純粋関数。
  * - 対になるタグの間を半角スペース2つ×ネスト段でインデント
  * - [iscript]〜[endscript] 内を JavaScript、[html]〜[endhtml] 内を HTML として prettier 整形
- * - [p] / @p を含む行の直後に空行を1行だけ入れる
  * prettier が非同期のため async。
  */
 export async function formatText(

@@ -125,35 +125,9 @@ suite("TyranoFormatter.formatText", () => {
     assert.strictEqual(warnings.length, 1);
   });
 
-  test("[p] を含む行の後に空行を入れる", async () => {
-    const input = ["おはよう[p]", "[bg]"].join("\n");
-    const expected = ["おはよう[p]", "", "[bg]"].join("\n");
-    assert.strictEqual(await fmt(input), expected);
-  });
-
-  test("[p] の後の連続空行は1行に正規化される", async () => {
-    const input = ["[p]", "", "", "[bg]"].join("\n");
-    const expected = ["[p]", "", "[bg]"].join("\n");
-    assert.strictEqual(await fmt(input), expected);
-  });
-
-  test("@p でも空行を入れる", async () => {
-    const input = ["@p", "[bg]"].join("\n");
-    const expected = ["@p", "", "[bg]"].join("\n");
-    assert.strictEqual(await fmt(input), expected);
-  });
-
-  test("playse/ptext は [p] 規則の対象外", async () => {
-    const input = ['[playse storage="a.ogg"]', '[ptext name="x"]', "[bg]"].join(
-      "\n",
-    );
+  test("[p] / @p を含む行の後に空行は挿入されない", async () => {
+    const input = ["おはよう[p]", "[bg]", "@p", "[bg]"].join("\n");
     assert.strictEqual(await fmt(input), input);
-  });
-
-  test("1行に複数タグがあっても [p] を検出する", async () => {
-    const input = ["こんにちは[l][r][p]", "[bg]"].join("\n");
-    const expected = ["こんにちは[l][r][p]", "", "[bg]"].join("\n");
-    assert.strictEqual(await fmt(input), expected);
   });
 
   test("同一行に開始＋終了タグがある場合は深さを変えない", async () => {

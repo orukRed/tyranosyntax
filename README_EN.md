@@ -433,7 +433,6 @@ Press `Shift+Alt+F` to format the active .ks file.
 - **Indentation**: Indent lines between paired tags (`macro`/`endmacro`, `if`/`endif`, etc.) with 2 spaces per nesting level
 - **JavaScript formatting**: Format JavaScript code inside `[iscript]`〜`[endscript]` blocks with prettier
 - **HTML formatting**: Format HTML code inside `[html]`〜`[endhtml]` blocks with prettier
-- **Blank line insertion**: Insert one blank line after lines containing `[p]` / `@p` (consecutive blank lines are normalized to one)
 
 ### Batch Format
 
