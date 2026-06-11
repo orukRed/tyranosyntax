@@ -4,11 +4,7 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
-
-- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[html]`〜`[endhtml]`ブロック内でも対応しました。ブロック内では`<!-- -->`（HTMLコメント）でコメントアウト／解除されます。
-
-## [3.2.0] 2026-05-28
+## [3.2.0] 2026-06-11
 
 - .ksファイルのコードフォーマット機能を追加しました。VS Code標準の「ドキュメントのフォーマット」（`Shift+Alt+F`）で以下の整形が行われます。
   - 対になるタグ（`macro`/`endmacro`、`if`/`endif` 等）の間を半角スペース2つ×ネスト段数でインデント
@@ -16,7 +12,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - `[html]`〜`[endhtml]`内のHTMLをprettierで整形
   - `[p]`/`@p`を含む行の直後に空行を1行追加
 - アクティビティバーのサイドバーに「一括フォーマット」ボタンを追加しました。確認ダイアログ後に`data/scenario`配下のすべての.ksファイルを一括整形します。
-- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが改善されました。`[iscript]`〜`[endscript]`ブロック内では`//`、それ以外では`;`でコメントアウトされます。
+- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[iscript]`〜`[endscript]`ブロック内では`//`でコメントアウトされます。
+- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[html]`〜`[endhtml]`ブロック内では`<!-- -->`（HTMLコメント）でコメントアウトされます。
 
 ## [3.1.2] 2026-05-13
 
