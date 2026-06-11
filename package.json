@@ -22,7 +22,10 @@
   "categories": [
     "Programming Languages"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:tyrano",
+    "onStartupFinished"
+  ],
   "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
@@ -1824,7 +1827,7 @@
     "viewsWelcome": [
       {
         "view": "tyrano-dev-tools",
-        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)"
+        "contents": "[$(debug-alt) デバッグ実行（β版）](command:tyrano.sidebar.debug)\n\n[$(open-preview) その場プレビュー](command:tyrano.sidebar.preview)\n\n[$(type-hierarchy) フローチャート表示](command:tyrano.sidebar.flowchart)\n\n[$(table) マクロ一覧テーブル](command:tyrano.macroTable)\n\n[$(trash) 未使用リソース検出](command:tyrano.unusedResources)\n\n[$(list-tree) 一括フォーマット](command:tyrano.batchFormat)"
       },
       {
         "view": "tyrano-links",
@@ -1871,6 +1874,14 @@
       {
         "command": "tyrano.unusedResources",
         "title": "tyrano.unusedResources"
+      },
+      {
+        "command": "tyrano.batchFormat",
+        "title": "一括フォーマット"
+      },
+      {
+        "command": "tyrano.toggleLineComment",
+        "title": "行コメントの切り替え (TyranoScript)"
       },
       {
         "command": "tyrano.sidebar.debug",
@@ -1948,6 +1959,12 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "tyrano.toggleLineComment",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "tyrano.sidebar.expandMacros",
@@ -2061,6 +2078,13 @@
     ],
     "keybindings": [
       {
+        "command": "tyrano.toggleLineComment",
+        "key": "ctrl+/",
+        "win": "ctrl+/",
+        "mac": "cmd+/",
+        "when": "editorLangId == tyrano && editorTextFocus && !editorReadonly"
+      },
+      {
         "command": "tyrano.shiftEnter",
         "key": "shift+enter",
         "win": "shift+enter",
@@ -2123,7 +2147,6 @@
     "globals": "^15.8.0",
     "mocha": "^9.2.2",
     "mocha-explorer-launcher-scripts": "^0.4.0",
-    "prettier": "^3.3.2",
     "source-map-support": "^0.5.21",
     "typescript": "^5.1.5",
     "typescript-eslint": "^7.15.0",
@@ -2138,6 +2161,7 @@
     "jquery": "^3.7.0",
     "jsdom": "^22.1.0",
     "npm-check-updates": "^16.10.13",
+    "prettier": "^3.3.2",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.8",

@@ -4,6 +4,16 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [3.2.0] 2026-06-11
+
+- .ksファイルのコードフォーマット機能を追加しました。VS Code標準の「ドキュメントのフォーマット」（`Shift+Alt+F`）で以下の整形が行われます。
+  - 対になるタグ（`macro`/`endmacro`、`if`/`endif` 等）の間を半角スペース2つ×ネスト段数でインデント
+  - `[iscript]`〜`[endscript]`内のJavaScriptをprettierで整形
+  - `[html]`〜`[endhtml]`内のHTMLをprettierで整形
+- アクティビティバーのサイドバーに「一括フォーマット」ボタンを追加しました。確認ダイアログ後に`data/scenario`配下のすべての.ksファイルを一括整形します。
+- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[iscript]`〜`[endscript]`ブロック内では`//`でコメントアウトされます。
+- `Ctrl+/`（Mac: `Cmd+/`）によるコメントトグルが`[html]`〜`[endhtml]`ブロック内では`<!-- -->`（HTMLコメント）でコメントアウトされます。
+
 ## [3.1.2] 2026-05-13
 
 - 「タグ[text]のパラメータ "val" はタグ "text" に定義されていません。」というエラーが表示されてしまうことがある不具合を修正しました。
