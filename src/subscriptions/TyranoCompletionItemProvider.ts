@@ -877,7 +877,7 @@ export class TyranoCompletionItemProvider
     suggestionsByTag: SuggestionsMiniumByTag,
     inputType: string,
   ): TagCompletionCacheEntry {
-    const suggestionSignature = Object.keys(suggestionsByTag).join("\u0000");
+    const suggestionSignature = Object.keys(suggestionsByTag).join("|;|");
     const cached = this.tagCompletionCache.get(projectPath);
     if (
       cached &&
