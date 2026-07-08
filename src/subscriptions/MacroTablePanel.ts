@@ -118,7 +118,7 @@ export class MacroTablePanel {
               preserveFocus: false,
             });
             res.json({ ok: true });
-          } catch (error) {
+          } catch (_error) {
             TyranoLogger.print(
               `MacroTablePanel open-file failed for ${filePath}`,
               ErrorLevel.WARN,

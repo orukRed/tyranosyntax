@@ -2,9 +2,9 @@
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as assert from "assert";
+import * as path from "path";
 import * as vscode from "vscode";
 import { TyranoCompletionItemProvider } from "../../../subscriptions/TyranoCompletionItemProvider";
-// import * as path from "path";
 
 // // 新しく追加した型定義のテスト用
 // type TagParameterConfig = {
@@ -71,6 +71,39 @@ class MockCancellationToken implements vscode.CancellationToken {
 class MockCompletionContext implements vscode.CompletionContext {
   triggerKind = vscode.CompletionTriggerKind.Invoke;
   triggerCharacter = undefined;
+}
+
+function createMockDocumentWithText(lineText: string): vscode.TextDocument {
+  return {
+    uri: vscode.Uri.file("/project/data/scenario/test.ks"),
+    fileName: "/project/data/scenario/test.ks",
+    isUntitled: false,
+    languageId: "tyrano",
+    version: 1,
+    isDirty: false,
+    isClosed: false,
+    eol: vscode.EndOfLine.LF,
+    lineCount: 1,
+    save: () => Promise.resolve(true),
+    lineAt: (_: number | vscode.Position) => ({
+      lineNumber: 0,
+      text: lineText,
+      range: new vscode.Range(0, 0, 0, lineText.length),
+      rangeIncludingLineBreak: new vscode.Range(0, 0, 1, 0),
+      firstNonWhitespaceCharacterIndex: lineText.search(/\S/),
+      isEmptyOrWhitespace: lineText.trim() === "",
+    }),
+    offsetAt: () => 0,
+    positionAt: () => new vscode.Position(0, 0),
+    getText: () => lineText,
+    getWordRangeAtPosition: () => undefined,
+    validateRange: (range: vscode.Range) => range,
+    validatePosition: (position: vscode.Position) => position,
+  } as vscode.TextDocument;
+}
+
+function getCompletionLabel(item: vscode.CompletionItem): string {
+  return typeof item.label === "string" ? item.label : item.label.label;
 }
 
 suite("TyranoCompletionItemProvider", () => {
@@ -217,6 +250,141 @@ suite("TyranoCompletionItemProvider", () => {
           );
         }
       }
+    });
+  });
+
+  suite("performance-focused completion behavior", () => {
+    const PROJECT_PATH = "/project";
+
+    test("completionTag reuses cached candidates for repeated requests", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+      const suggestions = {
+        p: { name: "p", description: "paragraph" },
+        jump: { name: "jump", description: "jump" },
+      };
+      providerAny.infoWs = {
+        suggestions: new Map([[PROJECT_PATH, suggestions]]),
+      };
+
+      const document = createMockDocumentWithText("ju");
+      const position = new vscode.Position(0, 2);
+
+      const firstResult = await providerAny.completionTag(
+        PROJECT_PATH,
+        document,
+        position,
+      );
+      const secondResult = await providerAny.completionTag(
+        PROJECT_PATH,
+        document,
+        position,
+      );
+
+      assert.ok(Array.isArray(firstResult), "completionTag should return items");
+      assert.strictEqual(
+        firstResult,
+        secondResult,
+        "Repeated tag completions should reuse the cached item array",
+      );
+    });
+
+    test("completionTag refreshes the cache when tag keys change", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+      const suggestions: Record<string, { name: string; description: string }> =
+        {
+          p: { name: "p", description: "paragraph" },
+        };
+      providerAny.infoWs = {
+        suggestions: new Map([[PROJECT_PATH, suggestions]]),
+      };
+
+      const document = createMockDocumentWithText("ju");
+      const position = new vscode.Position(0, 2);
+      const firstResult = await providerAny.completionTag(
+        PROJECT_PATH,
+        document,
+        position,
+      );
+
+      suggestions.jump = { name: "jump", description: "jump" };
+      const secondResult = await providerAny.completionTag(
+        PROJECT_PATH,
+        document,
+        position,
+      );
+
+      assert.ok(Array.isArray(firstResult), "first result should be an array");
+      assert.ok(Array.isArray(secondResult), "second result should be an array");
+      assert.notStrictEqual(
+        firstResult,
+        secondResult,
+        "A changed tag list should rebuild cached candidates",
+      );
+      assert.ok(
+        secondResult
+          .map((item: vscode.CompletionItem) => getCompletionLabel(item))
+          .includes("jump"),
+        "Newly added tags should be present after cache refresh",
+      );
+    });
+
+    test("completionParameter does not mutate chara_part suggestions", async () => {
+      const provider = new TyranoCompletionItemProvider();
+      const providerAny = provider as any;
+      const baseSuggestion = {
+        name: "chara_part",
+        description: "character part",
+        parameters: [
+          {
+            name: "name",
+            description: "character name",
+            required: true,
+          },
+        ],
+      };
+      providerAny.infoWs = {
+        suggestions: new Map([[PROJECT_PATH, { chara_part: baseSuggestion }]]),
+        characterMap: new Map([
+          [
+            PROJECT_PATH,
+            [
+              {
+                name: "hero",
+                layer: new Map([
+                  ["eye", []],
+                  ["mouth", []],
+                ]),
+              },
+            ],
+          ],
+        ]),
+      };
+
+      const result = await providerAny.completionParameter(
+        "chara_part",
+        {},
+        PROJECT_PATH,
+        "hero",
+        createMockDocumentWithText("[chara_part "),
+        new vscode.Position(0, 12),
+      );
+
+      assert.ok(Array.isArray(result), "completionParameter should return items");
+      const labels = result.map((item: vscode.CompletionItem) =>
+        getCompletionLabel(item),
+      );
+      assert.ok(labels.includes("eye"), "Dynamic part values should be included");
+      assert.ok(
+        labels.includes("mouth"),
+        "Dynamic part values should be included",
+      );
+      assert.deepStrictEqual(
+        baseSuggestion.parameters.map((parameter) => parameter.name),
+        ["name"],
+        "Source suggestions should not be mutated",
+      );
     });
   });
 
@@ -538,7 +706,6 @@ suite("TyranoCompletionItemProvider", () => {
         transitionMap,
         getProjectPathByFilePath: async (_: string) => PROJECT_PATH,
         isSamePath: (p1: string, p2: string) => {
-          const path = require("path");
           return path.resolve(p1) === path.resolve(p2);
         },
         DATA_DIRECTORY: "/data",
