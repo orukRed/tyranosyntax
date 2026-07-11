@@ -1344,7 +1344,29 @@ export class InformationWorkSpace {
       }
     }
 
-    return matchedProjectPath;
+    if (!matchedProjectPath) {
+      return undefined;
+    }
+
+    const resolvedMatchedProjectPath = path.resolve(matchedProjectPath);
+    let searchDirectory = path.dirname(resolvedFilePath);
+
+    for (;;) {
+      const isKnownProjectRoot =
+        path.relative(resolvedMatchedProjectPath, searchDirectory) === "";
+      if (fs.existsSync(path.join(searchDirectory, "index.html"))) {
+        return isKnownProjectRoot ? matchedProjectPath : searchDirectory;
+      }
+      if (isKnownProjectRoot) {
+        return undefined;
+      }
+
+      const parentDirectory = path.dirname(searchDirectory);
+      if (parentDirectory === searchDirectory) {
+        return undefined;
+      }
+      searchDirectory = parentDirectory;
+    }
   }
 
   /**

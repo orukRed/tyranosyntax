@@ -1,27 +1,34 @@
 import * as assert from "assert";
+import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import { InformationWorkSpace } from "../../InformationWorkSpace";
 
 suite("InformationWorkSpace completion fast paths", () => {
-  test("uses the deepest known project root for a file", async () => {
+  test("prefers a newly-created nested project over a known parent root", async () => {
     const info = InformationWorkSpace.getInstance();
     const originalSuggestions = info.suggestions;
-    const parentProjectPath = path.resolve("issue416-parent-project");
+    const testDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "tyranosyntax-issue416-"),
+    );
+    const parentProjectPath = path.join(testDirectory, "parent-project");
     const nestedProjectPath = path.join(parentProjectPath, "nested-project");
+    const scenarioDirectory = path.join(nestedProjectPath, "data", "scenario");
 
     try {
-      info.suggestions = new Map([
-        [parentProjectPath, {}],
-        [nestedProjectPath, {}],
-      ]);
+      fs.mkdirSync(scenarioDirectory, { recursive: true });
+      fs.writeFileSync(path.join(parentProjectPath, "index.html"), "");
+      fs.writeFileSync(path.join(nestedProjectPath, "index.html"), "");
+      info.suggestions = new Map([[parentProjectPath, {}]]);
 
       const projectPath = await info.getProjectPathByFilePath(
-        path.join(nestedProjectPath, "data", "scenario", "scene.ks"),
+        path.join(scenarioDirectory, "scene.ks"),
       );
 
       assert.strictEqual(projectPath, nestedProjectPath);
     } finally {
       info.suggestions = originalSuggestions;
+      fs.rmSync(testDirectory, { recursive: true, force: true });
     }
   });
 

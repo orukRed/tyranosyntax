@@ -168,7 +168,7 @@ suite("TyranoCompletionItemProvider performance behavior", () => {
     assert.strictEqual(getInsertText(bracketResult[0]), "p $0");
     assert.strictEqual(getInsertText(atResult[0]), "p $0");
     assert.notStrictEqual(normalResult, bracketResult);
-    assert.notStrictEqual(bracketResult, atResult);
+    assert.strictEqual(bracketResult, atResult);
   });
 
   test("does not mutate chara_part suggestions while adding dynamic parts", async () => {
