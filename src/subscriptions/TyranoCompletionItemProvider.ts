@@ -8,7 +8,9 @@ import * as fs from "fs";
 
 type SuggestionsMiniumByTag = {
   [tag: string]: {
-    [s: string]: string;
+    name?: string;
+    description?: string;
+    [s: string]: unknown;
   };
 };
 
@@ -31,6 +33,13 @@ type TagParameterConfig = {
   values?: string[];
 };
 
+type TagCompletionStyle = "plain" | "at" | "bracket";
+
+type TagCompletionCacheEntry = {
+  suggestionVersion: number;
+  completionsByStyle: Map<TagCompletionStyle, vscode.CompletionItem[]>;
+};
+
 export class TyranoCompletionItemProvider
   implements vscode.CompletionItemProvider
 {
@@ -41,6 +50,10 @@ export class TyranoCompletionItemProvider
   private readonly PARAM_REGEXP = new RegExp('(\\S)+="(?![\\s\\S]*")', "g");
   private readonly VARIABLE_REGEXP = /&?(f\.|sf\.|tf\.|mp\.)(\S)*$/;
   private readonly SHARP_REGEXP = /\s*#.*$/;
+  private readonly tagCompletionCache = new WeakMap<
+    SuggestionsMiniumByTag,
+    TagCompletionCacheEntry
+  >();
 
   public constructor() {}
   private tagParams: {
@@ -746,53 +759,48 @@ export class TyranoCompletionItemProvider
     }
 
     // 既存のリソースファイル処理（image, scenario等）
-    this.infoWs.resourceFileMap.forEach((resourcesMap, key) => {
-      if (projectPath === key) {
-        resourcesMap.forEach((resource) => {
-          if (typeArray.includes(resource.resourceType)) {
-            const comp = new vscode.CompletionItem({
-              label: resource.filePath
-                .replace(
-                  projectPath +
-                    this.infoWs.DATA_DIRECTORY +
-                    this.infoWs.pathDelimiter,
-                  "",
-                )
-                .replace(/\\/g, "/"),
-              description: resource.filePath.replace(
-                projectPath + this.infoWs.pathDelimiter,
-                "",
-              ),
-              detail: "",
-            });
-            comp.kind = vscode.CompletionItemKind.File;
-            const referenceFilePath = path
-              .relative(referencePath, resource.filePath)
-              .replace(/\\/g, "/"); //基準パスからの相対パス
+    const resources = this.infoWs.resourceFileMap.get(projectPath);
+    if (!resources) return completions;
 
-            // MarkdownStringの設定（baseUriを先に設定する必要がある）
-            comp.documentation = new vscode.MarkdownString();
-            comp.documentation.baseUri = vscode.Uri.file(
-              referencePath + path.sep,
-            );
-            comp.documentation.supportHtml = true;
-            comp.documentation.isTrusted = true;
-            comp.documentation.supportThemeIcons = true;
-
-            // 画像の絶対パスを作成
-            const absoluteImagePath = vscode.Uri.file(
-              resource.filePath,
-            ).toString();
-
-            comp.documentation.appendMarkdown(`${referenceFilePath}<br>`);
-            comp.documentation.appendMarkdown(
-              `<img src="${absoluteImagePath}" width=350>`,
-            );
-
-            comp.insertText = new vscode.SnippetString(referenceFilePath); //基準パスからの相対パス
-            completions.push(comp);
-          }
+    resources.forEach((resource) => {
+      if (typeArray.includes(resource.resourceType)) {
+        const comp = new vscode.CompletionItem({
+          label: resource.filePath
+            .replace(
+              projectPath +
+                this.infoWs.DATA_DIRECTORY +
+                this.infoWs.pathDelimiter,
+              "",
+            )
+            .replace(/\\/g, "/"),
+          description: resource.filePath.replace(
+            projectPath + this.infoWs.pathDelimiter,
+            "",
+          ),
+          detail: "",
         });
+        comp.kind = vscode.CompletionItemKind.File;
+        const referenceFilePath = path
+          .relative(referencePath, resource.filePath)
+          .replace(/\\/g, "/"); //基準パスからの相対パス
+
+        // MarkdownStringの設定（baseUriを先に設定する必要がある）
+        comp.documentation = new vscode.MarkdownString();
+        comp.documentation.baseUri = vscode.Uri.file(referencePath + path.sep);
+        comp.documentation.supportHtml = true;
+        comp.documentation.isTrusted = true;
+        comp.documentation.supportThemeIcons = true;
+
+        // 画像の絶対パスを作成
+        const absoluteImagePath = vscode.Uri.file(resource.filePath).toString();
+
+        comp.documentation.appendMarkdown(`${referenceFilePath}<br>`);
+        comp.documentation.appendMarkdown(
+          `<img src="${absoluteImagePath}" width=350>`,
+        );
+
+        comp.insertText = new vscode.SnippetString(referenceFilePath); //基準パスからの相対パス
+        completions.push(comp);
       }
     });
     return completions;
@@ -844,9 +852,23 @@ export class TyranoCompletionItemProvider
         ? lineText.charAt(position.character)
         : "";
 
-    const suggestions = structuredClone(
-      this.infoWs.suggestions.get(projectPath),
-    ) as SuggestionsByTag; // TODO: Don't use type assertion //タグ補完に使うタグのリスト
+    const suggestions = this.infoWs.suggestions.get(projectPath) as
+      | SuggestionsByTag
+      | undefined; // TODO: Don't use type assertion //タグ補完に使うタグのリスト
+    if (!suggestions) {
+      return completions;
+    }
+    const selectedTagKey = Object.prototype.hasOwnProperty.call(
+      suggestions,
+      selectedTag,
+    )
+      ? selectedTag
+      : Object.keys(suggestions).find(
+          (tagKey) => suggestions[tagKey]["name"]?.toString() === selectedTag,
+        );
+    if (!selectedTagKey) {
+      return completions;
+    }
     const partList = this.getPartListFromCharacterData(
       projectPath,
       nameParamValue,
@@ -854,21 +876,22 @@ export class TyranoCompletionItemProvider
     //item:{}で囲ったタグの番号。0,1,2,3...
     //name:そのまんま。middle.jsonを見て。
     //item2:タグのパラメータ。0,1,2,3...って順に。
-    for (const item in suggestions) {
+    for (const item of [selectedTagKey]) {
       const tagName = suggestions[item]["name"]?.toString(); //タグ名。jumpとかpとかimageとか。
       if (selectedTag === tagName) {
+        const parameterSuggestions = [...suggestions[item]["parameters"]];
         //nameの値によって、追加するパラメータを変更する。
         //chara_partタグなら特別にCharacterDataに存在するpartの値を追加する。
         if (selectedTag === "chara_part") {
           partList.forEach((part) => {
-            suggestions[item]["parameters"].push({
+            parameterSuggestions.push({
               name: part,
               description: "chara_layerタグのpartパラメータで指定した値",
               required: false,
             });
           });
         }
-        for (const item2 of suggestions[item]["parameters"]) {
+        for (const item2 of parameterSuggestions) {
           if (!(item2["name"] in parameters)) {
             //タグにないparameterのみインテリセンスに出す
             let detailText = "";
@@ -922,6 +945,9 @@ export class TyranoCompletionItemProvider
     const suggestionsByTag = this.infoWs.suggestions.get(
       projectPath,
     ) as SuggestionsMiniumByTag; // FIXME: Don't use type assertion
+    if (!suggestionsByTag) {
+      return completions;
+    }
 
     // 現在の行の内容を取得
     const lineText = document.lineAt(position.line).text;
@@ -936,6 +962,32 @@ export class TyranoCompletionItemProvider
     const isInsideBrackets =
       lastOpenBracket > lastCloseBracket && lastOpenBracket !== -1;
 
+    const inputType =
+      vscode.workspace
+        .getConfiguration()
+        .get<string>("TyranoScript syntax.completionTag.inputType") ?? "[ ]";
+    const completionStyle: TagCompletionStyle =
+      hasAtSymbol || isInsideBrackets
+        ? "plain"
+        : inputType === "@"
+          ? "at"
+          : "bracket";
+    const suggestionVersion = this.infoWs.getSuggestionVersion(projectPath);
+    let cacheEntry = this.tagCompletionCache.get(suggestionsByTag);
+    if (!cacheEntry || cacheEntry.suggestionVersion !== suggestionVersion) {
+      cacheEntry = {
+        suggestionVersion,
+        completionsByStyle: new Map(),
+      };
+      this.tagCompletionCache.set(suggestionsByTag, cacheEntry);
+    }
+
+    const cachedCompletions =
+      cacheEntry.completionsByStyle.get(completionStyle);
+    if (cachedCompletions) {
+      return cachedCompletions;
+    }
+
     for (const suggestion of Object.values(suggestionsByTag)) {
       if (!suggestion.name) continue;
       const { name, description } = suggestion;
@@ -943,10 +995,6 @@ export class TyranoCompletionItemProvider
         // FIXME: Make the `try`-block smaller[]
         const textLabel = name.toString();
         const comp = new vscode.CompletionItem(textLabel);
-        const inputType = vscode.workspace
-          .getConfiguration()
-          .get("TyranoScript syntax.completionTag.inputType");
-
         // insertTextを動的に決定
         let insertText: string;
         if (hasAtSymbol) {
@@ -977,6 +1025,7 @@ export class TyranoCompletionItemProvider
         TyranoLogger.printStackTrace(error);
       }
     }
+    cacheEntry.completionsByStyle.set(completionStyle, completions);
     return completions;
   }
 
@@ -993,40 +1042,40 @@ export class TyranoCompletionItemProvider
     const dataDir =
       projectPath + this.infoWs.DATA_DIRECTORY + this.infoWs.pathDelimiter;
 
-    this.infoWs.resourceFileMap.forEach((resourcesMap, key) => {
-      if (projectPath !== key) return;
-      resourcesMap.forEach((resource) => {
-        // data/ 以降の相対パス (例: "bgimage\room.jpg")
-        const relFromData = resource.filePath.startsWith(dataDir)
-          ? resource.filePath.slice(dataDir.length)
-          : path.relative(dataDir, resource.filePath);
-        const segments = relFromData.split(path.sep);
-        // 最初のセグメントがリソースフォルダ名 (例: "bgimage")
-        // 挿入テキストはそれ以降 (例: "room.jpg")
-        const insertText = segments.slice(1).join("/");
-        if (!insertText) return; // data直下のファイルは除外
+    const resources = this.infoWs.resourceFileMap.get(projectPath);
+    if (!resources) return completions;
 
-        const comp = new vscode.CompletionItem({
-          label: insertText,
-          description: relFromData.replace(/\\/g, "/"),
-        });
-        comp.kind = vscode.CompletionItemKind.File;
-        comp.insertText = new vscode.SnippetString(insertText);
+    resources.forEach((resource) => {
+      // data/ 以降の相対パス (例: "bgimage\room.jpg")
+      const relFromData = resource.filePath.startsWith(dataDir)
+        ? resource.filePath.slice(dataDir.length)
+        : path.relative(dataDir, resource.filePath);
+      const segments = relFromData.split(path.sep);
+      // 最初のセグメントがリソースフォルダ名 (例: "bgimage")
+      // 挿入テキストはそれ以降 (例: "room.jpg")
+      const insertText = segments.slice(1).join("/");
+      if (!insertText) return; // data直下のファイルは除外
 
-        const absoluteImagePath = vscode.Uri.file(resource.filePath).toString();
-        comp.documentation = new vscode.MarkdownString();
-        comp.documentation.baseUri = vscode.Uri.file(
-          path.dirname(resource.filePath) + path.sep,
-        );
-        comp.documentation.supportHtml = true;
-        comp.documentation.isTrusted = true;
-        comp.documentation.appendMarkdown(`${insertText}<br>`);
-        comp.documentation.appendMarkdown(
-          `<img src="${absoluteImagePath}" width=350>`,
-        );
-
-        completions.push(comp);
+      const comp = new vscode.CompletionItem({
+        label: insertText,
+        description: relFromData.replace(/\\/g, "/"),
       });
+      comp.kind = vscode.CompletionItemKind.File;
+      comp.insertText = new vscode.SnippetString(insertText);
+
+      const absoluteImagePath = vscode.Uri.file(resource.filePath).toString();
+      comp.documentation = new vscode.MarkdownString();
+      comp.documentation.baseUri = vscode.Uri.file(
+        path.dirname(resource.filePath) + path.sep,
+      );
+      comp.documentation.supportHtml = true;
+      comp.documentation.isTrusted = true;
+      comp.documentation.appendMarkdown(`${insertText}<br>`);
+      comp.documentation.appendMarkdown(
+        `<img src="${absoluteImagePath}" width=350>`,
+      );
+
+      completions.push(comp);
     });
     return completions;
   }
