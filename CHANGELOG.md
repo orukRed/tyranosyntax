@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [3.2.1] 2026-07-11
+
+- タグ補完候補のキャッシュ、プロジェクトルートの解決、パラメータ補完を改善し、タグ補完を繰り返し実行した際の応答速度を改善しました。[#419](https://github.com/orukRed/tyranosyntax/pull/419)
+
 ## [3.2.0] 2026-06-11
 
 - .ksファイルのコードフォーマット機能を追加しました。VS Code標準の「ドキュメントのフォーマット」（`Shift+Alt+F`）で以下の整形が行われます。
