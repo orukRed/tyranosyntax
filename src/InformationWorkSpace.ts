@@ -62,6 +62,8 @@ export class InformationWorkSpace {
   >(); //projectpath,変数名と、定義情報
   private _labelMap: Map<string, LabelData[]> = new Map<string, LabelData[]>(); //ファイルパス、LabelDataの配列
   private _suggestions: Map<string, object> = new Map<string, object>(); //projectPath,入力候補のオブジェクト
+  private _suggestionVersions: Map<string, number> = new Map<string, number>();
+  private _suggestionVersionCounter = 0;
   private _characterMap: Map<string, CharacterData[]> = new Map<
     string,
     CharacterData[]
@@ -107,6 +109,41 @@ export class InformationWorkSpace {
   public static getInstance(): InformationWorkSpace {
     return this.instance;
   }
+
+  private markSuggestionsUpdated(projectPath: string): void {
+    this._suggestionVersions.set(projectPath, ++this._suggestionVersionCounter);
+  }
+
+  private setSuggestionsForProject(
+    projectPath: string,
+    suggestions: object,
+  ): void {
+    this._suggestions.set(projectPath, suggestions);
+    this.markSuggestionsUpdated(projectPath);
+  }
+
+  private addSuggestion(
+    projectPath: string,
+    tagName: string,
+    suggestion: unknown,
+  ): void {
+    const suggestions = this._suggestions.get(projectPath) as
+      | Record<string, unknown>
+      | undefined;
+    if (!suggestions) return;
+
+    suggestions[tagName] = suggestion;
+    this.markSuggestionsUpdated(projectPath);
+  }
+
+  /**
+   * 指定プロジェクトのタグ候補が最後に更新された世代を返す。
+   * 補完候補キャッシュの無効化に利用する。
+   */
+  public getSuggestionVersion(projectPath: string): number {
+    return this._suggestionVersions.get(projectPath) ?? 0;
+  }
+
   private getSnippetPath(): string {
     return InformationExtension.language === "ja"
       ? path.join(
@@ -144,7 +181,7 @@ export class InformationWorkSpace {
 
         this.defaultTagList = Object.keys(parsedJson);
         this.defaultTagList.push(...Object.keys(this.pluginTags)); //pluginTagsをdefaultTagListに追加
-        this.suggestions.set(projectPath, combinedObject);
+        this.setSuggestionsForProject(projectPath, combinedObject);
         if (Object.keys(this.suggestions.get(projectPath)!).length === 0) {
           throw new Error("suggestions is empty");
         }
@@ -468,8 +505,11 @@ export class InformationWorkSpace {
                     macroName,
                   )
                 ) {
-                  this._suggestions.get(projectPath)![macroName] =
-                    macroData.parseToJsonObject();
+                  this.addSuggestion(
+                    projectPath,
+                    macroName,
+                    macroData.parseToJsonObject(),
+                  );
                 }
               }
             }
@@ -933,8 +973,11 @@ export class InformationWorkSpace {
                 macroData.macroName,
               )
             ) {
-              this._suggestions.get(projectPath)![macroData.macroName] =
-                macroData.parseToJsonObject();
+              this.addSuggestion(
+                projectPath,
+                macroData.macroName,
+                macroData.parseToJsonObject(),
+              );
             }
           }
           isMacro = false; //macro-endmacro間であることを判定
@@ -1193,10 +1236,21 @@ export class InformationWorkSpace {
       (tag) => !this.defaultTagList.includes(tag),
     );
 
-    if (0 < filteredDeleteTagList.length) {
-      filteredDeleteTagList.forEach((tag) => {
-        delete this.suggestions.get(projectPath)![tag];
-      });
+    const suggestions = this.suggestions.get(projectPath) as
+      | Record<string, unknown>
+      | undefined;
+    if (!suggestions) return;
+
+    let hasDeletedSuggestion = false;
+    filteredDeleteTagList.forEach((tag) => {
+      if (Object.prototype.hasOwnProperty.call(suggestions, tag)) {
+        delete suggestions[tag];
+        hasDeletedSuggestion = true;
+      }
+    });
+
+    if (hasDeletedSuggestion) {
+      this.markSuggestionsUpdated(projectPath);
     }
   }
   /**
@@ -1268,12 +1322,64 @@ export class InformationWorkSpace {
     return ret;
   }
 
+  private getKnownProjectPathByFilePath(filePath: string): string | undefined {
+    const resolvedFilePath = path.resolve(filePath);
+    let matchedProjectPath: string | undefined;
+
+    for (const projectPath of this._suggestions.keys()) {
+      const relativePath = path.relative(
+        path.resolve(projectPath),
+        resolvedFilePath,
+      );
+      const isOutsideProject =
+        relativePath === ".." ||
+        relativePath.startsWith(`..${path.sep}`) ||
+        path.isAbsolute(relativePath);
+
+      if (
+        !isOutsideProject &&
+        (!matchedProjectPath || projectPath.length > matchedProjectPath.length)
+      ) {
+        matchedProjectPath = projectPath;
+      }
+    }
+
+    if (!matchedProjectPath) {
+      return undefined;
+    }
+
+    const resolvedMatchedProjectPath = path.resolve(matchedProjectPath);
+    let searchDirectory = path.dirname(resolvedFilePath);
+
+    for (;;) {
+      const isKnownProjectRoot =
+        path.relative(resolvedMatchedProjectPath, searchDirectory) === "";
+      if (fs.existsSync(path.join(searchDirectory, "index.html"))) {
+        return isKnownProjectRoot ? matchedProjectPath : searchDirectory;
+      }
+      if (isKnownProjectRoot) {
+        return undefined;
+      }
+
+      const parentDirectory = path.dirname(searchDirectory);
+      if (parentDirectory === searchDirectory) {
+        return undefined;
+      }
+      searchDirectory = parentDirectory;
+    }
+  }
+
   /**
    * 引数で指定したファイルパスからプロジェクトパス（index.htmlのあるフォルダパス）を取得します。
    * @param filePath
    * @returns
    */
   public async getProjectPathByFilePath(filePath: string): Promise<string> {
+    const knownProjectPath = this.getKnownProjectPathByFilePath(filePath);
+    if (knownProjectPath) {
+      return knownProjectPath;
+    }
+
     let searchDir;
     do {
       const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
@@ -1301,6 +1407,11 @@ export class InformationWorkSpace {
    * @returns
    */
   private getProjectPathByFilePathSync(filePath: string): string {
+    const knownProjectPath = this.getKnownProjectPathByFilePath(filePath);
+    if (knownProjectPath) {
+      return knownProjectPath;
+    }
+
     let searchDir;
     do {
       const delimiterIndex = filePath.lastIndexOf(this.pathDelimiter);
@@ -1494,6 +1605,10 @@ export class InformationWorkSpace {
   }
   public set suggestions(value: Map<string, object>) {
     this._suggestions = value;
+    this._suggestionVersions.clear();
+    for (const projectPath of value.keys()) {
+      this.markSuggestionsUpdated(projectPath);
+    }
   }
   public get extensionPath() {
     return this._extensionPath;
