@@ -4,6 +4,10 @@ All notable changes to the "tyranosyntax" extension will be documented in this f
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [3.2.1] 2026-07-13
+
+- TyranoScriptと関係のないフォルダを開いた際に、TyranoScriptプロジェクトが見つからない旨のエラーが表示される不具合を修正しました。
+
 ## [3.2.0] 2026-06-11
 
 - .ksファイルのコードフォーマット機能を追加しました。VS Code標準の「ドキュメントのフォーマット」（`Shift+Alt+F`）で以下の整形が行われます。
