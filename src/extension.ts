@@ -641,13 +641,14 @@ export function activate(context: ExtensionContext) {
 
           TyranoLogger.print("TyranoScript syntax initialize end");
 
-          //エラーポップアップ
-          if (infoWs.getTyranoScriptProjectRootPaths().length === 0) {
-            vscode.window.showErrorMessage(
+          // ティラノプロジェクトでない場合は、通知せずログにのみ記録する
+          const projectRootPaths = infoWs.getTyranoScriptProjectRootPaths();
+          if (projectRootPaths.length === 0) {
+            TyranoLogger.print(
               `TyranoScriptのプロジェクトが見つかりませんでした。一部機能が使用できません。`,
             );
           }
-          infoWs.getTyranoScriptProjectRootPaths().forEach((element) => {
+          projectRootPaths.forEach((element) => {
             vscode.window.showInformationMessage(
               `${element.split(infoWs.pathDelimiter).pop()}の初期化が完了しました。`,
             );

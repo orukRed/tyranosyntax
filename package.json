@@ -23,8 +23,7 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:tyrano",
-    "onStartupFinished"
+    "onLanguage:tyrano"
   ],
   "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
   "main": "./out/extension.js",
