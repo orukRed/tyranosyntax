@@ -6,6 +6,7 @@ import * as assert from "assert";
 // as well as import your extension to test it
 import * as vscode from "vscode";
 import { TyranoDiagnostic } from "../../../subscriptions/TyranoDiagnostic";
+import { Parser } from "../../../Parser";
 
 // Mock TextDocument for testing
 class MockTextDocument implements vscode.TextDocument {
@@ -1019,3 +1020,205 @@ suite("TyranoDiagnostic", () => {
       });
     });
   });
+
+// 任意の行内容を指定できるモックドキュメント
+class ParameterizedMockTextDocument {
+  private lines: string[];
+  public uri = vscode.Uri.file("/test-parameterized.ks");
+  public fileName = "/test-parameterized.ks";
+  public languageId = "tyrano";
+
+  constructor(text: string) {
+    this.lines = text.split("\n");
+  }
+
+  public get lineCount(): number {
+    return this.lines.length;
+  }
+
+  public getText(): string {
+    return this.lines.join("\n");
+  }
+
+  public lineAt(lineOrPosition: number | vscode.Position): vscode.TextLine {
+    const line =
+      typeof lineOrPosition === "number" ? lineOrPosition : lineOrPosition.line;
+    const text = this.lines[line] ?? "";
+    return {
+      lineNumber: line,
+      text,
+      range: new vscode.Range(line, 0, line, text.length),
+      rangeIncludingLineBreak: new vscode.Range(line, 0, line + 1, 0),
+      firstNonWhitespaceCharacterIndex: text.length - text.trimStart().length,
+      isEmptyOrWhitespace: text.trim().length === 0,
+    };
+  }
+}
+
+suite("TyranoDiagnostic.isExistPercentAtBeginning", () => {
+  test("正常系 先頭に%がある場合はtrue", () => {
+    const diag = new TyranoDiagnostic();
+    assert.strictEqual(
+      (diag as any).isExistPercentAtBeginning("%f.hoge"),
+      true,
+    );
+  });
+
+  test("正常系 先頭に%がない場合はfalse", () => {
+    const diag = new TyranoDiagnostic();
+    assert.strictEqual((diag as any).isExistPercentAtBeginning("f.hoge"), false);
+  });
+
+  test("正常系 %が先頭以外にある場合はfalse", () => {
+    const diag = new TyranoDiagnostic();
+    assert.strictEqual(
+      (diag as any).isExistPercentAtBeginning("f.hoge%"),
+      false,
+    );
+  });
+
+  test("異常系 空文字はfalse", () => {
+    const diag = new TyranoDiagnostic();
+    assert.strictEqual((diag as any).isExistPercentAtBeginning(""), false);
+  });
+});
+
+suite("TyranoDiagnostic.checkParameterSpacing", () => {
+  const runCheck = async (text: string): Promise<vscode.Diagnostic[]> => {
+    const diag = new TyranoDiagnostic();
+    // 設定に依存せず診断を実行させる
+    (diag as any).isExecuteDiagnostic = () => true;
+    const diagnostics: vscode.Diagnostic[] = [];
+    const doc = new ParameterizedMockTextDocument(text);
+    await (diag as any).checkParameterSpacing(diagnostics, "/fake/project", doc);
+    return diagnostics;
+  };
+
+  test("正常系 ダブルクォート直後にパラメータが続くと診断される", async () => {
+    const diagnostics = await runCheck('[bg storage="a.png"time=100]');
+    assert.strictEqual(diagnostics.length, 1);
+    assert.strictEqual(
+      diagnostics[0].severity,
+      vscode.DiagnosticSeverity.Error,
+    );
+  });
+
+  test("正常系 シングルクォート直後にパラメータが続くと診断される", async () => {
+    const diagnostics = await runCheck("[bg storage='a.png'time=100]");
+    assert.strictEqual(diagnostics.length, 1);
+  });
+
+  test("正常系 バッククォート直後にパラメータが続くと診断される", async () => {
+    const diagnostics = await runCheck("[bg storage=`a.png`time=100]");
+    assert.strictEqual(diagnostics.length, 1);
+  });
+
+  test("正常系 スペースが正しく入っていれば診断されない", async () => {
+    const diagnostics = await runCheck('[bg storage="a.png" time=100]');
+    assert.strictEqual(diagnostics.length, 0);
+  });
+
+  test("正常系 複数行の複数箇所が検出される", async () => {
+    const diagnostics = await runCheck(
+      '[bg storage="a.png"time=100]\n[chara_show name="akane"face="angry"]',
+    );
+    assert.strictEqual(diagnostics.length, 2);
+    assert.strictEqual(diagnostics[0].range.start.line, 0);
+    assert.strictEqual(diagnostics[1].range.start.line, 1);
+  });
+
+  test("正常系 設定で無効な場合は診断されない", async () => {
+    const diag = new TyranoDiagnostic();
+    (diag as any).isExecuteDiagnostic = () => false;
+    const diagnostics: vscode.Diagnostic[] = [];
+    const doc = new ParameterizedMockTextDocument(
+      '[bg storage="a.png"time=100]',
+    );
+    await (diag as any).checkParameterSpacing(
+      diagnostics,
+      "/fake/project",
+      doc,
+    );
+    assert.strictEqual(diagnostics.length, 0);
+  });
+});
+
+suite("TyranoDiagnostic.detectionMissingAmpersandInVariable", () => {
+  const runDetection = async (
+    line: string,
+  ): Promise<vscode.Diagnostic[]> => {
+    const diag = new TyranoDiagnostic();
+    (diag as any).isExecuteDiagnostic = () => true;
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText(line);
+    const diagnostics: vscode.Diagnostic[] = [];
+    const doc = new ParameterizedMockTextDocument(line);
+    for (const data of parsedData) {
+      await (diag as any).detectionMissingAmpersandInVariable(
+        data,
+        doc,
+        "/fake/project",
+        diagnostics,
+      );
+    }
+    return diagnostics;
+  };
+
+  test("正常系 &なしで変数を使うと警告される", async () => {
+    const diagnostics = await runDetection('[bg storage="f.hoge"]');
+    assert.strictEqual(diagnostics.length, 1);
+    assert.strictEqual(
+      diagnostics[0].severity,
+      vscode.DiagnosticSeverity.Warning,
+    );
+  });
+
+  test("正常系 &付きの変数は警告されない", async () => {
+    const diagnostics = await runDetection('[bg storage="&f.hoge"]');
+    assert.strictEqual(diagnostics.length, 0);
+  });
+
+  test("正常系 %付きの変数（マクロ引数）は警告されない", async () => {
+    const diagnostics = await runDetection('[bg storage="%f.hoge"]');
+    assert.strictEqual(diagnostics.length, 0);
+  });
+
+  test("正常系 exp/cond/preexpパラメータは&なしでも警告されない", async () => {
+    for (const param of ["exp", "cond", "preexp"]) {
+      const diagnostics = await runDetection(`[eval ${param}="f.hoge=1"]`);
+      assert.strictEqual(
+        diagnostics.length,
+        0,
+        `${param}パラメータは対象外であるべき`,
+      );
+    }
+  });
+
+  test("正常系 変数を含まない値は警告されない", async () => {
+    const diagnostics = await runDetection('[bg storage="room.jpg"]');
+    assert.strictEqual(diagnostics.length, 0);
+  });
+
+  test("正常系 text/commentタグは早期returnして警告されない", async () => {
+    const textDiagnostics = await runDetection("f.hogeという地の文");
+    assert.strictEqual(textDiagnostics.length, 0);
+    const commentDiagnostics = await runDetection(";f.hogeというコメント");
+    assert.strictEqual(commentDiagnostics.length, 0);
+  });
+
+  test("正常系 設定で無効な場合は警告されない", async () => {
+    const diag = new TyranoDiagnostic();
+    (diag as any).isExecuteDiagnostic = () => false;
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText('[bg storage="f.hoge"]');
+    const diagnostics: vscode.Diagnostic[] = [];
+    const doc = new ParameterizedMockTextDocument('[bg storage="f.hoge"]');
+    await (diag as any).detectionMissingAmpersandInVariable(
+      parsedData[0],
+      doc,
+      "/fake/project",
+      diagnostics,
+    );
+    assert.strictEqual(diagnostics.length, 0);
+  });
+});

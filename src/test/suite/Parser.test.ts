@@ -132,3 +132,89 @@ suite("Parser.parseText", () => {
   });
 
 });
+
+suite("Parser.getValidBreakpointLines", () => {
+  test("正常系:タグ行（[]記法・@記法）が対象になる", () => {
+    const parser = Parser.getInstance();
+    const text = '[bg storage="room.jpg"]\n@wait time=100';
+    const result = parser.getValidBreakpointLines(text);
+    assert.deepStrictEqual(result, [0, 1]);
+  });
+
+  test("正常系:ラベル行が対象になる", () => {
+    const parser = Parser.getInstance();
+    const text = "*start\n[bg storage=\"room.jpg\"]\n*end";
+    const result = parser.getValidBreakpointLines(text);
+    assert.deepStrictEqual(result, [0, 1, 2]);
+  });
+
+  test("正常系:iscript/endscript行とその間のテキスト行が対象になる", () => {
+    const parser = Parser.getInstance();
+    const text = "[iscript]\nf.hoge = 1;\nf.fuga = 2;\n[endscript]";
+    const result = parser.getValidBreakpointLines(text);
+    assert.deepStrictEqual(result, [0, 1, 2, 3]);
+  });
+
+  test("正常系:script外のテキスト行・コメント行・空行は除外される", () => {
+    const parser = Parser.getInstance();
+    const text = ";コメント行\nただのテキスト\n\n[bg storage=\"room.jpg\"]";
+    const result = parser.getValidBreakpointLines(text);
+    assert.deepStrictEqual(result, [3]);
+  });
+
+  test("正常系:結果は0始まりの昇順でソートされる", () => {
+    const parser = Parser.getInstance();
+    const text =
+      "*start\nテキスト\n[iscript]\nf.hoge = 1;\n[endscript]\n@jump target=*start";
+    const result = parser.getValidBreakpointLines(text);
+    // 1行目（テキスト）のみ除外される
+    assert.deepStrictEqual(result, [0, 2, 3, 4, 5]);
+    const sorted = [...result].sort((a, b) => a - b);
+    assert.deepStrictEqual(result, sorted);
+  });
+
+  test("異常系:空のテキストは空配列を返す", () => {
+    const parser = Parser.getInstance();
+    const result = parser.getValidBreakpointLines("");
+    assert.deepStrictEqual(result, []);
+  });
+});
+
+suite("Parser.getTagAtLine", () => {
+  test("正常系:指定行のタグを返す", () => {
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText(
+      '[bg storage="room.jpg"]\n@wait time=100',
+    );
+    const result = parser.getTagAtLine(parsedData, 1);
+    assert.ok(result, "タグが見つからない");
+    assert.strictEqual(result.name, "wait");
+  });
+
+  test("正常系:ラベル行はpm.line経由で一致する", () => {
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText("*start\n[bg storage=\"room.jpg\"]");
+    const result = parser.getTagAtLine(parsedData, 0);
+    assert.ok(result, "ラベルが見つからない");
+    assert.strictEqual(result.name, "label");
+    assert.strictEqual(result.pm.label_name, "start");
+  });
+
+  test("正常系:comment/textタグはスキップされる", () => {
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText(";コメント行\nただのテキスト");
+    assert.strictEqual(parser.getTagAtLine(parsedData, 0), undefined);
+    assert.strictEqual(parser.getTagAtLine(parsedData, 1), undefined);
+  });
+
+  test("異常系:該当行にタグがなければundefinedを返す", () => {
+    const parser = Parser.getInstance();
+    const parsedData = parser.parseText('[bg storage="room.jpg"]');
+    assert.strictEqual(parser.getTagAtLine(parsedData, 99), undefined);
+  });
+
+  test("異常系:空のパース済みデータはundefinedを返す", () => {
+    const parser = Parser.getInstance();
+    assert.strictEqual(parser.getTagAtLine([], 0), undefined);
+  });
+});
