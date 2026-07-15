@@ -5,6 +5,7 @@ import { Parser } from "../Parser";
 import { ErrorLevel, TyranoLogger } from "../TyranoLogger";
 import { VariableData } from "../defineData/VariableData";
 import * as fs from "fs";
+import { shouldTriggerCompletionAutomatically } from "./TyranoCompletionTrigger";
 
 type SuggestionsMiniumByTag = {
   [tag: string]: {
@@ -108,7 +109,7 @@ export class TyranoCompletionItemProvider
     document: vscode.TextDocument,
     position: vscode.Position,
     _token: vscode.CancellationToken,
-    _context: vscode.CompletionContext,
+    context: vscode.CompletionContext,
   ): Promise<
     | vscode.CompletionItem[]
     | vscode.CompletionList<vscode.CompletionItem>
@@ -116,11 +117,21 @@ export class TyranoCompletionItemProvider
     | undefined
   > {
     try {
+      const lineText = document.lineAt(position.line).text;
+      if (
+        context.triggerKind === vscode.CompletionTriggerKind.TriggerCharacter &&
+        !shouldTriggerCompletionAutomatically(
+          lineText.substring(0, position.character),
+          context.triggerCharacter,
+        )
+      ) {
+        return undefined;
+      }
+
       const projectPath = await this.infoWs.getProjectPathByFilePath(
         document.fileName,
       );
       //カーソル付近のタグデータを取得
-      const lineText = document.lineAt(position.line).text;
       const parsedData = this.parser.parseText(lineText);
       const tagIndex = this.parser.getIndex(parsedData, position.character);
 

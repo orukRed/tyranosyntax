@@ -9,7 +9,6 @@ import { LanguageClient } from "vscode-languageclient/node";
 import { TyranoCreateTagByShortcutKey } from "./subscriptions/TyranoCreateTagByShortcutKey";
 import { TyranoHoverProvider } from "./subscriptions/TyranoHoverProvider";
 import { TyranoOutlineProvider } from "./subscriptions/TyranoOutlineProvider";
-import { TyranoCompletionItemProvider } from "./subscriptions/TyranoCompletionItemProvider";
 import { TyranoDiagnostic } from "./subscriptions/TyranoDiagnostic";
 import { ErrorLevel, TyranoLogger } from "./TyranoLogger";
 import { InformationWorkSpace } from "./InformationWorkSpace";
@@ -40,6 +39,7 @@ import { MacroTreeProvider } from "./subscriptions/sidebar/MacroTreeProvider";
 import { SidebarRefresher } from "./subscriptions/sidebar/SidebarRefresher";
 import { UsageIndexer } from "./subscriptions/sidebar/UsageIndexer";
 import { VariableTreeProvider } from "./subscriptions/sidebar/VariableTreeProvider";
+import { registerTyranoCompletionItemProvider } from "./subscriptions/TyranoCompletionRegistration";
 
 const TYRANO_MODE = { scheme: "file", language: "tyrano" };
 // Delay in milliseconds to wait for VS Code's file system to sync after external file changes (e.g., git operations)
@@ -324,11 +324,7 @@ export function activate(context: ExtensionContext) {
           );
           TyranoLogger.print("TyranoOutlineProvider activate");
           context.subscriptions.push(
-            vscode.languages.registerCompletionItemProvider(
-              TYRANO_MODE,
-              new TyranoCompletionItemProvider(),
-              ".",
-            ),
+            registerTyranoCompletionItemProvider(),
           );
           TyranoLogger.print("TyranoCompletionItemProvider activate");
 
@@ -641,13 +637,14 @@ export function activate(context: ExtensionContext) {
 
           TyranoLogger.print("TyranoScript syntax initialize end");
 
-          //エラーポップアップ
-          if (infoWs.getTyranoScriptProjectRootPaths().length === 0) {
-            vscode.window.showErrorMessage(
+          // ティラノプロジェクトでない場合は、通知せずログにのみ記録する
+          const projectRootPaths = infoWs.getTyranoScriptProjectRootPaths();
+          if (projectRootPaths.length === 0) {
+            TyranoLogger.print(
               `TyranoScriptのプロジェクトが見つかりませんでした。一部機能が使用できません。`,
             );
           }
-          infoWs.getTyranoScriptProjectRootPaths().forEach((element) => {
+          projectRootPaths.forEach((element) => {
             vscode.window.showInformationMessage(
               `${element.split(infoWs.pathDelimiter).pop()}の初期化が完了しました。`,
             );

@@ -15,7 +15,7 @@
     "url": "https://github.com/orukRed/tyranosyntax"
   },
   "icon": "images/icon.png",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "engines": {
     "vscode": "^1.79.1"
   },
@@ -23,8 +23,7 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:tyrano",
-    "onStartupFinished"
+    "onLanguage:tyrano"
   ],
   "comment": "tyranoscriptのファイル開いた時extension.tsを起動",
   "main": "./out/extension.js",
@@ -118,6 +117,11 @@
               "タグの予測変換をするとき、[ ]で囲んだタグを出力します。",
               "タグの予測変換をするとき、@から始まるタグを出力します。"
             ]
+          },
+          "TyranoScript syntax.completion.autoTrigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "文字入力時にタグやパラメータなどの補完候補を自動表示します。無効にした場合もCtrl + Spaceで手動表示できます。"
           },
           "TyranoScript syntax.outline.blockComment": {
             "type": "boolean",
