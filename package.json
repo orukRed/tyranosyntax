@@ -118,6 +118,11 @@
               "タグの予測変換をするとき、@から始まるタグを出力します。"
             ]
           },
+          "TyranoScript syntax.completion.autoTrigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "文字入力時にタグやパラメータなどの補完候補を自動表示します。無効にした場合もCtrl + Spaceで手動表示できます。"
+          },
           "TyranoScript syntax.outline.blockComment": {
             "type": "boolean",
             "default": true,
