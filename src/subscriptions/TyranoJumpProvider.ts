@@ -83,6 +83,14 @@ export class TyranoJumpProvider {
     //F12押した付近のタグのデータを取得
     const tagIndex = parser.getIndex(parsedData, position.character);
 
+    //カーソル位置にタグがないなら何もしない
+    if (tagIndex === undefined || parsedData[tagIndex] === undefined) {
+      vscode.window.showWarningMessage(
+        "現在選択しているタグはTyranoScript syntax.jump.tagに登録されているタグではありません。\nsetting.jsonをご確認ください。",
+      );
+      return;
+    }
+
     //カーソル位置のタグ名取得
     const tagName = parsedData[tagIndex]["name"];
 
@@ -102,7 +110,16 @@ export class TyranoJumpProvider {
     //カーソルの位置のタグがジャンプ系タグなら
     if (Object.keys(jumpTagObject).includes(tagName)) {
       //変数を使っている場合はジャンプさせない
-      const variableStr = /&f\.|&sf\.|&tf\.|&mp\|/;
+      const variableStr = /&f\.|&sf\.|&tf\.|&mp\./;
+      if (
+        jumpStorage.search(variableStr) !== -1 ||
+        (jumpTarget !== undefined && jumpTarget.search(variableStr) !== -1)
+      ) {
+        vscode.window.showInformationMessage(
+          "storageやtargetパラメータに変数を使用しているためジャンプできません。",
+        );
+        return;
+      }
       if (
         !fs.existsSync(
           vscode.Uri.file(
@@ -111,7 +128,7 @@ export class TyranoJumpProvider {
         )
       ) {
         vscode.window.showWarningMessage(
-          `${parsedData[tagIndex]["pm"]["storage"]}は存在しないファイルです。`,
+          `${jumpStorage}は存在しないファイルです。`,
         );
         return;
       }
@@ -133,17 +150,6 @@ export class TyranoJumpProvider {
             new vscode.Position(0, 0),
             new vscode.Position(0, 0),
           ),
-        );
-        return;
-      }
-
-      //変数ならジャンプさせない
-      if (
-        jumpStorage.search(variableStr) !== -1 ||
-        jumpTarget.search(variableStr) !== -1
-      ) {
-        vscode.window.showInformationMessage(
-          "storageやtargetパラメータに変数を使用しているためジャンプできません。",
         );
         return;
       }

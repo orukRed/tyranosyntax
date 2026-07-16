@@ -4,7 +4,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { TyranoCompletionItemProvider } from "../../../subscriptions/TyranoCompletionItemProvider";
-// import * as path from "path";
+import * as nodePath from "path";
 
 // // 新しく追加した型定義のテスト用
 // type TagParameterConfig = {
@@ -538,8 +538,7 @@ suite("TyranoCompletionItemProvider", () => {
         transitionMap,
         getProjectPathByFilePath: async (_: string) => PROJECT_PATH,
         isSamePath: (p1: string, p2: string) => {
-          const path = require("path");
-          return path.resolve(p1) === path.resolve(p2);
+          return nodePath.resolve(p1) === nodePath.resolve(p2);
         },
         DATA_DIRECTORY: "/data",
         DATA_SCENARIO: "/scenario",

@@ -49,7 +49,7 @@ async function getAllKsFiles(workspacePath: string): Promise<string[]> {
     const fullPath = path.join(workspacePath, file);
     const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
-      getAllKsFiles(fullPath);
+      results.push(...(await getAllKsFiles(fullPath)));
     } else if (file.endsWith(".ks")) {
       results.push(fullPath);
     }

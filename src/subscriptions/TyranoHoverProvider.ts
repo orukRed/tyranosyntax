@@ -15,7 +15,7 @@ export class TyranoHoverProvider {
       fs.readFileSync(this.getTooltipPath(), "utf8"),
     );
     // this.regExp = /(\w+)(\s*((\w*)=\"?([a-zA-Z0-9_./\*]*)\"?)*)*/;//取得した行に対しての正規表現	//タグのどこをホバーしてもツールチップ出る版
-    this.regExp = /(\[||@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
+    this.regExp = /(\[|@)(\w+)(\s*)/; //取得した行に対しての正規表現 //タグ名のみホバーでツールチップ出る版
   }
 
   private getTooltipPath(): string {
